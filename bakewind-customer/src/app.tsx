@@ -3,6 +3,7 @@ import { FileRoutes } from "@solidjs/start/router";
 import { Suspense } from "solid-js";
 import { MetaProvider, Title, Meta, Link } from "@solidjs/meta";
 import { ErrorBoundary } from "solid-js";
+import { AuthProvider } from "./auth/AuthContext";
 
 function GlobalMeta() {
   return (
@@ -136,17 +137,19 @@ export default function App() {
   return (
     <MetaProvider>
       <GlobalMeta />
-      <ErrorBoundary fallback={ErrorFallback}>
-        <Router
-          root={props => (
-            <Suspense fallback={<LoadingFallback />}>
-              {props.children}
-            </Suspense>
-          )}
-        >
-          <FileRoutes />
-        </Router>
-      </ErrorBoundary>
+      <AuthProvider>
+        <ErrorBoundary fallback={ErrorFallback}>
+          <Router
+            root={props => (
+              <Suspense fallback={<LoadingFallback />}>
+                {props.children}
+              </Suspense>
+            )}
+          >
+            <FileRoutes />
+          </Router>
+        </ErrorBoundary>
+      </AuthProvider>
     </MetaProvider>
   );
 }

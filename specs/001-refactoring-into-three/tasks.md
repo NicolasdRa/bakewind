@@ -96,11 +96,11 @@
 - [x] T032 Create OpenAPI specification generation in bakewind-api/src/swagger.ts
 
 ### Customer Application (SolidStart - SSR/SSG)
-- [ ] T033 Configure SolidStart for SSR with SEO meta tags in bakewind-customer/app.config.ts
-- [ ] T034 Create product browsing pages with server-side data fetching in bakewind-customer/src/routes/products/
-- [ ] T035 Create shopping cart store with client persistence in bakewind-customer/src/stores/cart.ts
-- [ ] T036 Create checkout flow with form validation in bakewind-customer/src/routes/checkout/
-- [ ] T037 Create customer account pages with protected routes in bakewind-customer/src/routes/account/
+- [x] T033 Configure SolidStart for SSR with SEO meta tags in bakewind-customer/app.config.ts
+- [x] T034 Create product browsing pages with server-side data fetching in bakewind-customer/src/routes/products/
+- [x] T035 Create shopping cart store with client persistence in bakewind-customer/src/stores/cart.ts
+- [x] T036 Create checkout flow with form validation in bakewind-customer/src/routes/checkout/
+- [x] T037 Create customer account pages with protected routes in bakewind-customer/src/routes/account/
 - [ ] T038 Create API client using openapi-typescript in bakewind-customer/src/api/
 - [ ] T039 Implement customer authentication with SSR support in bakewind-customer/src/auth/
 - [ ] T040 Add SEO components (sitemap, robots.txt, structured data) in bakewind-customer/

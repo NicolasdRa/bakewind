@@ -1,5 +1,5 @@
 import { Show, For, createSignal } from "solid-js";
-import { A } from "@solidjs/router";
+import { A, useNavigate } from "@solidjs/router";
 import { useCart } from "../stores/cart";
 
 // Cart Icon Component
@@ -173,10 +173,11 @@ export function CartSidebar() {
     }
   };
 
+  const navigate = useNavigate();
+
   const handleCheckout = () => {
     actions.closeCart();
-    // Navigate to checkout - this will be implemented with routing
-    window.location.href = "/checkout";
+    navigate("/checkout");
   };
 
   return (

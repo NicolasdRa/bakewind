@@ -1,6 +1,7 @@
 import { Title, Meta } from "@solidjs/meta";
 import { createAsync, useParams, A } from "@solidjs/router";
 import { Show, createSignal, For } from "solid-js";
+import { AddToCartButton } from "../../components/Cart";
 import "../../styles/globals.css";
 
 // Types
@@ -235,8 +236,8 @@ export default function ProductDetail() {
   const handleAddToCart = () => {
     const prod = product();
     if (prod && prod.isAvailable) {
+      // This will be handled by the AddToCartButton component
       console.log(`Adding ${quantity()} of ${prod.name} to cart`);
-      // TODO: Integrate with cart store
     }
   };
 
@@ -357,12 +358,23 @@ export default function ProductDetail() {
                               <span class="text-primary-700">${totalPrice()}</span>
                             </div>
 
-                            <button
-                              class="btn-primary w-full text-lg py-3 justify-center"
-                              onClick={handleAddToCart}
-                            >
-                              Add to Cart - ${totalPrice()}
-                            </button>
+                            <AddToCartButton
+                              product={{
+                                id: prod.id,
+                                name: prod.name,
+                                price: prod.price,
+                                image: prod.images[0] || "/assets/products/placeholder.jpg",
+                                category: prod.category,
+                                allergens: prod.allergens,
+                                stock: prod.stock,
+                              }}
+                              quantity={quantity()}
+                              disabled={!prod.isAvailable}
+                              class="w-full text-lg py-3 justify-center"
+                              onSuccess={() => {
+                                console.log(`Successfully added ${quantity()} of ${prod.name} to cart`);
+                              }}
+                            />
                           </div>
                         </Show>
                       </div>
