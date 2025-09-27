@@ -1,31 +1,10 @@
 import { Title, Meta } from "@solidjs/meta";
 import { createAsync } from "@solidjs/router";
 import { For, Suspense, createSignal, Show } from "solid-js";
+import { productsApi } from "../../api";
+import type { Product, ProductsResponse } from "../../api";
+import { generateBreadcrumbStructuredData, generateFAQStructuredData } from "../../utils/seo";
 import "../../styles/globals.css";
-
-// Types for our products
-interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  category: string;
-  images: string[];
-  isAvailable: boolean;
-  allergens: string[];
-  tags?: string[];
-  stock?: number;
-}
-
-interface ProductsResponse {
-  data: Product[];
-  meta: {
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-  };
-}
 
 // Mock data for now - this will be replaced with actual API calls
 const mockProducts: Product[] = [
@@ -103,33 +82,22 @@ const mockProducts: Product[] = [
   }
 ];
 
-// Server-side data fetching function
+// Server-side data fetching function using API client
 async function fetchProducts(category?: string, search?: string): Promise<ProductsResponse> {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 300));
+  const response = await productsApi.getProducts({
+    category: category === "All" ? undefined : category,
+    search,
+    available: true, // Only show available products
+  });
 
-  let filtered = mockProducts;
-
-  if (category && category !== "all") {
-    filtered = filtered.filter(p => p.category.toLowerCase() === category.toLowerCase());
-  }
-
-  if (search) {
-    const searchLower = search.toLowerCase();
-    filtered = filtered.filter(p =>
-      p.name.toLowerCase().includes(searchLower) ||
-      p.description.toLowerCase().includes(searchLower) ||
-      p.category.toLowerCase().includes(searchLower)
-    );
-  }
-
+  // Transform the response to match the expected format
   return {
-    data: filtered,
+    data: response.products,
     meta: {
-      total: filtered.length,
-      page: 1,
-      limit: 50,
-      totalPages: 1
+      total: response.total,
+      page: response.page,
+      limit: response.limit,
+      totalPages: Math.ceil(response.total / response.limit)
     }
   };
 }
@@ -290,10 +258,44 @@ export default function Products() {
     // TODO: Integrate with cart store
   };
 
+  // Structured data for the products page
+  const breadcrumbData = generateBreadcrumbStructuredData([
+    { name: "Home", url: "https://bakewind.com/" },
+    { name: "Products", url: "https://bakewind.com/products" }
+  ]);
+
+  const faqData = generateFAQStructuredData([
+    {
+      question: "What ingredients do you use in your baked goods?",
+      answer: "We use only premium, locally-sourced ingredients including organic flour, farm-fresh eggs, and real butter. We avoid artificial preservatives and additives."
+    },
+    {
+      question: "Are your products available for same-day pickup?",
+      answer: "Yes! Most of our products are baked fresh daily and available for same-day pickup. For specialty items or large orders, we recommend ordering 24 hours in advance."
+    },
+    {
+      question: "Do you offer gluten-free options?",
+      answer: "Yes, we have a selection of gluten-free breads, cookies, and pastries. Please note that these items are prepared in a facility that also processes gluten."
+    },
+    {
+      question: "Can I place custom orders for special occasions?",
+      answer: "Absolutely! We specialize in custom cakes and catering for weddings, birthdays, and corporate events. Contact us at least 48 hours in advance to discuss your needs."
+    }
+  ]);
+
   return (
     <>
       <Title>Our Products - BakeWind Bakery</Title>
       <Meta name="description" content="Browse our selection of fresh baked breads, pastries, cookies, pies, and custom cakes. All made with premium ingredients and traditional methods." />
+      <Meta name="keywords" content="bakery products, fresh bread, pastries, cookies, pies, custom cakes, artisan bakery, organic ingredients" />
+
+      {/* Structured Data */}
+      <script type="application/ld+json">
+        {JSON.stringify(breadcrumbData)}
+      </script>
+      <script type="application/ld+json">
+        {JSON.stringify(faqData)}
+      </script>
 
       <main class="min-h-screen bg-bakery-cream">
         {/* Header */}

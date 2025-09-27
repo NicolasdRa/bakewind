@@ -4,12 +4,9 @@ import { A } from "@solidjs/router";
 import { AuthGuard, useAuth } from "../../auth/AuthContext";
 import "../../styles/globals.css";
 
-// Mock user data - in real app this would come from authentication context
-const mockUser = {
-  id: "user_123",
-  firstName: "John",
-  lastName: "Doe",
-  email: "john.doe@example.com",
+// Default user data for when auth data is not available
+const defaultUserData = {
+  firstName: "User",
   phone: "(555) 123-4567",
   joinDate: "2024-01-15",
   totalOrders: 12,
@@ -51,16 +48,16 @@ const mockRecentOrders = [
   },
 ];
 
-// Account statistics
-const accountStats = [
+// Account statistics - will be computed in component using real user data
+const getAccountStats = (user: any) => [
   {
     label: "Total Orders",
-    value: mockUser.totalOrders,
+    value: defaultUserData.totalOrders,
     icon: "📦",
   },
   {
     label: "Member Since",
-    value: new Date(mockUser.joinDate).toLocaleDateString('en-US', {
+    value: new Date(defaultUserData.joinDate).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long'
     }),
@@ -68,7 +65,7 @@ const accountStats = [
   },
   {
     label: "Favorite Category",
-    value: mockUser.favoriteCategory,
+    value: defaultUserData.favoriteCategory,
     icon: "❤️",
   },
   {
@@ -197,6 +194,9 @@ function RecentOrdersSection() {
 
 // Account Stats Component
 function AccountStatsSection() {
+  const { user } = useAuth();
+  const accountStats = getAccountStats(user());
+
   return (
     <div class="bg-white rounded-lg shadow-md p-6">
       <h2 class="text-xl font-semibold text-bakery-brown mb-4">Account Overview</h2>
@@ -274,7 +274,7 @@ export default function AccountDashboard() {
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h1 class="text-3xl font-display font-bold text-bakery-brown mb-2">
-                  Welcome back, {user()?.firstName || mockUser.firstName}!
+                  Welcome back, {user()?.firstName || defaultUserData.firstName || "there"}!
                 </h1>
                 <p class="text-gray-600">
                   Manage your account, view orders, and discover new favorites.

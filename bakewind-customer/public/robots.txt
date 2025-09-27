@@ -1,0 +1,32 @@
+# BakeWind Bakery robots.txt
+# https://www.robotstxt.org/robotstxt.html
+
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://bakewind.com/sitemap.xml
+
+# Crawl delay for politeness (1 second)
+Crawl-delay: 1
+
+# Disallow admin/private areas (not applicable for customer app, but good practice)
+Disallow: /admin/
+Disallow: /api/
+Disallow: /private/
+
+# Allow access to product images and assets
+Allow: /assets/
+Allow: /images/
+Allow: /favicon.ico
+
+# Popular search engine specific rules
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+# Block any aggressive crawlers if needed
+# User-agent: BadBot
+# Disallow: /

@@ -101,7 +101,7 @@
 - [x] T035 Create shopping cart store with client persistence in bakewind-customer/src/stores/cart.ts
 - [x] T036 Create checkout flow with form validation in bakewind-customer/src/routes/checkout/
 - [x] T037 Create customer account pages with protected routes in bakewind-customer/src/routes/account/
-- [ ] T038 Create API client using openapi-typescript in bakewind-customer/src/api/
+- [x] T038 Create API client using openapi-typescript in bakewind-customer/src/api/
 - [ ] T039 Implement customer authentication with SSR support in bakewind-customer/src/auth/
 - [ ] T040 Add SEO components (sitemap, robots.txt, structured data) in bakewind-customer/
 

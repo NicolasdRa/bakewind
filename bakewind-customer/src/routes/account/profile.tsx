@@ -1,7 +1,7 @@
 import { Title, Meta } from "@solidjs/meta";
 import { createSignal, Show } from "solid-js";
-import { A } from "@solidjs/router";
-import { AuthGuard } from "../../auth/AuthContext";
+import { A, useNavigate } from "@solidjs/router";
+import { AuthGuard, useAuth } from "../../auth/AuthContext";
 import "../../styles/globals.css";
 
 // Profile form interface
@@ -73,6 +73,9 @@ const validateZipCode = (zip: string): boolean => {
 };
 
 export default function ProfilePage() {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
   const [profileData, setProfileData] = createSignal<ProfileData>(mockCurrentProfile);
   const [isEditing, setIsEditing] = createSignal(false);
   const [isSaving, setIsSaving] = createSignal(false);
@@ -187,6 +190,16 @@ export default function ProfilePage() {
     setErrors({});
   };
 
+  // Handle logout
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate("/login");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
+
   return (
     <AuthGuard redirectTo="/login">
       <Title>My Profile - BakeWind Bakery</Title>
@@ -205,9 +218,17 @@ export default function ProfilePage() {
                   Manage your personal information and preferences.
                 </p>
               </div>
-              <A href="/account" class="btn-outline mt-4 sm:mt-0">
-                ← Back to Account
-              </A>
+              <div class="flex gap-2 mt-4 sm:mt-0">
+                <A href="/account" class="btn-outline">
+                  ← Back to Account
+                </A>
+                <button
+                  onClick={handleLogout}
+                  class="btn-outline text-red-600 border-red-300 hover:bg-red-50"
+                >
+                  Sign Out
+                </button>
+              </div>
             </div>
           </div>
         </section>

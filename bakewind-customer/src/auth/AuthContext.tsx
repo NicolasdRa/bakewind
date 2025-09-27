@@ -1,4 +1,6 @@
-import { createContext, useContext, createSignal, createEffect, JSX } from "solid-js";
+import { createContext, useContext, createSignal, createEffect, JSX, onMount } from "solid-js";
+import { isServer } from "solid-js/web";
+import { api, ApiError } from "../api";
 
 // Auth user interface
 export interface AuthUser {
@@ -31,91 +33,72 @@ export interface RegisterData {
 // Create the auth context
 const AuthContext = createContext<AuthContextType>();
 
-// Mock authentication functions
-const AUTH_STORAGE_KEY = "bakewind_auth_token";
-const USER_STORAGE_KEY = "bakewind_user_data";
-
-// Mock user data for development
-const mockUser: AuthUser = {
-  id: "user_123",
-  email: "john.doe@example.com",
-  firstName: "John",
-  lastName: "Doe",
-  isVerified: true,
+// SSR-compatible storage helpers
+const getStorageItem = (key: string): string | null => {
+  if (isServer) return null;
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
 };
 
-// Simulate API calls
-async function mockLogin(email: string, password: string): Promise<{ user: AuthUser; token: string } | null> {
-  // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 1000));
-
-  // Simple mock validation
-  if (email === "john.doe@example.com" && password === "password123") {
-    return {
-      user: mockUser,
-      token: "mock_jwt_token_123",
-    };
+const setStorageItem = (key: string, value: string): void => {
+  if (isServer) return;
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    // Ignore storage errors
   }
+};
 
-  return null;
-}
-
-async function mockRegister(userData: RegisterData): Promise<{ user: AuthUser; token: string } | null> {
-  // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 1500));
-
-  // Simple mock - always succeed for demo
-  const newUser: AuthUser = {
-    id: `user_${Date.now()}`,
-    email: userData.email,
-    firstName: userData.firstName,
-    lastName: userData.lastName,
-    isVerified: false,
-  };
-
-  return {
-    user: newUser,
-    token: `mock_jwt_token_${Date.now()}`,
-  };
-}
-
-async function mockRefreshAuth(token: string): Promise<AuthUser | null> {
-  // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 500));
-
-  // Simple mock - validate token format
-  if (token.startsWith("mock_jwt_token_")) {
-    return mockUser;
+const removeStorageItem = (key: string): void => {
+  if (isServer) return;
+  try {
+    localStorage.removeItem(key);
+  } catch {
+    // Ignore storage errors
   }
+};
 
-  return null;
-}
+// Storage keys
+const USER_STORAGE_KEY = "bakewind_user_data";
 
 // Auth provider component
 export function AuthProvider(props: { children: JSX.Element }) {
   const [user, setUser] = createSignal<AuthUser | null>(null);
   const [isLoading, setIsLoading] = createSignal(true);
 
-  // Initialize auth state on mount
-  createEffect(async () => {
-    if (typeof localStorage === "undefined") {
+  // Initialize auth state - only run on client side
+  onMount(async () => {
+    if (isServer) {
       setIsLoading(false);
       return;
     }
 
     try {
-      const token = localStorage.getItem(AUTH_STORAGE_KEY);
-      const userData = localStorage.getItem(USER_STORAGE_KEY);
+      // Try to restore user from localStorage
+      const userData = getStorageItem(USER_STORAGE_KEY);
+      if (userData) {
+        try {
+          const parsedUser = JSON.parse(userData);
+          setUser(parsedUser);
+        } catch {
+          // Invalid user data, clear it
+          removeStorageItem(USER_STORAGE_KEY);
+        }
+      }
 
-      if (token && userData) {
-        // Verify token with server (mock)
-        const validUser = await mockRefreshAuth(token);
-        if (validUser) {
-          setUser(validUser);
-        } else {
-          // Invalid token, clear storage
-          localStorage.removeItem(AUTH_STORAGE_KEY);
-          localStorage.removeItem(USER_STORAGE_KEY);
+      // Try to get fresh profile from server (uses httpOnly cookies)
+      try {
+        const profile = await api.auth.getProfile();
+        setUser(profile);
+        setStorageItem(USER_STORAGE_KEY, JSON.stringify(profile));
+      } catch (error) {
+        // If profile fetch fails, clear stored user
+        if (error instanceof ApiError && error.status === 401) {
+          setUser(null);
+          removeStorageItem(USER_STORAGE_KEY);
         }
       }
     } catch (error) {
@@ -128,19 +111,20 @@ export function AuthProvider(props: { children: JSX.Element }) {
   // Login function
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      const result = await mockLogin(email, password);
-      if (result) {
-        setUser(result.user);
+      const response = await api.auth.login({
+        email,
+        password,
+        sessionContext: {
+          userAgent: isServer ? "SSR" : navigator.userAgent,
+          deviceType: "web",
+          timezone: isServer ? "UTC" : Intl.DateTimeFormat().resolvedOptions().timeZone,
+        },
+      });
 
-        // Store auth data
-        if (typeof localStorage !== "undefined") {
-          localStorage.setItem(AUTH_STORAGE_KEY, result.token);
-          localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(result.user));
-        }
+      setUser(response.user);
+      setStorageItem(USER_STORAGE_KEY, JSON.stringify(response.user));
 
-        return true;
-      }
-      return false;
+      return true;
     } catch (error) {
       console.error("Login failed:", error);
       return false;
@@ -150,19 +134,19 @@ export function AuthProvider(props: { children: JSX.Element }) {
   // Register function
   const register = async (userData: RegisterData): Promise<boolean> => {
     try {
-      const result = await mockRegister(userData);
-      if (result) {
-        setUser(result.user);
+      const response = await api.auth.register({
+        ...userData,
+        sessionContext: {
+          userAgent: isServer ? "SSR" : navigator.userAgent,
+          deviceType: "web",
+          timezone: isServer ? "UTC" : Intl.DateTimeFormat().resolvedOptions().timeZone,
+        },
+      });
 
-        // Store auth data
-        if (typeof localStorage !== "undefined") {
-          localStorage.setItem(AUTH_STORAGE_KEY, result.token);
-          localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(result.user));
-        }
+      setUser(response.user);
+      setStorageItem(USER_STORAGE_KEY, JSON.stringify(response.user));
 
-        return true;
-      }
-      return false;
+      return true;
     } catch (error) {
       console.error("Registration failed:", error);
       return false;
@@ -170,33 +154,31 @@ export function AuthProvider(props: { children: JSX.Element }) {
   };
 
   // Logout function
-  const logout = () => {
-    setUser(null);
-
-    // Clear storage
-    if (typeof localStorage !== "undefined") {
-      localStorage.removeItem(AUTH_STORAGE_KEY);
-      localStorage.removeItem(USER_STORAGE_KEY);
+  const logout = async (): Promise<void> => {
+    try {
+      await api.auth.logout();
+    } catch (error) {
+      console.warn("Logout API call failed:", error);
+      // Continue with local logout even if API call fails
+    } finally {
+      setUser(null);
+      removeStorageItem(USER_STORAGE_KEY);
     }
   };
 
   // Refresh auth function
   const refreshAuth = async (): Promise<void> => {
-    if (typeof localStorage === "undefined") return;
-
     try {
-      const token = localStorage.getItem(AUTH_STORAGE_KEY);
-      if (token) {
-        const validUser = await mockRefreshAuth(token);
-        if (validUser) {
-          setUser(validUser);
-        } else {
-          logout();
-        }
-      }
+      const tokens = await api.auth.refresh();
+      // Tokens are handled via httpOnly cookies
+      // Get fresh profile
+      const profile = await api.auth.getProfile();
+      setUser(profile);
+      setStorageItem(USER_STORAGE_KEY, JSON.stringify(profile));
     } catch (error) {
       console.warn("Failed to refresh auth:", error);
-      logout();
+      setUser(null);
+      removeStorageItem(USER_STORAGE_KEY);
     }
   };
 
@@ -234,13 +216,25 @@ export function AuthGuard(props: {
 }) {
   const { isAuthenticated, isLoading } = useAuth();
 
+  // On server-side, always show loading or fallback
+  if (isServer) {
+    return (
+      <div class="min-h-screen bg-bakery-cream flex items-center justify-center">
+        <div class="text-center">
+          <div class="spinner w-8 h-8 mx-auto mb-4"></div>
+          <p class="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   // Show loading while checking auth
   if (isLoading()) {
     return (
       <div class="min-h-screen bg-bakery-cream flex items-center justify-center">
         <div class="text-center">
           <div class="spinner w-8 h-8 mx-auto mb-4"></div>
-          <p class="text-gray-600">Loading...</p>
+          <p class="text-gray-600">Checking authentication...</p>
         </div>
       </div>
     );
