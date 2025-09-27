@@ -1,0 +1,171 @@
+/* Enhanced Analytics Route using Design Tokens */
+@reference "tailwindcss";
+
+/* Container and Header */
+.container {
+  padding: var(--header-padding);
+  max-width: var(--section-max-width);
+  margin: 0 auto;
+  animation: fadeIn var(--duration-base) var(--easing-out);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--grid-gap-lg);
+  animation: slideInLeft var(--duration-slower) var(--easing-spring);
+}
+
+.headerContent {
+  flex: 1;
+}
+
+.title {
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-extrabold);
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-2) 0;
+  letter-spacing: -0.02em;
+  background: linear-gradient(
+    135deg,
+    var(--text-primary) 0%,
+    var(--primary-color) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+  font-size: var(--font-size-lg);
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* Enhanced Analytics Grid */
+.analyticsGrid {
+  @apply grid grid-cols-1;
+  gap: var(--grid-gap);
+}
+
+@media (min-width: 768px) {
+  .analyticsGrid {
+    @apply grid-cols-2;
+    gap: var(--grid-gap-lg);
+  }
+}
+
+@media (min-width: 1024px) {
+  .analyticsGrid {
+    @apply grid-cols-3;
+  }
+}
+
+.analyticsGrid > * {
+  animation: slideUp var(--duration-slower) var(--easing-spring);
+  animation-fill-mode: both;
+}
+
+.analyticsGrid > *:nth-child(1) { animation-delay: 0.1s; }
+.analyticsGrid > *:nth-child(2) { animation-delay: 0.2s; }
+.analyticsGrid > *:nth-child(3) { animation-delay: 0.3s; }
+.analyticsGrid > *:nth-child(4) { animation-delay: 0.4s; }
+.analyticsGrid > *:nth-child(5) { animation-delay: 0.5s; }
+.analyticsGrid > *:nth-child(6) { animation-delay: 0.6s; }
+
+/* Enhanced Analytics Card */
+.analyticsCard {
+  background: var(--card-bg);
+  border: var(--card-border);
+  border-radius: var(--card-radius);
+  padding: var(--card-padding);
+  box-shadow: var(--card-shadow);
+  transition: all var(--duration-base) var(--easing-default);
+  position: relative;
+  overflow: hidden;
+}
+
+.analyticsCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    var(--primary-color) 0%,
+    var(--accent-color) 50%,
+    var(--success-color) 100%
+  );
+  transform: scaleX(0);
+  transition: transform var(--duration-slow) var(--easing-spring);
+  transform-origin: left;
+}
+
+.analyticsCard:hover::before {
+  transform: scaleX(1);
+}
+
+.analyticsCard:hover {
+  box-shadow: var(--card-shadow-hover);
+  transform: var(--card-transform-hover);
+  border-color: var(--border-hover);
+}
+
+.cardTitle {
+  @apply text-sm font-medium mb-2;
+  color: var(--text-secondary);
+  transition: all var(--duration-base) var(--easing-default);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: var(--font-size-xs);
+}
+
+.cardValue {
+  @apply text-3xl font-bold mb-3;
+  color: var(--text-primary);
+  transition: all var(--duration-base) var(--easing-default);
+  font-size: var(--font-size-4xl);
+  background: linear-gradient(
+    135deg,
+    var(--text-primary) 0%,
+    var(--primary-color) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.cardChange {
+  @apply text-sm font-medium;
+  font-size: var(--font-size-sm);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.cardChangePositive {
+  color: var(--success-color);
+  background: var(--success-light);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-md);
+  font-weight: var(--font-weight-semibold);
+}
+
+.cardChangeNegative {
+  color: var(--error-color);
+  background: var(--error-light);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-md);
+  font-weight: var(--font-weight-semibold);
+}
+
+.analyticsCard:hover .cardTitle {
+  color: var(--primary-color);
+}
+
+.analyticsCard:hover .cardValue {
+  transform: scale(1.05);
+}

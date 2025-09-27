@@ -1,144 +1,278 @@
-import { Title, Meta } from "@solidjs/meta";
-import "../styles/globals.css";
+import { A } from '@solidjs/router'
+import { Show, createSignal, createEffect, onMount } from 'solid-js'
+import { useAuthUser } from '~/hooks/useAuthUser'
+import SEO from '~/components/SEO/SEO'
+import Logo from '~/components/Logo/Logo'
+import ThemeToggle from '~/components/ThemeToggle/ThemeToggle'
+import FeatureIcon from '~/components/FeatureIcon/FeatureIcon'
+import DashboardPreview from '~/components/DashboardPreview/DashboardPreview'
+import styles from './home/home.module.css'
 
-export default function Home() {
+export default function LandingPage() {
+  const user = useAuthUser()
+  const [theme, setTheme] = createSignal<'light' | 'dark'>('light')
+  const [mobileMenuOpen, setMobileMenuOpen] = createSignal(false)
+
+  // Initialize theme from localStorage or system preference
+  onMount(() => {
+    const savedTheme = localStorage.getItem('landingTheme')
+    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+    const initialTheme = savedTheme || (systemPrefersDark ? 'dark' : 'light')
+    setTheme(initialTheme as 'light' | 'dark')
+
+    // Set both data-theme and class for compatibility
+    document.documentElement.setAttribute('data-theme', initialTheme)
+    if (initialTheme === 'dark') {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
+  })
+
+  // Update theme when it changes
+  createEffect(() => {
+    const currentTheme = theme()
+    document.documentElement.setAttribute('data-theme', currentTheme)
+    localStorage.setItem('landingTheme', currentTheme)
+
+    // Update class for Tailwind dark mode
+    if (currentTheme === 'dark') {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
+  })
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'light' ? 'dark' : 'light')
+  }
+
   return (
     <>
-      <Title>BakeWind Bakery - Fresh Baked Goods & Custom Orders</Title>
-      <Meta name="description" content="Welcome to BakeWind Bakery! Discover our fresh baked breads, artisan pastries, and custom cakes. Order online for pickup or delivery." />
+      <SEO
+        title="BakeWind - Modern Bakery Management Software"
+        description="Streamline your bakery operations with our comprehensive SaaS platform. Track orders, manage inventory, and boost productivity with software designed for bakers."
+        path="/"
+      />
 
-      <main class="min-h-screen bg-gradient-to-br from-bakery-cream via-bakery-wheat to-bakery-crust">
-        {/* Hero Section */}
-        <section class="section-padding">
-          <div class="max-w-content container-padding">
-            <div class="text-center">
-              <h1 class="text-4xl md:text-6xl lg:text-7xl font-display font-bold text-bakery-brown mb-6 animate-fade-in">
-                Welcome to <span class="gradient-text">BakeWind</span>
-              </h1>
-              <p class="text-xl md:text-2xl text-gray-700 mb-8 max-w-3xl mx-auto text-balance animate-slide-up">
-                Your local artisan bakery crafting fresh breads, delicate pastries, and custom celebration cakes with traditional methods and premium ingredients.
-              </p>
-              <div class="flex flex-col sm:flex-row gap-4 justify-center items-center animate-slide-up">
-                <a href="/products" class="btn-primary text-lg px-8 py-3">
-                  Shop Now
-                </a>
-                <a href="/about" class="btn-outline text-lg px-8 py-3">
-                  Our Story
-                </a>
+      <div class={styles.container}>
+        {/* Navigation */}
+        <nav class={styles.navigation}>
+          <div class={styles.navContent}>
+            <A href="/" class={styles.logoLink}>
+              <Logo size="medium" />
+            </A>
+
+            {/* Desktop Navigation */}
+            <div class={styles.navActions}>
+              <A href="/" class={styles.navLink} classList={{ [styles.navLinkActive]: true }}>Home</A>
+              <A href="/pricing" class={styles.navLink}>Pricing</A>
+              <ThemeToggle theme={theme()} onToggle={toggleTheme} />
+
+              <Show
+                when={user && user.id}
+                fallback={
+                  <A href="/login" class={styles.loginButton}>
+                    Sign In
+                  </A>
+                }
+              >
+                <A href="/dashboard" class={styles.dashboardButton}>
+                  My Dashboard
+                </A>
+              </Show>
+            </div>
+
+            {/* Mobile Menu Button */}
+            <button
+              class={styles.mobileMenuButton}
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen())}
+              aria-label="Toggle mobile menu"
+            >
+              <Show when={!mobileMenuOpen()} fallback={
+                <svg class={styles.menuIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              }>
+                <svg class={styles.menuIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </Show>
+            </button>
+          </div>
+        </nav>
+
+        {/* Mobile Menu Overlay */}
+        <Show when={mobileMenuOpen()}>
+          <div class={styles.mobileMenuOverlay} onClick={() => setMobileMenuOpen(false)}>
+            <div class={styles.mobileMenu} onClick={(e) => e.stopPropagation()}>
+              <div class={styles.mobileMenuContent}>
+                <A href="/" class={styles.mobileNavLink} classList={{ [styles.mobileNavLinkActive]: true }} onClick={() => setMobileMenuOpen(false)}>
+                  Home
+                </A>
+                <A href="/pricing" class={styles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>
+                  Pricing
+                </A>
+
+                <div class={styles.mobileThemeToggle}>
+                  <ThemeToggle theme={theme()} onToggle={toggleTheme} />
+                </div>
+
+                <Show
+                  when={user && user.id}
+                  fallback={
+                    <A href="/login" class={styles.mobileLoginButton} onClick={() => setMobileMenuOpen(false)}>
+                      Sign In
+                    </A>
+                  }
+                >
+                  <A href="/dashboard" class={styles.mobileDashboardButton} onClick={() => setMobileMenuOpen(false)}>
+                    My Dashboard
+                  </A>
+                </Show>
               </div>
+            </div>
+          </div>
+        </Show>
+
+        {/* Hero Section */}
+        <section class={styles.hero}>
+          <div class={styles.heroContent}>
+            <div class={styles.heroText}>
+              <h1 class={styles.heroTitle}>
+                Modern Bakery Management
+                <span class={styles.heroAccent}>Made Simple</span>
+              </h1>
+              <p class={styles.heroDescription}>
+                Streamline your bakery operations with our comprehensive SaaS platform.
+                Track orders, manage inventory, monitor production, and boost productivity—all in one cloud-based solution.
+              </p>
+
+              <div class={styles.heroActions}>
+                <Show
+                  when={user && user.id}
+                  fallback={
+                    <>
+                      <A href="/trial-signup" class={styles.ctaPrimary}>
+                        Start Free Trial
+                      </A>
+                      <A href="/features" class={styles.ctaSecondary}>
+                        View Features
+                      </A>
+                    </>
+                  }
+                >
+                  <A href="/dashboard" class={styles.ctaPrimary}>
+                    Go to Dashboard
+                  </A>
+                </Show>
+              </div>
+            </div>
+
+            <div class={styles.heroVisual}>
+              <DashboardPreview />
             </div>
           </div>
         </section>
 
         {/* Features Section */}
-        <section class="section-padding bg-white/50">
-          <div class="max-w-content container-padding">
-            <div class="text-center mb-12">
-              <h2 class="text-3xl md:text-4xl font-display font-bold text-bakery-brown mb-4">
-                Why Choose BakeWind?
-              </h2>
-              <p class="text-lg text-gray-600 max-w-2xl mx-auto">
-                We're committed to bringing you the finest baked goods with time-honored techniques and the freshest ingredients.
+        <section class={styles.features}>
+          <div class={styles.featuresContent}>
+            <h2 class={styles.featuresTitle}>Everything you need to run your bakery</h2>
+            <p class={styles.featuresDescription}>
+              Comprehensive software features designed specifically for bakery operations
+            </p>
+
+            <div class={styles.featuresGrid}>
+              <div class={styles.featureCard}>
+                <FeatureIcon type="orders" />
+                <h3 class={styles.featureTitle}>Order Management</h3>
+                <p class={styles.featureDescription}>
+                  Track customer orders, internal orders, and delivery schedules in real-time.
+                </p>
+              </div>
+
+              <div class={styles.featureCard}>
+                <FeatureIcon type="inventory" />
+                <h3 class={styles.featureTitle}>Inventory Control</h3>
+                <p class={styles.featureDescription}>
+                  Monitor ingredients, supplies, and finished products with automatic alerts.
+                </p>
+              </div>
+
+              <div class={styles.featureCard}>
+                <FeatureIcon type="production" />
+                <h3 class={styles.featureTitle}>Production Planning</h3>
+                <p class={styles.featureDescription}>
+                  Schedule baking sessions, manage recipes, and optimize production workflows.
+                </p>
+              </div>
+
+              <div class={styles.featureCard}>
+                <FeatureIcon type="analytics" />
+                <h3 class={styles.featureTitle}>Analytics & Reports</h3>
+                <p class={styles.featureDescription}>
+                  Get insights into sales trends, popular products, and operational efficiency.
+                </p>
+              </div>
+
+              <div class={styles.featureCard}>
+                <FeatureIcon type="customers" />
+                <h3 class={styles.featureTitle}>Customer Management</h3>
+                <p class={styles.featureDescription}>
+                  Build relationships with detailed customer profiles and order history.
+                </p>
+              </div>
+
+              <div class={styles.featureCard}>
+                <FeatureIcon type="products" />
+                <h3 class={styles.featureTitle}>Product Catalog</h3>
+                <p class={styles.featureDescription}>
+                  Manage your bakery's offerings with pricing, descriptions, and images.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Footer */}
+        <footer class={styles.footer}>
+          <div class={styles.footerContent}>
+            <div class={styles.footerBrand}>
+              <Logo size="small" showSubtitle={false} theme="dark" />
+              <p class={styles.footerDescription}>
+                Modern bakery management software made simple
               </p>
             </div>
 
-            <div class="content-grid">
-              <div class="card text-center group hover-scale">
-                <div class="text-4xl mb-4 animate-bounce-gentle">🍞</div>
-                <h3 class="text-xl font-semibold text-bakery-brown mb-2">Fresh Daily</h3>
-                <p class="text-gray-600">All our breads and pastries are baked fresh every morning using traditional techniques.</p>
+            <div class={styles.footerLinks}>
+              <div class={styles.footerSection}>
+                <h4 class={styles.footerSectionTitle}>Product</h4>
+                <ul class={styles.footerList}>
+                  <li><A href="/features" class={styles.footerLink}>Features</A></li>
+                  <li><A href="/pricing" class={styles.footerLink}>Pricing</A></li>
+                  <li><A href="/demo" class={styles.footerLink}>Demo</A></li>
+                </ul>
               </div>
 
-              <div class="card text-center group hover-scale">
-                <div class="text-4xl mb-4 animate-bounce-gentle" style="animation-delay: 0.2s;">🌾</div>
-                <h3 class="text-xl font-semibold text-bakery-brown mb-2">Premium Ingredients</h3>
-                <p class="text-gray-600">We source only the finest organic flours, local dairy, and seasonal ingredients.</p>
-              </div>
-
-              <div class="card text-center group hover-scale">
-                <div class="text-4xl mb-4 animate-bounce-gentle" style="animation-delay: 0.4s;">🎂</div>
-                <h3 class="text-xl font-semibold text-bakery-brown mb-2">Custom Orders</h3>
-                <p class="text-gray-600">Special occasion? We create beautiful custom cakes and pastries for your celebrations.</p>
+              <div class={styles.footerSection}>
+                <h4 class={styles.footerSectionTitle}>Company</h4>
+                <ul class={styles.footerList}>
+                  <li><a href="#about" class={styles.footerLink}>About</a></li>
+                  <li><a href="#contact" class={styles.footerLink}>Contact</a></li>
+                  <li><a href="#privacy" class={styles.footerLink}>Privacy</a></li>
+                </ul>
               </div>
             </div>
           </div>
-        </section>
 
-        {/* CTA Section */}
-        <section class="section-padding bg-bakery-brown text-white">
-          <div class="max-w-content container-padding text-center">
-            <h2 class="text-3xl md:text-4xl font-display font-bold mb-4">
-              Ready to Order?
-            </h2>
-            <p class="text-xl mb-8 text-bakery-cream">
-              Browse our selection of fresh baked goods and place your order online for convenient pickup or delivery.
+          <div class={styles.footerBottom}>
+            <p class={styles.footerCopyright}>
+              © 2024 BakeWind. All rights reserved.
             </p>
-            <a href="/products" class="inline-flex items-center btn bg-white text-bakery-brown hover:bg-bakery-cream text-lg px-8 py-3">
-              View Our Products
-              <svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-              </svg>
-            </a>
           </div>
-        </section>
-
-        {/* Store Hours */}
-        <section class="section-padding bg-white/80">
-          <div class="max-w-content container-padding">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-              <div>
-                <h2 class="text-3xl font-display font-bold text-bakery-brown mb-6">
-                  Visit Our Bakery
-                </h2>
-                <div class="space-y-4">
-                  <div class="flex justify-between items-center p-3 bg-white rounded-lg shadow-sm">
-                    <span class="font-medium">Monday - Friday</span>
-                    <span class="text-primary-600">6:00 AM - 6:00 PM</span>
-                  </div>
-                  <div class="flex justify-between items-center p-3 bg-white rounded-lg shadow-sm">
-                    <span class="font-medium">Saturday</span>
-                    <span class="text-primary-600">7:00 AM - 5:00 PM</span>
-                  </div>
-                  <div class="flex justify-between items-center p-3 bg-white rounded-lg shadow-sm">
-                    <span class="font-medium">Sunday</span>
-                    <span class="text-primary-600">8:00 AM - 3:00 PM</span>
-                  </div>
-                </div>
-                <div class="mt-6 p-4 bg-primary-50 rounded-lg">
-                  <h3 class="font-semibold text-primary-800 mb-2">📍 Location</h3>
-                  <p class="text-primary-700">123 Baker Street, Downtown, CA 90210</p>
-                  <p class="text-primary-700">📞 +1-555-BAKEWIND</p>
-                </div>
-              </div>
-
-              <div class="bg-white rounded-lg shadow-lg p-6">
-                <h3 class="text-xl font-semibold text-bakery-brown mb-4">Today's Specials</h3>
-                <div class="space-y-3">
-                  <div class="flex justify-between items-center border-b border-gray-200 pb-2">
-                    <span>Sourdough Bread</span>
-                    <span class="price-display">$4.50</span>
-                  </div>
-                  <div class="flex justify-between items-center border-b border-gray-200 pb-2">
-                    <span>Croissants (6-pack)</span>
-                    <span class="price-display">$12.00</span>
-                  </div>
-                  <div class="flex justify-between items-center border-b border-gray-200 pb-2">
-                    <span>Chocolate Chip Cookies</span>
-                    <span class="price-display">$2.50</span>
-                  </div>
-                  <div class="flex justify-between items-center">
-                    <span>Apple Pie (whole)</span>
-                    <span class="price-display">$18.00</span>
-                  </div>
-                </div>
-                <a href="/products" class="btn-primary w-full mt-4 justify-center">
-                  See All Products
-                </a>
-              </div>
-            </div>
-          </div>
-        </section>
-      </main>
+        </footer>
+      </div>
     </>
-  );
+  )
 }

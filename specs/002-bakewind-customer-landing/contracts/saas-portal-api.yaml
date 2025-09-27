@@ -1,0 +1,500 @@
+openapi: 3.0.3
+info:
+  title: BakeWind SaaS Portal API
+  description: API for BakeWind software marketing landing page and customer portal
+  version: 1.0.0
+  contact:
+    name: BakeWind Development Team
+    email: dev@bakewind.com
+
+servers:
+  - url: http://localhost:5000
+    description: Development server
+  - url: https://api.bakewind.com
+    description: Production server
+
+paths:
+  # Authentication Endpoints
+  /auth/trial-signup:
+    post:
+      summary: Create trial account for prospects
+      description: Register new trial user with business information for 14-day software evaluation
+      operationId: createTrialAccount
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TrialSignupRequest'
+      responses:
+        '201':
+          description: Trial account created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthSuccessResponse'
+        '400':
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Email already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/login:
+    post:
+      summary: Authenticate existing subscribers
+      description: Login for existing software subscribers to access their dashboard
+      operationId: loginUser
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthSuccessResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/refresh:
+    post:
+      summary: Refresh authentication tokens
+      description: Obtain new access token using refresh token
+      operationId: refreshToken
+      tags: [Authentication]
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '401':
+          description: Invalid refresh token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/logout:
+    post:
+      summary: Logout user and revoke session
+      description: Invalidate user session and clear authentication tokens
+      operationId: logoutUser
+      tags: [Authentication]
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Logout successful
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # User Profile Endpoints
+  /auth/me:
+    get:
+      summary: Get current user profile
+      description: Retrieve authenticated user's profile information and subscription status
+      operationId: getCurrentUser
+      tags: [Profile]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User profile retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # Subscription Management
+  /subscriptions/plans:
+    get:
+      summary: Get available subscription plans
+      description: Retrieve active subscription plans for pricing page display
+      operationId: getSubscriptionPlans
+      tags: [Subscriptions]
+      responses:
+        '200':
+          description: Subscription plans retrieved
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SubscriptionPlan'
+
+  # Software Features
+  /features:
+    get:
+      summary: Get software features for marketing
+      description: Retrieve BakeWind software features for landing page showcase
+      operationId: getSoftwareFeatures
+      tags: [Features]
+      responses:
+        '200':
+          description: Software features retrieved
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SoftwareFeature'
+
+  # Trial Management
+  /trials/{trialId}/onboarding:
+    patch:
+      summary: Update trial onboarding progress
+      description: Mark onboarding steps as complete and trigger sample data loading
+      operationId: updateTrialOnboarding
+      tags: [Trials]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: trialId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OnboardingUpdateRequest'
+      responses:
+        '200':
+          description: Onboarding progress updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrialAccount'
+        '403':
+          description: Not authorized to update this trial
+        '404':
+          description: Trial not found
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: refreshToken
+
+  schemas:
+    # Request Schemas
+    TrialSignupRequest:
+      type: object
+      required: [businessName, fullName, email, phone, password, locations, agreeToTerms]
+      properties:
+        businessName:
+          type: string
+          description: Name of the bakery or business
+          example: "Sweet Dreams Bakery"
+        fullName:
+          type: string
+          description: User's full name
+          example: "John Smith"
+        email:
+          type: string
+          format: email
+          description: Business email address
+          example: "john@sweetdreamsbakery.com"
+        phone:
+          type: string
+          description: Contact phone number
+          example: "+1 (555) 123-4567"
+        password:
+          type: string
+          minLength: 8
+          description: Account password
+          example: "SecurePassword123!"
+        locations:
+          type: string
+          enum: ["1", "2-3", "4-10", "10+"]
+          description: Number of bakery locations
+          example: "2-3"
+        agreeToTerms:
+          type: boolean
+          description: Agreement to terms of service
+          example: true
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+          description: User email address
+          example: "john@sweetdreamsbakery.com"
+        password:
+          type: string
+          description: Account password
+          example: "SecurePassword123!"
+
+    OnboardingUpdateRequest:
+      type: object
+      properties:
+        onboardingCompleted:
+          type: boolean
+          description: Whether onboarding wizard is completed
+        sampleDataRequested:
+          type: boolean
+          description: Whether to load sample bakery data
+
+    # Response Schemas
+    AuthSuccessResponse:
+      type: object
+      required: [user, accessToken]
+      properties:
+        user:
+          $ref: '#/components/schemas/UserProfile'
+        accessToken:
+          type: string
+          description: JWT access token
+          example: "eyJhbGciOiJIUzI1NiIs..."
+        refreshToken:
+          type: string
+          description: Refresh token (also set as httpOnly cookie)
+          example: "refresh_token_value"
+        dashboardUrl:
+          type: string
+          description: URL to redirect to dashboard
+          example: "/admin/overview"
+
+    TokenResponse:
+      type: object
+      required: [accessToken]
+      properties:
+        accessToken:
+          type: string
+          description: New JWT access token
+          example: "eyJhbGciOiJIUzI1NiIs..."
+
+    UserProfile:
+      type: object
+      required: [id, email, firstName, lastName, role, subscriptionStatus]
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        email:
+          type: string
+          format: email
+          example: "john@sweetdreamsbakery.com"
+        firstName:
+          type: string
+          example: "John"
+        lastName:
+          type: string
+          example: "Smith"
+        businessName:
+          type: string
+          example: "Sweet Dreams Bakery"
+        role:
+          type: string
+          enum: [trial_user, subscriber, admin]
+          example: "trial_user"
+        subscriptionStatus:
+          type: string
+          enum: [trial, active, past_due, canceled]
+          example: "trial"
+        trialEndsAt:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2025-10-11T23:59:59Z"
+        isEmailVerified:
+          type: boolean
+          example: true
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-09-27T12:00:00Z"
+
+    SubscriptionPlan:
+      type: object
+      required: [id, name, description, priceMonthlyUsd, priceAnnualUsd, features]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: "Professional"
+        description:
+          type: string
+          example: "Ideal for growing bakeries with multiple locations"
+        priceMonthlyUsd:
+          type: integer
+          description: Price in cents for monthly billing
+          example: 14900
+        priceAnnualUsd:
+          type: integer
+          description: Price in cents for annual billing
+          example: 143040
+        maxLocations:
+          type: integer
+          nullable: true
+          example: 3
+        maxUsers:
+          type: integer
+          nullable: true
+          example: 10
+        features:
+          type: array
+          items:
+            type: string
+          example: ["advanced_analytics", "multi_location", "staff_management"]
+        isPopular:
+          type: boolean
+          example: true
+        sortOrder:
+          type: integer
+          example: 2
+
+    SoftwareFeature:
+      type: object
+      required: [id, name, description, iconName, category]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: "Order Management"
+        description:
+          type: string
+          example: "Track customer orders and delivery schedules in real-time"
+        iconName:
+          type: string
+          example: "orders"
+        category:
+          type: string
+          enum: [orders, inventory, production, analytics, customers, products]
+          example: "orders"
+        availableInPlans:
+          type: array
+          items:
+            type: string
+            format: uuid
+        demoUrl:
+          type: string
+          format: uri
+          nullable: true
+          example: "https://demo.bakewind.com/orders"
+        isHighlighted:
+          type: boolean
+          example: false
+        sortOrder:
+          type: integer
+          example: 1
+
+    TrialAccount:
+      type: object
+      required: [id, userId, signupSource, businessSize, trialLengthDays]
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        signupSource:
+          type: string
+          example: "landing_page"
+        businessSize:
+          type: string
+          enum: ["1", "2-3", "4-10", "10+"]
+          example: "2-3"
+        trialLengthDays:
+          type: integer
+          example: 14
+        onboardingCompleted:
+          type: boolean
+          example: false
+        sampleDataLoaded:
+          type: boolean
+          example: false
+        conversionRemindersSent:
+          type: integer
+          example: 0
+        convertedAt:
+          type: string
+          format: date-time
+          nullable: true
+        convertedToPlanId:
+          type: string
+          format: uuid
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+          example: "Invalid input data"
+        code:
+          type: string
+          example: "VALIDATION_ERROR"
+        details:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+          example:
+            email: ["Email is already registered"]
+            password: ["Password must be at least 8 characters"]
+
+tags:
+  - name: Authentication
+    description: User authentication and session management
+  - name: Profile
+    description: User profile management
+  - name: Subscriptions
+    description: Subscription plan management
+  - name: Features
+    description: Software feature catalog
+  - name: Trials
+    description: Trial account management

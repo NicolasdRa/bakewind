@@ -1,0 +1,31 @@
+/* Profile Route CSS Module */
+@reference "tailwindcss";
+
+/* Error State */
+.errorContainer {
+  @apply flex flex-col items-center justify-center py-12;
+}
+
+.errorIcon {
+  @apply text-6xl mb-4 opacity-70;
+}
+
+.errorTitle {
+  @apply text-2xl font-bold mb-2;
+  color: var(--text-primary);
+}
+
+.errorMessage {
+  @apply text-center mb-6;
+  color: var(--text-secondary);
+}
+
+.errorButton {
+  @apply px-6 py-2 rounded-lg font-medium transition-colors duration-200;
+  background-color: var(--accent-color);
+  color: white;
+}
+
+.errorButton:hover {
+  background-color: var(--accent-hover);
+}

@@ -1,0 +1,1440 @@
+.container {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+}
+
+.headerContent {
+  flex: 1;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 0.5rem 0;
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.headerActions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.dateInput {
+  height: 2.5rem; /* 40px - Standard header height */
+  padding: 0 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.dateInput:hover {
+  border-color: var(--primary-color);
+}
+
+.dateInput:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+}
+
+/* Action buttons now handled by ActionButton component */
+
+.statsRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.statCard {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.statValue {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.statLabel {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.scheduleHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding: 1.5rem;
+  background: var(--bg-secondary);
+  border-radius: 0.75rem;
+  border: 1px solid var(--border-color);
+}
+
+.scheduleInfo {
+  flex: 1;
+}
+
+.scheduleTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.5rem 0;
+}
+
+.scheduleSubtitle {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.currentTime {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  background: var(--bg-tertiary);
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+}
+
+.productionBoard {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  min-height: 600px;
+}
+
+.statusColumn {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.columnHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.columnTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.columnCount {
+  background: var(--primary-color);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.itemsList {
+  flex: 1;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  overflow-y: auto;
+}
+
+.productionCard {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.productionCard:hover {
+  border-color: var(--primary-color);
+  box-shadow: 0 2px 8px var(--shadow-color);
+}
+
+.overdue {
+  border-color: #ef4444;
+  background: #fef2f2;
+}
+
+.inProgress {
+  border-left: 4px solid #f97316;
+}
+
+.completed {
+  border-left: 4px solid #10b981;
+  opacity: 0.8;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.itemName {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  flex: 1;
+}
+
+.quantity {
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.cardDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.detailRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+}
+
+.detailIcon {
+  font-size: 0.875rem;
+}
+
+.detailText {
+  color: var(--text-secondary);
+  flex: 1;
+}
+
+.overdueTag {
+  background: #fee2e2;
+  color: #dc2626;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.itemNotes {
+  background: var(--bg-tertiary);
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  border-left: 3px solid var(--primary-color);
+}
+
+.qualityCheck {
+  background: #d1fae5;
+  color: #059669;
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+.dragHint {
+  margin-top: auto;
+  padding: 0.5rem;
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  background: var(--bg-tertiary);
+  border-radius: 0.375rem;
+  transition: all 0.2s;
+}
+
+.productionCard:hover .dragHint {
+  color: var(--primary-color);
+  background: rgba(245, 158, 11, 0.1);
+}
+
+.cardActions {
+  margin-top: auto;
+}
+
+.actionBtn {
+  width: 100%;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.375rem;
+  background: var(--primary-color);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.actionBtn:hover {
+  background: var(--primary-hover);
+}
+
+/* Modal Styles */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 2rem;
+}
+
+.modalContent {
+  background: var(--bg-primary);
+  border-radius: 1rem;
+  max-width: 600px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.modalTitle {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.modalTitle h2 {
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.statusBadge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: capitalize;
+  display: inline-block;
+  width: fit-content;
+}
+
+.modalClose {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modalClose:hover {
+  color: var(--text-primary);
+}
+
+.modalBody {
+  padding: 1.5rem;
+}
+
+.itemDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.detailGroup {
+  background: var(--bg-secondary);
+  padding: 1rem;
+  border-radius: 0.5rem;
+}
+
+.detailGroup h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.75rem 0;
+}
+
+.detailGroup p {
+  margin: 0.5rem 0;
+  color: var(--text-secondary);
+}
+
+.modalActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.modalActionBtn {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.375rem;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.875rem;
+}
+
+.modalActionBtn:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+/* Dark mode support */
+[data-theme="dark"] .statCard,
+[data-theme="dark"] .scheduleHeader,
+[data-theme="dark"] .statusColumn {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .productionCard {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+[data-theme="dark"] .overdue {
+  background: rgba(254, 242, 242, 0.1);
+}
+
+[data-theme="dark"] .itemNotes {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .qualityCheck {
+  background: rgba(209, 250, 229, 0.15);
+  color: #34d399;
+}
+
+[data-theme="dark"] .detailGroup {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .currentTime {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .columnHeader {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .headerActions {
+    justify-content: space-between;
+  }
+
+  .scheduleHeader {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+    text-align: center;
+  }
+
+  .productionBoard {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .statusColumn {
+    min-height: 300px;
+  }
+
+  .modalContent {
+    margin: 1rem;
+    max-height: calc(100vh - 2rem);
+  }
+
+  .modalActions {
+    flex-direction: column;
+  }
+}
+
+/* Drag and Drop Styles */
+.productionCard {
+  animation: slideIn 0.2s ease-out;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.productionCard[draggable="true"] {
+  cursor: grab;
+}
+
+.productionCard[draggable="true"]:active {
+  cursor: grabbing;
+}
+
+.dragging {
+  opacity: 0.5;
+  transform: rotate(5deg);
+  z-index: 1000;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  border: 2px dashed var(--primary-color);
+  background: var(--bg-primary);
+}
+
+.dragOver {
+  background: linear-gradient(135deg, 
+    rgba(245, 158, 11, 0.1) 0%, 
+    rgba(245, 158, 11, 0.05) 100%
+  );
+  border: 2px dashed var(--primary-color);
+  transform: scale(1.02);
+  transition: all 0.2s ease;
+}
+
+.dragOver .columnHeader {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--primary-color);
+}
+
+.dragOver .columnTitle {
+  color: var(--primary-color);
+}
+
+.dragOver .itemsList {
+  border: 1px dashed var(--primary-color);
+  border-radius: 0.5rem;
+  background: rgba(245, 158, 11, 0.05);
+  min-height: 100px;
+}
+
+/* Smooth transitions for drag operations */
+.statusColumn {
+  transition: all 0.2s ease;
+}
+
+.productionCard:not(.dragging) {
+  transition: all 0.2s ease;
+}
+
+/* Prevent text selection during drag */
+.productionBoard * {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Visual feedback for valid drop zones */
+.statusColumn:not(.dragOver) .itemsList {
+  transition: all 0.2s ease;
+}
+
+/* Hover effect for draggable cards */
+.productionCard[draggable="true"]:hover:not(.dragging) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px var(--shadow-color);
+  border-color: var(--primary-color);
+}
+
+/* Animation for cards entering/leaving */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes dragPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* Apply pulse animation to drag over columns */
+.dragOver {
+  animation: dragPulse 1s infinite ease-in-out;
+}
+
+/* Dark mode drag and drop styles */
+[data-theme="dark"] .dragging {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--primary-color);
+}
+
+[data-theme="dark"] .dragOver {
+  background: linear-gradient(135deg, 
+    rgba(251, 191, 36, 0.15) 0%, 
+    rgba(251, 191, 36, 0.08) 100%
+  );
+}
+
+[data-theme="dark"] .dragOver .columnHeader {
+  background: rgba(251, 191, 36, 0.15);
+}
+
+[data-theme="dark"] .dragOver .itemsList {
+  background: rgba(251, 191, 36, 0.08);
+}
+
+/* Production Planning Styles */
+.planningView {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.planningHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.planningTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.planningStats {
+  display: flex;
+  gap: 2rem;
+}
+
+.planningStat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.planningStatValue {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.planningStatLabel {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.emptyPlanning {
+  text-align: center;
+  padding: 3rem 2rem;
+  background: var(--bg-secondary);
+  border-radius: 0.75rem;
+  border: 1px solid var(--border-color);
+}
+
+.emptyPlanning h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 1rem 0;
+}
+
+.emptyPlanning p {
+  color: var(--text-secondary);
+  margin: 0.5rem 0;
+  line-height: 1.5;
+}
+
+.demandList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.demandCard {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  transition: all 0.2s;
+}
+
+.demandCard:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border-color: var(--primary-color);
+}
+
+.demandHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.demandProductInfo {
+  flex: 1;
+}
+
+.demandProductName {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.5rem 0;
+}
+
+.demandMeta {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.demandQuantity {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+.demandPrepTime {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.demandPriority {
+  display: flex;
+  align-items: center;
+}
+
+.priorityBadge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  white-space: nowrap;
+}
+
+.demandSources {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: var(--bg-primary);
+  border-radius: 0.5rem;
+  border: 1px solid rgba(245, 158, 11, 0.1);
+}
+
+.sourceBreakdown {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.sourceItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: var(--bg-secondary);
+  border-radius: 0.375rem;
+}
+
+.sourceIcon {
+  font-size: 1rem;
+}
+
+.sourceLabel {
+  flex: 1;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.sourceValue {
+  font-weight: 600;
+  color: var(--text-primary);
+  min-width: 2rem;
+  text-align: right;
+}
+
+.demandActions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.demandActionBtn {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.375rem;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.demandActionBtn:hover {
+  border-color: var(--primary-color);
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--primary-color);
+  transform: translateY(-1px);
+}
+
+/* Dark mode support for planning view */
+[data-theme="dark"] .demandCard {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .demandSources {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(245, 158, 11, 0.2);
+}
+
+[data-theme="dark"] .sourceItem {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .demandActionBtn {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .emptyPlanning {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Responsive design for planning view */
+@media (max-width: 768px) {
+  .planningHeader {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .planningStats {
+    justify-content: space-around;
+    gap: 1rem;
+  }
+
+  .sourceBreakdown {
+    grid-template-columns: 1fr;
+  }
+
+  .demandActions {
+    flex-direction: column;
+  }
+
+  .demandActionBtn {
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .planningStats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .demandMeta {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+/* Demand Planning Table Styles */
+.demandTable {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.demandTableHeader {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 1fr;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-color);
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+}
+
+.demandHeaderCell {
+  display: flex;
+  align-items: center;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  white-space: nowrap;
+}
+
+.demandTableRow {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 1fr;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  transition: all 0.2s;
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.demandTableRow:hover {
+  background: rgba(245, 158, 11, 0.05);
+  border-color: rgba(245, 158, 11, 0.2);
+}
+
+.demandTableRow:last-child {
+  border-bottom: none;
+}
+
+.demandTableCell {
+  display: flex;
+  align-items: center;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.demandProductInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.demandProductName {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  font-size: 0.875rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.demandProductCategory {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.demandPriorityCell {
+  justify-content: center;
+}
+
+.priorityBadgeSmall {
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  white-space: nowrap;
+}
+
+.priorityHigh {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.priorityMedium {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.priorityLow {
+  background: #d1fae5;
+  color: #059669;
+}
+
+.demandQuantityCell {
+  font-weight: 600;
+  color: var(--primary-color);
+  justify-content: center;
+}
+
+.demandOrderCell {
+  justify-content: center;
+  color: var(--text-secondary);
+}
+
+.demandPrepTimeCell {
+  justify-content: center;
+  color: var(--text-secondary);
+}
+
+.demandActionsCell {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.demandTableActionBtn {
+  padding: 0.375rem 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.375rem;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.demandTableActionBtn:hover {
+  border-color: var(--primary-color);
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--primary-color);
+  transform: translateY(-1px);
+}
+
+/* Dark mode support for demand table */
+[data-theme="dark"] .demandTable {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .demandTableHeader {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .demandTableRow:hover {
+  background: rgba(251, 191, 36, 0.08);
+  border-color: rgba(251, 191, 36, 0.2);
+}
+
+[data-theme="dark"] .priorityHigh {
+  background: rgba(254, 226, 226, 0.2);
+  color: #f87171;
+}
+
+[data-theme="dark"] .priorityMedium {
+  background: rgba(254, 243, 199, 0.2);
+  color: #fbbf24;
+}
+
+[data-theme="dark"] .priorityLow {
+  background: rgba(209, 250, 229, 0.2);
+  color: #34d399;
+}
+
+[data-theme="dark"] .demandTableActionBtn {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Responsive design for demand table */
+@media (max-width: 1024px) {
+  .demandTableHeader,
+  .demandTableRow {
+    grid-template-columns: 2fr 1fr 1fr 0.8fr 0.8fr 0.8fr 1fr;
+    gap: 0.75rem;
+    padding: 1rem;
+  }
+  
+  .demandHeaderCell,
+  .demandTableCell {
+    font-size: 0.8125rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .demandTable {
+    overflow-x: auto;
+  }
+  
+  .demandTableHeader,
+  .demandTableRow {
+    min-width: 800px;
+    grid-template-columns: 200px 80px 80px 80px 80px 80px 120px;
+    gap: 0.5rem;
+    padding: 0.75rem;
+  }
+  
+  .demandHeaderCell,
+  .demandTableCell {
+    font-size: 0.75rem;
+  }
+  
+  .demandActionsCell {
+    gap: 0.25rem;
+  }
+  
+  .demandTableActionBtn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.6875rem;
+  }
+}
+
+
+/* Recipe Modal Styles - reuse from products with slight adjustments */
+.recipeCategory {
+  padding: 0.25rem 0.5rem;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.productionBadge {
+  margin-top: 0.5rem;
+  padding: 0.375rem 0.75rem;
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.recipeContent {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.recipeDescription p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-style: italic;
+  background: var(--bg-tertiary);
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border-left: 3px solid var(--primary-color);
+}
+
+.recipeDetails {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: var(--bg-secondary);
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-color);
+}
+
+.timeInfo {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.timeItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.timeLabel {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  margin-bottom: 0.25rem;
+}
+
+.timeValue {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.yieldInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.yieldLabel {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  margin-bottom: 0.25rem;
+}
+
+.yieldValue {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+.recipeSection {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+}
+
+.recipeSection h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 1rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.ingredientsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.ingredientItem {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem;
+  background: var(--bg-primary);
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-color);
+  transition: all 0.2s;
+}
+
+.ingredientItem:hover {
+  background: rgba(245, 158, 11, 0.05);
+  border-color: rgba(245, 158, 11, 0.2);
+}
+
+.ingredientQuantity {
+  font-weight: 600;
+  color: var(--primary-color);
+  min-width: 4rem;
+  text-align: right;
+  font-size: 0.875rem;
+}
+
+.ingredientName {
+  flex: 1;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+}
+
+.ingredientCost {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.instructionsList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.instructionStep {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--bg-primary);
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-color);
+}
+
+.stepNumber {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary-color);
+  color: white;
+  border-radius: 50%;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.stepText {
+  flex: 1;
+  line-height: 1.6;
+  color: var(--text-primary);
+}
+
+.allergensList {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.allergenBadge {
+  padding: 0.25rem 0.75rem;
+  background: #fee2e2;
+  color: #dc2626;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.recipeTagsList {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.recipeTag {
+  padding: 0.25rem 0.75rem;
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--primary-color);
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+/* Dark mode support for recipe modal */
+
+[data-theme="dark"] .recipeDescription p {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .recipeDetails {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .recipeSection {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .ingredientItem {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+[data-theme="dark"] .ingredientItem:hover {
+  background: rgba(251, 191, 36, 0.08);
+  border-color: rgba(251, 191, 36, 0.2);
+}
+
+[data-theme="dark"] .instructionStep {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+[data-theme="dark"] .recipeCategory {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .recipeTag {
+  background: rgba(251, 191, 36, 0.15);
+  border-color: rgba(251, 191, 36, 0.3);
+}
+
+[data-theme="dark"] .allergenBadge {
+  background: rgba(254, 226, 226, 0.2);
+  color: #f87171;
+}
+
+[data-theme="dark"] .productionBadge {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.4);
+  color: #34d399;
+}
+
+/* Responsive design for recipe modal in production */
+@media (max-width: 768px) {
+  .recipeDetails {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+  
+  .timeInfo {
+    justify-content: space-around;
+    width: 100%;
+  }
+  
+  .ingredientItem {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.5rem;
+  }
+  
+  .ingredientQuantity {
+    min-width: auto;
+    text-align: center;
+  }
+  
+  .instructionStep {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .stepNumber {
+    align-self: center;
+  }
+}

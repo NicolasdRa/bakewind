@@ -1,0 +1,42 @@
+/* ActivityWidget CSS Module */
+@reference "tailwindcss";
+
+/* Container */
+.container {
+  @apply space-y-3 max-h-64 overflow-y-auto;
+}
+
+/* Activity Item */
+.activityItem {
+  @apply flex items-start gap-3 p-2 rounded-lg transition-colors duration-200;
+}
+
+.activityItem:hover {
+  background-color: var(--bg-secondary);
+}
+
+/* Activity Icon */
+.activityIcon {
+  @apply w-8 h-8 flex items-center justify-center rounded-full text-sm flex-shrink-0;
+  background-color: var(--bg-secondary);
+}
+
+/* Activity Content */
+.activityContent {
+  @apply flex-1 min-w-0;
+}
+
+.activityAction {
+  @apply text-sm font-medium;
+  color: var(--text-primary);
+}
+
+.activityUser {
+  @apply text-xs;
+  color: var(--text-secondary);
+}
+
+.activityTime {
+  @apply text-xs;
+  color: var(--text-muted);
+}

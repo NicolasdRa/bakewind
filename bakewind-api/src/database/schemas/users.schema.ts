@@ -21,6 +21,15 @@ export const userRoleEnum = pgEnum('user_role', [
   'CUSTOMER',
   'GUEST',
   'VIEWER',
+  'trial_user',
+  'subscriber',
+]);
+
+export const subscriptionStatusEnum = pgEnum('subscription_status', [
+  'trial',
+  'active',
+  'past_due',
+  'canceled',
 ]);
 
 export const usersTable = pgTable(
@@ -55,6 +64,14 @@ export const usersTable = pgTable(
     // Location
     country: varchar({ length: 100 }),
     city: varchar({ length: 100 }),
+
+    // SaaS-specific fields
+    businessName: varchar('business_name', { length: 255 }),
+    subscriptionStatus: subscriptionStatusEnum('subscription_status').default('trial'),
+    trialEndsAt: timestamp('trial_ends_at', {
+      mode: 'date',
+      withTimezone: true,
+    }),
 
     // Audit fields
     createdAt: timestamp('created_at', {
@@ -131,5 +148,8 @@ export const usersTable = pgTable(
     idxUserActiveVerified: index('idx_user_active_verified')
       .on(table.isActive, table.isEmailVerified)
       .where(sql`${table.isActive} = true AND ${table.isEmailVerified} = true`),
+    idxUserSubscriptionStatus: index('idx_user_subscription_status').on(table.subscriptionStatus),
+    idxUserTrialEndsAt: index('idx_user_trial_ends_at').on(table.trialEndsAt),
+    idxUserBusinessName: index('idx_user_business_name').on(table.businessName),
   }),
 );

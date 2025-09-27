@@ -1,0 +1,61 @@
+/* ChartWidget CSS Module */
+@reference "tailwindcss";
+
+/* Container */
+.container {
+  @apply space-y-4;
+}
+
+/* Header */
+.header {
+  @apply flex items-center justify-between;
+}
+
+.title {
+  @apply text-sm font-medium;
+  color: var(--text-secondary);
+}
+
+.subtitle {
+  @apply text-xs;
+  color: var(--text-muted);
+}
+
+/* Chart Area */
+.chartContainer {
+  @apply h-32 flex items-end justify-between gap-2;
+}
+
+.chartItem {
+  @apply flex flex-col items-center gap-2 flex-1;
+}
+
+.barContainer {
+  @apply w-full rounded-t-sm relative overflow-hidden;
+  background-color: var(--bg-tertiary);
+}
+
+.bar {
+  @apply rounded-t-sm transition-all duration-500;
+  background-color: var(--accent-color);
+}
+
+.barLabel {
+  @apply text-xs;
+  color: var(--text-secondary);
+}
+
+/* Footer */
+.footer {
+  @apply text-center;
+}
+
+.footerLabel {
+  @apply text-sm;
+  color: var(--text-secondary);
+}
+
+.footerValue {
+  @apply font-medium;
+  color: var(--text-primary);
+}

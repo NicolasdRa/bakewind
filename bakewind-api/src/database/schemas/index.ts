@@ -11,5 +11,11 @@ export * from './internal-orders.schema';
 export * from './production.schema';
 export * from './analytics.schema';
 
+// SaaS schema exports
+export * from './subscription-plans.schema';
+export * from './trial-accounts.schema';
+export * from './software-features.schema';
+export * from './user-sessions.schema';
+
 // Relations exports
 export * from './relations';

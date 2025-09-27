@@ -1,0 +1,333 @@
+/* Enhanced Location Selection using Design Tokens */
+
+.container {
+  min-height: 100vh;
+  background: linear-gradient(
+    135deg,
+    var(--bg-secondary) 0%,
+    var(--bg-primary) 50%,
+    var(--bg-tertiary) 100%
+  );
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 3rem 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 30% 20%, var(--shadow-colored) 0%, transparent 50%),
+              radial-gradient(circle at 70% 80%, var(--accent-light) 0%, transparent 60%);
+  opacity: 0.2;
+  animation: float 6s ease-in-out infinite;
+}
+
+@media (min-width: 640px) {
+  .container {
+    padding: 3rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    padding: 2rem;
+  }
+}
+
+/* Header Section */
+.headerSection {
+  margin: 0 auto;
+  width: 100%;
+  max-width: 28rem;
+  position: relative;
+  z-index: 1;
+  animation: slideInLeft var(--duration-slower) var(--easing-spring);
+}
+
+.title {
+  margin-top: 1.5rem;
+  text-align: center;
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-extrabold);
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  transition: color var(--duration-slow) var(--easing-default);
+}
+
+.subtitle {
+  margin-top: 0.5rem;
+  text-align: center;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  transition: color var(--duration-slow) var(--easing-default);
+}
+
+/* Main Content */
+.mainSection {
+  margin-top: 2rem;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  max-width: 28rem;
+  position: relative;
+  z-index: 1;
+  animation: slideInRight var(--duration-slower) var(--easing-spring) 0.2s both;
+}
+
+.card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  padding: var(--card-padding-lg);
+  box-shadow: var(--card-shadow);
+  border-radius: var(--card-radius-lg);
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    var(--primary-color) 0%,
+    var(--accent-color) 100%
+  );
+}
+
+@media (min-width: 640px) {
+  .card {
+    padding: 2.5rem;
+  }
+}
+
+/* Form */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.locationGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Location Option */
+.locationOption {
+  position: relative;
+  display: flex;
+  cursor: pointer;
+  border-radius: var(--radius-lg);
+  border: 2px solid var(--border-color);
+  padding: 1rem;
+  transition: all var(--duration-base) var(--easing-default);
+  background: var(--input-bg);
+}
+
+.locationOption:hover {
+  border-color: var(--border-hover);
+  background: var(--bg-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--card-shadow-hover);
+}
+
+.locationOptionActive {
+  border-color: var(--primary-color);
+  background: var(--primary-light);
+  box-shadow: var(--input-focus-ring);
+}
+
+.radioInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.locationContent {
+  display: flex;
+  flex: 1;
+}
+
+.locationDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.locationName {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+  transition: color var(--duration-base) var(--easing-default);
+}
+
+.locationAddress {
+  margin-top: 0.25rem;
+  display: flex;
+  align-items: center;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  transition: color var(--duration-base) var(--easing-default);
+}
+
+.locationOption:hover .locationName {
+  color: var(--primary-color);
+}
+
+.locationOption:hover .locationAddress {
+  color: var(--text-primary);
+}
+
+/* Radio Indicator */
+.radioIndicator {
+  display: flex;
+  height: 1.25rem;
+  width: 1.25rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 2px solid var(--border-color);
+  transition: all var(--duration-base) var(--easing-default);
+  background: var(--input-bg);
+}
+
+.locationOption:hover .radioIndicator {
+  border-color: var(--primary-color);
+}
+
+.locationOptionActive .radioIndicator {
+  border-color: var(--primary-color);
+  background: var(--primary-color);
+}
+
+.radioDot {
+  height: 0.625rem;
+  width: 0.625rem;
+  border-radius: 50%;
+  background: white;
+  transform: scale(0);
+  transition: transform var(--duration-base) var(--easing-spring);
+}
+
+.locationOptionActive .radioDot {
+  transform: scale(1);
+}
+
+/* Submit Button */
+.submitButton {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: var(--btn-padding-lg);
+  border: 2px solid var(--primary-color);
+  border-radius: var(--btn-radius-lg);
+  box-shadow: var(--btn-shadow-primary);
+  font-size: var(--font-size-base);
+  font-weight: var(--btn-font-weight);
+  color: white;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+  cursor: pointer;
+  transition: all var(--duration-base) var(--easing-default);
+  position: relative;
+  overflow: hidden;
+}
+
+.submitButton::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transform: translate(-50%, -50%);
+  transition: width var(--duration-slower), height var(--duration-slower);
+}
+
+.submitButton:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.submitButton:hover {
+  transform: var(--btn-transform-hover);
+  box-shadow: var(--btn-shadow-primary-hover);
+}
+
+.submitButton:active {
+  transform: var(--btn-transform-active);
+}
+
+.submitButtonDisabled {
+  background: var(--color-neutral-300);
+  border-color: var(--color-neutral-300);
+  color: var(--text-muted);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.submitButtonDisabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.submitButtonDisabled::before {
+  display: none;
+}
+
+/* Error and Empty States */
+.errorState {
+  text-align: center;
+  padding: 2rem;
+  color: var(--error-color);
+}
+
+.errorState p {
+  margin-bottom: 1rem;
+  font-size: var(--font-size-base);
+}
+
+.errorState button {
+  padding: 0.5rem 1rem;
+  background: var(--error-color);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  transition: background var(--duration-base);
+}
+
+.errorState button:hover {
+  background: var(--error-hover);
+}
+
+.emptyState {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-muted);
+}
+
+.emptyState p {
+  font-size: var(--font-size-base);
+}

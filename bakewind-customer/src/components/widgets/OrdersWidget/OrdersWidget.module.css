@@ -1,0 +1,238 @@
+.container {
+  padding: 1rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.count {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+}
+
+.ordersList {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.orderCard {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  transition: all 0.2s;
+}
+
+.orderCard:hover {
+  border-color: var(--primary-color);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.orderHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+}
+
+.orderInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.orderNumber {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+}
+
+.customerName {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.status {
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.statusPending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.statusConfirmed {
+  background: #fde68a;
+  color: #78350f;
+}
+
+.statusInProduction {
+  background: #fed7aa;
+  color: #c2410c;
+}
+
+.statusReady {
+  background: #d1fae5;
+  color: #059669;
+}
+
+.statusDelivered {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.statusCancelled {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.statusDefault {
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+.orderDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.item {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.itemQty {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.itemName {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.moreItems {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  font-style: italic;
+}
+
+.orderFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.time {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.total {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+  font-size: 0.875rem;
+}
+
+.actions {
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+  margin-top: auto;
+}
+
+.viewAllLink {
+  display: inline-flex;
+  align-items: center;
+  color: var(--primary-color);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: opacity 0.2s;
+}
+
+.viewAllLink:hover {
+  opacity: 0.8;
+}
+
+/* Dark mode support */
+[data-theme="dark"] .orderCard {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .statusPending {
+  background: rgba(254, 243, 199, 0.15);
+  color: #fbbf24;
+}
+
+[data-theme="dark"] .statusConfirmed {
+  background: rgba(253, 230, 138, 0.15);
+  color: #f59e0b;
+}
+
+[data-theme="dark"] .statusInProduction {
+  background: rgba(254, 215, 170, 0.15);
+  color: #fb923c;
+}
+
+[data-theme="dark"] .statusReady {
+  background: rgba(209, 250, 229, 0.15);
+  color: #34d399;
+}
+
+[data-theme="dark"] .statusDelivered {
+  background: rgba(236, 253, 245, 0.15);
+  color: #10b981;
+}
+
+[data-theme="dark"] .statusCancelled {
+  background: rgba(254, 226, 226, 0.15);
+  color: #f87171;
+}

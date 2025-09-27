@@ -1,0 +1,84 @@
+/* Theme Toggle Button */
+.themeToggle {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  color: #6b7280;
+}
+
+.themeToggle:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: #1f2937;
+}
+
+.themeToggle:active {
+  transform: scale(0.95);
+}
+
+/* Icon Container */
+.iconContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.themeToggle:hover .iconContainer {
+  transform: rotate(20deg);
+}
+
+/* Icon Styles */
+.icon {
+  width: 20px;
+  height: 20px;
+  transition: all 0.3s ease;
+}
+
+/* Dark theme adjustments */
+[data-theme="dark"] .themeToggle {
+  color: #9ca3af;
+}
+
+[data-theme="dark"] .themeToggle:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #f1f5f9;
+}
+
+/* Animation for icon switching */
+@keyframes fadeInRotate {
+  from {
+    opacity: 0;
+    transform: rotate(-180deg) scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+  }
+}
+
+.icon {
+  animation: fadeInRotate 0.3s ease;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .themeToggle {
+    width: 32px;
+    height: 32px;
+  }
+
+  .icon {
+    width: 18px;
+    height: 18px;
+  }
+}
