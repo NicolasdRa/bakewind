@@ -63,37 +63,37 @@
 ## Phase 3.2: Tests First (TDD) ⚠️ MUST COMPLETE BEFORE 3.3
 
 ### API Authentication Tests
-- [ ] T012 [P] Write test for POST /api/v1/auth/login in bakewind-api/tests/integration/auth.test.ts
-- [ ] T013 [P] Write test for POST /api/v1/auth/refresh in bakewind-api/tests/integration/auth.test.ts
-- [ ] T014 [P] Write test for POST /api/v1/auth/logout in bakewind-api/tests/integration/auth.test.ts
-- [ ] T015 [P] Write test for JWT validation middleware in bakewind-api/tests/unit/auth-middleware.test.ts
+- [x] T012 [P] Write test for POST /api/v1/auth/login in bakewind-api/tests/integration/auth.test.ts
+- [x] T013 [P] Write test for POST /api/v1/auth/refresh in bakewind-api/tests/integration/auth.test.ts
+- [x] T014 [P] Write test for POST /api/v1/auth/logout in bakewind-api/tests/integration/auth.test.ts
+- [x] T015 [P] Write test for JWT validation middleware in bakewind-api/tests/unit/auth-middleware.test.ts
 
 ### Customer API Tests
-- [ ] T016 [P] Write test for GET /api/v1/products in bakewind-api/tests/integration/products.test.ts
-- [ ] T017 [P] Write test for POST /api/v1/orders in bakewind-api/tests/integration/orders.test.ts
-- [ ] T018 [P] Write test for GET /api/v1/orders/:id in bakewind-api/tests/integration/orders.test.ts
-- [ ] T019 [P] Write test for POST /api/v1/customers/register in bakewind-api/tests/integration/customers.test.ts
+- [x] T016 [P] Write test for GET /api/v1/products in bakewind-api/tests/integration/products.test.ts
+- [x] T017 [P] Write test for POST /api/v1/orders in bakewind-api/tests/integration/orders.test.ts
+- [x] T018 [P] Write test for GET /api/v1/orders/:id in bakewind-api/tests/integration/orders.test.ts
+- [x] T019 [P] Write test for POST /api/v1/customers/register in bakewind-api/tests/integration/customers.test.ts
 
 ### Admin API Tests
-- [ ] T020 [P] Write test for GET /api/v1/admin/orders in bakewind-api/tests/integration/admin-orders.test.ts
-- [ ] T021 [P] Write test for PATCH /api/v1/admin/orders/:id in bakewind-api/tests/integration/admin-orders.test.ts
-- [ ] T022 [P] Write test for GET /api/v1/admin/inventory in bakewind-api/tests/integration/admin-inventory.test.ts
-- [ ] T023 [P] Write test for GET /api/v1/admin/analytics in bakewind-api/tests/integration/admin-analytics.test.ts
+- [x] T020 [P] Write test for GET /api/v1/admin/orders in bakewind-api/tests/integration/admin-orders.test.ts
+- [x] T021 [P] Write test for PATCH /api/v1/admin/orders/:id in bakewind-api/tests/integration/admin-orders.test.ts
+- [x] T022 [P] Write test for GET /api/v1/admin/inventory in bakewind-api/tests/integration/admin-inventory.test.ts
+- [x] T023 [P] Write test for GET /api/v1/admin/analytics in bakewind-api/tests/integration/admin-analytics.test.ts
 
 ### Cross-Application Integration Tests
-- [ ] T024 Write end-to-end test for customer order flow in tests/e2e/customer-order-flow.test.ts
-- [ ] T025 Write end-to-end test for admin order management in tests/e2e/admin-order-management.test.ts
-- [ ] T026 Write test for WebSocket real-time updates in tests/e2e/websocket-sync.test.ts
+- [x] T024 Write end-to-end test for customer order flow in tests/e2e/customer-order-flow.test.ts
+- [x] T025 Write end-to-end test for admin order management in tests/e2e/admin-order-management.test.ts
+- [x] T026 Write test for WebSocket real-time updates in tests/e2e/websocket-sync.test.ts
 
 ## Phase 3.3: Core Implementation (ONLY after tests are failing)
 
 ### API Service Refactoring
-- [ ] T027 Refactor bakewind-api auth module to support JWT with refresh tokens
-- [ ] T028 Add API versioning with /api/v1 prefix to all endpoints in bakewind-api
-- [ ] T029 Implement CORS configuration for customer and admin origins in bakewind-api
-- [ ] T030 Add correlation ID middleware for request tracking in bakewind-api
-- [ ] T031 Implement rate limiting middleware using Nginx configuration
-- [ ] T032 Create OpenAPI specification generation in bakewind-api/src/swagger.ts
+- [x] T027 Refactor bakewind-api auth module to support JWT with refresh tokens
+- [x] T028 Add API versioning with /api/v1 prefix to all endpoints in bakewind-api
+- [x] T029 Implement CORS configuration for customer and admin origins in bakewind-api
+- [x] T030 Add correlation ID middleware for request tracking in bakewind-api
+- [x] T031 Implement rate limiting middleware using Nginx configuration
+- [x] T032 Create OpenAPI specification generation in bakewind-api/src/swagger.ts
 
 ### Customer Application (SolidStart - SSR/SSG)
 - [ ] T033 Configure SolidStart for SSR with SEO meta tags in bakewind-customer/app.config.ts

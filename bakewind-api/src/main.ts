@@ -97,12 +97,30 @@ async function bootstrap() {
     hidePoweredBy: true,
   });
 
-  // Enable CORS
+  // Enable CORS with environment-specific origins
+  const corsOrigins = process.env.CORS_ORIGINS?.split(',') || [
+    'http://localhost:3000', // Customer app (development)
+    'http://localhost:3001', // Admin app (development)
+    'https://customer.bakewind.com', // Customer app (production)
+    'https://admin.bakewind.com', // Admin app (production)
+  ];
+
   app.enableCors({
-    origin: process.env.CORS_ORIGIN || true,
-    credentials: true,
+    origin: process.env.NODE_ENV === 'development' ? true : corsOrigins,
+    credentials: true, // Enable cookies for refresh tokens
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'Accept',
+      'Origin',
+      'X-Requested-With',
+      'Cache-Control',
+    ],
+    exposedHeaders: ['X-Total-Count', 'X-Correlation-ID'],
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
+    maxAge: 86400, // 24 hours preflight cache
   });
 
   // Patch Swagger for Zod compatibility
@@ -112,23 +130,42 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle('BakeWind API')
     .setDescription(
-      'API documentation for the BakeWind Bakery Management System',
+      'API documentation for the BakeWind Bakery Management System\n\n' +
+      'This API supports the three-application architecture:\n' +
+      '- Customer-facing website (public orders, product browsing)\n' +
+      '- Admin management system (staff operations, analytics)\n' +
+      '- Central API service (all business logic and data)\n\n' +
+      'All endpoints are prefixed with `/api/v1/` for versioning.',
     )
-    .setVersion('1.0')
+    .setVersion('1.0.0')
+    .setTermsOfService('https://bakewind.com/terms')
+    .setContact(
+      'BakeWind Support',
+      'https://bakewind.com/support',
+      'support@bakewind.com',
+    )
+    .setLicense('MIT', 'https://opensource.org/licenses/MIT')
+    .addServer('http://localhost:3010', 'Development API Server')
+    .addServer('https://api.bakewind.com', 'Production API Server')
     .addBearerAuth(
       {
         type: 'http',
         scheme: 'bearer',
         bearerFormat: 'JWT',
+        description: 'Enter your JWT access token',
       },
       'JWT-auth',
     )
-    .addTag('auth', 'Authentication endpoints')
-    .addTag('users', 'User management')
-    .addTag('orders', 'Order management')
-    .addTag('products', 'Product catalog')
-    .addTag('inventory', 'Inventory management')
-    .addTag('production', 'Production planning')
+    .addTag('Authentication', 'User authentication and authorization')
+    .addTag('Users', 'User management and profiles')
+    .addTag('Products', 'Product catalog and availability')
+    .addTag('Orders', 'Order management and tracking')
+    .addTag('Customers', 'Customer registration and management')
+    .addTag('Inventory', 'Inventory tracking and management')
+    .addTag('Production', 'Production planning and scheduling')
+    .addTag('Analytics', 'Business analytics and reporting')
+    .addTag('Locations', 'Store location management')
+    .addTag('Health', 'System health and monitoring')
     .build();
 
   const document = SwaggerModule.createDocument(
@@ -138,6 +175,17 @@ async function bootstrap() {
   );
 
   SwaggerModule.setup('api', app, document, swaggerCustomOptions);
+
+  // Enable API versioning
+  app.setGlobalPrefix('api/v1', {
+    exclude: [
+      'health',
+      'health/(.*)',
+      'api',
+      'api/(.*)',
+      'assets/(.*)',
+    ],
+  });
 
   // Global validation pipe
   app.useGlobalPipes(new ZodValidationPipe());

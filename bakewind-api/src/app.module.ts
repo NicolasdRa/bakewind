@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
 
@@ -13,6 +13,7 @@ import { UsersModule } from './users/users.module';
 import { LocationsModule } from './locations/locations.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
+import { CorrelationIdMiddleware } from './common/middleware/correlation-id.middleware';
 
 import configuration, { AppConfig } from './config/configuration';
 
@@ -67,4 +68,8 @@ import configuration, { AppConfig } from './config/configuration';
     },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(CorrelationIdMiddleware).forRoutes('*');
+  }
+}

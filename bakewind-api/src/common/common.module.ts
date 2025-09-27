@@ -1,5 +1,6 @@
 import { Global, Module } from '@nestjs/common';
 import { ResponseFormattingService } from './services/response-formatting.service';
+import { CorrelationLoggerService } from './services/correlation-logger.service';
 
 import { DatabaseModule } from '../database/database.module';
 
@@ -11,7 +12,7 @@ import { DatabaseModule } from '../database/database.module';
 @Global()
 @Module({
   imports: [DatabaseModule],
-  providers: [ResponseFormattingService],
-  exports: [ResponseFormattingService],
+  providers: [ResponseFormattingService, CorrelationLoggerService],
+  exports: [ResponseFormattingService, CorrelationLoggerService],
 })
 export class CommonModule {}
