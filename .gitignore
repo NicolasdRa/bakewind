@@ -57,6 +57,7 @@ Thumbs.db
 .cache/
 .cache/images/
 gitignore
+pids
 *.pid
 *.seed
 *.pid.lock
@@ -70,6 +71,9 @@ drizzle/db.sqlite
 # TypeScript
 *.tsbuildinfo
 
+# Diagnostic reports
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
 # SolidStart specific
 app.config.timestamp_*.js
 .wrangler/
@@ -80,7 +84,20 @@ app.config.timestamp_*.js
 # Backup folders - ignore all contents
 bakewind-backend-backup/node_modules/
 bakewind-backend-backup/dist/
+bakewind-backend-backup/build/
 bakewind-backend-backup/.env
+bakewind-backend-backup/.env.development.local
+bakewind-backend-backup/.env.test.local
+bakewind-backend-backup/.env.production.local
+bakewind-backend-backup/.env.local
+bakewind-backend-backup/coverage/
+bakewind-backend-backup/.nyc_output/
+bakewind-backend-backup/logs/
+bakewind-backend-backup/*.log
+bakewind-backend-backup/.temp/
+bakewind-backend-backup/.tmp/
+bakewind-backend-backup/pids/
+bakewind-backend-backup/report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 bakewind-front-solidstart-backup/node_modules/
 bakewind-front-solidstart-backup/dist/
 bakewind-front-solidstart-backup/.output/
