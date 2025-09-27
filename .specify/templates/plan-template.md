@@ -47,7 +47,17 @@
 ## Constitution Check
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+**Core Principles Compliance**:
+- [ ] Database-First: Schema design precedes API design
+- [ ] Type Safety: All interfaces fully typed, no 'any'
+- [ ] TDD: Tests written before implementation
+- [ ] Separation: Clear module boundaries maintained
+- [ ] Observability: Logging and metrics planned
+
+**Standards Compliance**:
+- [ ] API follows RESTful conventions
+- [ ] Database changes via migrations only
+- [ ] Security requirements addressed
 
 ## Project Structure
 
@@ -216,4 +226,4 @@ directories captured above]
 - [ ] Complexity deviations documented
 
 ---
-*Based on Constitution v2.1.1 - See `/memory/constitution.md`*
+*Based on Constitution v1.0.0 - See `.specify/memory/constitution.md`*

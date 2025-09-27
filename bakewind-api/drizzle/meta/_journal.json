@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1757313125754,
+      "tag": "0000_puzzling_night_thrasher",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1757755827973,
+      "tag": "0001_wet_adam_warlock",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1757969548435,
+      "tag": "0002_milky_deadpool",
+      "breakpoints": true
+    }
+  ]
+}

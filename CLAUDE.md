@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 BakeWind is a bakery management system consisting of:
 - **Backend**: NestJS API with PostgreSQL database using Drizzle ORM
-- **Frontend**: SolidStart application with SQLite database for local data
+- **Frontend**: SolidStart application with Tailwind CSS
 
 ## Common Development Commands
 

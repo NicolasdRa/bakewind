@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - bakewind-api
+      - bakewind-customer
+      - bakewind-admin
+    networks:
+      - bakewind-network
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: bakewind
+      POSTGRES_USER: bakewind
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-bakewind123}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d
+    networks:
+      - bakewind-network
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - bakewind-network
+
+  bakewind-api:
+    build:
+      context: ./bakewind-api
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://bakewind:${DB_PASSWORD:-bakewind123}@postgres:5432/bakewind
+      JWT_SECRET: ${JWT_SECRET:-your-jwt-secret-here}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-your-jwt-refresh-secret-here}
+      REDIS_URL: redis://redis:6379
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,http://localhost:3001}
+    ports:
+      - "3010:3000"
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - bakewind-network
+
+  bakewind-customer:
+    build:
+      context: ./bakewind-customer
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: production
+      API_BASE_URL: http://bakewind-api:3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - bakewind-api
+    networks:
+      - bakewind-network
+
+  bakewind-admin:
+    build:
+      context: ./bakewind-admin
+      dockerfile: Dockerfile
+    ports:
+      - "3001:80"
+    depends_on:
+      - bakewind-api
+    networks:
+      - bakewind-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  bakewind-network:
+    driver: bridge
