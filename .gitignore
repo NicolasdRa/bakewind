@@ -132,6 +132,24 @@ bakewind-customer/node_modules/
 bakewind-customer/dist/
 bakewind-customer/.env
 
+# Main backend project
+bakewind-backend/node_modules/
+bakewind-backend/dist/
+bakewind-backend/build/
+bakewind-backend/.env
+bakewind-backend/.env.development.local
+bakewind-backend/.env.test.local
+bakewind-backend/.env.production.local
+bakewind-backend/.env.local
+bakewind-backend/coverage/
+bakewind-backend/.nyc_output/
+bakewind-backend/logs/
+bakewind-backend/*.log
+bakewind-backend/.temp/
+bakewind-backend/.tmp/
+bakewind-backend/pids/
+bakewind-backend/report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
 # API
 bakewind-api/node_modules/
 bakewind-api/dist/
