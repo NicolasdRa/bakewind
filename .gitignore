@@ -55,6 +55,8 @@ Thumbs.db
 .temp/
 .tmp/
 .cache/
+.cache/images/
+gitignore
 *.pid
 *.seed
 *.pid.lock
@@ -83,7 +85,13 @@ bakewind-front-solidstart-backup/node_modules/
 bakewind-front-solidstart-backup/dist/
 bakewind-front-solidstart-backup/.output/
 bakewind-front-solidstart-backup/.vinxi/
+bakewind-front-solidstart-backup/.wrangler/
+bakewind-front-solidstart-backup/.vercel/
+bakewind-front-solidstart-backup/.netlify/
 bakewind-front-solidstart-backup/.env
+bakewind-front-solidstart-backup/.env*.local
+bakewind-front-solidstart-backup/app.config.timestamp_*.js
+bakewind-front-solidstart-backup/docs/
 
 # Admin and customer apps
 bakewind-admin/node_modules/
