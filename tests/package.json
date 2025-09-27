@@ -1,0 +1,21 @@
+{
+  "name": "bakewind-e2e-tests",
+  "version": "1.0.0",
+  "description": "End-to-end tests for BakeWind three-application architecture",
+  "private": true,
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:codegen": "playwright codegen",
+    "test:report": "playwright show-report",
+    "test:customer-flow": "playwright test customer-order-flow.test.ts",
+    "test:admin-flow": "playwright test admin-order-management.test.ts",
+    "test:websocket": "playwright test websocket-sync.test.ts"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.47.0",
+    "@types/node": "^22.10.7",
+    "typescript": "^5.7.3"
+  }
+}
