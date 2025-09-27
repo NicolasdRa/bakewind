@@ -1,0 +1,25 @@
+/* ClockWidget CSS Module */
+@reference "tailwindcss";
+
+/* Container */
+.container {
+  @apply text-center space-y-3;
+}
+
+/* Time Display */
+.time {
+  @apply text-3xl font-mono font-bold;
+  color: var(--accent-color);
+}
+
+/* Date Display */
+.date {
+  @apply text-sm;
+  color: var(--text-secondary);
+}
+
+/* Timezone Label */
+.timezone {
+  @apply text-xs;
+  color: var(--text-muted);
+}

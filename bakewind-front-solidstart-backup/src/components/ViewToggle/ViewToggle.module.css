@@ -1,0 +1,89 @@
+/* ViewToggle Component - Tailwind CSS Module */
+@reference "tailwindcss";
+
+/* Container - Match ActionButton Height */
+.viewToggle {
+  height: 2.5rem; /* 40px - Same as ActionButton */
+  display: flex;
+  align-items: center;
+  gap: 0.25rem; /* Reduced gap to fit proportionally */
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-color);
+  padding: 0.25rem; /* Increased padding for better visual separation */
+  background-color: var(--bg-primary);
+}
+
+/* Toggle Buttons - Proportionally Smaller */
+.toggleButton {
+  height: 2rem; /* 32px - Reduced to accommodate doubled padding */
+  padding: 0 0.8rem; /* Proportionally reduced padding */
+  border-radius: 0.3125rem; /* Proportionally reduced radius */
+  font-size: 0.8125rem; /* Slightly smaller font */
+  font-weight: 500;
+  transition: all 0.2s;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem; /* Proportionally reduced gap */
+  min-width: auto;
+}
+
+.toggleButtonActive {
+  background-color: var(--primary-color);
+  color: white;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+.toggleButtonInactive {
+  color: var(--text-secondary);
+  background: transparent;
+}
+
+.toggleButtonInactive:hover {
+  color: var(--text-primary);
+  background-color: var(--bg-tertiary);
+}
+
+/* Icon and Label responsive behavior */
+.toggleButtonIcon {
+  display: block;
+}
+
+.toggleButtonLabel {
+  display: none;
+}
+
+/* Show labels on larger screens */
+@media (min-width: 1024px) {
+  .toggleButtonIcon {
+    display: none;
+  }
+  
+  .toggleButtonLabel {
+    display: block;
+  }
+}
+
+/* Compact variant for smaller spaces */
+.viewToggle.compact {
+  height: 2rem; /* 32px - Compact container height */
+  padding: 0.125rem; /* Doubled from 0.0625rem for better spacing */
+  gap: 0.1875rem; /* Proportionally smaller gap */
+}
+
+.viewToggle.compact .toggleButton {
+  height: 1.75rem; /* 28px - Reduced to accommodate doubled padding */
+  padding: 0 0.375rem; /* Proportionally smaller padding */
+  font-size: 0.6875rem; /* Proportionally smaller font */
+  border-radius: 0.25rem; /* Proportionally smaller radius */
+  gap: 0.25rem; /* Proportionally smaller gap */
+}
+
+.viewToggle.compact .toggleButtonLabel {
+  display: none;
+}
+
+.viewToggle.compact .toggleButtonIcon {
+  display: block;
+}

@@ -1,0 +1,329 @@
+/* Enhanced Login Page using Design Tokens */
+@reference "tailwindcss";
+
+/* Enhanced Main Container */
+.container {
+  @apply min-h-screen flex items-center justify-center p-4;
+  background: linear-gradient(
+    135deg,
+    var(--primary-light) 0%,
+    var(--bg-secondary) 30%,
+    var(--accent-light) 100%
+  );
+  position: relative;
+  overflow: hidden;
+}
+
+.container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at 20% 50%,
+    var(--shadow-colored) 0%,
+    transparent 60%
+  );
+  opacity: 0.4;
+  animation: pulse 4s ease-in-out infinite;
+}
+
+/* Enhanced Login Card */
+.loginCard {
+  @apply w-full max-w-md border;
+  background: var(--glass-bg);
+  border-color: var(--border-color);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  padding: var(--card-padding-lg);
+  border-radius: var(--card-radius-lg);
+  box-shadow: var(--shadow-2xl);
+  position: relative;
+  z-index: 1;
+  animation: scaleIn var(--duration-slower) var(--easing-spring);
+}
+
+.loginCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    var(--primary-color) 0%,
+    var(--accent-color) 50%,
+    var(--primary-hover) 100%
+  );
+  border-radius: var(--card-radius-lg) var(--card-radius-lg) 0 0;
+}
+
+/* Enhanced Header Section */
+.header {
+  @apply text-center mb-8;
+  animation: fadeIn var(--duration-slower) var(--easing-out) 0.2s both;
+}
+
+.title {
+  @apply text-3xl font-bold mb-2;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+  background: linear-gradient(
+    135deg,
+    var(--text-primary) 0%,
+    var(--primary-color) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+  @apply text-lg;
+  color: var(--text-secondary);
+}
+
+/* Form Styles */
+.form {
+  @apply space-y-6;
+}
+
+/* Enhanced Login Type Toggle */
+.loginTypeToggle {
+  @apply flex rounded-lg border p-1 mb-6;
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
+  position: relative;
+  overflow: hidden;
+}
+
+.loginTypeToggle::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--primary-light), transparent);
+  opacity: 0.05;
+}
+
+.toggleOption {
+  @apply flex-1 text-center py-2 px-4 rounded-md text-sm font-medium cursor-pointer;
+  color: var(--text-secondary);
+  transition: all var(--duration-base) var(--easing-default);
+  position: relative;
+  z-index: 1;
+}
+
+.toggleOption input {
+  @apply sr-only;
+}
+
+.toggleOption input:checked + .toggleLabel {
+  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+  color: white;
+  box-shadow: var(--btn-shadow-primary);
+  transform: scale(1.02);
+}
+
+.toggleOption:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.toggleLabel {
+  transition: all var(--duration-base) var(--easing-default);
+}
+
+/* Enhanced Form Fields */
+.formGroup {
+  @apply space-y-2;
+  animation: slideUp var(--duration-slower) var(--easing-spring);
+  animation-fill-mode: both;
+}
+
+.form > .formGroup:nth-child(1) { animation-delay: 0.1s; }
+.form > .formGroup:nth-child(2) { animation-delay: 0.2s; }
+.form > .formGroup:nth-child(3) { animation-delay: 0.3s; }
+
+.label {
+  @apply block text-sm font-medium;
+  color: var(--text-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.input {
+  @apply w-full rounded-lg border focus:outline-none;
+  padding: var(--input-padding-lg);
+  background: var(--input-bg);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+  font-size: var(--font-size-base);
+  transition: all var(--duration-base) var(--easing-default);
+  position: relative;
+}
+
+.input:hover {
+  border-color: var(--border-hover);
+}
+
+.input:focus {
+  border-color: var(--primary-color);
+  box-shadow: var(--input-focus-ring);
+  transform: translateY(-1px);
+}
+
+.input::placeholder {
+  color: var(--text-muted);
+}
+
+/* Enhanced Submit Button */
+.submitButton {
+  @apply w-full font-medium text-white focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed;
+  padding: var(--btn-padding-lg);
+  border-radius: var(--btn-radius);
+  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+  border: 2px solid var(--primary-color);
+  transition: all var(--duration-base) var(--easing-default);
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--btn-shadow-primary);
+  font-weight: var(--btn-font-weight);
+  animation: slideUp var(--duration-slower) var(--easing-spring) 0.4s both;
+}
+
+.submitButton::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transform: translate(-50%, -50%);
+  transition: width var(--duration-slower), height var(--duration-slower);
+}
+
+.submitButton:hover:not(:disabled)::before {
+  width: 300px;
+  height: 300px;
+}
+
+.submitButton:hover:not(:disabled) {
+  transform: var(--btn-transform-hover);
+  box-shadow: var(--btn-shadow-primary-hover);
+}
+
+.submitButton:active:not(:disabled) {
+  transform: var(--btn-transform-active);
+}
+
+.submitButton:focus {
+  box-shadow: var(--input-focus-ring);
+}
+
+.submitButton:disabled {
+  background: var(--text-muted);
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Loading State */
+.loading {
+  @apply inline-flex items-center gap-2;
+}
+
+.spinner {
+  @apply w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin;
+}
+
+/* Enhanced Error Message */
+.errorMessage {
+  @apply mt-4 p-3 rounded-lg border;
+  background: var(--error-light);
+  border-color: var(--error-color);
+  color: var(--error-color);
+  animation: slideIn var(--duration-base) var(--easing-out);
+  position: relative;
+}
+
+.errorMessage::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--error-color);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.errorIcon {
+  @apply inline-block w-4 h-4 mr-2;
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+  .loginCard {
+    @apply p-6 mx-4;
+  }
+  
+  .title {
+    @apply text-2xl;
+  }
+}
+
+/* Enhanced Dark Mode Support */
+[data-theme="dark"] .errorMessage {
+  background: var(--error-light);
+  border-color: var(--error-color);
+  color: var(--error-color);
+}
+
+[data-theme="dark"] .container::before {
+  opacity: 0.2;
+}
+
+[data-theme="dark"] .loginCard {
+  box-shadow: var(--shadow-2xl), 0 0 0 1px var(--border-color);
+}
+
+/* Loading Enhancements */
+.loadingOverlay {
+  position: absolute;
+  inset: 0;
+  background: var(--glass-bg);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: inherit;
+  z-index: 10;
+}
+
+.loadingSpinner {
+  width: 2rem;
+  height: 2rem;
+  border: 3px solid var(--border-color);
+  border-top: 3px solid var(--primary-color);
+  border-radius: 50%;
+  animation: spin var(--duration-base) linear infinite;
+}
+
+/* Focus indicators for accessibility */
+.input:focus,
+.submitButton:focus,
+.toggleOption:focus-within {
+  outline: none;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .loginCard {
+    border-width: 2px;
+  }
+  
+  .input {
+    border-width: 2px;
+  }
+}

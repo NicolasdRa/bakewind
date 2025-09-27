@@ -1,0 +1,86 @@
+/* CalendarWidget CSS Module */
+@reference "tailwindcss";
+
+/* Container */
+.container {
+  @apply space-y-4;
+}
+
+/* Calendar Header */
+.header {
+  @apply text-center;
+}
+
+.monthTitle {
+  @apply text-lg font-semibold;
+  color: var(--text-primary);
+}
+
+/* Mini Calendar */
+.calendarGrid {
+  @apply grid grid-cols-7 gap-1 text-xs;
+}
+
+.dayHeader {
+  @apply text-center p-1 font-medium;
+  color: var(--text-secondary);
+}
+
+.emptyCell {
+  @apply p-1;
+}
+
+.dayCell {
+  @apply p-1 text-center rounded cursor-pointer transition-colors duration-200;
+}
+
+.dayCell:hover {
+  background-color: var(--bg-secondary);  
+}
+
+.dayToday {
+  @apply p-1 text-center rounded cursor-pointer transition-colors duration-200 text-white;
+  background-color: var(--accent-color);
+}
+
+.dayWithEvent {
+  @apply p-1 text-center rounded cursor-pointer transition-colors duration-200 font-medium;
+  color: var(--accent-color);
+  background-color: var(--bg-secondary);
+}
+
+/* Upcoming Events */
+.eventsSection {
+  /* Base events section - no additional styles needed */
+}
+
+.eventsTitle {
+  @apply text-sm font-medium mb-2;
+  color: var(--text-secondary);
+}
+
+.eventsList {
+  @apply space-y-2;
+}
+
+.eventItem {
+  @apply flex items-center gap-2 text-xs;
+}
+
+.eventIndicator {
+  @apply w-2 h-2 rounded-full;
+  background-color: var(--accent-color);
+}
+
+.eventContent {
+  @apply flex-1;
+}
+
+.eventTitle {
+  @apply font-medium;
+  color: var(--text-primary);
+}
+
+.eventTime {
+  color: var(--text-secondary);
+}

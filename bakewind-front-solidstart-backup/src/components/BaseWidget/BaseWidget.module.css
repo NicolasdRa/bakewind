@@ -1,0 +1,210 @@
+/* BaseWidget Component - Tailwind CSS Module */
+@reference "tailwindcss";
+
+/* Enhanced Widget Container */
+.widget {
+  @apply rounded-xl border;
+  background-color: var(--bg-primary);
+  border-color: var(--border-color);
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition-base);
+  position: relative;
+  overflow: hidden;
+  animation: scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.widget::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+  transform: scaleX(0);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform-origin: left;
+}
+
+.widget:hover::before {
+  transform: scaleX(1);
+}
+
+.widget:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+  border-color: var(--border-hover);
+}
+
+/* Size Classes */
+.sizeMinimized {
+  @apply col-span-1 row-span-1;
+}
+
+.sizeSmall {
+  @apply col-span-1 row-span-1;
+}
+
+.sizeMedium {
+  @apply col-span-1 row-span-1;
+}
+
+.sizeLarge {
+  @apply col-span-1 lg:col-span-2 row-span-2;
+}
+
+/* Enhanced Widget Header */
+.header {
+  @apply flex items-center justify-between p-4 border-b;
+  border-color: var(--border-light);
+  background: linear-gradient(to bottom, var(--bg-primary), var(--bg-secondary));
+  position: relative;
+}
+
+.header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-hover), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.widget:hover .header::after {
+  opacity: 1;
+}
+
+.title {
+  @apply font-semibold truncate;
+  color: var(--text-primary);
+  font-size: 0.9375rem;
+  letter-spacing: -0.01em;
+}
+
+.controls {
+  @apply flex items-center gap-1;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.widget:hover .controls {
+  opacity: 1;
+}
+
+/* Enhanced Control Buttons */
+.controlButton {
+  @apply p-1.5 rounded-lg;
+  color: var(--text-muted);
+  transition: var(--transition-fast);
+  position: relative;
+}
+
+.controlButton::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--bg-hover);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.controlButton:hover::before {
+  opacity: 1;
+}
+
+.controlButton:hover {
+  color: var(--text-primary);
+  transform: scale(1.1);
+}
+
+.controlButton:active {
+  transform: scale(0.95);
+}
+
+.closeButton {
+  @apply p-1.5 rounded-lg;
+  color: var(--text-muted);
+  transition: var(--transition-fast);
+  position: relative;
+}
+
+.closeButton::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--error-light);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.closeButton:hover::before {
+  opacity: 1;
+}
+
+.closeButton:hover {
+  color: var(--error-color);
+  transform: rotate(90deg) scale(1.1);
+}
+
+.closeButton:active {
+  transform: rotate(90deg) scale(0.95);
+}
+
+.buttonIcon {
+  @apply text-sm;
+  position: relative;
+  z-index: 1;
+}
+
+/* Enhanced Widget Content */
+.content {
+  @apply p-4;
+  animation: fadeIn 0.4s ease-out 0.1s both;
+}
+
+/* Loading State */
+.widget.loading .content {
+  position: relative;
+}
+
+.widget.loading .content::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--bg-hover),
+    transparent
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* Widget States */
+.widget.active {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px var(--shadow-colored);
+}
+
+.widget.error {
+  border-color: var(--error-color);
+  background: var(--error-light);
+}
+
+.widget.success {
+  border-color: var(--success-color);
+  background: var(--success-light);
+}
+
+/* Responsive Grid Adjustments */
+@media (max-width: 768px) {
+  .widget {
+    animation: slideUp 0.3s ease-out;
+  }
+}

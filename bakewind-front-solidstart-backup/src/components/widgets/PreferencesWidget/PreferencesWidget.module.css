@@ -1,0 +1,82 @@
+/* PreferencesWidget CSS Module */
+@reference "tailwindcss";
+
+/* Container */
+.container {
+  @apply rounded-xl shadow-sm border p-6;
+  background-color: var(--bg-primary);
+  border-color: var(--border-color);
+}
+
+.title {
+  @apply text-lg font-semibold mb-4;
+  color: var(--text-primary);
+}
+
+/* Preferences Content */
+.content {
+  @apply space-y-4;
+}
+
+/* Field Group */
+.fieldGroup {
+  /* Base field group - no additional styles needed */
+}
+
+.fieldLabel {
+  @apply block text-sm font-medium mb-1;
+  color: var(--text-secondary);
+}
+
+.fieldSelect {
+  @apply w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent;
+  border-color: var(--border-color);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  --tw-ring-color: var(--accent-color);
+}
+
+/* Features Section */
+.featuresSection {
+  @apply space-y-3;
+}
+
+.sectionTitle {
+  @apply text-sm font-medium;
+  color: var(--text-secondary);
+}
+
+/* Toggle Labels */
+.toggleLabel {
+  @apply flex items-center justify-between;
+}
+
+.toggleText {
+  @apply text-sm;
+  color: var(--text-secondary);
+}
+
+.toggleCheckbox {
+  @apply w-4 h-4 rounded;
+  color: var(--accent-color);
+  border-color: var(--border-color);
+  --tw-ring-color: var(--accent-color);
+}
+
+/* Apply Button */
+.applyButton {
+  @apply w-full px-4 py-2 rounded-lg font-medium transition-colors duration-200 text-white;
+  background-color: var(--accent-color);
+}
+
+.applyButton:hover {
+  background-color: var(--accent-hover);
+}
+
+/* Error Message */
+.errorMessage {
+  @apply p-3 mb-4 text-sm font-medium rounded-lg;
+  background-color: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
