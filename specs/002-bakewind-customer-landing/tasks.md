@@ -37,53 +37,53 @@
 
 ## Phase 3.1: Database & Infrastructure Setup
 
-- [ ] T001 [P] Create Drizzle database schemas for SaaS entities in `bakewind-api/src/database/schemas/saas-users.ts`
-- [ ] T002 [P] Create Drizzle database schemas for subscription plans in `bakewind-api/src/database/schemas/subscription-plans.ts`
-- [ ] T003 [P] Create Drizzle database schemas for trial accounts in `bakewind-api/src/database/schemas/trial-accounts.ts`
-- [ ] T004 [P] Create Drizzle database schemas for software features in `bakewind-api/src/database/schemas/software-features.ts`
-- [ ] T005 [P] Create Drizzle database schemas for user sessions in `bakewind-api/src/database/schemas/user-sessions.ts`
-- [ ] T006 Generate and run database migration for SaaS schema in `bakewind-api/drizzle/migrations/`
-- [ ] T007 [P] Configure Stripe integration in `bakewind-api/src/stripe/stripe.module.ts`
-- [ ] T008 [P] Set up environment variables for SaaS portal in `bakewind-api/.env.example`
+- [x] T001 [P] Create Drizzle database schemas for SaaS entities in `bakewind-api/src/database/schemas/saas-users.ts`
+- [x] T002 [P] Create Drizzle database schemas for subscription plans in `bakewind-api/src/database/schemas/subscription-plans.ts`
+- [x] T003 [P] Create Drizzle database schemas for trial accounts in `bakewind-api/src/database/schemas/trial-accounts.ts`
+- [x] T004 [P] Create Drizzle database schemas for software features in `bakewind-api/src/database/schemas/software-features.ts`
+- [x] T005 [P] Create Drizzle database schemas for user sessions in `bakewind-api/src/database/schemas/user-sessions.ts`
+- [x] T006 Generate and run database migration for SaaS schema in `bakewind-api/drizzle/migrations/`
+- [x] T007 [P] Configure Stripe integration in `bakewind-api/src/stripe/stripe.module.ts`
+- [x] T008 [P] Set up environment variables for SaaS portal in `bakewind-api/.env.example`
 
 ## Phase 3.2: Contract Tests (TDD) ⚠️ MUST COMPLETE BEFORE 3.3
 
-- [ ] T009 [P] Create contract test for POST /auth/trial-signup in `bakewind-api/test/contracts/auth-trial-signup.test.ts`
-- [ ] T010 [P] Create contract test for POST /auth/login in `bakewind-api/test/contracts/auth-login.test.ts`
-- [ ] T011 [P] Create contract test for POST /auth/refresh in `bakewind-api/test/contracts/auth-refresh.test.ts`
-- [ ] T012 [P] Create contract test for POST /auth/logout in `bakewind-api/test/contracts/auth-logout.test.ts`
-- [ ] T013 [P] Create contract test for GET /auth/me in `bakewind-api/test/contracts/auth-me.test.ts`
-- [ ] T014 [P] Create contract test for GET /subscriptions/plans in `bakewind-api/test/contracts/subscriptions-plans.test.ts`
-- [ ] T015 [P] Create contract test for GET /features in `bakewind-api/test/contracts/features.test.ts`
-- [ ] T016 [P] Create contract test for PATCH /trials/{trialId}/onboarding in `bakewind-api/test/contracts/trials-onboarding.test.ts`
+- [x] T009 [P] Create contract test for POST /auth/trial-signup in `bakewind-api/test/contracts/auth-trial-signup.test.ts`
+- [x] T010 [P] Create contract test for POST /auth/login in `bakewind-api/test/contracts/auth-login.test.ts`
+- [x] T011 [P] Create contract test for POST /auth/refresh in `bakewind-api/test/contracts/auth-refresh.test.ts`
+- [x] T012 [P] Create contract test for POST /auth/logout in `bakewind-api/test/contracts/auth-logout.test.ts`
+- [x] T013 [P] Create contract test for GET /auth/me in `bakewind-api/test/contracts/auth-me.test.ts`
+- [x] T014 [P] Create contract test for GET /subscriptions/plans in `bakewind-api/test/contracts/subscriptions-plans.test.ts`
+- [x] T015 [P] Create contract test for GET /features in `bakewind-api/test/contracts/features.test.ts`
+- [x] T016 [P] Create contract test for PATCH /trials/{trialId}/onboarding in `bakewind-api/test/contracts/trials-onboarding.test.ts`
 
 ## Phase 3.3: Backend Service Layer
 
-- [ ] T017 [P] Create SaaS User service with validation in `bakewind-api/src/saas-users/saas-users.service.ts`
-- [ ] T018 [P] Create Subscription Plans service in `bakewind-api/src/subscriptions/subscription-plans.service.ts`
-- [ ] T019 [P] Create Trial Accounts service with conversion tracking in `bakewind-api/src/trials/trial-accounts.service.ts`
-- [ ] T020 [P] Create Software Features service in `bakewind-api/src/features/software-features.service.ts`
-- [ ] T021 [P] Create User Sessions service with JWT management in `bakewind-api/src/auth/user-sessions.service.ts`
+- [x] T017 [P] Create SaaS User service with validation in `bakewind-api/src/saas-users/saas-users.service.ts`
+- [x] T018 [P] Create Subscription Plans service in `bakewind-api/src/subscriptions/subscription-plans.service.ts`
+- [x] T019 [P] Create Trial Accounts service with conversion tracking in `bakewind-api/src/trials/trial-accounts.service.ts`
+- [x] T020 [P] Create Software Features service in `bakewind-api/src/features/software-features.service.ts`
+- [x] T021 [P] Create User Sessions service with JWT management in `bakewind-api/src/auth/user-sessions.service.ts`
 
 ## Phase 3.4: Backend API Controllers
 
-- [ ] T022 Create authentication controller for trial signup in `bakewind-api/src/auth/auth.controller.ts`
-- [ ] T023 Add login endpoint to authentication controller in `bakewind-api/src/auth/auth.controller.ts`
-- [ ] T024 Add refresh token endpoint to authentication controller in `bakewind-api/src/auth/auth.controller.ts`
-- [ ] T025 Add logout endpoint to authentication controller in `bakewind-api/src/auth/auth.controller.ts`
-- [ ] T026 Add user profile endpoint to authentication controller in `bakewind-api/src/auth/auth.controller.ts`
-- [ ] T027 [P] Create subscriptions controller for plans in `bakewind-api/src/subscriptions/subscriptions.controller.ts`
-- [ ] T028 [P] Create features controller for software catalog in `bakewind-api/src/features/features.controller.ts`
-- [ ] T029 [P] Create trials controller for onboarding in `bakewind-api/src/trials/trials.controller.ts`
+- [x] T022 Create authentication controller for trial signup in `bakewind-api/src/auth/auth.controller.ts`
+- [x] T023 Add login endpoint to authentication controller in `bakewind-api/src/auth/auth.controller.ts`
+- [x] T024 Add refresh token endpoint to authentication controller in `bakewind-api/src/auth/auth.controller.ts`
+- [x] T025 Add logout endpoint to authentication controller in `bakewind-api/src/auth/auth.controller.ts`
+- [x] T026 Add user profile endpoint to authentication controller in `bakewind-api/src/auth/auth.controller.ts`
+- [x] T027 [P] Create subscriptions controller for plans in `bakewind-api/src/subscriptions/subscriptions.controller.ts`
+- [x] T028 [P] Create features controller for software catalog in `bakewind-api/src/features/features.controller.ts`
+- [x] T029 [P] Create trials controller for onboarding in `bakewind-api/src/trials/trials.controller.ts`
 
 ## Phase 3.5: Backend Integration & Middleware
 
-- [ ] T030 [P] Create JWT authentication middleware in `bakewind-api/src/auth/jwt-auth.middleware.ts`
-- [ ] T031 [P] Create trial signup validation pipe in `bakewind-api/src/auth/trial-signup.validation.ts`
-- [ ] T032 [P] Configure CORS and security headers in `bakewind-api/src/main.ts`
-- [ ] T033 [P] Set up Stripe webhook handler in `bakewind-api/src/stripe/stripe-webhook.controller.ts`
-- [ ] T034 [P] Create database seed script for subscription plans in `bakewind-api/src/database/seeds/subscription-plans.seed.ts`
-- [ ] T035 [P] Create database seed script for software features in `bakewind-api/src/database/seeds/software-features.seed.ts`
+- [x] T030 [P] Create JWT authentication middleware in `bakewind-api/src/auth/jwt-auth.middleware.ts`
+- [x] T031 [P] Create trial signup validation pipe in `bakewind-api/src/auth/trial-signup.validation.ts`
+- [x] T032 [P] Configure CORS and security headers in `bakewind-api/src/main.ts`
+- [x] T033 [P] Set up Stripe webhook handler in `bakewind-api/src/stripe/stripe-webhook.controller.ts`
+- [x] T034 [P] Create database seed script for subscription plans in `bakewind-api/src/database/seeds/subscription-plans.seed.ts`
+- [x] T035 [P] Create database seed script for software features in `bakewind-api/src/database/seeds/software-features.seed.ts`
 
 ## Phase 3.6: Frontend Infrastructure
 

@@ -46,15 +46,20 @@ export class AuthController {
             email: { type: 'string' },
             firstName: { type: 'string' },
             lastName: { type: 'string' },
+            businessName: { type: 'string' },
             role: { type: 'string' },
+            subscriptionStatus: { type: 'string' },
+            trialEndsAt: { type: 'string', format: 'date-time', nullable: true },
+            isEmailVerified: { type: 'boolean' },
             isActive: { type: 'boolean' },
-            lastLogin: { type: 'string', format: 'date-time' },
+            lastLoginAt: { type: 'string', format: 'date-time' },
             createdAt: { type: 'string', format: 'date-time' },
             updatedAt: { type: 'string', format: 'date-time' },
           },
         },
         accessToken: { type: 'string' },
         refreshToken: { type: 'string' },
+        dashboardUrl: { type: 'string' },
       },
     },
   })
@@ -70,6 +75,66 @@ export class AuthController {
     console.log('🚀 Auth Controller login method called with:', loginDto);
     const auditContext = req.auditContext;
     return this.authService.login(loginDto, auditContext);
+  }
+
+  @Public()
+  @Post('trial-signup')
+  @HttpCode(HttpStatus.CREATED)
+  @Throttle({ default: { limit: 3, ttl: 60000 } }) // 3 trial signups per minute
+  @ApiOperation({ summary: 'Sign up for a 14-day free trial' })
+  @ApiResponse({
+    status: 201,
+    description: 'Trial account created successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        user: {
+          type: 'object',
+          properties: {
+            id: { type: 'string' },
+            email: { type: 'string' },
+            firstName: { type: 'string' },
+            lastName: { type: 'string' },
+            businessName: { type: 'string' },
+            role: { type: 'string', example: 'trial_user' },
+            subscriptionStatus: { type: 'string', example: 'trial' },
+            trialEndsAt: { type: 'string', format: 'date-time' },
+            isEmailVerified: { type: 'boolean' },
+            createdAt: { type: 'string', format: 'date-time' },
+          },
+        },
+        accessToken: { type: 'string' },
+        refreshToken: { type: 'string' },
+        dashboardUrl: { type: 'string', example: '/admin/overview' },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid input data',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Email already exists',
+  })
+  @ApiResponse({
+    status: 429,
+    description: 'Too many trial signup attempts',
+  })
+  async trialSignup(
+    @Body() trialSignupDto: {
+      businessName: string;
+      fullName: string;
+      email: string;
+      phone?: string;
+      password: string;
+      locations: '1' | '2-3' | '4-10' | '10+';
+      agreeToTerms: boolean;
+    },
+    @Request() req: any
+  ) {
+    const auditContext = req.auditContext || {};
+    return this.authService.trialSignup(trialSignupDto, auditContext);
   }
 
   @Public()
@@ -184,10 +249,13 @@ export class AuthController {
         email: { type: 'string' },
         firstName: { type: 'string' },
         lastName: { type: 'string' },
+        businessName: { type: 'string' },
         role: { type: 'string' },
+        subscriptionStatus: { type: 'string' },
+        trialEndsAt: { type: 'string', format: 'date-time', nullable: true },
+        isEmailVerified: { type: 'boolean' },
         isActive: { type: 'boolean' },
-        locationId: { type: 'array', items: { type: 'string' } },
-        lastLogin: { type: 'string', format: 'date-time' },
+        lastLoginAt: { type: 'string', format: 'date-time' },
         createdAt: { type: 'string', format: 'date-time' },
         updatedAt: { type: 'string', format: 'date-time' },
       },

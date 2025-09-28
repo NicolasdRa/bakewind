@@ -97,18 +97,22 @@ async function bootstrap() {
     hidePoweredBy: true,
   });
 
-  // Enable CORS with environment-specific origins
+  // Enable CORS with environment-specific origins for SaaS applications
   const corsOrigins = process.env.CORS_ORIGINS?.split(',') || [
     'http://localhost:3000', // Customer app (development)
     'http://localhost:3001', // Admin app (development)
+    'http://localhost:3002', // SaaS customer portal (development)
     'https://customer.bakewind.com', // Customer app (production)
     'https://admin.bakewind.com', // Admin app (production)
+    'https://portal.bakewind.com', // SaaS customer portal (production)
+    'https://www.bakewind.com', // Main website (production)
+    'https://bakewind.com', // Main website (production - apex domain)
   ];
 
   app.enableCors({
     origin: process.env.NODE_ENV === 'development' ? true : corsOrigins,
-    credentials: true, // Enable cookies for refresh tokens
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    credentials: true, // Enable cookies for refresh tokens and session management
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
     allowedHeaders: [
       'Content-Type',
       'Authorization',
@@ -116,8 +120,18 @@ async function bootstrap() {
       'Origin',
       'X-Requested-With',
       'Cache-Control',
+      'X-CSRF-Token',
+      'X-User-Agent',
+      'X-Session-ID',
+      'X-Trial-ID',
     ],
-    exposedHeaders: ['X-Total-Count', 'X-Correlation-ID'],
+    exposedHeaders: [
+      'X-Total-Count',
+      'X-Correlation-ID',
+      'X-Rate-Limit-Remaining',
+      'X-Rate-Limit-Reset',
+      'X-Trial-Days-Remaining',
+    ],
     preflightContinue: false,
     optionsSuccessStatus: 204,
     maxAge: 86400, // 24 hours preflight cache
@@ -158,6 +172,9 @@ async function bootstrap() {
     )
     .addTag('Authentication', 'User authentication and authorization')
     .addTag('Users', 'User management and profiles')
+    .addTag('Subscriptions', 'SaaS subscription plans and billing')
+    .addTag('Features', 'Software feature catalog and availability')
+    .addTag('Trials', 'Trial account management and conversion')
     .addTag('Products', 'Product catalog and availability')
     .addTag('Orders', 'Order management and tracking')
     .addTag('Customers', 'Customer registration and management')
