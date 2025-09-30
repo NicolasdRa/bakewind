@@ -5,6 +5,28 @@
 **Status**: Draft - Revised for SaaS Context
 **Input**: User clarification: "The customer facing app is the entry point for the user to the BakeWind software, not an order point for bakery products, but a selling point for the software as a service itself."
 
+## Architecture Clarification
+**IMPORTANT**: This specification covers the refactoring of BakeWind into THREE distinct applications:
+
+### 1. website (SSR Landing App - NEW/REFACTORED)
+- A **Server-Side Rendered (SSR) SolidStart application** optimized for SEO
+- The public-facing marketing and sales portal for BakeWind software
+- Responsible for landing pages, pricing, trial signups, and authentication ONLY
+- **MUST NOT** contain any dashboard/management features
+
+### 2. admin (Dashboard SPA - EXISTING TO BE ENHANCED)
+- A **Client-Side Solid.js SPA** for authenticated users
+- ALL bakery management features must be migrated here:
+  - Orders, inventory, production, recipes, customers, analytics
+  - Dashboard layouts and navigation
+  - Management components and pages
+- Receives authenticated users redirected from website
+
+### 3. api (Backend - SHARED)
+- NestJS API serving both frontend applications
+- Handles authentication, trials, subscriptions, and all business logic
+- Single source of truth for both frontend apps
+
 ## Execution Flow (main)
 ```
 1. Parse user clarification from Input
@@ -50,12 +72,12 @@
 ## User Scenarios & Testing *(mandatory)*
 
 ### Primary User Story
-A bakery owner discovers BakeWind software online, explores the landing page to learn about management features, views pricing plans and subscription options, signs up for a 14-day free trial, completes the guided onboarding process, and either converts to a paid subscription or logs into their existing bakery management dashboard.
+A bakery owner discovers BakeWind software online, explores the landing page to learn about management features, views pricing plans and subscription options, signs up for a 14-day free trial, authenticates successfully, and is then redirected to the separate BakeWind Dashboard application where they complete onboarding and manage their bakery operations.
 
 ### Acceptance Scenarios
 1. **Given** a potential customer arrives at the landing page, **When** they browse the home page, **Then** they can see software features, benefits, testimonials, and clear navigation to pricing/trial signup
 2. **Given** a prospect wants to try the software, **When** they attempt to start a trial, **Then** they are guided through account creation with business details
-3. **Given** an existing subscriber, **When** they log in through the portal, **Then** they are seamlessly redirected to their bakery management dashboard
+3. **Given** an existing subscriber, **When** they log in through the portal, **Then** they are seamlessly redirected to the separate BakeWind Dashboard application (client-side SPA)
 4. **Given** a prospect visits the pricing page, **When** they view available plans, **Then** they can see transparent subscription pricing with feature comparisons
 5. **Given** a trial user, **When** they complete onboarding, **Then** they have access to the full software with sample data and guided tutorials
 
@@ -70,7 +92,7 @@ A bakery owner discovers BakeWind software online, explores the landing page to 
 ### Functional Requirements
 - **FR-001**: System MUST provide a public landing page showcasing BakeWind software features and benefits
 - **FR-002**: System MUST allow prospects to create trial accounts with business email and company details
-- **FR-003**: System MUST allow existing subscribers to log in and access their bakery management dashboard
+- **FR-003**: System MUST allow existing subscribers to log in and be redirected to the separate BakeWind Dashboard application
 - **FR-004**: System MUST display software feature demos with interactive screenshots and video tours
 - **FR-005**: System MUST provide subscription pricing plans with feature comparison matrices
 - **FR-006**: System MUST enable 14-day free trial signup with full feature access
@@ -80,9 +102,23 @@ A bakery owner discovers BakeWind software online, explores the landing page to 
 - **FR-010**: System MUST persist subscriber account information and subscription status securely
 - **FR-011**: System MUST provide guided onboarding wizard with sample data and tutorial videos
 - **FR-012**: System MUST track trial progress and send conversion reminders as trial expiration approaches
-- **FR-013**: System MUST seamlessly redirect authenticated users to their appropriate dashboard based on subscription status
+- **FR-013**: System MUST seamlessly redirect authenticated users to the BakeWind Dashboard application based on subscription status
 - **FR-014**: System MUST display customer testimonials, case studies, and success stories on landing page
-- **FR-015**: System MUST integrate with existing BakeWind admin software for authenticated user dashboard access
+- **FR-015**: System MUST integrate with BakeWind API for authentication and redirect to separate BakeWind Dashboard application
+- **FR-016**: System MUST be built as an SSR application using SolidStart for optimal SEO performance
+- **FR-017**: System MUST NOT include bakery management features (orders, inventory, production) - these belong in the separate dashboard app
+
+### Migration Requirements (admin app)
+- **MR-001**: System MUST migrate ALL dashboard routes from website to admin
+- **MR-002**: System MUST migrate order management pages and components to admin
+- **MR-003**: System MUST migrate inventory tracking features to admin
+- **MR-004**: System MUST migrate production planning features to admin
+- **MR-005**: System MUST migrate recipe management to admin
+- **MR-006**: System MUST migrate customer management to admin
+- **MR-007**: System MUST migrate analytics dashboards to admin
+- **MR-008**: System MUST ensure proper authentication token passing between apps
+- **MR-009**: System MUST implement seamless redirect from website login to admin dashboard
+- **MR-010**: System MUST maintain consistent API client configuration across both frontend apps
 
 ### Key Entities *(include if feature involves data)*
 - **SaaS User**: Software prospects and subscribers including business credentials, company information, and subscription status

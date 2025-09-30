@@ -1,7 +1,7 @@
 
-# Implementation Plan: BakeWind SaaS Landing & Customer Portal
+# Implementation Plan: BakeWind SaaS Landing & Dashboard Separation
 
-**Branch**: `002-bakewind-customer-landing` | **Date**: 2025-09-27 | **Spec**: [spec.md](./spec.md)
+**Branch**: `002-bakewind-customer-landing` | **Date**: 2025-09-28 | **Spec**: [spec.md](./spec.md)
 **Input**: Feature specification from `/Users/nuuk/Documents/apps/bakewind/specs/002-bakewind-customer-landing/spec.md`
 
 ## Execution Flow (/plan command scope)
@@ -31,18 +31,23 @@
 - Phase 3-4: Implementation execution (manual or via tools)
 
 ## Summary
-Create a SaaS marketing landing page and customer portal for BakeWind bakery management software. The primary requirement is to provide a public-facing entry point where potential customers can discover the software, view pricing plans, sign up for 14-day free trials, and existing subscribers can log in to access their bakery management dashboard. Technical approach includes SolidStart frontend with Tailwind CSS, NestJS backend with PostgreSQL, and Stripe integration for subscription billing.
+Refactor BakeWind into a proper three-tier SaaS architecture by:
+1. Creating an SEO-optimized SSR landing/auth app (website)
+2. Migrating all dashboard features to a separate Solid.js SPA (admin)
+3. Ensuring both frontends communicate with the shared NestJS API (api)
+
+The primary requirement is to provide a public-facing, SEO-optimized entry point where potential customers can discover the software, view pricing plans, sign up for 14-day free trials, and existing subscribers can log in to be redirected to the separate BakeWind Dashboard application. Technical approach includes SSR SolidStart for SEO, client-side Solid.js for dashboard interactivity, Stripe for subscription billing, and shared NestJS API.
 
 ## Technical Context
 **Language/Version**: TypeScript 5.6, Node.js 22+
-**Primary Dependencies**: SolidStart 1.1, NestJS, Drizzle ORM, Tailwind CSS 4.1
-**Storage**: PostgreSQL (backend), session-based auth via httpOnly cookies
+**Primary Dependencies**: SolidStart 1.1 (SSR), Solid.js (SPA), NestJS, Drizzle ORM, Tailwind CSS 4.1, Stripe SDK
+**Storage**: PostgreSQL (backend), no local database for customer app
 **Testing**: Vitest (frontend), Jest (backend), contract testing for APIs
-**Target Platform**: Web browsers (SSR/SPA), Linux server deployment
-**Project Type**: web - frontend (bakewind-customer) + backend (bakewind-api)
+**Target Platform**: Web browsers (SSR + SPA), Linux server deployment
+**Project Type**: web - SSR frontend + SPA dashboard + backend API
 **Performance Goals**: <200ms page loads, <1s trial signup flow, 60fps animations
 **Constraints**: SEO optimized, mobile responsive, WCAG 2.1 AA compliance
-**Scale/Scope**: 10k+ trial signups/month, 1k concurrent users, 20 pages/components
+**Scale/Scope**: 10k+ trial signups/month, 1k concurrent users, 82+ tasks across 3 apps
 
 ## Constitution Check
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
@@ -73,8 +78,14 @@ specs/[###-feature]/
 ```
 
 ### Source Code (repository root)
+<!--
+  ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
+  for this feature. Delete unused options and expand the chosen structure with
+  real paths (e.g., apps/admin, packages/something). The delivered plan must
+  not include Option labels.
+-->
 ```
-bakewind-api/                     # NestJS Backend API
+api/                              # NestJS Backend API (shared)
 ├── src/
 │   ├── auth/                     # Authentication module
 │   ├── users/                    # User management
@@ -83,24 +94,48 @@ bakewind-api/                     # NestJS Backend API
 │   └── health/                   # Health checks
 └── test/                         # Jest tests
 
-bakewind-customer/                # SolidStart Frontend
+website/                          # SSR SolidStart Landing App (NEW/REFACTORED)
 ├── src/
-│   ├── components/               # Reusable UI components
-│   │   ├── LoginForm.tsx         # Existing login component
-│   │   ├── TrialSignupForm.tsx   # New trial signup form
+│   ├── components/               # Landing/marketing UI components ONLY
+│   │   ├── LoginForm.tsx         # Authentication form
+│   │   ├── TrialSignupForm.tsx   # Trial registration form
+│   │   ├── PricingTable.tsx      # Subscription plans display
+│   │   ├── FeatureShowcase.tsx   # Software feature demos
 │   │   └── Logo/                 # Brand components
-│   ├── routes/                   # File-based routing
+│   ├── routes/                   # SSR routes (NO dashboard routes)
 │   │   ├── index.tsx             # Landing page
 │   │   ├── pricing/              # Pricing page
-│   │   ├── login/                # Login route
-│   │   ├── trial-signup/         # Trial signup route (NEW)
-│   │   └── api/auth/             # API actions
+│   │   ├── features/             # Feature showcase
+│   │   ├── about/                # About/testimonials
+│   │   ├── login/                # Login (redirects to admin)
+│   │   ├── trial-signup/         # Trial signup
+│   │   └── api/auth/             # Auth API actions
 │   ├── lib/                      # Utilities & helpers
-│   └── stores/                   # State management
+│   │   └── api-client.ts         # API communication
+│   └── stores/                   # Minimal auth state only
+│       └── authStore.tsx         # Authentication state
 └── tests/                        # Vitest tests
+
+admin/                            # Solid.js Dashboard SPA (EXISTING - TO BE ENHANCED)
+├── src/
+│   ├── pages/                    # Dashboard management pages (MIGRATE HERE)
+│   │   ├── dashboard/            # Main dashboard
+│   │   ├── orders/               # Order management (MOVE from website)
+│   │   ├── inventory/            # Inventory tracking (MOVE from website)
+│   │   ├── production/           # Production planning (MOVE from website)
+│   │   ├── recipes/              # Recipe management (MOVE from website)
+│   │   ├── customers/            # Customer management (MOVE from website)
+│   │   └── analytics/            # Business analytics (MOVE from website)
+│   ├── components/               # Dashboard UI components
+│   ├── stores/                   # Application state management
+│   └── lib/                      # Utilities and API client
+└── tests/                        # Testing suite
 ```
 
-**Structure Decision**: Web application architecture with separate frontend (SolidStart) and backend (NestJS) applications. The bakewind-customer frontend serves as the public-facing SaaS portal, while bakewind-api provides the backend services. This separation enables independent deployment and scaling of the customer acquisition frontend from the main bakery management system.
+**Structure Decision**: Three-tier web application architecture with clear separation:
+1. **website**: SSR SolidStart app for public landing, marketing, and authentication only
+2. **admin**: Solid.js SPA for ALL dashboard/management features (migrated from website)
+3. **api**: Shared NestJS backend serving both frontend applications
 
 ## Phase 0: Outline & Research
 1. **Extract unknowns from Technical Context** above:
@@ -160,19 +195,34 @@ bakewind-customer/                # SolidStart Frontend
 *This section describes what the /tasks command will do - DO NOT execute during /plan*
 
 **Task Generation Strategy**:
-- Load `.specify/templates/tasks-template.md` as base
-- Generate tasks from Phase 1 design docs (contracts, data model, quickstart)
-- Each contract → contract test task [P]
-- Each entity → model creation task [P] 
-- Each user story → integration test task
-- Implementation tasks to make tests pass
+- Load existing `tasks.md` (already created with 82 tasks)
+- Enhance with Phase 1 design artifacts:
+  - data-model.md: 5 entities → database schema tasks
+  - contracts/saas-portal-api.yaml: 11 endpoints → contract test tasks
+  - quickstart.md: 6 scenarios → integration test tasks
+- Verify migration tasks align with data model
+- Add implementation tasks for TDD workflow
+
+**Three-Tier Architecture Tasks**:
+1. **Backend (bakewind-api)**: Database schemas, API services, contract tests
+2. **Customer App (bakewind-customer)**: SSR components, landing pages, auth flow
+3. **Admin App (bakewind-admin)**: SPA dashboard, migrated features, client-side routing
 
 **Ordering Strategy**:
-- TDD order: Tests before implementation 
-- Dependency order: Models before services before UI
-- Mark [P] for parallel execution (independent files)
+- Phase 3.1-3.5: Backend foundation (database → tests → services → controllers)
+- Phase 3.6-3.9: Customer app SSR implementation
+- Phase 3.10: Dashboard migration and integration
+- TDD approach: Contract tests before implementation
+- Mark [P] for parallel execution (different files)
 
-**Estimated Output**: 25-30 numbered, ordered tasks in tasks.md
+**Current Status**: 82 tasks already defined covering:
+- Database setup: T001-T008
+- Contract tests: T009-T016
+- Backend services: T017-T035
+- Frontend customer app: T036-T055
+- Dashboard migration: T056-T082
+
+**Estimated Completion**: All tasks defined and ready for execution
 
 **IMPORTANT**: This phase is executed by the /tasks command, NOT by /plan
 
@@ -207,7 +257,7 @@ bakewind-customer/                # SolidStart Frontend
 - [x] Initial Constitution Check: PASS
 - [x] Post-Design Constitution Check: PASS
 - [x] All NEEDS CLARIFICATION resolved
-- [ ] Complexity deviations documented
+- [x] Complexity deviations documented (none required)
 
 ---
 *Based on Constitution v1.0.0 - See `.specify/memory/constitution.md`*

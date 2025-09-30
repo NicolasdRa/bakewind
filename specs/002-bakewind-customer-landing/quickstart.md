@@ -1,301 +1,274 @@
-# Quickstart: BakeWind SaaS Landing & Customer Portal
+# Quickstart Guide: BakeWind SaaS Landing & Dashboard Separation
 
-**Date**: 2025-09-27
-**Feature**: 002-bakewind-customer-landing
+**Feature**: BakeWind SaaS Landing & Dashboard Separation
+**Date**: 2025-09-28
+**Branch**: `002-bakewind-customer-landing`
+
+## Overview
+
+This guide provides step-by-step validation scenarios to verify the implementation of the BakeWind three-tier architecture with proper separation between landing pages and dashboard functionality.
 
 ## Prerequisites
 
-- Node.js 22+ installed
-- PostgreSQL database running
-- Stripe test account configured
-- BakeWind API server running on localhost:5000
-- BakeWind Customer frontend running on localhost:3001
+Before starting validation:
+1. All three applications running locally:
+   - `api` on http://localhost:5000
+   - `website` on http://localhost:3000
+   - `admin` on http://localhost:3001
+2. PostgreSQL database with migrations applied
+3. Stripe test keys configured
+4. Seed data loaded (plans, features)
 
-## Environment Setup
+## Test Scenarios
 
-```bash
-# Backend environment variables
-export VITE_API_URL=http://localhost:5000
-export STRIPE_PUBLISHABLE_KEY=pk_test_...
-export STRIPE_SECRET_KEY=sk_test_...
-export JWT_SECRET=your-jwt-secret
-export DATABASE_URL=postgresql://user:pass@localhost:5432/bakewind
+### Scenario 1: Landing Page Experience
+**Objective**: Verify SEO-optimized landing pages load correctly
 
-# Frontend environment variables
-export VITE_API_URL=http://localhost:5000
-export VITE_STRIPE_PUBLISHABLE_KEY=pk_test_...
-```
+1. Navigate to http://localhost:3001
+2. Verify landing page loads with:
+   - Hero section with clear value proposition
+   - Feature highlights (at least 3)
+   - Testimonials section
+   - Clear CTA for trial signup
+3. View page source and verify:
+   - Server-side rendered HTML (no loading spinners)
+   - Meta tags present for SEO
+   - Structured data for rich snippets
+4. Check performance:
+   - First Contentful Paint < 1s
+   - No layout shifts after load
 
-## Quick Validation Tests
+✅ **Success**: Landing page is fully rendered server-side with good performance
 
-### Test 1: Landing Page Load Performance
-**Validates**: FR-001 (Public landing page showcasing software features)
+### Scenario 2: Trial Signup Flow
+**Objective**: Verify new users can create trial accounts
 
-```bash
-# Start both servers
-cd bakewind-api && npm run start:dev &
-cd bakewind-customer && npm run dev &
-
-# Test page load speed
-curl -w "%{time_total}\n" -o /dev/null -s http://localhost:3001/
-
-# Expected: Response time < 200ms
-# Expected: Page shows BakeWind software features and trial CTA
-```
-
-**Manual Verification**:
-1. Visit http://localhost:3001/
-2. Verify hero section shows "Modern Bakery Management Made Simple"
-3. Verify "Start Free Trial" button is prominently displayed
-4. Verify features section shows 6 software capabilities
-5. Verify responsive design on mobile viewport
-
-### Test 2: Trial Signup Flow
-**Validates**: FR-002, FR-006, FR-008, FR-009 (Trial account creation with validation)
-
-```bash
-# Test trial signup API endpoint
-curl -X POST http://localhost:5000/auth/trial-signup \
-  -H "Content-Type: application/json" \
-  -d '{
-    "businessName": "Test Bakery",
-    "fullName": "John Test",
-    "email": "john@testbakery.com",
-    "phone": "+1 555-123-4567",
-    "password": "SecurePass123!",
-    "locations": "2-3",
-    "agreeToTerms": true
-  }'
-
-# Expected: 201 status with user object and JWT tokens
-# Expected: Trial account created with 14-day expiration
-```
-
-**Manual Verification**:
-1. Visit http://localhost:3001/trial-signup
-2. Fill all required fields with valid business information
-3. Submit form and verify:
-   - Loading state appears during submission
-   - Success redirect to dashboard occurs
+1. Click "Start Free Trial" from landing page
+2. Navigate to /trial-signup
+3. Fill form with:
+   - Email: test@bakery.com
+   - Password: TestPass123!
+   - Company: Test Bakery LLC
+   - Phone: 555-0123
+4. Submit form
+5. Verify:
+   - Account created (201 response)
+   - JWT tokens received
+   - Redirected to onboarding flow
    - Welcome email sent (check logs)
-   - Database has new user with role=trial_user
+6. Check database:
+   - User record created
+   - Trial account active
+   - End date = start date + 14 days
 
-### Test 3: Existing Subscriber Login
-**Validates**: FR-003, FR-013, FR-015 (Subscriber authentication and dashboard redirect)
+✅ **Success**: Trial account created with proper expiration date
 
-```bash
-# Create test subscriber first
-curl -X POST http://localhost:5000/auth/trial-signup \
-  -H "Content-Type: application/json" \
-  -d '{
-    "businessName": "Existing Bakery",
-    "fullName": "Jane Subscriber",
-    "email": "jane@existingbakery.com",
-    "phone": "+1 555-987-6543",
-    "password": "ExistingPass123!",
-    "locations": "1",
-    "agreeToTerms": true
-  }'
+### Scenario 3: Authentication Handoff
+**Objective**: Verify seamless redirect between apps
 
-# Update user to subscriber status (simulate conversion)
-# Then test login
-curl -X POST http://localhost:5000/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "jane@existingbakery.com",
-    "password": "ExistingPass123!"
-  }'
-
-# Expected: 200 status with user object and dashboard redirect URL
-```
-
-**Manual Verification**:
-1. Visit http://localhost:3001/login
-2. Enter existing subscriber credentials
+1. Navigate to http://localhost:3000/login
+2. Login with trial account credentials
 3. Verify:
-   - Authentication succeeds
-   - Redirect to appropriate dashboard based on role
-   - Session persists across page reloads
-   - Logout functionality works
+   - Authentication successful
+   - JWT token in response
+   - Redirect URL points to admin app
+4. Follow redirect to http://localhost:3001
+5. Verify in admin app:
+   - User is authenticated
+   - JWT token passed correctly
+   - User data available
+   - Dashboard loads without re-login
 
-### Test 4: Pricing Page with Plan Comparison
-**Validates**: FR-005 (Subscription pricing plans with feature comparison)
+✅ **Success**: User authenticated in both apps without re-authentication
 
+### Scenario 4: Pricing Page & Plans
+**Objective**: Verify subscription plans display correctly
+
+1. Navigate to http://localhost:3000/pricing
+2. Verify 4 plans displayed:
+   - Starter
+   - Professional
+   - Enterprise
+   - Custom
+3. For each plan verify:
+   - Monthly and yearly prices
+   - Feature list
+   - Limits clearly shown
+   - CTA button active
+4. Click "Subscribe" on Professional plan
+5. Verify:
+   - Requires authentication
+   - Creates Stripe checkout session
+   - Redirects to Stripe payment page
+
+✅ **Success**: All plans display with working Stripe integration
+
+### Scenario 5: Dashboard Migration Verification
+**Objective**: Ensure dashboard features are NOT in customer app
+
+1. Check `website/src/routes/`:
+   - NO dashboard routes present
+   - NO order management routes
+   - NO inventory routes
+   - NO production routes
+2. Check `admin/src/pages/`:
+   - Dashboard page exists
+   - Orders management exists
+   - Inventory tracking exists
+   - Production planning exists
+   - All features migrated
+3. Test navigation in admin app:
+   - All dashboard routes work
+   - State management functional
+   - API calls successful
+
+✅ **Success**: Complete separation of concerns between apps
+
+### Scenario 6: Trial Expiration
+**Objective**: Verify trial expiration handling
+
+1. Create trial account
+2. Manually update trial end date to past date in DB
+3. Run trial expiration job
+4. Verify:
+   - Trial status = 'expired'
+   - Expiration email sent
+   - User cannot access dashboard
+   - Prompted to subscribe
+5. Navigate to pricing page
+6. Select plan and complete payment
+7. Verify:
+   - Trial status = 'converted'
+   - Full access restored
+   - Subscription active
+
+✅ **Success**: Trial expiration and conversion flow working
+
+## Integration Tests
+
+### API Contract Tests
+Run from `api` directory:
 ```bash
-# Test subscription plans API
-curl http://localhost:5000/subscriptions/plans
-
-# Expected: Array of 4 plans (Starter, Professional, Business, Enterprise)
-# Expected: Each plan has pricing, features, and metadata
+npm run test:contracts
 ```
 
-**Manual Verification**:
-1. Visit http://localhost:3001/pricing
-2. Verify 4 subscription plans displayed
-3. Verify "Most Popular" badge on Professional plan
-4. Verify feature comparison shows clear differences
-5. Verify all CTAs lead to trial signup or login
-6. Verify responsive design and mobile usability
+Expected output:
+- ✅ POST /auth/trial-signup
+- ✅ POST /auth/login
+- ✅ POST /auth/refresh
+- ✅ POST /auth/logout
+- ✅ GET /auth/me
+- ✅ GET /subscriptions/plans
+- ✅ POST /subscriptions/create-checkout
+- ✅ GET /features
+- ✅ PATCH /trials/{id}/onboarding
+- ✅ POST /users/{id}/verify-email
 
-### Test 5: Software Feature Showcase
-**Validates**: FR-004, FR-014 (Feature demos and marketing content)
-
+### Frontend E2E Tests
+Run from `website` directory:
 ```bash
-# Test software features API
-curl http://localhost:5000/features
-
-# Expected: Array of BakeWind software features
-# Expected: Features categorized and include demo links
+npm run test:e2e
 ```
 
-**Manual Verification**:
-1. Visit landing page features section
-2. Verify 6 feature cards with icons and descriptions
-3. Verify each feature focuses on business benefits
-4. Verify demo links work (if implemented)
-5. Verify features map to subscription plans correctly
+Expected scenarios:
+- ✅ Landing page loads
+- ✅ Trial signup completes
+- ✅ Login redirects to admin
+- ✅ Pricing page displays plans
+- ✅ Features showcase works
 
-### Test 6: Authentication Security
-**Validates**: Security requirements and session management
-
+### Admin Dashboard Tests
+Run from `admin` directory:
 ```bash
-# Test JWT token validation
-TOKEN=$(curl -X POST http://localhost:5000/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"jane@existingbakery.com","password":"ExistingPass123!"}' \
-  | jq -r '.accessToken')
-
-# Test protected endpoint
-curl -H "Authorization: Bearer $TOKEN" \
-  http://localhost:5000/auth/me
-
-# Expected: 200 status with user profile
-# Test invalid token
-curl -H "Authorization: Bearer invalid_token" \
-  http://localhost:5000/auth/me
-
-# Expected: 401 status
+npm run test:e2e
 ```
 
-**Manual Verification**:
-1. Verify passwords are hashed in database (never plaintext)
-2. Verify JWT tokens expire appropriately
-3. Verify refresh token rotation works
-4. Verify CORS headers prevent unauthorized origins
-5. Verify rate limiting on auth endpoints
-
-## Database Validation
-
-### Verify Schema Creation
-```sql
--- Check required tables exist
-SELECT table_name FROM information_schema.tables
-WHERE table_schema = 'public'
-AND table_name IN (
-  'users', 'trial_accounts', 'subscription_plans',
-  'software_features', 'user_sessions'
-);
-
--- Verify trial user creation
-SELECT id, email, role, subscription_status, trial_ends_at
-FROM users
-WHERE email = 'john@testbakery.com';
-
--- Verify trial account record
-SELECT signup_source, business_size, onboarding_completed
-FROM trial_accounts
-WHERE user_id = (SELECT id FROM users WHERE email = 'john@testbakery.com');
-```
-
-### Test Data Setup
-```sql
--- Insert subscription plans
-INSERT INTO subscription_plans (id, name, description, price_monthly_usd, price_annual_usd, max_locations, sort_order) VALUES
-('plan-starter', 'Starter', 'Perfect for small bakeries', 4900, 47040, 1, 1),
-('plan-professional', 'Professional', 'Ideal for growing bakeries', 14900, 143040, 3, 2),
-('plan-business', 'Business', 'Comprehensive solution', 39900, 383040, 10, 3),
-('plan-enterprise', 'Enterprise', 'Custom enterprise solution', 0, 0, NULL, 4);
-
--- Insert software features
-INSERT INTO software_features (id, name, description, icon_name, category, available_in_plans, sort_order) VALUES
-('feat-orders', 'Order Management', 'Track customer orders in real-time', 'orders', 'orders', '["plan-starter","plan-professional","plan-business","plan-enterprise"]', 1),
-('feat-inventory', 'Inventory Control', 'Monitor ingredients and supplies', 'inventory', 'inventory', '["plan-professional","plan-business","plan-enterprise"]', 2);
-```
+Expected scenarios:
+- ✅ Dashboard loads with auth
+- ✅ Orders page functional
+- ✅ Inventory management works
+- ✅ Production planning active
+- ✅ Analytics displays charts
 
 ## Performance Benchmarks
 
-### Target Metrics
-- Landing page load: < 200ms initial response
-- Trial signup: < 1s form submission to redirect
-- Login flow: < 500ms authentication response
-- Pricing page: < 150ms with plan data
-- Core Web Vitals: LCP < 2.5s, FID < 100ms, CLS < 0.1
-
-### Load Testing
+### Customer App (SSR)
 ```bash
-# Install artillery for load testing
-npm install -g artillery
-
-# Test landing page performance
-artillery quick --count 10 --num 100 http://localhost:3001/
-
-# Test trial signup under load
-artillery quick --count 5 --num 20 \
-  -p '{"businessName":"Load Test","fullName":"Test User","email":"test{{$randomInt(1,10000)}}@test.com","phone":"+15551234567","password":"TestPass123!","locations":"1","agreeToTerms":true}' \
-  http://localhost:5000/auth/trial-signup
+npm run lighthouse
 ```
+- Performance: > 90
+- Accessibility: > 95
+- Best Practices: > 90
+- SEO: > 95
 
-## SEO Validation
-
-### Meta Tags and Structure
+### Admin App (SPA)
 ```bash
-# Test meta tags and structured data
-curl -s http://localhost:3001/ | grep -E '<meta|<title|application/ld\+json'
-
-# Expected: Title, description, OpenGraph tags
-# Expected: Software application structured data
+npm run bundle-analyze
 ```
+- Initial bundle: < 200KB gzipped
+- Lazy loaded chunks: < 50KB each
+- Time to Interactive: < 2s
 
-### Search Engine Optimization
-1. Verify robots.txt allows indexing
-2. Verify sitemap.xml includes all public pages
-3. Verify canonical URLs prevent duplicate content
-4. Verify semantic HTML structure (h1, h2, h3 hierarchy)
-5. Verify alt text on all images
-6. Verify page speed metrics meet Google standards
+## Security Checklist
 
-## Troubleshooting Common Issues
+- [ ] JWT tokens not in localStorage (httpOnly cookies)
+- [ ] CORS configured for known origins only
+- [ ] Rate limiting on auth endpoints
+- [ ] Input validation on all forms
+- [ ] XSS protection headers set
+- [ ] CSRF tokens for state-changing operations
+- [ ] Stripe webhooks signature verified
+- [ ] SQL injection prevented (parameterized queries)
 
-### Trial Signup Fails
-1. Check database connection and migrations
-2. Verify Stripe test keys are configured
-3. Check email validation and uniqueness constraints
-4. Verify password complexity requirements
+## Deployment Validation
 
-### Login Redirect Issues
-1. Check JWT secret configuration
-2. Verify session cookie settings
-3. Check redirect URL configuration based on user role
-4. Verify CORS settings for cross-origin requests
+### Environment Variables
+Verify all required in each app:
 
-### Performance Issues
-1. Check database indexes on frequently queried fields
-2. Verify CDN configuration for static assets
-3. Check bundle size and code splitting
-4. Verify server response caching headers
+**api**:
+- DATABASE_URL
+- JWT_SECRET
+- STRIPE_SECRET_KEY
+- STRIPE_WEBHOOK_SECRET
+- CORS_ORIGIN
+
+**website**:
+- VITE_API_URL
+- VITE_STRIPE_PUBLIC_KEY
+- VITE_ADMIN_APP_URL
+
+**admin**:
+- VITE_API_URL
+- VITE_CUSTOMER_APP_URL
+
+### Health Checks
+- http://localhost:5000/health - API health
+- http://localhost:3000/api/health - Customer app health
+- http://localhost:3001/health - Admin app health
+
+## Troubleshooting
+
+### Issue: Authentication fails between apps
+**Solution**: Verify CORS settings and cookie domain configuration
+
+### Issue: Dashboard features in customer app
+**Solution**: Run migration cleanup tasks T056-T064
+
+### Issue: Trial doesn't expire
+**Solution**: Check cron job for trial expiration is running
+
+### Issue: Stripe webhook fails
+**Solution**: Verify webhook secret and endpoint URL
 
 ## Success Criteria
 
-✅ **All API endpoints return expected status codes and data**
-✅ **Landing page loads under 200ms with all content**
-✅ **Trial signup creates user and redirects to dashboard**
-✅ **Existing users can login and access appropriate dashboard**
-✅ **Pricing page displays plans with accurate feature comparison**
-✅ **Security headers and authentication work correctly**
-✅ **Mobile responsive design functions on all screen sizes**
-✅ **SEO meta tags and structured data are properly implemented**
+✅ All test scenarios pass
+✅ Contract tests 100% passing
+✅ E2E tests 100% passing
+✅ Performance benchmarks met
+✅ Security checklist complete
+✅ Health checks responding
+✅ No console errors in any app
+✅ Clean separation between apps verified
 
-When all tests pass, the SaaS landing and customer portal is ready for production deployment.
-
----
-*Quickstart validation complete - ready for task generation*
+When all criteria are met, the BakeWind SaaS Landing & Dashboard Separation is ready for production deployment.

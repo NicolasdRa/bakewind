@@ -1,0 +1,27 @@
+{
+  "moduleFileExtensions": ["js", "json", "ts"],
+  "rootDir": "../",
+  "testMatch": ["<rootDir>/test/**/*.contract.test.ts"],
+  "transform": {
+    "^.+\\.(t|j)s$": "ts-jest"
+  },
+  "collectCoverageFrom": [
+    "src/**/*.(t|j)s",
+    "!src/**/*.spec.ts",
+    "!src/**/*.contract.test.ts"
+  ],
+  "coverageDirectory": "coverage-contract",
+  "testEnvironment": "node",
+  "testTimeout": 30000,
+  "setupFilesAfterEnv": ["<rootDir>/test/jest-contract.setup.ts"],
+  "globalSetup": "<rootDir>/test/jest-global-setup.ts",
+  "globalTeardown": "<rootDir>/test/jest-global-teardown.ts",
+  "moduleNameMapper": {
+    "^src/(.*)$": "<rootDir>/src/$1"
+  },
+  "modulePaths": ["<rootDir>/src"],
+  "maxWorkers": 1,
+  "forceExit": true,
+  "detectOpenHandles": true,
+  "verbose": true
+}

@@ -1,203 +1,277 @@
-# Data Model: BakeWind SaaS Landing & Customer Portal
+# Data Model: BakeWind SaaS Landing & Dashboard Separation
 
-**Date**: 2025-09-27
-**Feature**: 002-bakewind-customer-landing
+**Feature**: BakeWind SaaS Landing & Dashboard Separation
+**Date**: 2025-09-28
+**Branch**: `002-bakewind-customer-landing`
 
 ## Entity Definitions
 
-### SaaS User
-Represents both prospects and subscribers in the BakeWind software ecosystem.
+### 1. SaasUser
+Primary entity representing software users (both trial and paid subscribers).
 
-**Fields**:
-- `id` (UUID, primary key) - Unique user identifier
-- `email` (string, unique, required) - User email address for authentication
-- `password_hash` (string, required) - Bcrypt hashed password
-- `first_name` (string, required) - User's first name
-- `last_name` (string, required) - User's last name
-- `business_name` (string, required) - Name of the bakery/business
-- `phone_number` (string, optional) - Contact phone number
-- `role` (enum: trial_user, subscriber, admin) - User permission level
-- `subscription_status` (enum: trial, active, past_due, canceled) - Current billing status
-- `trial_ends_at` (timestamp, nullable) - When trial expires (null for paid users)
-- `is_email_verified` (boolean, default: false) - Email verification status
-- `created_at` (timestamp) - Account creation date
-- `updated_at` (timestamp) - Last modification date
-- `last_login_at` (timestamp, nullable) - Last successful login
+```typescript
+interface SaasUser {
+  id: string;                    // UUID primary key
+  email: string;                  // Unique, business email required
+  passwordHash: string;           // Bcrypt hashed password
+  companyName: string;            // Bakery business name
+  companyPhone?: string;          // Optional contact number
+  companyAddress?: string;        // Optional business address
+  role: 'owner' | 'admin' | 'user'; // User role within organization
+  subscriptionPlanId?: string;    // FK to SubscriptionPlan (null for trials)
+  trialAccountId?: string;        // FK to TrialAccount (null for paid)
+  stripeCustomerId?: string;      // Stripe customer reference
+  emailVerified: boolean;         // Email verification status
+  onboardingCompleted: boolean;   // Onboarding flow status
+  createdAt: Date;                // Account creation timestamp
+  updatedAt: Date;                // Last modification timestamp
+  lastLoginAt?: Date;             // Last successful login
+  deletedAt?: Date;               // Soft delete timestamp
+}
 
-**Validation Rules**:
-- Email must be valid format and unique across system
-- Password must be minimum 8 characters with complexity requirements
-- Business name required for trial signup
-- Phone number must be valid format if provided
-- Trial users must have trial_ends_at set
-- Subscriber role requires active subscription_status
+// Validation Rules:
+// - email: valid email format, unique in database
+// - companyName: 2-100 characters
+// - passwordHash: never exposed via API
+// - role: defaults to 'owner' for first user
+```
 
-**State Transitions**:
-- trial_user → subscriber (upon successful payment)
-- trial_user → canceled (trial expires without payment)
-- subscriber → past_due (payment failure)
-- past_due → subscriber (payment recovered)
-- past_due → canceled (dunning period expires)
+### 2. SubscriptionPlan
+Defines available software subscription tiers.
 
-### Subscription Plan
-Defines the available software service tiers and their attributes.
+```typescript
+interface SubscriptionPlan {
+  id: string;                     // UUID primary key
+  name: string;                   // Plan name (e.g., "Starter", "Professional")
+  slug: string;                   // URL-friendly identifier
+  description: string;            // Marketing description
+  monthlyPrice: number;           // Monthly subscription price in cents
+  yearlyPrice: number;            // Yearly subscription price in cents
+  features: string[];             // Array of feature descriptions
+  limits: {
+    maxUsers: number;             // Maximum team members
+    maxLocations: number;         // Maximum bakery locations
+    maxProducts: number;          // Maximum product catalog size
+    maxOrders: number;            // Monthly order limit
+    hasAnalytics: boolean;        // Analytics feature access
+    hasApi: boolean;              // API access
+    hasCustomReports: boolean;    // Custom reporting
+  };
+  stripePriceIdMonthly: string;   // Stripe price ID for monthly billing
+  stripePriceIdYearly: string;    // Stripe price ID for yearly billing
+  displayOrder: number;           // UI display order
+  isActive: boolean;              // Available for new subscriptions
+  createdAt: Date;
+  updatedAt: Date;
+}
 
-**Fields**:
-- `id` (UUID, primary key) - Unique plan identifier
-- `name` (string, required) - Display name (Starter, Professional, Business, Enterprise)
-- `description` (text, required) - Plan description for marketing
-- `price_monthly_usd` (integer, required) - Price in cents for USD monthly billing
-- `price_annual_usd` (integer, required) - Price in cents for USD annual billing
-- `max_locations` (integer, nullable) - Maximum bakery locations (null = unlimited)
-- `max_users` (integer, nullable) - Maximum user accounts (null = unlimited)
-- `features` (JSON array) - List of included feature identifiers
-- `stripe_price_id_monthly` (string) - Stripe price ID for monthly billing
-- `stripe_price_id_annual` (string) - Stripe price ID for annual billing
-- `is_popular` (boolean, default: false) - Display "Most Popular" badge
-- `sort_order` (integer, required) - Display order on pricing page
-- `is_active` (boolean, default: true) - Available for new signups
-- `created_at` (timestamp) - Plan creation date
-- `updated_at` (timestamp) - Last modification date
+// Validation Rules:
+// - name: 2-50 characters, unique
+// - slug: lowercase, hyphens only, unique
+// - prices: positive integers (cents)
+// - displayOrder: unique positive integer
+```
 
-**Validation Rules**:
-- Name must be unique and non-empty
-- Prices must be positive integers (in cents)
-- Annual price should be discounted vs monthly
-- Stripe price IDs must be valid and active
-- Features array must contain valid feature identifiers
-- Sort order determines pricing page display sequence
+### 3. TrialAccount
+Tracks trial account status and conversion.
 
-### Trial Account
-Tracks trial-specific data and conversion metrics for prospects.
+```typescript
+interface TrialAccount {
+  id: string;                     // UUID primary key
+  userId: string;                 // FK to SaasUser
+  startDate: Date;                // Trial start timestamp
+  endDate: Date;                  // Trial expiration (startDate + 14 days)
+  status: 'active' | 'expired' | 'converted' | 'cancelled';
+  conversionDate?: Date;          // When trial converted to paid
+  conversionPlanId?: string;      // FK to SubscriptionPlan if converted
+  onboardingStep: number;         // Current onboarding progress (0-5)
+  onboardingData: {
+    businessType?: string;        // Type of bakery
+    employeeCount?: string;       // Size of operation
+    currentSolution?: string;     // What they use now
+    painPoints?: string[];        // Problems to solve
+  };
+  remindersSent: {
+    day7: boolean;                // 7-day reminder sent
+    day12: boolean;               // 12-day reminder sent
+    expired: boolean;             // Expiration notice sent
+  };
+  createdAt: Date;
+  updatedAt: Date;
+}
 
-**Fields**:
-- `id` (UUID, primary key) - Unique trial identifier
-- `user_id` (UUID, foreign key to SaaS User) - Associated user account
-- `signup_source` (string) - Marketing attribution (landing_page, pricing_page, etc.)
-- `business_size` (enum: 1, 2-3, 4-10, 10+) - Number of bakery locations
-- `trial_length_days` (integer, default: 14) - Trial duration
-- `onboarding_completed` (boolean, default: false) - Setup wizard completion
-- `sample_data_loaded` (boolean, default: false) - Demo data injection status
-- `conversion_reminders_sent` (integer, default: 0) - Email reminder count
-- `converted_at` (timestamp, nullable) - Date of trial-to-paid conversion
-- `converted_to_plan_id` (UUID, nullable) - Which plan they subscribed to
-- `cancellation_reason` (string, nullable) - Why trial wasn't converted
-- `created_at` (timestamp) - Trial start date
-- `updated_at` (timestamp) - Last modification date
+// Validation Rules:
+// - endDate: automatically set to startDate + 14 days
+// - status: transitions follow state machine rules
+// - onboardingStep: 0-5 range
+```
 
-**Validation Rules**:
-- User ID must reference valid SaaS User with trial_user role
-- Signup source required for attribution tracking
-- Business size maps to subscription plan recommendations
-- Trial length must be positive integer
-- Converted trials must have converted_at and converted_to_plan_id
+### 4. SoftwareFeature
+Catalog of software features for marketing display.
 
-**Lifecycle Events**:
-- Created upon trial signup completion
-- Onboarding completion triggers sample data loading
-- Conversion reminders sent at day 10, 13, and trial end
-- Conversion updates user role and subscription status
+```typescript
+interface SoftwareFeature {
+  id: string;                     // UUID primary key
+  name: string;                   // Feature name
+  slug: string;                   // URL-friendly identifier
+  category: 'orders' | 'inventory' | 'production' | 'analytics' | 'customers' | 'recipes';
+  description: string;            // Short description
+  longDescription: string;        // Detailed explanation
+  benefits: string[];             // Business benefits list
+  screenshotUrl?: string;         // Demo screenshot URL
+  videoUrl?: string;              // Demo video URL
+  availableInPlans: string[];     // Array of plan IDs that include this
+  displayOrder: number;           // UI display order
+  isHighlighted: boolean;         // Featured on homepage
+  createdAt: Date;
+  updatedAt: Date;
+}
 
-### Software Feature
-Catalog of BakeWind capabilities showcased on the landing page.
+// Validation Rules:
+// - name: 2-100 characters
+// - slug: lowercase, hyphens only, unique
+// - category: must be valid enum value
+// - availableInPlans: must reference valid plan IDs
+```
 
-**Fields**:
-- `id` (UUID, primary key) - Unique feature identifier
-- `name` (string, required) - Feature display name
-- `description` (text, required) - Marketing description
-- `icon_name` (string, required) - Icon identifier for UI display
-- `category` (enum: orders, inventory, production, analytics, customers, products) - Feature grouping
-- `available_in_plans` (JSON array) - Plan IDs that include this feature
-- `demo_url` (string, nullable) - Link to interactive demo
-- `help_doc_url` (string, nullable) - Documentation link
-- `sort_order` (integer, required) - Display order on landing page
-- `is_highlighted` (boolean, default: false) - Featured on hero section
-- `is_active` (boolean, default: true) - Show on public pages
-- `created_at` (timestamp) - Feature addition date
-- `updated_at` (timestamp) - Last modification date
+### 5. UserSession
+Manages authentication sessions and refresh tokens.
 
-**Validation Rules**:
-- Name must be unique and descriptive
-- Description should focus on business benefits, not technical details
-- Icon name must reference valid icon in design system
-- Available in plans array must contain valid plan IDs
-- Demo URL must be valid HTTPS if provided
+```typescript
+interface UserSession {
+  id: string;                     // UUID primary key
+  userId: string;                 // FK to SaasUser
+  refreshToken: string;           // Hashed refresh token
+  accessTokenId: string;          // JTI claim for access token
+  ipAddress: string;              // Client IP address
+  userAgent: string;              // Client user agent
+  expiresAt: Date;                // Refresh token expiration
+  revokedAt?: Date;               // When session was revoked
+  revokedReason?: string;         // Why session was revoked
+  createdAt: Date;
+}
 
-### User Session
-Tracks authentication state and dashboard access for security and analytics.
-
-**Fields**:
-- `id` (UUID, primary key) - Unique session identifier
-- `user_id` (UUID, foreign key to SaaS User) - Associated user
-- `access_token_hash` (string, required) - Hashed JWT access token
-- `refresh_token_hash` (string, required) - Hashed refresh token
-- `expires_at` (timestamp, required) - Session expiration time
-- `ip_address` (string, nullable) - Client IP for security tracking
-- `user_agent` (text, nullable) - Browser/device information
-- `dashboard_redirect_url` (string, nullable) - Post-login destination
-- `is_revoked` (boolean, default: false) - Manual session termination
-- `created_at` (timestamp) - Session start time
-- `last_activity_at` (timestamp) - Most recent API call
-
-**Validation Rules**:
-- User ID must reference valid SaaS User
-- Token hashes must be cryptographically secure
-- Expires at must be future timestamp
-- IP address must be valid IPv4/IPv6 format
-- Dashboard redirect URL must be valid internal route
-
-**Security Considerations**:
-- All tokens stored as salted hashes, never plaintext
-- Automatic cleanup of expired sessions
-- IP and user agent tracking for anomaly detection
-- Revocation support for compromised sessions
+// Validation Rules:
+// - refreshToken: unique, hashed with bcrypt
+// - expiresAt: 7 days from creation
+// - accessTokenId: unique UUID
+```
 
 ## Relationships
 
-### User ↔ Trial Account
-- One-to-one: Each trial user has exactly one trial account
-- Cascade delete: Removing user removes trial data
-- Trial account created automatically on trial signup
+```mermaid
+erDiagram
+    SaasUser ||--o{ UserSession : has
+    SaasUser ||--o| TrialAccount : has
+    SaasUser ||--o| SubscriptionPlan : subscribes_to
+    TrialAccount }o--|| SubscriptionPlan : converts_to
+    SoftwareFeature }o--o{ SubscriptionPlan : included_in
 
-### User ↔ Subscription Plan
-- Many-to-one: Multiple users can have same plan
-- Nullable: Trial users don't have assigned plans yet
-- Historical tracking: Plan changes preserved in audit log
+    SaasUser {
+        string id PK
+        string email UK
+        string subscriptionPlanId FK
+        string trialAccountId FK
+    }
 
-### User ↔ User Session
-- One-to-many: Users can have multiple active sessions
-- Cascade delete: User deletion revokes all sessions
-- Automatic cleanup: Expired sessions pruned daily
+    SubscriptionPlan {
+        string id PK
+        string name
+        number monthlyPrice
+        number yearlyPrice
+    }
 
-### Trial Account ↔ Subscription Plan
-- Many-to-one via converted_to_plan_id: Tracks conversion outcomes
-- Nullable: Unconverted trials have no associated plan
-- Analytics: Enables conversion rate analysis by plan
+    TrialAccount {
+        string id PK
+        string userId FK
+        string conversionPlanId FK
+        date startDate
+        date endDate
+    }
 
-### Software Feature ↔ Subscription Plan
-- Many-to-many via available_in_plans JSON array: Features belong to multiple plans
-- Required: All plans must include some features
-- Marketing: Drives plan comparison matrices
+    SoftwareFeature {
+        string id PK
+        string name
+        string[] availableInPlans
+    }
 
-## Database Considerations
+    UserSession {
+        string id PK
+        string userId FK
+        string refreshToken UK
+        date expiresAt
+    }
+```
 
-### Indexing Strategy
-- Primary keys: UUID with B-tree indexes
-- Foreign keys: All relationships indexed
-- Query optimization: Email, subscription_status, trial_ends_at
-- Analytics: created_at, converted_at for time-series queries
+## State Transitions
 
-### Data Retention
-- User data: Retained until explicit deletion request
-- Session data: Auto-cleanup after 30 days inactive
-- Trial data: Retained for 2 years for analytics
-- Audit logs: 7 years retention for compliance
+### Trial Account States
+```
+created -> active -> expired
+         -> active -> converted
+         -> active -> cancelled
+```
 
-### Migration Strategy
-- Extend existing BakeWind user table with SaaS fields
-- Add new tables: trial_accounts, subscription_plans, software_features
-- Preserve existing user_sessions table structure
-- Backfill existing users with appropriate roles and statuses
+### User Subscription States
+```
+trial -> trial_expired -> reactivated
+      -> paid_active -> paid_cancelled -> paid_expired
+      -> paid_active -> paid_paused -> paid_active
+```
 
----
-*Data model ready for API contract generation*
+## Database Indexes
+
+```sql
+-- SaasUser indexes
+CREATE UNIQUE INDEX idx_saas_user_email ON saas_users(email);
+CREATE INDEX idx_saas_user_stripe_customer ON saas_users(stripe_customer_id);
+CREATE INDEX idx_saas_user_deleted ON saas_users(deleted_at);
+
+-- TrialAccount indexes
+CREATE INDEX idx_trial_user ON trial_accounts(user_id);
+CREATE INDEX idx_trial_status ON trial_accounts(status);
+CREATE INDEX idx_trial_end_date ON trial_accounts(end_date);
+
+-- UserSession indexes
+CREATE UNIQUE INDEX idx_session_refresh ON user_sessions(refresh_token);
+CREATE INDEX idx_session_user ON user_sessions(user_id);
+CREATE INDEX idx_session_expires ON user_sessions(expires_at);
+
+-- SubscriptionPlan indexes
+CREATE UNIQUE INDEX idx_plan_slug ON subscription_plans(slug);
+CREATE INDEX idx_plan_active ON subscription_plans(is_active);
+
+-- SoftwareFeature indexes
+CREATE UNIQUE INDEX idx_feature_slug ON software_features(slug);
+CREATE INDEX idx_feature_category ON software_features(category);
+```
+
+## Migration Considerations
+
+### From Existing System
+1. Existing users in `users` table need migration to `saas_users`
+2. Map existing roles to new role structure
+3. Create trial accounts for users without subscriptions
+4. Generate Stripe customer IDs for existing paid users
+
+### Data Seeding Requirements
+1. Create 4 subscription plans: Starter, Professional, Enterprise, Custom
+2. Populate software features for each category
+3. Set up trial reminder templates
+4. Configure default onboarding flow
+
+## Security Notes
+
+1. **PII Protection**: Email, company details are PII - encrypt at rest
+2. **Password Security**: Bcrypt with cost factor 12
+3. **Token Security**: Refresh tokens hashed before storage
+4. **Soft Deletes**: User data retained for 30 days after deletion
+5. **Audit Trail**: All state changes logged with timestamp and actor
+
+## Performance Considerations
+
+1. **Caching**: Subscription plans and features cacheable (change rarely)
+2. **Pagination**: User lists must be paginated (limit 50)
+3. **Eager Loading**: Include plan details when fetching users
+4. **Background Jobs**: Trial expiration checks run hourly
+5. **Database Pools**: Separate read replicas for analytics queries
