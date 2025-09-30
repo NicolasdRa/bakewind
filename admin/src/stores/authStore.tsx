@@ -199,7 +199,7 @@ if (typeof window !== 'undefined') {
   }, 0);
 }
 
-// Create Auth Context
+// Create Auth Context with proper default value
 export interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
@@ -212,10 +212,36 @@ export interface AuthContextType {
   clearError: () => void;
 }
 
-const AuthContext = createContext<AuthContextType>();
+// Create a default context value that throws helpful errors if used before provider mounts
+const createDefaultContext = (): AuthContextType => ({
+  user: null,
+  isAuthenticated: false,
+  isLoading: true,
+  error: null,
+  isInitialized: false,
+  login: async () => { throw new Error('AuthProvider not mounted'); },
+  logout: async () => { throw new Error('AuthProvider not mounted'); },
+  refreshProfile: async () => { throw new Error('AuthProvider not mounted'); },
+  clearError: () => { throw new Error('AuthProvider not mounted'); },
+});
+
+const AuthContext = createContext<AuthContextType>(createDefaultContext());
 
 export const AuthProvider: Component<{ children: JSX.Element }> = (props) => {
   console.log('[AuthProvider] Rendering, has children:', !!props.children);
+
+  // Create stable context value object
+  const contextValue: AuthContextType = {
+    get user() { return authStore.user; },
+    get isAuthenticated() { return authStore.isAuthenticated; },
+    get isLoading() { return authStore.isLoading; },
+    get error() { return authStore.error; },
+    get isInitialized() { return authStore.isInitialized; },
+    login: authStore.handleAuthCallback.bind(authStore),
+    logout: authStore.logout.bind(authStore),
+    refreshProfile: authStore.refreshProfile.bind(authStore),
+    clearError: authStore.clearError.bind(authStore),
+  };
 
   // Set up session check effect
   createEffect(() => {
@@ -229,18 +255,6 @@ export const AuthProvider: Component<{ children: JSX.Element }> = (props) => {
     }
   });
 
-  const contextValue: AuthContextType = {
-    get user() { return authStore.user; },
-    get isAuthenticated() { return authStore.isAuthenticated; },
-    get isLoading() { return authStore.isLoading; },
-    get error() { return authStore.error; },
-    get isInitialized() { return authStore.isInitialized; },
-    login: authStore.handleAuthCallback.bind(authStore),
-    logout: authStore.logout.bind(authStore),
-    refreshProfile: authStore.refreshProfile.bind(authStore),
-    clearError: authStore.clearError.bind(authStore),
-  };
-
   console.log('[AuthProvider] Context ready, isInitialized:', contextValue.isInitialized);
 
   return (
@@ -252,8 +266,5 @@ export const AuthProvider: Component<{ children: JSX.Element }> = (props) => {
 
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
   return context;
 };
