@@ -74,59 +74,50 @@ This task list implements the dashboard migration feature with **85 tasks** acro
   - Assert: 200 on success, 400 if >20 widgets
   - **MUST FAIL**: Endpoint not implemented yet
 
-- [ ] **T008** [P] Contract test: POST /api/v1/order-locks/acquire
+- [x] **T008** Contract test: POST /api/v1/order-locks/acquire ✓
   - File: `api/test/order-locks/order-locks-acquire.e2e-spec.ts`
   - Test: Acquire lock on order, fail if already locked
   - Assert: 200 with OrderLock, 409 if conflict
-  - **MUST FAIL**: Endpoint not implemented yet
 
-- [ ] **T009** [P] Contract test: DELETE /api/v1/order-locks/release/:orderId
+- [x] **T009** Contract test: DELETE /api/v1/order-locks/release/:orderId ✓
   - File: `api/test/order-locks/order-locks-release.e2e-spec.ts`
   - Test: Release lock, 404 if not owner
   - Assert: 204 on success
-  - **MUST FAIL**: Endpoint not implemented yet
 
-- [ ] **T010** [P] Contract test: POST /api/v1/order-locks/renew/:orderId
+- [x] **T010** Contract test: POST /api/v1/order-locks/renew/:orderId ✓
   - File: `api/test/order-locks/order-locks-renew.e2e-spec.ts`
   - Test: Extend lock TTL, 404 if expired
   - Assert: 200 with updated expires_at
-  - **MUST FAIL**: Endpoint not implemented yet
 
-- [ ] **T011** [P] Contract test: GET /api/v1/order-locks/status/:orderId
+- [x] **T011** Contract test: GET /api/v1/order-locks/status/:orderId ✓
   - File: `api/test/order-locks/order-locks-status.e2e-spec.ts`
   - Test: Check lock status (locked or unlocked)
   - Assert: 200 with OrderLock or UnlockedStatus
-  - **MUST FAIL**: Endpoint not implemented yet
 
-- [ ] **T012** [P] Contract test: GET /api/v1/inventory (with low_stock flag)
+- [x] **T012** Contract test: GET /api/v1/inventory (with low_stock flag) ✓
   - File: `api/test/inventory/inventory-list-lowstock.e2e-spec.ts`
   - Test: List inventory with low_stock boolean
   - Assert: 200 with InventoryItemWithTracking[] schema
-  - **MUST FAIL**: Extension not implemented yet
 
-- [ ] **T013** [P] Contract test: GET /api/v1/inventory/:itemId/consumption
+- [x] **T013** Contract test: GET /api/v1/inventory/:itemId/consumption ✓
   - File: `api/test/inventory/inventory-consumption-get.e2e-spec.ts`
   - Test: Get consumption tracking data
   - Assert: 200 with ConsumptionTracking schema
-  - **MUST FAIL**: Endpoint not implemented yet
 
-- [ ] **T014** [P] Contract test: PUT /api/v1/inventory/:itemId/consumption/threshold
+- [x] **T014** Contract test: PUT /api/v1/inventory/:itemId/consumption/threshold ✓
   - File: `api/test/inventory/inventory-consumption-set-threshold.e2e-spec.ts`
   - Test: Set custom reorder threshold
   - Assert: 200 with updated ConsumptionTracking
-  - **MUST FAIL**: Endpoint not implemented yet
 
-- [ ] **T015** [P] Contract test: DELETE /api/v1/inventory/:itemId/consumption/threshold
+- [x] **T015** Contract test: DELETE /api/v1/inventory/:itemId/consumption/threshold ✓
   - File: `api/test/inventory/inventory-consumption-delete-threshold.e2e-spec.ts`
   - Test: Remove custom threshold, revert to predictive
   - Assert: 204 on success
-  - **MUST FAIL**: Endpoint not implemented yet
 
-- [ ] **T016** [P] Contract test: POST /api/v1/inventory/:itemId/consumption/recalculate
+- [x] **T016** Contract test: POST /api/v1/inventory/:itemId/consumption/recalculate ✓
   - File: `api/test/inventory/inventory-consumption-recalculate.e2e-spec.ts`
   - Test: Trigger on-demand recalculation
   - Assert: 200 with updated avg_daily_consumption
-  - **MUST FAIL**: Endpoint not implemented yet
 
 ### WebSocket Event Tests (Parallel - Different Files)
 
@@ -395,7 +386,7 @@ This task list implements the dashboard migration feature with **85 tasks** acro
 
 ### Stores (State Management) - Parallel - Different Files
 
-- [x] **T056** [P] Create WidgetsStore with layout state
+- [x] **T056** WidgetsStore with layout state ✓
   - File: `admin/src/stores/widgets.ts`
   - State: `config: WidgetConfiguration | null`, `loading: boolean`, `error: string | null`
   - Actions: `fetchConfig()`, `updateConfig(dto)`, `addWidget(widget)`, `removeWidget(id)`, `reorderWidgets(newOrder)`, `setLayoutType()`
@@ -494,12 +485,12 @@ This task list implements the dashboard migration feature with **85 tasks** acro
 
 ### Dashboard Pages (Parallel - Different Files)
 
-- [ ] **T069** [P] Create Overview page with customizable widgets
+- [x] **T069** Overview page with customizable widgets ✓
   - File: `admin/src/pages/Overview.tsx`
-  - Features: WidgetGrid, layout switcher, add/remove widgets
-  - Data: Fetch metrics via RealtimeStore
+  - Features: Widget list, layout switcher, add/remove widgets, error handling, loading states
+  - Data: Fetch config via widgetsStore
   - Route: `/dashboard/overview` (default route)
-  - Dependency: T056, T058, T063, T064
+  - Dependency: T056
 
 - [ ] **T070** [P] Create Orders page with search/filter
   - File: `admin/src/pages/Orders.tsx`

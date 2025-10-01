@@ -20,6 +20,8 @@ export * from './user-sessions.schema';
 
 // Dashboard schema exports
 export * from './widget-configurations';
+export * from './order-locks';
+export * from './inventory-consumption';
 
 // Relations exports
 export * from './relations';
