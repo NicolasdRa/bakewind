@@ -1,0 +1,162 @@
+openapi: 3.0.3
+info:
+  title: Widgets API
+  description: Dashboard widget configuration management
+  version: 1.0.0
+
+paths:
+  /api/v1/widgets/config:
+    get:
+      summary: Get user's widget configuration
+      description: Retrieves the authenticated user's dashboard widget layout (FR-015)
+      tags: [Widgets]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Widget configuration retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WidgetConfiguration'
+        '404':
+          description: No configuration found (first-time user)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      summary: Update user's widget configuration
+      description: Saves the user's complete dashboard widget layout (FR-014, FR-015)
+      tags: [Widgets]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateWidgetConfigRequest'
+      responses:
+        '200':
+          description: Configuration updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WidgetConfiguration'
+        '400':
+          description: Validation error (e.g., >20 widgets)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    WidgetConfiguration:
+      type: object
+      required:
+        - id
+        - user_id
+        - layout_type
+        - widgets
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        layout_type:
+          type: string
+          enum: [grid, list, masonry]
+        widgets:
+          type: array
+          maxItems: 20
+          items:
+            $ref: '#/components/schemas/Widget'
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Widget:
+      type: object
+      required:
+        - id
+        - type
+        - position
+      properties:
+        id:
+          type: string
+          description: Unique widget instance ID
+        type:
+          type: string
+          enum: [metrics, orders, inventory, production, chart, preferences]
+          description: Widget type (FR-016)
+        position:
+          $ref: '#/components/schemas/WidgetPosition'
+        config:
+          type: object
+          description: Widget-specific configuration
+          additionalProperties: true
+
+    WidgetPosition:
+      type: object
+      required:
+        - x
+        - y
+        - w
+        - h
+      properties:
+        x:
+          type: integer
+          minimum: 0
+        y:
+          type: integer
+          minimum: 0
+        w:
+          type: integer
+          minimum: 1
+        h:
+          type: integer
+          minimum: 1
+
+    UpdateWidgetConfigRequest:
+      type: object
+      required:
+        - layout_type
+        - widgets
+      properties:
+        layout_type:
+          type: string
+          enum: [grid, list, masonry]
+        widgets:
+          type: array
+          maxItems: 20
+          items:
+            $ref: '#/components/schemas/Widget'
+
+    Error:
+      type: object
+      required:
+        - statusCode
+        - message
+      properties:
+        statusCode:
+          type: integer
+        message:
+          type: string
+        error:
+          type: string
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

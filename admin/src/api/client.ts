@@ -346,3 +346,40 @@ export const userApi = {
     return apiClient.get('/users/billing-history', { limit });
   },
 };
+
+// Widgets API
+export interface Widget {
+  id: string;
+  type: 'metrics' | 'orders' | 'inventory' | 'production' | 'chart' | 'preferences';
+  position: {
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+  };
+  config?: Record<string, unknown>;
+}
+
+export interface WidgetConfiguration {
+  id: string;
+  user_id: string;
+  layout_type: 'grid' | 'list' | 'masonry';
+  widgets: Widget[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface UpdateWidgetConfigDto {
+  layout_type: 'grid' | 'list' | 'masonry';
+  widgets: Widget[];
+}
+
+export const widgetsApi = {
+  async getConfig(): Promise<WidgetConfiguration> {
+    return apiClient.get('/widgets/config');
+  },
+
+  async updateConfig(config: UpdateWidgetConfigDto): Promise<WidgetConfiguration> {
+    return apiClient.put('/widgets/config', config);
+  },
+};

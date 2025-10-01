@@ -1,0 +1,198 @@
+openapi: 3.0.3
+info:
+  title: Real-Time WebSocket Events
+  description: Socket.IO event definitions for dashboard real-time updates
+  version: 1.0.0
+
+# Note: WebSocket events don't use REST paths, but we document them for contract clarity
+
+x-websocket-events:
+  connection:
+    direction: client-to-server
+    event: connection
+    description: Client establishes WebSocket connection with JWT auth
+    payload:
+      type: object
+      required:
+        - auth
+      properties:
+        auth:
+          type: object
+          required:
+            - token
+          properties:
+            token:
+              type: string
+              description: JWT access token
+
+  dashboard:join:
+    direction: client-to-server
+    event: dashboard:join
+    description: Client joins user-specific dashboard room for metric updates (FR-016a)
+    payload:
+      type: object
+      required:
+        - userId
+      properties:
+        userId:
+          type: string
+          format: uuid
+
+  metrics:update:
+    direction: server-to-client
+    event: metrics:update
+    description: Server pushes dashboard metric updates to user (FR-016a)
+    payload:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        metrics:
+          type: object
+          description: Delta updates (only changed metrics)
+          properties:
+            total_orders:
+              type: integer
+            pending_orders:
+              type: integer
+            revenue_today:
+              type: number
+            low_stock_items:
+              type: integer
+            active_production_batches:
+              type: integer
+
+  order:locked:
+    direction: server-to-client
+    event: order:locked
+    description: Notifies clients when an order is locked (FR-022b)
+    payload:
+      $ref: '#/components/schemas/OrderLock'
+
+  order:unlocked:
+    direction: server-to-client
+    event: order:unlocked
+    description: Notifies clients when an order is unlocked (FR-022c)
+    payload:
+      type: object
+      required:
+        - order_id
+      properties:
+        order_id:
+          type: string
+          format: uuid
+
+  order:updated:
+    direction: server-to-client
+    event: order:updated
+    description: Notifies clients when order data changes (real-time sync)
+    payload:
+      type: object
+      required:
+        - order_id
+        - changes
+      properties:
+        order_id:
+          type: string
+          format: uuid
+        changes:
+          type: object
+          description: Delta of changed fields
+          additionalProperties: true
+
+  inventory:low-stock-alert:
+    direction: server-to-client
+    event: inventory:low-stock-alert
+    description: Notifies when inventory item crosses low-stock threshold (FR-028)
+    payload:
+      type: object
+      required:
+        - item_id
+        - item_name
+        - current_stock
+        - threshold
+      properties:
+        item_id:
+          type: string
+          format: uuid
+        item_name:
+          type: string
+        current_stock:
+          type: number
+        threshold:
+          type: number
+        days_of_supply_remaining:
+          type: number
+
+  connection:status:
+    direction: server-to-client
+    event: connection:status
+    description: Server notifies client of connection state (FR-016c)
+    payload:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum: [connected, reconnecting, disconnected]
+        message:
+          type: string
+
+  heartbeat:
+    direction: client-to-server
+    event: heartbeat
+    description: Client heartbeat to maintain connection and renew order locks
+    payload:
+      type: object
+      required:
+        - timestamp
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        active_order_locks:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: Order IDs currently locked by this client
+
+  error:
+    direction: server-to-client
+    event: error
+    description: Server error notification
+    payload:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          enum: [AUTH_FAILED, RATE_LIMIT, INVALID_EVENT, SERVER_ERROR]
+        message:
+          type: string
+
+components:
+  schemas:
+    OrderLock:
+      type: object
+      required:
+        - order_id
+        - locked_by_user_id
+        - locked_by_user_name
+        - locked_at
+      properties:
+        order_id:
+          type: string
+          format: uuid
+        locked_by_user_id:
+          type: string
+          format: uuid
+        locked_by_user_name:
+          type: string
+        locked_at:
+          type: string
+          format: date-time

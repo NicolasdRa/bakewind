@@ -1,0 +1,267 @@
+openapi: 3.0.3
+info:
+  title: Inventory Extensions API
+  description: Extensions to existing inventory API for consumption tracking and predictive alerts
+  version: 1.0.0
+
+paths:
+  /api/v1/inventory:
+    get:
+      summary: List inventory with low-stock indicators
+      description: Extended to include predictive low-stock flags (FR-028)
+      tags: [Inventory]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: low_stock_only
+          in: query
+          schema:
+            type: boolean
+            default: false
+          description: Filter to show only low-stock items
+        - name: category
+          in: query
+          schema:
+            type: string
+          description: Filter by category
+      responses:
+        '200':
+          description: Inventory items retrieved
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InventoryItemWithTracking'
+
+  /api/v1/inventory/{itemId}/consumption:
+    get:
+      summary: Get consumption tracking data for item
+      description: Returns consumption rate and predictive data (FR-028)
+      tags: [Inventory]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Consumption data retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsumptionTracking'
+        '404':
+          description: Item not found or no tracking data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/inventory/{itemId}/consumption/threshold:
+    put:
+      summary: Set custom reorder threshold
+      description: User configures custom threshold override (FR-028a)
+      tags: [Inventory]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetThresholdRequest'
+      responses:
+        '200':
+          description: Threshold updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsumptionTracking'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      summary: Remove custom threshold
+      description: Reverts to predictive calculation
+      tags: [Inventory]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Custom threshold removed
+
+  /api/v1/inventory/{itemId}/consumption/recalculate:
+    post:
+      summary: Trigger on-demand recalculation
+      description: Forces immediate recalculation of consumption rate
+      tags: [Inventory]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Recalculation completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsumptionTracking'
+
+components:
+  schemas:
+    InventoryItemWithTracking:
+      allOf:
+        - $ref: '#/components/schemas/BaseInventoryItem'
+        - type: object
+          required:
+            - low_stock
+            - consumption_tracking
+          properties:
+            low_stock:
+              type: boolean
+              description: Predictive or custom threshold flag (FR-028)
+            consumption_tracking:
+              $ref: '#/components/schemas/ConsumptionTrackingSummary'
+
+    BaseInventoryItem:
+      type: object
+      required:
+        - id
+        - name
+        - current_stock
+        - unit
+        - category
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        current_stock:
+          type: number
+          format: decimal
+        unit:
+          type: string
+        category:
+          type: string
+        lead_time_days:
+          type: integer
+          description: Supplier lead time
+
+    ConsumptionTracking:
+      type: object
+      required:
+        - inventory_item_id
+        - avg_daily_consumption
+        - calculation_period_days
+        - last_calculated_at
+        - calculation_method
+      properties:
+        id:
+          type: string
+          format: uuid
+        inventory_item_id:
+          type: string
+          format: uuid
+        avg_daily_consumption:
+          type: number
+          format: decimal
+          description: Units consumed per day (7-day average)
+        calculation_period_days:
+          type: integer
+          default: 7
+        last_calculated_at:
+          type: string
+          format: date-time
+        calculation_method:
+          type: string
+          enum: [historical_orders, manual, predicted]
+        custom_reorder_threshold:
+          type: number
+          format: decimal
+          nullable: true
+          description: User override (FR-028a)
+        custom_lead_time_days:
+          type: integer
+          nullable: true
+        sample_size:
+          type: integer
+          description: Number of orders in calculation
+        days_of_supply_remaining:
+          type: number
+          format: decimal
+          description: current_stock / avg_daily_consumption
+        predicted_stockout_date:
+          type: string
+          format: date
+          nullable: true
+
+    ConsumptionTrackingSummary:
+      type: object
+      properties:
+        avg_daily_consumption:
+          type: number
+        days_of_supply_remaining:
+          type: number
+        has_custom_threshold:
+          type: boolean
+
+    SetThresholdRequest:
+      type: object
+      required:
+        - custom_reorder_threshold
+      properties:
+        custom_reorder_threshold:
+          type: number
+          format: decimal
+          minimum: 0
+        custom_lead_time_days:
+          type: integer
+          minimum: 1
+
+    Error:
+      type: object
+      required:
+        - statusCode
+        - message
+      properties:
+        statusCode:
+          type: integer
+        message:
+          type: string
+        error:
+          type: string
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

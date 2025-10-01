@@ -18,5 +18,8 @@ export * from './trial-accounts.schema';
 export * from './software-features.schema';
 export * from './user-sessions.schema';
 
+// Dashboard schema exports
+export * from './widget-configurations';
+
 // Relations exports
 export * from './relations';

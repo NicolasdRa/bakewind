@@ -1,0 +1,211 @@
+openapi: 3.0.3
+info:
+  title: Order Locks API
+  description: Order editing lock management for concurrent access control
+  version: 1.0.0
+
+paths:
+  /api/v1/order-locks/acquire:
+    post:
+      summary: Acquire lock on an order
+      description: Attempts to lock an order for editing (FR-022a)
+      tags: [OrderLocks]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AcquireLockRequest'
+      responses:
+        '200':
+          description: Lock acquired successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderLock'
+        '409':
+          description: Order already locked by another user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LockConflictError'
+        '404':
+          description: Order not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/order-locks/release/{orderId}:
+    delete:
+      summary: Release lock on an order
+      description: Releases the lock when user closes order modal (FR-022c)
+      tags: [OrderLocks]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Lock released successfully
+        '404':
+          description: No lock found or not owned by current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/order-locks/renew/{orderId}:
+    post:
+      summary: Renew lock on an order
+      description: Extends lock TTL when user is actively editing (heartbeat)
+      tags: [OrderLocks]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Lock renewed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderLock'
+        '404':
+          description: Lock not found or expired
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/order-locks/status/{orderId}:
+    get:
+      summary: Check lock status of an order
+      description: Returns current lock status (FR-022b)
+      tags: [OrderLocks]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Lock status retrieved
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/OrderLock'
+                  - $ref: '#/components/schemas/UnlockedStatus'
+
+components:
+  schemas:
+    OrderLock:
+      type: object
+      required:
+        - id
+        - order_id
+        - locked_by_user_id
+        - locked_by_user_name
+        - locked_at
+        - expires_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        order_id:
+          type: string
+          format: uuid
+        locked_by_user_id:
+          type: string
+          format: uuid
+        locked_by_user_name:
+          type: string
+          description: User's display name for lock indicator (FR-022b)
+        locked_by_session_id:
+          type: string
+        locked_at:
+          type: string
+          format: date-time
+        expires_at:
+          type: string
+          format: date-time
+        last_activity_at:
+          type: string
+          format: date-time
+
+    UnlockedStatus:
+      type: object
+      required:
+        - order_id
+        - locked
+      properties:
+        order_id:
+          type: string
+          format: uuid
+        locked:
+          type: boolean
+          enum: [false]
+
+    AcquireLockRequest:
+      type: object
+      required:
+        - order_id
+        - session_id
+      properties:
+        order_id:
+          type: string
+          format: uuid
+        session_id:
+          type: string
+          description: WebSocket session ID
+
+    LockConflictError:
+      type: object
+      required:
+        - statusCode
+        - message
+        - locked_by
+      properties:
+        statusCode:
+          type: integer
+          enum: [409]
+        message:
+          type: string
+        locked_by:
+          $ref: '#/components/schemas/OrderLock'
+
+    Error:
+      type: object
+      required:
+        - statusCode
+        - message
+      properties:
+        statusCode:
+          type: integer
+        message:
+          type: string
+        error:
+          type: string
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
