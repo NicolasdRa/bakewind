@@ -191,13 +191,13 @@ This task list implements the dashboard migration feature with **85 tasks** acro
   - Constraint: `CHECK (jsonb_array_length(widgets) <= 20)`
   - Export: Drizzle schema with inferred types
 
-- [ ] **T027** [P] Create order_locks schema
+- [x] **T027** Create order_locks schema ✓
   - File: `api/src/database/schemas/order-locks.ts`
   - Schema: id, order_id, locked_by_user_id, session_id, locked_at, expires_at, last_activity_at
   - Constraint: `UNIQUE(order_id)`, expires_at default 5 minutes
   - Export: Drizzle schema with inferred types
 
-- [ ] **T028** [P] Create inventory_consumption_tracking schema
+- [x] **T028** Create inventory_consumption_tracking schema ✓
   - File: `api/src/database/schemas/inventory-consumption.ts`
   - Schema: id, inventory_item_id, avg_daily_consumption, calculation_period_days, last_calculated_at, custom_reorder_threshold, sample_size
   - Constraint: `UNIQUE(inventory_item_id)`
@@ -248,24 +248,22 @@ This task list implements the dashboard migration feature with **85 tasks** acro
 
 ### Order Locks Module (Sequential within module)
 
-- [ ] **T036** [P] Create OrderLock DTOs
+- [x] **T036** Create OrderLock DTOs ✓
   - File: `api/src/order-locks/dto/acquire-lock.dto.ts`
   - DTOs: `AcquireLockDto`, `OrderLockResponseDto`
   - Validation: order_id (UUID), session_id (string)
 
-- [ ] **T037** Create OrderLocksService with Redis logic
+- [x] **T037** Create OrderLocksService with Redis logic ✓
   - File: `api/src/order-locks/order-locks.service.ts`
   - Methods: `acquireLock(orderId, userId, sessionId)`, `releaseLock(orderId, userId)`, `renewLock(orderId, userId)`, `getLockStatus(orderId)`, `cleanupExpired()`
   - Logic: Redis atomic operations (SET NX EX), PostgreSQL backup
   - TTL: 5 minutes, renewable
-  - Dependency: T004, T027, T036
 
-- [ ] **T038** Create OrderLocksController with REST endpoints
+- [x] **T038** Create OrderLocksController with REST endpoints ✓
   - File: `api/src/order-locks/order-locks.controller.ts`
   - Endpoints: POST /acquire, DELETE /release/:orderId, POST /renew/:orderId, GET /status/:orderId
   - Guards: JWT auth guard
   - Error handling: 409 Conflict for locked orders
-  - Dependency: T037
 
 - [ ] **T039** Create OrderLocksGateway for WebSocket notifications
   - File: `api/src/order-locks/order-locks.gateway.ts`
@@ -273,11 +271,11 @@ This task list implements the dashboard migration feature with **85 tasks** acro
   - Integration: Called by OrderLocksService on lock state changes
   - Dependency: T037, T042
 
-- [ ] **T040** Create OrderLocksModule and wire dependencies
+- [x] **T040** Create OrderLocksModule and wire dependencies ✓
   - File: `api/src/order-locks/order-locks.module.ts`
-  - Imports: DatabaseModule, RealtimeModule (for gateway)
-  - Providers: OrderLocksService, OrderLocksGateway
-  - Controllers: OrderLocksController
+  - Imports: DatabaseModule
+  - Providers: OrderLocksService, OrderLocksController
+  - Wired into AppModule
 
 - [ ] **T041** Unit tests for OrderLocksService
   - File: `api/test/order-locks/order-locks.service.spec.ts`

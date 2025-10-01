@@ -19,6 +19,7 @@ import { CustomersModule } from './customers/customers.module';
 import { UserSessionsModule } from './user-sessions/user-sessions.module';
 import { StripeModule } from './stripe/stripe.module';
 import { WidgetsModule } from './widgets/widgets.module';
+import { OrderLocksModule } from './order-locks/order-locks.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
 import { CorrelationIdMiddleware } from './common/middleware/correlation-id.middleware';
@@ -67,6 +68,7 @@ import configuration, { AppConfig } from './config/configuration';
     UserSessionsModule,
     StripeModule,
     WidgetsModule,
+    OrderLocksModule,
     HealthModule,
     CommonModule,
   ],
