@@ -1,38 +1,16 @@
-import { type RouteSectionProps, useSubmission, redirect } from "@solidjs/router";
+import { type RouteSectionProps, useSubmission } from "@solidjs/router";
 import { Show } from "solid-js";
 import { LoginForm } from "~/components/LoginForm";
 import { loginUser } from "~/routes/api/auth/login";
-import { getAuthUserServer } from "~/lib/auth-queries";
-import { getRedirectUrlBasedOnPermission } from "~/lib/permissions";
 import SEO from "~/components/SEO/SEO";
 
 // Route loader to redirect authenticated users
+// REMOVED: Session check on GET to prevent "headers already sent" errors
+// The login form action will handle authentication properly
 export async function GET() {
   "use server";
-
-  console.log('🔐 [LOGIN_ROUTE] Checking if user is already authenticated...');
-
-  try {
-    const user = await getAuthUserServer();
-
-    if (user) {
-      console.log('✅ [LOGIN_ROUTE] User already authenticated, redirecting to dashboard...');
-      const redirectUrl = getRedirectUrlBasedOnPermission(user.role);
-      console.log('🧭 [LOGIN_ROUTE] Redirecting to:', redirectUrl);
-      throw redirect(redirectUrl);
-    }
-
-    console.log('🚫 [LOGIN_ROUTE] User not authenticated, showing login form...');
-    return null; // Return null for normal rendering
-  } catch (error) {
-    // Check if it's a redirect
-    if (error instanceof Response) {
-      throw error;
-    }
-
-    console.error('❌ [LOGIN_ROUTE] Error during auth check:', error);
-    return null; // Return null for normal rendering
-  }
+  console.log('🔐 [LOGIN_ROUTE] Showing login form...');
+  return null;
 }
 
 const LoginFormWithAction = () => {
@@ -105,7 +83,7 @@ const LoginFormWithAction = () => {
   );
 };
 
-export default function LoginScreen(props: RouteSectionProps) {
+export default function LoginScreen(_props: RouteSectionProps) {
   return (
     <>
       <SEO

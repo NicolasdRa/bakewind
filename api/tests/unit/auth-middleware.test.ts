@@ -117,6 +117,6 @@ describe('JwtAuthGuard', () => {
     } as ExecutionContext;
 
     await guard.canActivate(mockContext);
-    expect(mockRequest['user']).toEqual(mockUser);
+    expect((mockRequest as any)['user']).toEqual(mockUser);
   });
 });

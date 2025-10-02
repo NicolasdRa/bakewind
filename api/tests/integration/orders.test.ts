@@ -199,7 +199,7 @@ describe('Orders API (e2e)', () => {
         .expect(200);
 
       if (response.body.data.length > 0) {
-        expect(response.body.data.every(order => order.status === 'pending')).toBe(true);
+        expect(response.body.data.every((order: any) => order.status === 'pending')).toBe(true);
       }
     });
   });

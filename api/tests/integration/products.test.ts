@@ -38,7 +38,7 @@ describe('Products API (e2e)', () => {
         .get('/api/v1/products?category=bread')
         .expect(200);
 
-      expect(response.body.data.every(product =>
+      expect(response.body.data.every((product: any) =>
         product.category === 'bread'
       )).toBe(true);
     });
@@ -48,7 +48,7 @@ describe('Products API (e2e)', () => {
         .get('/api/v1/products?available=true')
         .expect(200);
 
-      expect(response.body.data.every(product =>
+      expect(response.body.data.every((product: any) =>
         product.isAvailable === true
       )).toBe(true);
     });

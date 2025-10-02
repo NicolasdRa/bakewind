@@ -14,6 +14,7 @@ import {
 import { patchNestJsSwagger, ZodValidationPipe } from 'nestjs-zod';
 import { join } from 'path';
 import fastifyHelmet from '@fastify/helmet';
+import fastifyCookie from '@fastify/cookie';
 
 const swaggerDocumentOptions: SwaggerDocumentOptions = {
   operationIdFactory: (controllerKey: string, methodKey: string) => {
@@ -40,6 +41,16 @@ async function bootstrap() {
       bodyLimit: 10485760, // 10MB
     }),
   );
+
+  // Configure cookie support
+  await app.register(fastifyCookie, {
+    secret: process.env.COOKIE_SECRET || 'my-secret-key-change-in-production',
+    parseOptions: {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+    },
+  });
 
   // Configure security headers with Helmet
   await app.register(fastifyHelmet, {
@@ -99,8 +110,9 @@ async function bootstrap() {
 
   // Enable CORS with environment-specific origins for SaaS applications
   const corsOrigins = process.env.CORS_ORIGINS?.split(',') || [
-    'http://localhost:3000', // Customer app (development)
-    'http://localhost:3001', // Admin app (development)
+    'http://localhost:8080', // Reverse proxy (development)
+    'http://localhost:3000', // Direct customer app (development)
+    'http://localhost:3001', // Direct admin app (development)
     'http://localhost:3002', // SaaS customer portal (development)
     'https://customer.bakewind.com', // Customer app (production)
     'https://admin.bakewind.com', // Admin app (production)
@@ -124,6 +136,9 @@ async function bootstrap() {
       'X-User-Agent',
       'X-Session-ID',
       'X-Trial-ID',
+      'X-Forwarded-Prefix',
+      'X-Forwarded-Host',
+      'X-Forwarded-Proto',
     ],
     exposedHeaders: [
       'X-Total-Count',

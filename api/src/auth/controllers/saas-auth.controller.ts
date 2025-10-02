@@ -146,7 +146,7 @@ export class SaasAuthController {
       });
 
     } catch (error) {
-      if (error.message.includes('already exists')) {
+      if (error instanceof Error && error.message.includes('already exists')) {
         throw new ConflictException('Email already exists');
       }
       throw error;

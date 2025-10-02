@@ -14,7 +14,7 @@ export class WidgetsService {
    * @returns Widget configuration or throws NotFoundException
    */
   async getConfig(userId: string) {
-    const db = this.database.getDb();
+    const db = this.database.database;
 
     const [config] = await db
       .select()
@@ -43,7 +43,7 @@ export class WidgetsService {
    * @returns Updated widget configuration
    */
   async updateConfig(userId: string, dto: UpdateWidgetConfigDto) {
-    const db = this.database.getDb();
+    const db = this.database.database;
 
     // Check if config exists
     const [existingConfig] = await db
@@ -100,7 +100,7 @@ export class WidgetsService {
    * @returns Created widget configuration
    */
   async createDefault(userId: string) {
-    const db = this.database.getDb();
+    const db = this.database.database;
 
     const defaultWidgets = [
       {

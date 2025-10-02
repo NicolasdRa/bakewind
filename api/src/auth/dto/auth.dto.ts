@@ -7,28 +7,28 @@ export class CreateTrialSignupDto {
     example: 'Sweet Dreams Bakery',
   })
   @IsString()
-  businessName: string;
+  businessName!: string;
 
   @ApiProperty({
     description: "User's full name",
     example: 'John Smith',
   })
   @IsString()
-  fullName: string;
+  fullName!: string;
 
   @ApiProperty({
     description: 'Business email address',
     example: 'john@sweetdreamsbakery.com',
   })
   @IsEmail()
-  email: string;
+  email!: string;
 
   @ApiProperty({
     description: 'Contact phone number',
     example: '+1 (555) 123-4567',
   })
   @IsString()
-  phone: string;
+  phone!: string;
 
   @ApiProperty({
     description: 'Account password',
@@ -37,7 +37,7 @@ export class CreateTrialSignupDto {
   })
   @IsString()
   @MinLength(8)
-  password: string;
+  password!: string;
 
   @ApiProperty({
     description: 'Number of bakery locations',
@@ -45,14 +45,14 @@ export class CreateTrialSignupDto {
     enum: ['1', '2-3', '4-10', '10+'],
   })
   @IsEnum(['1', '2-3', '4-10', '10+'])
-  locations: '1' | '2-3' | '4-10' | '10+';
+  locations!: '1' | '2-3' | '4-10' | '10+';
 
   @ApiProperty({
     description: 'Agreement to terms of service',
     example: true,
   })
   @IsBoolean()
-  agreeToTerms: boolean;
+  agreeToTerms!: boolean;
 }
 
 export class LoginDto {
@@ -61,14 +61,14 @@ export class LoginDto {
     example: 'john@sweetdreamsbakery.com',
   })
   @IsEmail()
-  email: string;
+  email!: string;
 
   @ApiProperty({
     description: 'Account password',
     example: 'SecurePassword123!',
   })
   @IsString()
-  password: string;
+  password!: string;
 }
 
 export class RefreshTokenDto {
@@ -77,7 +77,7 @@ export class RefreshTokenDto {
     example: 'refresh_token_value',
   })
   @IsString()
-  refreshToken: string;
+  refreshToken!: string;
 }
 
 export class UserProfileDto {
@@ -85,89 +85,89 @@ export class UserProfileDto {
     description: 'User ID',
     example: '550e8400-e29b-41d4-a716-446655440000',
   })
-  id: string;
+  id!: string;
 
   @ApiProperty({
     description: 'User email',
     example: 'john@sweetdreamsbakery.com',
   })
-  email: string;
+  email!: string;
 
   @ApiProperty({
     description: 'First name',
     example: 'John',
   })
-  firstName: string;
+  firstName!: string;
 
   @ApiProperty({
     description: 'Last name',
     example: 'Smith',
   })
-  lastName: string;
+  lastName!: string;
 
   @ApiProperty({
     description: 'Business name',
     example: 'Sweet Dreams Bakery',
   })
-  businessName: string;
+  businessName!: string;
 
   @ApiProperty({
     description: 'User role',
     example: 'trial_user',
     enum: ['trial_user', 'subscriber', 'admin'],
   })
-  role: string;
+  role!: string;
 
   @ApiProperty({
     description: 'Subscription status',
     example: 'trial',
     enum: ['trial', 'active', 'past_due', 'canceled'],
   })
-  subscriptionStatus: string;
+  subscriptionStatus!: string;
 
   @ApiProperty({
     description: 'Trial end date',
     example: '2025-10-11T23:59:59Z',
     nullable: true,
   })
-  trialEndsAt: string | null;
+  trialEndsAt!: string | null;
 
   @ApiProperty({
     description: 'Email verification status',
     example: true,
   })
-  isEmailVerified: boolean;
+  isEmailVerified!: boolean;
 
   @ApiProperty({
     description: 'Account creation date',
     example: '2025-09-27T12:00:00Z',
   })
-  createdAt: string;
+  createdAt!: string;
 }
 
 export class AuthSuccessResponseDto {
   @ApiProperty({
     description: 'User profile information',
   })
-  user: any;
+  user!: any;
 
   @ApiProperty({
     description: 'JWT access token',
     example: 'eyJhbGciOiJIUzI1NiIs...',
   })
-  accessToken: string;
+  accessToken!: string;
 
   @ApiProperty({
     description: 'Refresh token (also set as httpOnly cookie)',
     example: 'refresh_token_value',
   })
-  refreshToken: string;
+  refreshToken!: string;
 
   @ApiProperty({
     description: 'URL to redirect to dashboard',
     example: '/admin/overview',
   })
-  dashboardUrl: string;
+  dashboardUrl!: string;
 }
 
 export class TokenResponseDto {
@@ -175,7 +175,7 @@ export class TokenResponseDto {
     description: 'New JWT access token',
     example: 'eyJhbGciOiJIUzI1NiIs...',
   })
-  accessToken: string;
+  accessToken!: string;
 }
 
 export class ErrorResponseDto {
@@ -183,7 +183,7 @@ export class ErrorResponseDto {
     description: 'Error message',
     example: 'Invalid input data',
   })
-  message: string;
+  message!: string;
 
   @ApiProperty({
     description: 'Error code',

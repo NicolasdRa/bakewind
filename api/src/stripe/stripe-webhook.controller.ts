@@ -70,7 +70,8 @@ export class StripeWebhookController {
 
       this.logger.log(`Received Stripe webhook: ${event.type} (${event.id})`);
     } catch (error) {
-      this.logger.error('Webhook signature verification failed:', error.message);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error('Webhook signature verification failed:', errorMessage);
       throw new BadRequestException('Invalid webhook signature');
     }
 

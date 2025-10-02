@@ -96,6 +96,34 @@ const loginUser = action(async (formData: FormData) => {
 
     console.log('💾 [LOGIN_API] Session created, redirecting...');
 
+    // Create secure transfer session via API
+    console.log('🔐 [LOGIN_API] Creating secure transfer session...');
+    const transferResponse = await fetch(`${process.env.VITE_API_URL || "http://localhost:5000"}/auth/create-transfer-session`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        accessToken,
+        refreshToken,
+        userId: data.user.id,
+      }),
+    });
+
+    if (!transferResponse.ok) {
+      console.error('❌ [LOGIN_API] Failed to create transfer session');
+      throw new Error("Failed to create transfer session");
+    }
+
+    const { sessionId } = await transferResponse.json();
+    console.log('✅ [LOGIN_API] Transfer session created:', sessionId);
+
+    // Build admin redirect URL with session ID (NOT tokens)
+    const adminAppUrl = process.env.VITE_ADMIN_APP_URL || 'http://localhost:3001';
+    const redirectUrl = `${adminAppUrl}/auth/callback?session=${sessionId}`;
+
+    console.log('🧭 [LOGIN_API] Redirecting to admin app with session ID');
+
     // Check if user has multiple locations - redirect to selection
     if (data.user.locationId && data.user.locationId.length > 1) {
       throw redirect("/select-location");
@@ -103,15 +131,9 @@ const loginUser = action(async (formData: FormData) => {
       // Auto-select single location and redirect to dashboard
       const { updateUserLocation } = await import("~/lib/auth-session");
       await updateUserLocation(data.user.locationId[0]);
-
-      // Determine redirect based on role
-      const { getRedirectUrlBasedOnPermission } = await import("~/lib/permissions");
-      const redirectUrl = getRedirectUrlBasedOnPermission(sessionUser.role);
       throw redirect(redirectUrl);
     } else {
       // No locations assigned - redirect to dashboard anyway
-      const { getRedirectUrlBasedOnPermission } = await import("~/lib/permissions");
-      const redirectUrl = getRedirectUrlBasedOnPermission(sessionUser.role);
       throw redirect(redirectUrl);
     }
 

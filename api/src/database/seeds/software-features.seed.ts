@@ -504,7 +504,8 @@ export class SoftwareFeaturesSeed {
       return { isValid, issues };
     } catch (error) {
       this.logger.error('Failed to validate feature consistency:', error);
-      return { isValid: false, issues: [`Validation error: ${error.message}`] };
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return { isValid: false, issues: [`Validation error: ${errorMessage}`] };
     }
   }
 

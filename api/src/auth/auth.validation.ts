@@ -10,7 +10,7 @@ export const jwtPayloadSchema = z.object({
   role: z.enum(userRoleValues),
   type: z.enum(['access', 'refresh']).optional(),
   iat: z.number().optional(),
-  exp: z.number().optional(),
+  exp: z.number(),
 });
 
 /**

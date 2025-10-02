@@ -20,9 +20,12 @@ import { UserSessionsModule } from './user-sessions/user-sessions.module';
 import { StripeModule } from './stripe/stripe.module';
 import { WidgetsModule } from './widgets/widgets.module';
 import { OrderLocksModule } from './order-locks/order-locks.module';
+import { InventoryModule } from './inventory/inventory.module';
+import { RealtimeModule } from './realtime/realtime.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
 import { CorrelationIdMiddleware } from './common/middleware/correlation-id.middleware';
+import { RedisModule } from './redis/redis.module';
 
 import configuration, { AppConfig } from './config/configuration';
 
@@ -34,6 +37,9 @@ import configuration, { AppConfig } from './config/configuration';
       load: [configuration],
       envFilePath: ['.env.local', '.env'],
     }),
+
+    // Redis module (global)
+    RedisModule,
 
     // Rate limiting
     ThrottlerModule.forRootAsync({
@@ -69,6 +75,8 @@ import configuration, { AppConfig } from './config/configuration';
     StripeModule,
     WidgetsModule,
     OrderLocksModule,
+    InventoryModule,
+    RealtimeModule,
     HealthModule,
     CommonModule,
   ],

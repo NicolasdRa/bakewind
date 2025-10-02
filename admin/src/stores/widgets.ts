@@ -3,7 +3,7 @@
  * Manages dashboard widget configuration state
  */
 
-import { createSignal, createEffect } from 'solid-js';
+import { createSignal } from 'solid-js';
 import { widgetsApi, Widget, WidgetConfiguration, UpdateWidgetConfigDto } from '../api/client';
 
 // Store state

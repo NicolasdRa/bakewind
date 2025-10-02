@@ -1,5 +1,6 @@
-import { Router, Route, } from "@solidjs/router";
+import { Router, Route } from "@solidjs/router";
 import { Component, lazy } from "solid-js";
+import { Navigate } from "@solidjs/router";
 
 import ProtectedPage from "./ProtectedPage";
 import RootLayout from "./RootLayout";
@@ -13,15 +14,33 @@ const ProductionPage = lazy(() => import("./pages/production/ProductionPage"));
 const RecipesPage = lazy(() => import("./pages/recipes/RecipesPage"));
 const CustomersPage = lazy(() => import("./pages/customers/CustomersPage"));
 const AnalyticsPage = lazy(() => import("./pages/analytics/AnalyticsPage"));
-
+const ProductsPage = lazy(() => import("./pages/Products"));
+const ProfilePage = lazy(() => import("./pages/Profile"));
+const SettingsPage = lazy(() => import("./pages/Settings"));
+const AuthCallback = lazy(() => import("./pages/AuthCallback"));
+const DevLogin = lazy(() => import("./pages/DevLogin"));
 
 const App: Component = () => {
   console.log('[App] Rendering App component');
 
+  // Get base path from environment (for proxy setup) or use root
+  const basePath = import.meta.env.VITE_BASE_PATH || '';
+  console.log('[App] Base path:', basePath);
+
   return (
-    <Router root={RootLayout}>
+    <Router base={basePath} root={RootLayout}>
+      {/* Auth callback route - public, no protection */}
+      <Route path="/auth/callback" component={AuthCallback} />
+
+      {/* Development-only direct login (bypasses cookie issues on localhost) */}
+      <Route path="/dev-login" component={DevLogin} />
+
+      {/* Redirect root to dashboard */}
+      <Route path="/" component={() => <Navigate href="/dashboard/overview" />} />
+
+      {/* Dashboard routes - all under /dashboard/* */}
       <Route
-        path="/"
+        path="/dashboard/overview"
         component={() => (
           <ProtectedPage>
             <Dashboard />
@@ -29,7 +48,7 @@ const App: Component = () => {
         )}
       />
       <Route
-        path="/orders"
+        path="/dashboard/orders"
         component={() => (
           <ProtectedPage>
             <OrdersPage />
@@ -37,7 +56,7 @@ const App: Component = () => {
         )}
       />
       <Route
-        path="/inventory"
+        path="/dashboard/inventory"
         component={() => (
           <ProtectedPage>
             <InventoryPage />
@@ -45,7 +64,7 @@ const App: Component = () => {
         )}
       />
       <Route
-        path="/production"
+        path="/dashboard/production"
         component={() => (
           <ProtectedPage>
             <ProductionPage />
@@ -53,7 +72,7 @@ const App: Component = () => {
         )}
       />
       <Route
-        path="/recipes"
+        path="/dashboard/recipes"
         component={() => (
           <ProtectedPage>
             <RecipesPage />
@@ -61,7 +80,15 @@ const App: Component = () => {
         )}
       />
       <Route
-        path="/customers"
+        path="/dashboard/products"
+        component={() => (
+          <ProtectedPage>
+            <ProductsPage />
+          </ProtectedPage>
+        )}
+      />
+      <Route
+        path="/dashboard/customers"
         component={() => (
           <ProtectedPage>
             <CustomersPage />
@@ -69,14 +96,30 @@ const App: Component = () => {
         )}
       />
       <Route
-        path="/analytics"
+        path="/dashboard/analytics"
         component={() => (
           <ProtectedPage>
             <AnalyticsPage />
           </ProtectedPage>
         )}
       />
-        <Route path="*paramName" component={NotFound} />
+      <Route
+        path="/dashboard/profile"
+        component={() => (
+          <ProtectedPage>
+            <ProfilePage />
+          </ProtectedPage>
+        )}
+      />
+      <Route
+        path="/dashboard/settings"
+        component={() => (
+          <ProtectedPage>
+            <SettingsPage />
+          </ProtectedPage>
+        )}
+      />
+      <Route path="*paramName" component={NotFound} />
     </Router>
   );
 };

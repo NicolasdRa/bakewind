@@ -1,5 +1,5 @@
 import { RouteSectionProps } from "@solidjs/router";
-import { Component, ParentComponent } from "solid-js";
+import { Component } from "solid-js";
 import { AuthProvider } from "./stores/authStore";
 import Layout from "./Layout";
 

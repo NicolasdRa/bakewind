@@ -7,7 +7,10 @@ import {
   Request,
   HttpCode,
   HttpStatus,
+  Res,
+  UnauthorizedException,
 } from '@nestjs/common';
+import { FastifyReply } from 'fastify';
 import {
   ApiTags,
   ApiOperation,
@@ -23,11 +26,35 @@ import { LoginUserDto } from '../users/dto/login-user.dto';
 import { userRegistrationSchema } from '../users/users.validation';
 import { Public } from './decorators/public.decorator';
 import { TrialSignupDto } from './trial-signup.validation';
+import {
+  CreateTransferSessionDto,
+  ExchangeTransferSessionDto,
+  TransferSessionResponse,
+  TransferSessionTokens,
+} from './dto/auth-transfer.dto';
 
 @ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
+
+  /**
+   * Get cookie options for tokens
+   * Must be consistent across all endpoints
+   */
+  private getCookieOptions() {
+    const isProduction = process.env.NODE_ENV === 'production';
+
+    // Development: Using reverse proxy on localhost:8080
+    // Production: Using subdomain with shared parent domain
+    return {
+      httpOnly: true,
+      secure: false, // false for HTTP in development, true for HTTPS in production
+      sameSite: 'lax' as const,
+      path: '/', // Cookies accessible from all paths
+      // Domain not set - cookies will be scoped to the serving domain (localhost:8080 in dev)
+    };
+  }
 
   @Public()
   @Post('login')
@@ -72,10 +99,33 @@ export class AuthController {
     status: 429,
     description: 'Too many login attempts',
   })
-  async login(@Body() loginDto: LoginUserDto, @Request() req: any) {
+  async login(
+    @Body() loginDto: LoginUserDto,
+    @Request() req: any,
+    @Res({ passthrough: true }) res: FastifyReply,
+  ) {
     console.log('🚀 Auth Controller login method called with:', loginDto);
     const auditContext = req.auditContext;
-    return this.authService.login(loginDto, auditContext);
+    const result = await this.authService.login(loginDto, auditContext);
+
+    // Set httpOnly cookies for tokens
+    const cookieOptions = this.getCookieOptions();
+
+    res.setCookie('accessToken', result.accessToken, {
+      ...cookieOptions,
+      maxAge: 15 * 60 * 1000, // 15 minutes
+    });
+
+    res.setCookie('refreshToken', result.refreshToken, {
+      ...cookieOptions,
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    // Return user data without tokens (tokens are in cookies)
+    return {
+      user: result.user,
+      expiresIn: result.expiresIn,
+    };
   }
 
   @Public()
@@ -181,18 +231,21 @@ export class AuthController {
   }
 
   @Post('refresh')
-  @UseGuards(JwtRefreshAuthGuard)
+  @Public() // Allow refresh without JWT guard since we're using cookies
   @HttpCode(HttpStatus.OK)
-  @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Refresh access token using refresh token' })
+  @ApiOperation({
+    summary: 'Refresh access token using refresh token',
+    description:
+      'Refreshes the access token using the refresh token from httpOnly cookie. ' +
+      'Implements token rotation - old refresh token is invalidated.',
+  })
   @ApiResponse({
     status: 200,
     description: 'Tokens refreshed successfully',
     schema: {
       type: 'object',
       properties: {
-        accessToken: { type: 'string' },
-        refreshToken: { type: 'string' },
+        message: { type: 'string', example: 'Tokens refreshed successfully' },
       },
     },
   })
@@ -200,15 +253,46 @@ export class AuthController {
     status: 401,
     description: 'Invalid refresh token',
   })
-  async refresh(@Request() req: any) {
-    return this.authService.refreshTokens(req.user.refreshToken);
+  async refresh(
+    @Request() req: any,
+    @Res({ passthrough: true }) res: FastifyReply,
+  ) {
+    // Extract refresh token from cookie
+    const refreshToken = req.cookies?.refreshToken;
+
+    if (!refreshToken) {
+      throw new UnauthorizedException('No refresh token provided');
+    }
+
+    // Refresh tokens (with rotation)
+    const tokens = await this.authService.refreshTokens(refreshToken);
+
+    // Set new httpOnly cookies
+    const cookieOptions = this.getCookieOptions();
+
+    res.setCookie('accessToken', tokens.accessToken, {
+      ...cookieOptions,
+      maxAge: 15 * 60 * 1000, // 15 minutes
+    });
+
+    res.setCookie('refreshToken', tokens.refreshToken, {
+      ...cookieOptions,
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    return { message: 'Tokens refreshed successfully' };
   }
 
   @Post('logout')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Logout and invalidate refresh token' })
+  @ApiOperation({
+    summary: 'Logout and invalidate tokens',
+    description:
+      'Invalidates the refresh token and blacklists the current access token. ' +
+      'The access token will be rejected for all future requests.',
+  })
   @ApiResponse({
     status: 200,
     description: 'Successfully logged out',
@@ -223,8 +307,22 @@ export class AuthController {
     status: 401,
     description: 'Unauthorized',
   })
-  async logout(@Request() req: any) {
-    await this.authService.logout(req.user.id);
+  async logout(
+    @Request() req: any,
+    @Res({ passthrough: true }) res: FastifyReply,
+  ) {
+    // Extract access token from cookie or Authorization header
+    const accessToken =
+      req.cookies?.accessToken ||
+      req.headers.authorization?.replace('Bearer ', '');
+
+    // Logout and blacklist token
+    await this.authService.logout(req.user.id, accessToken);
+
+    // Clear httpOnly cookies
+    res.clearCookie('accessToken', { path: '/' });
+    res.clearCookie('refreshToken', { path: '/' });
+
     return { message: 'Successfully logged out' };
   }
 
@@ -265,5 +363,123 @@ export class AuthController {
       ...req.user,
       locationId: locationIds,
     };
+  }
+
+  @Public()
+  @Post('create-transfer-session')
+  @HttpCode(HttpStatus.CREATED)
+  @Throttle({ default: { limit: 10, ttl: 60000 } }) // 10 per minute
+  @ApiOperation({
+    summary: 'Create a secure auth transfer session for cross-domain authentication',
+    description:
+      'Creates a one-time, short-lived (30s) session for securely transferring tokens between domains. ' +
+      'This is used when redirecting from the customer website to the admin dashboard.',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Transfer session created successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        sessionId: {
+          type: 'string',
+          description: 'Unique session ID for token exchange',
+        },
+        expiresIn: {
+          type: 'number',
+          description: 'Time until session expires (seconds)',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 429,
+    description: 'Too many requests',
+  })
+  async createTransferSession(
+    @Body() dto: CreateTransferSessionDto,
+  ): Promise<TransferSessionResponse> {
+    return this.authService.createAuthTransferSession(
+      dto.accessToken,
+      dto.refreshToken,
+      dto.userId,
+    );
+  }
+
+  @Public()
+  @Post('create-cookie-session')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Create cookie session from tokens',
+    description:
+      'Internal endpoint used by admin dashboard to set httpOnly cookies ' +
+      'after receiving tokens from transfer session exchange.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Cookies set successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string', example: 'Session created successfully' },
+      },
+    },
+  })
+  async createCookieSession(
+    @Body() body: { accessToken: string; refreshToken: string },
+    @Res({ passthrough: true }) res: FastifyReply,
+  ) {
+    const { accessToken, refreshToken } = body;
+
+    // Set httpOnly cookies
+    const cookieOptions = this.getCookieOptions();
+
+    res.setCookie('accessToken', accessToken, {
+      ...cookieOptions,
+      maxAge: 15 * 60 * 1000, // 15 minutes
+    });
+
+    res.setCookie('refreshToken', refreshToken, {
+      ...cookieOptions,
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    return { message: 'Session created successfully' };
+  }
+
+  @Public()
+  @Post('exchange-transfer-session')
+  @HttpCode(HttpStatus.OK)
+  @Throttle({ default: { limit: 10, ttl: 60000 } }) // 10 per minute
+  @ApiOperation({
+    summary: 'Exchange a transfer session ID for authentication tokens',
+    description:
+      'Exchanges a one-time session ID for the stored access and refresh tokens. ' +
+      'The session is deleted after exchange and cannot be reused.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Tokens retrieved successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        accessToken: { type: 'string' },
+        refreshToken: { type: 'string' },
+        userId: { type: 'string' },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Invalid or expired session ID',
+  })
+  @ApiResponse({
+    status: 429,
+    description: 'Too many requests',
+  })
+  async exchangeTransferSession(
+    @Body() dto: ExchangeTransferSessionDto,
+  ): Promise<TransferSessionTokens> {
+    return this.authService.exchangeAuthTransferSession(dto.sessionId);
   }
 }

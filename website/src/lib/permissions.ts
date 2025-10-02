@@ -93,3 +93,32 @@ export const getRedirectUrlBasedOnPermission = (role: UserRole): string => {
     return adminAppUrl;
   }
 };
+
+/**
+ * Build admin app redirect URL with authentication tokens
+ */
+export const buildAdminRedirectUrl = (
+  accessToken: string,
+  refreshToken: string,
+  user: {
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    role: string;
+  }
+): string => {
+  const adminAppUrl = import.meta.env.VITE_ADMIN_APP_URL || "http://localhost:3001";
+
+  // Encode user data
+  const userParam = encodeURIComponent(JSON.stringify({
+    id: user.id,
+    email: user.email,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    role: user.role,
+  }));
+
+  // Build URL with query parameters
+  return `${adminAppUrl}?accessToken=${encodeURIComponent(accessToken)}&refreshToken=${encodeURIComponent(refreshToken)}&user=${userParam}`;
+};

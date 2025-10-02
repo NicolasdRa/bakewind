@@ -1,17 +1,21 @@
-import { Injectable, NotFoundException, ConflictException, Inject } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, Inject, forwardRef } from '@nestjs/common';
 import { eq, and, lt } from 'drizzle-orm';
-import { db } from '../database/db';
+import { DatabaseService } from '../database/database.service';
 import { orderLocks, usersTable, orders } from '../database/schemas';
 import { RedisConfigService } from '../config/redis.config';
 import { AcquireLockDto, OrderLockResponseDto, UnlockedStatusDto } from './dto/acquire-lock.dto';
+import { RealtimeService } from '../realtime/realtime.service';
 
 @Injectable()
 export class OrderLocksService {
   private readonly LOCK_TTL_SECONDS = 300; // 5 minutes
 
   constructor(
+    private readonly databaseService: DatabaseService,
     @Inject(RedisConfigService)
     private readonly redisConfig: RedisConfigService,
+    @Inject(forwardRef(() => RealtimeService))
+    private readonly realtimeService: RealtimeService,
   ) {}
 
   async acquireLock(userId: string, dto: AcquireLockDto): Promise<OrderLockResponseDto> {
@@ -19,7 +23,7 @@ export class OrderLocksService {
     const lockKey = `order_lock:${dto.order_id}`;
 
     // Check if order exists
-    const [order] = await db.select().from(orders).where(eq(orders.id, dto.order_id)).limit(1);
+    const [order] = await this.databaseService.database.select().from(orders).where(eq(orders.id, dto.order_id)).limit(1);
     if (!order) {
       throw new NotFoundException('Order not found');
     }
@@ -50,15 +54,17 @@ export class OrderLocksService {
 
     try {
       // Check if lock already exists in DB
-      const [existingDbLock] = await db
+      const [existingDbLock] = await this.databaseService.database
         .select()
         .from(orderLocks)
         .where(eq(orderLocks.orderId, dto.order_id))
         .limit(1);
 
+      let lockResponse: OrderLockResponseDto;
+
       if (existingDbLock) {
         // Update existing lock
-        const [updatedLock] = await db
+        const [updatedLock] = await this.databaseService.database
           .update(orderLocks)
           .set({
             lockedByUserId: userId,
@@ -70,10 +76,10 @@ export class OrderLocksService {
           .where(eq(orderLocks.orderId, dto.order_id))
           .returning();
 
-        return this.mapToResponseDto(updatedLock);
+        lockResponse = await this.mapToResponseDto(updatedLock);
       } else {
         // Insert new lock
-        const [newLock] = await db
+        const [newLock] = await this.databaseService.database
           .insert(orderLocks)
           .values({
             orderId: dto.order_id,
@@ -85,8 +91,18 @@ export class OrderLocksService {
           })
           .returning();
 
-        return this.mapToResponseDto(newLock);
+        lockResponse = await this.mapToResponseDto(newLock);
       }
+
+      // Broadcast lock notification to all clients
+      this.realtimeService.broadcastOrderLocked({
+        order_id: lockResponse.order_id,
+        locked_by_user_id: lockResponse.locked_by_user_id,
+        locked_by_user_name: lockResponse.locked_by_user_name,
+        locked_at: lockResponse.locked_at,
+      });
+
+      return lockResponse;
     } catch (error) {
       // Rollback Redis lock if DB operation fails
       await redis.del(lockKey);
@@ -99,7 +115,7 @@ export class OrderLocksService {
     const lockKey = `order_lock:${orderId}`;
 
     // Find lock in DB
-    const [lock] = await db
+    const [lock] = await this.databaseService.database
       .select()
       .from(orderLocks)
       .where(and(eq(orderLocks.orderId, orderId), eq(orderLocks.lockedByUserId, userId)))
@@ -110,10 +126,13 @@ export class OrderLocksService {
     }
 
     // Delete from DB
-    await db.delete(orderLocks).where(eq(orderLocks.id, lock.id));
+    await this.databaseService.database.delete(orderLocks).where(eq(orderLocks.id, lock.id));
 
     // Delete from Redis
     await redis.del(lockKey);
+
+    // Broadcast unlock notification to all clients
+    this.realtimeService.broadcastOrderUnlocked(orderId);
   }
 
   async renewLock(userId: string, orderId: string): Promise<OrderLockResponseDto> {
@@ -121,7 +140,7 @@ export class OrderLocksService {
     const lockKey = `order_lock:${orderId}`;
 
     // Find lock owned by user
-    const [lock] = await db
+    const [lock] = await this.databaseService.database
       .select()
       .from(orderLocks)
       .where(and(eq(orderLocks.orderId, orderId), eq(orderLocks.lockedByUserId, userId)))
@@ -136,7 +155,7 @@ export class OrderLocksService {
 
     // Update DB
     const expiresAt = new Date(Date.now() + this.LOCK_TTL_SECONDS * 1000);
-    const [updatedLock] = await db
+    const [updatedLock] = await this.databaseService.database
       .update(orderLocks)
       .set({
         expiresAt,
@@ -150,16 +169,16 @@ export class OrderLocksService {
 
   async getLockStatus(orderId: string): Promise<OrderLockResponseDto | UnlockedStatusDto> {
     // Check if order exists
-    const [order] = await db.select().from(orders).where(eq(orders.id, orderId)).limit(1);
+    const [order] = await this.databaseService.database.select().from(orders).where(eq(orders.id, orderId)).limit(1);
     if (!order) {
       throw new NotFoundException('Order not found');
     }
 
     // Get lock from DB
-    const [lock] = await db
+    const [lock] = await this.databaseService.database
       .select()
       .from(orderLocks)
-      .where(and(eq(orderLocks.orderId, orderId), lt(new Date(), orderLocks.expiresAt)))
+      .where(and(eq(orderLocks.orderId, orderId), lt(orderLocks.expiresAt, new Date())))
       .limit(1);
 
     if (!lock) {
@@ -173,14 +192,14 @@ export class OrderLocksService {
   }
 
   async cleanupExpired(): Promise<number> {
-    const result = await db.delete(orderLocks).where(lt(orderLocks.expiresAt, new Date()));
+    const result = await this.databaseService.database.delete(orderLocks).where(lt(orderLocks.expiresAt, new Date()));
     return result.rowCount || 0;
   }
 
   private async mapToResponseDto(lock: typeof orderLocks.$inferSelect): Promise<OrderLockResponseDto> {
-    // Get user name
-    const [user] = await db
-      .select({ name: usersTable.name })
+    // Get user name from firstName and lastName
+    const [user] = await this.databaseService.database
+      .select({ firstName: usersTable.firstName, lastName: usersTable.lastName })
       .from(usersTable)
       .where(eq(usersTable.id, lock.lockedByUserId))
       .limit(1);
@@ -189,7 +208,7 @@ export class OrderLocksService {
       id: lock.id,
       order_id: lock.orderId,
       locked_by_user_id: lock.lockedByUserId,
-      locked_by_user_name: user?.name || 'Unknown User',
+      locked_by_user_name: user ? `${user.firstName} ${user.lastName}` : 'Unknown User',
       locked_by_session_id: lock.lockedBySessionId,
       locked_at: lock.lockedAt.toISOString(),
       expires_at: lock.expiresAt.toISOString(),

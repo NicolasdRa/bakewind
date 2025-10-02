@@ -141,10 +141,10 @@ export class UserSessionsService {
 
       return payload;
     } catch (error) {
-      if (error.name === 'TokenExpiredError') {
+      if (error instanceof Error && error.name === 'TokenExpiredError') {
         throw new UnauthorizedException('Token expired');
       }
-      if (error.name === 'JsonWebTokenError') {
+      if (error instanceof Error && error.name === 'JsonWebTokenError') {
         throw new UnauthorizedException('Invalid token');
       }
       throw error;
@@ -188,10 +188,10 @@ export class UserSessionsService {
 
       return tokens;
     } catch (error) {
-      if (error.name === 'TokenExpiredError') {
+      if (error instanceof Error && error.name === 'TokenExpiredError') {
         throw new UnauthorizedException('Refresh token expired');
       }
-      if (error.name === 'JsonWebTokenError') {
+      if (error instanceof Error && error.name === 'JsonWebTokenError') {
         throw new UnauthorizedException('Invalid refresh token');
       }
       throw error;

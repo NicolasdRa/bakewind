@@ -7,14 +7,14 @@ export class CreateSubscriptionPlanDto {
     example: 'Professional',
   })
   @IsString()
-  name: string;
+  name!: string;
 
   @ApiProperty({
     description: 'Plan description',
     example: 'Ideal for growing bakeries with multiple locations',
   })
   @IsString()
-  description: string;
+  description!: string;
 
   @ApiProperty({
     description: 'Monthly price in cents',
@@ -22,7 +22,7 @@ export class CreateSubscriptionPlanDto {
   })
   @IsNumber()
   @Min(0)
-  priceMonthlyUsd: number;
+  priceMonthlyUsd!: number;
 
   @ApiProperty({
     description: 'Annual price in cents',
@@ -30,7 +30,7 @@ export class CreateSubscriptionPlanDto {
   })
   @IsNumber()
   @Min(0)
-  priceAnnualUsd: number;
+  priceAnnualUsd!: number;
 
   @ApiPropertyOptional({
     description: 'Maximum number of locations',
@@ -86,7 +86,7 @@ export class CreateSubscriptionPlanDto {
     example: 2,
   })
   @IsNumber()
-  sortOrder: number;
+  sortOrder!: number;
 
   @ApiPropertyOptional({
     description: 'Whether the plan is active',
@@ -203,95 +203,95 @@ export class SubscriptionPlanResponseDto {
     description: 'Plan ID',
     example: '550e8400-e29b-41d4-a716-446655440001',
   })
-  id: string;
+  id!: string;
 
   @ApiProperty({
     description: 'Plan name',
     example: 'Professional',
   })
-  name: string;
+  name!: string;
 
   @ApiProperty({
     description: 'Plan description',
     example: 'Ideal for growing bakeries with multiple locations',
   })
-  description: string;
+  description!: string;
 
   @ApiProperty({
     description: 'Monthly price in cents',
     example: 14900,
   })
-  priceMonthlyUsd: number;
+  priceMonthlyUsd!: number;
 
   @ApiProperty({
     description: 'Annual price in cents',
     example: 143040,
   })
-  priceAnnualUsd: number;
+  priceAnnualUsd!: number;
 
   @ApiProperty({
     description: 'Maximum number of locations',
     example: 3,
     nullable: true,
   })
-  maxLocations: number | null;
+  maxLocations!: number | null;
 
   @ApiProperty({
     description: 'Maximum number of users',
     example: 10,
     nullable: true,
   })
-  maxUsers: number | null;
+  maxUsers!: number | null;
 
   @ApiProperty({
     description: 'List of features included in this plan',
     example: ['advanced_analytics', 'multi_location', 'staff_management'],
   })
-  features: string[];
+  features!: string[];
 
   @ApiProperty({
     description: 'Stripe monthly price ID',
     example: 'price_1234567890abcdef',
     nullable: true,
   })
-  stripePriceIdMonthly: string | null;
+  stripePriceIdMonthly!: string | null;
 
   @ApiProperty({
     description: 'Stripe annual price ID',
     example: 'price_1234567890abcdef_annual',
     nullable: true,
   })
-  stripePriceIdAnnual: string | null;
+  stripePriceIdAnnual!: string | null;
 
   @ApiProperty({
     description: 'Whether this is a popular plan',
     example: true,
   })
-  isPopular: boolean;
+  isPopular!: boolean;
 
   @ApiProperty({
     description: 'Sort order for display',
     example: 2,
   })
-  sortOrder: number;
+  sortOrder!: number;
 
   @ApiProperty({
     description: 'Whether the plan is active',
     example: true,
   })
-  isActive: boolean;
+  isActive!: boolean;
 
   @ApiProperty({
     description: 'Plan creation date',
     example: '2025-09-27T12:00:00Z',
   })
-  createdAt: string;
+  createdAt!: string;
 
   @ApiProperty({
     description: 'Plan last update date',
     example: '2025-09-27T12:00:00Z',
   })
-  updatedAt: string;
+  updatedAt!: string;
 }
 
 export class SubscriptionPlanQueryDto {

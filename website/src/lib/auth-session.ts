@@ -19,7 +19,15 @@ export interface SessionData {
 
 // Generate a strong session secret with: openssl rand -base64 32
 // Store this in your environment variables in production
-const SESSION_SECRET = process.env.SESSION_SECRET || "your-super-secret-session-key-at-least-32-chars";
+const SESSION_SECRET = process.env.SESSION_SECRET || "default-dev-secret-32chars-min!!";
+
+// Validate session secret length
+if (SESSION_SECRET.length < 32) {
+  throw new Error(
+    `SESSION_SECRET must be at least 32 characters. Current length: ${SESSION_SECRET.length}. ` +
+    `Generate a secure secret with: openssl rand -base64 32`
+  );
+}
 
 // Cache the session per request to avoid multiple cookie operations
 const sessionCache = new WeakMap();

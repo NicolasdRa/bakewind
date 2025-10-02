@@ -45,7 +45,8 @@ export class JwtAuthMiddleware implements NestMiddleware {
 
       next();
     } catch (error) {
-      this.logger.error(`Authentication failed for ${req.method} ${req.path}:`, error.message);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(`Authentication failed for ${req.method} ${req.path}:`, errorMessage);
 
       // Clear any potentially invalid cookies
       this.clearAuthCookies(res);

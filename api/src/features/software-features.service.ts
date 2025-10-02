@@ -127,7 +127,7 @@ export class SoftwareFeaturesService {
     const allFeatures = await this.findAll(true);
 
     return allFeatures.filter(feature =>
-      feature.availableInPlans.some(planId => planIds.includes(planId))
+      feature.availableInPlans.some((planId: string) => planIds.includes(planId))
     );
   }
 
@@ -239,7 +239,7 @@ export class SoftwareFeaturesService {
     const feature = await this.findById(featureId);
 
     if (feature.availableInPlans.includes(planId)) {
-      const updatedPlans = feature.availableInPlans.filter(id => id !== planId);
+      const updatedPlans = feature.availableInPlans.filter((id: string) => id !== planId);
 
       const [updatedFeature] = await this.db.database
         .update(softwareFeaturesTable)

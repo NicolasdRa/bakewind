@@ -1,0 +1,65 @@
+# BakeWind Development Reverse Proxy
+# This serves all three apps on localhost:8080 with different paths
+# to enable cookie sharing across apps in development
+
+# Disable automatic HTTPS for development
+{
+    auto_https off
+}
+
+http://localhost:8080 {
+    # Enable logging for debugging
+    log {
+        output file ./logs/caddy.log
+        level INFO
+    }
+
+    # Health check endpoint
+    handle /health {
+        respond "Proxy OK - BakeWind Development" 200
+    }
+
+    # API - /api/* (highest priority, most specific path)
+    handle /api/* {
+        reverse_proxy localhost:5000
+    }
+
+    # Admin Dashboard - /admin/* and admin assets
+    handle /admin* {
+        reverse_proxy localhost:3001
+    }
+
+    # Admin assets (Vite dev server assets for admin)
+    handle /src/* {
+        reverse_proxy localhost:3001
+    }
+
+    handle /@vite/* {
+        reverse_proxy localhost:3001
+    }
+
+    handle /@id/* {
+        reverse_proxy localhost:3001
+    }
+
+    handle /node_modules/* {
+        reverse_proxy localhost:3001
+    }
+
+    # Customer Website - /* (catch-all, lowest priority)
+    handle {
+        reverse_proxy localhost:3000
+    }
+
+    # Enable CORS
+    @options method OPTIONS
+    handle @options {
+        header {
+            Access-Control-Allow-Origin "*"
+            Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+            Access-Control-Allow-Headers "Content-Type, Authorization, Accept, Origin, X-Requested-With, Cookie"
+            Access-Control-Allow-Credentials "true"
+        }
+        respond 204
+    }
+}

@@ -57,7 +57,7 @@ export class ChangePasswordDto {
     example: 'CurrentPassword123!',
   })
   @IsString()
-  currentPassword: string;
+  currentPassword!: string;
 
   @ApiProperty({
     description: 'New password',
@@ -66,7 +66,7 @@ export class ChangePasswordDto {
   })
   @IsString()
   @MinLength(8)
-  newPassword: string;
+  newPassword!: string;
 }
 
 export class UserProfileResponseDto {
@@ -74,100 +74,100 @@ export class UserProfileResponseDto {
     description: 'User ID',
     example: '550e8400-e29b-41d4-a716-446655440000',
   })
-  id: string;
+  id!: string;
 
   @ApiProperty({
     description: 'User email',
     example: 'john@sweetdreamsbakery.com',
   })
-  email: string;
+  email!: string;
 
   @ApiProperty({
     description: 'Company name',
     example: 'Sweet Dreams Bakery',
   })
-  companyName: string;
+  companyName!: string;
 
   @ApiProperty({
     description: 'Company phone number',
     example: '+1 (555) 123-4567',
     nullable: true,
   })
-  companyPhone: string | null;
+  companyPhone!: string | null;
 
   @ApiProperty({
     description: 'Company address',
     example: '123 Main St, Anytown, ST 12345',
     nullable: true,
   })
-  companyAddress: string | null;
+  companyAddress!: string | null;
 
   @ApiProperty({
     description: 'Company website URL',
     example: 'https://sweetdreamsbakery.com',
     nullable: true,
   })
-  companyWebsite: string | null;
+  companyWebsite!: string | null;
 
   @ApiProperty({
     description: 'User role',
     example: 'owner',
     enum: ['owner', 'admin', 'manager', 'staff'],
   })
-  role: string;
+  role!: string;
 
   @ApiProperty({
     description: 'Account status',
     example: 'active',
     enum: ['active', 'inactive', 'suspended'],
   })
-  status: string;
+  status!: string;
 
   @ApiProperty({
     description: 'Email verification status',
     example: true,
   })
-  emailVerified: boolean;
+  emailVerified!: boolean;
 
   @ApiProperty({
     description: 'User timezone',
     example: 'America/New_York',
     nullable: true,
   })
-  timezone: string | null;
+  timezone!: string | null;
 
   @ApiProperty({
     description: 'User language preference',
     example: 'en',
     nullable: true,
   })
-  language: string | null;
+  language!: string | null;
 
   @ApiProperty({
     description: 'Stripe customer ID',
     example: 'cus_1234567890abcdef',
     nullable: true,
   })
-  stripeCustomerId: string | null;
+  stripeCustomerId!: string | null;
 
   @ApiProperty({
     description: 'Last login timestamp',
     example: '2025-09-27T12:00:00Z',
     nullable: true,
   })
-  lastLoginAt: string | null;
+  lastLoginAt!: string | null;
 
   @ApiProperty({
     description: 'Account creation date',
     example: '2025-09-27T12:00:00Z',
   })
-  createdAt: string;
+  createdAt!: string;
 
   @ApiProperty({
     description: 'Account last update date',
     example: '2025-09-27T12:00:00Z',
   })
-  updatedAt: string;
+  updatedAt!: string;
 }
 
 export class UserAccountSettingsDto {
