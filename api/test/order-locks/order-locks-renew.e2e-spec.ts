@@ -89,7 +89,9 @@ describe('OrderLocks API - POST /api/v1/order-locks/renew/:orderId (e2e)', () =>
 
       // Verify expires_at was extended
       const newExpiresAt = new Date(renewResponse.body.expires_at);
-      expect(newExpiresAt.getTime()).toBeGreaterThan(originalExpiresAt.getTime());
+      expect(newExpiresAt.getTime()).toBeGreaterThan(
+        originalExpiresAt.getTime(),
+      );
 
       // Verify last_activity_at was updated
       const lastActivityAt = new Date(renewResponse.body.last_activity_at);
@@ -188,7 +190,9 @@ describe('OrderLocks API - POST /api/v1/order-locks/renew/:orderId (e2e)', () =>
           .expect(HttpStatus.OK);
 
         const currentExpiresAt = new Date(renewResponse.body.expires_at);
-        expect(currentExpiresAt.getTime()).toBeGreaterThan(previousExpiresAt.getTime());
+        expect(currentExpiresAt.getTime()).toBeGreaterThan(
+          previousExpiresAt.getTime(),
+        );
         previousExpiresAt = currentExpiresAt;
       }
 

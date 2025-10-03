@@ -18,7 +18,9 @@ export class ZodValidationPipe implements PipeTransform {
       }
       throw new BadRequestException({
         message: 'Validation failed',
-        errors: [{ message: error instanceof Error ? error.message : 'Unknown error' }],
+        errors: [
+          { message: error instanceof Error ? error.message : 'Unknown error' },
+        ],
       });
     }
   }

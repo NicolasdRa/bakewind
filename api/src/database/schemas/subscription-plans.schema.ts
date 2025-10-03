@@ -62,7 +62,10 @@ export const subscriptionPlansTable = pgTable(
     idxPlanActive: index('idx_plan_active').on(table.isActive),
     idxPlanSortOrder: index('idx_plan_sort_order').on(table.sortOrder),
     idxPlanPopular: index('idx_plan_popular').on(table.isPopular),
-    idxPlanPricing: index('idx_plan_pricing').on(table.priceMonthlyUsd, table.priceAnnualUsd),
+    idxPlanPricing: index('idx_plan_pricing').on(
+      table.priceMonthlyUsd,
+      table.priceAnnualUsd,
+    ),
     idxPlanActiveSort: index('idx_plan_active_sort')
       .on(table.isActive, table.sortOrder)
       .where(sql`${table.isActive} = true`),

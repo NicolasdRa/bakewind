@@ -76,7 +76,7 @@ describe('PATCH /trials/{trialId}/onboarding (Contract Test)', () => {
 
       // Verify trial account UUID format
       expect(response.body.id).toMatch(
-        /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
       );
 
       // Verify business size is valid enum
@@ -89,8 +89,12 @@ describe('PATCH /trials/{trialId}/onboarding (Contract Test)', () => {
       expect(response.body.onboardingCompleted).toBe(true);
 
       // Verify timestamps are valid ISO format
-      expect(response.body.createdAt).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.*Z$/);
-      expect(response.body.updatedAt).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.*Z$/);
+      expect(response.body.createdAt).toMatch(
+        /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.*Z$/,
+      );
+      expect(response.body.updatedAt).toMatch(
+        /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.*Z$/,
+      );
     });
 
     it('should handle sample data request', async () => {
@@ -133,7 +137,7 @@ describe('PATCH /trials/{trialId}/onboarding (Contract Test)', () => {
       const initialUpdatedAt = new Date(initialResponse.body.updatedAt);
 
       // Wait a moment
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       // Make another update
       const updateResponse = await request(app.getHttpServer())
@@ -147,7 +151,9 @@ describe('PATCH /trials/{trialId}/onboarding (Contract Test)', () => {
       const newUpdatedAt = new Date(updateResponse.body.updatedAt);
 
       // Updated timestamp should be later
-      expect(newUpdatedAt.getTime()).toBeGreaterThan(initialUpdatedAt.getTime());
+      expect(newUpdatedAt.getTime()).toBeGreaterThan(
+        initialUpdatedAt.getTime(),
+      );
     });
   });
 
@@ -183,17 +189,15 @@ describe('PATCH /trials/{trialId}/onboarding (Contract Test)', () => {
         password: 'OtherOnboardingPass123!',
       };
 
-      await request(app.getHttpServer())
-        .post('/auth/trial-signup')
-        .send({
-          businessName: 'Other Onboarding Bakery',
-          fullName: 'Other User',
-          email: otherUserCredentials.email,
-          phone: '+1 555-888-9999',
-          password: otherUserCredentials.password,
-          locations: '1',
-          agreeToTerms: true,
-        });
+      await request(app.getHttpServer()).post('/auth/trial-signup').send({
+        businessName: 'Other Onboarding Bakery',
+        fullName: 'Other User',
+        email: otherUserCredentials.email,
+        phone: '+1 555-888-9999',
+        password: otherUserCredentials.password,
+        locations: '1',
+        agreeToTerms: true,
+      });
 
       const otherLoginResponse = await request(app.getHttpServer())
         .post('/auth/login')
@@ -286,7 +290,6 @@ describe('PATCH /trials/{trialId}/onboarding (Contract Test)', () => {
     it('should not allow updating already converted trials', async () => {
       // This test would require a trial that has been converted to paid
       // For now, we outline the expected behavior
-
       // Expected behavior for converted trials:
       // - convertedAt should be set
       // - convertedToPlanId should be set
@@ -332,13 +335,15 @@ describe('PATCH /trials/{trialId}/onboarding (Contract Test)', () => {
           .set('Authorization', `Bearer ${accessToken}`)
           .send({
             onboardingCompleted: true,
-          })
+          }),
       );
 
       const responses = await Promise.all(requests);
 
       // Should eventually be rate limited
-      const rateLimitedResponses = responses.filter(res => res.status === 429);
+      const rateLimitedResponses = responses.filter(
+        (res) => res.status === 429,
+      );
       expect(rateLimitedResponses.length).toBeGreaterThanOrEqual(0);
     });
 
@@ -429,18 +434,18 @@ describe('PATCH /trials/{trialId}/onboarding (Contract Test)', () => {
           .set('Authorization', `Bearer ${accessToken}`)
           .send({
             onboardingCompleted: true,
-          })
+          }),
       );
 
       const responses = await Promise.all(concurrentRequests);
 
       // All should either succeed or fail gracefully
-      responses.forEach(response => {
+      responses.forEach((response) => {
         expect([200, 409, 429]).toContain(response.status);
       });
 
       // At least one should succeed
-      const successfulResponses = responses.filter(res => res.status === 200);
+      const successfulResponses = responses.filter((res) => res.status === 200);
       expect(successfulResponses.length).toBeGreaterThan(0);
     });
   });

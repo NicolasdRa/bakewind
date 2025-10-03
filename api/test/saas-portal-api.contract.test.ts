@@ -271,8 +271,12 @@ describe('SaaS Portal API Contract Tests', () => {
         });
 
         // Check enum values
-        expect(['trial_user', 'subscriber', 'admin']).toContain(response.body.role);
-        expect(['trial', 'active', 'past_due', 'canceled']).toContain(response.body.subscriptionStatus);
+        expect(['trial_user', 'subscriber', 'admin']).toContain(
+          response.body.role,
+        );
+        expect(['trial', 'active', 'past_due', 'canceled']).toContain(
+          response.body.subscriptionStatus,
+        );
       });
 
       it('should return 401 for unauthenticated request', async () => {
@@ -341,8 +345,14 @@ describe('SaaS Portal API Contract Tests', () => {
           });
 
           // Validate category enum
-          expect(['orders', 'inventory', 'production', 'analytics', 'customers', 'products'])
-            .toContain(feature.category);
+          expect([
+            'orders',
+            'inventory',
+            'production',
+            'analytics',
+            'customers',
+            'products',
+          ]).toContain(feature.category);
         }
       });
     });
@@ -386,7 +396,9 @@ describe('SaaS Portal API Contract Tests', () => {
         });
 
         // Validate business size enum
-        expect(['1', '2-3', '4-10', '10+']).toContain(response.body.businessSize);
+        expect(['1', '2-3', '4-10', '10+']).toContain(
+          response.body.businessSize,
+        );
       });
 
       it('should return 404 for non-existent trial', async () => {
@@ -483,16 +495,15 @@ describe('SaaS Portal API Contract Tests', () => {
       const requests: Promise<any>[] = [];
 
       // Make multiple rapid requests
-      for (let i = 0; i < 105; i++) { // Exceed the rate limit of 100
-        requests.push(
-          request(app.getHttpServer())
-            .get('/subscriptions/plans')
-        );
+      for (let i = 0; i < 105; i++) {
+        // Exceed the rate limit of 100
+        requests.push(request(app.getHttpServer()).get('/subscriptions/plans'));
       }
 
       const responses = await Promise.allSettled(requests);
       const rateLimitedResponses = responses.filter(
-        (result): result is PromiseFulfilledResult<any> => result.status === 'fulfilled' && result.value.status === 429
+        (result): result is PromiseFulfilledResult<any> =>
+          result.status === 'fulfilled' && result.value.status === 429,
       );
 
       expect(rateLimitedResponses.length).toBeGreaterThan(0);

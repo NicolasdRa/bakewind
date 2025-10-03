@@ -56,7 +56,9 @@ describe('POST /auth/trial-signup (Contract Test)', () => {
       });
 
       // Verify JWT token format
-      expect(response.body.accessToken).toMatch(/^eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/);
+      expect(response.body.accessToken).toMatch(
+        /^eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/,
+      );
 
       // Verify dashboard URL format
       expect(response.body.dashboardUrl).toMatch(/^\/admin\/overview$/);
@@ -76,8 +78,8 @@ describe('POST /auth/trial-signup (Contract Test)', () => {
         });
 
       expect(response.headers['set-cookie']).toBeDefined();
-      const refreshTokenCookie = response.headers['set-cookie'].find((cookie: string) =>
-        cookie.startsWith('refreshToken=')
+      const refreshTokenCookie = response.headers['set-cookie'].find(
+        (cookie: string) => cookie.startsWith('refreshToken='),
       );
       expect(refreshTokenCookie).toBeDefined();
       expect(refreshTokenCookie).toContain('HttpOnly');
@@ -231,13 +233,15 @@ describe('POST /auth/trial-signup (Contract Test)', () => {
           .send({
             ...rapidSignupData,
             email: `ratetest${i}@testbakery.com`,
-          })
+          }),
       );
 
       const responses = await Promise.all(requests);
 
       // At least one should be rate limited (429)
-      const rateLimitedResponses = responses.filter(res => res.status === 429);
+      const rateLimitedResponses = responses.filter(
+        (res) => res.status === 429,
+      );
       expect(rateLimitedResponses.length).toBeGreaterThan(0);
     });
   });

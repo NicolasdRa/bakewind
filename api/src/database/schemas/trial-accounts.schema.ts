@@ -37,17 +37,22 @@ export const trialAccountsTable = pgTable(
     trialLengthDays: integer('trial_length_days').notNull().default(14),
 
     // Onboarding
-    onboardingCompleted: boolean('onboarding_completed').notNull().default(false),
+    onboardingCompleted: boolean('onboarding_completed')
+      .notNull()
+      .default(false),
     sampleDataLoaded: boolean('sample_data_loaded').notNull().default(false),
 
     // Conversion tracking
-    conversionRemindersSent: integer('conversion_reminders_sent').notNull().default(0),
+    conversionRemindersSent: integer('conversion_reminders_sent')
+      .notNull()
+      .default(0),
     convertedAt: timestamp('converted_at', {
       mode: 'date',
       withTimezone: true,
     }),
-    convertedToPlanId: uuid('converted_to_plan_id')
-      .references(() => subscriptionPlansTable.id),
+    convertedToPlanId: uuid('converted_to_plan_id').references(
+      () => subscriptionPlansTable.id,
+    ),
     cancellationReason: varchar('cancellation_reason', { length: 255 }),
 
     // Audit fields
@@ -67,13 +72,23 @@ export const trialAccountsTable = pgTable(
   (table) => ({
     // Performance indexes
     idxTrialUserId: index('idx_trial_user_id').on(table.userId),
-    idxTrialSignupSource: index('idx_trial_signup_source').on(table.signupSource),
-    idxTrialBusinessSize: index('idx_trial_business_size').on(table.businessSize),
-    idxTrialOnboarding: index('idx_trial_onboarding').on(table.onboardingCompleted),
+    idxTrialSignupSource: index('idx_trial_signup_source').on(
+      table.signupSource,
+    ),
+    idxTrialBusinessSize: index('idx_trial_business_size').on(
+      table.businessSize,
+    ),
+    idxTrialOnboarding: index('idx_trial_onboarding').on(
+      table.onboardingCompleted,
+    ),
     idxTrialConverted: index('idx_trial_converted').on(table.convertedAt),
-    idxTrialConvertedPlan: index('idx_trial_converted_plan').on(table.convertedToPlanId),
+    idxTrialConvertedPlan: index('idx_trial_converted_plan').on(
+      table.convertedToPlanId,
+    ),
     idxTrialCreated: index('idx_trial_created').on(table.createdAt),
-    idxTrialActiveOnboarding: index('idx_trial_active_onboarding')
-      .on(table.onboardingCompleted, table.sampleDataLoaded),
+    idxTrialActiveOnboarding: index('idx_trial_active_onboarding').on(
+      table.onboardingCompleted,
+      table.sampleDataLoaded,
+    ),
   }),
 );

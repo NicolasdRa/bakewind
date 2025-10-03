@@ -40,7 +40,9 @@ export const userSessionsTable = pgTable(
     lastActivityAt: timestamp('last_activity_at', {
       mode: 'date',
       withTimezone: true,
-    }).notNull().defaultNow(),
+    })
+      .notNull()
+      .defaultNow(),
 
     // Audit fields
     createdAt: timestamp('created_at', {
@@ -53,14 +55,25 @@ export const userSessionsTable = pgTable(
   (table) => ({
     // Performance indexes
     idxSessionUserId: index('idx_session_user_id').on(table.userId),
-    idxSessionAccessToken: index('idx_session_access_token').on(table.accessTokenHash),
-    idxSessionRefreshToken: index('idx_session_refresh_token').on(table.refreshTokenHash),
+    idxSessionAccessToken: index('idx_session_access_token').on(
+      table.accessTokenHash,
+    ),
+    idxSessionRefreshToken: index('idx_session_refresh_token').on(
+      table.refreshTokenHash,
+    ),
     idxSessionExpiresAt: index('idx_session_expires_at').on(table.expiresAt),
     idxSessionRevoked: index('idx_session_revoked').on(table.isRevoked),
-    idxSessionLastActivity: index('idx_session_last_activity').on(table.lastActivityAt),
-    idxSessionActiveUser: index('idx_session_active_user')
-      .on(table.userId, table.isRevoked, table.expiresAt),
-    idxSessionCleanup: index('idx_session_cleanup')
-      .on(table.expiresAt, table.isRevoked),
+    idxSessionLastActivity: index('idx_session_last_activity').on(
+      table.lastActivityAt,
+    ),
+    idxSessionActiveUser: index('idx_session_active_user').on(
+      table.userId,
+      table.isRevoked,
+      table.expiresAt,
+    ),
+    idxSessionCleanup: index('idx_session_cleanup').on(
+      table.expiresAt,
+      table.isRevoked,
+    ),
   }),
 );

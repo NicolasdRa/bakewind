@@ -87,7 +87,7 @@ describe('Realtime Gateway - Metrics Update (T019)', () => {
         const deltaMetrics = {
           total_orders: 150,
           pending_orders: 12,
-          revenue_today: 3450.50,
+          revenue_today: 3450.5,
         };
 
         realtimeService.broadcastMetrics(testUserId, deltaMetrics);
@@ -98,7 +98,7 @@ describe('Realtime Gateway - Metrics Update (T019)', () => {
           metrics: {
             total_orders: 150,
             pending_orders: 12,
-            revenue_today: 3450.50,
+            revenue_today: 3450.5,
           },
         });
         expect(data.timestamp).toBeDefined();

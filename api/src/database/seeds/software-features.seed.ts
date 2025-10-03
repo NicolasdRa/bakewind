@@ -17,10 +17,16 @@ export class SoftwareFeaturesSeed {
       {
         id: 'feature-order-management',
         name: 'Order Management',
-        description: 'Track and manage customer orders from placement to delivery with real-time status updates and automated notifications.',
+        description:
+          'Track and manage customer orders from placement to delivery with real-time status updates and automated notifications.',
         iconName: 'shopping-cart',
         category: 'orders' as const,
-        availableInPlans: ['plan-starter', 'plan-professional', 'plan-business', 'plan-enterprise'],
+        availableInPlans: [
+          'plan-starter',
+          'plan-professional',
+          'plan-business',
+          'plan-enterprise',
+        ],
         demoUrl: 'https://demo.bakewind.com/orders',
         helpDocUrl: 'https://docs.bakewind.com/features/order-management',
         sortOrder: 1,
@@ -30,10 +36,15 @@ export class SoftwareFeaturesSeed {
       {
         id: 'feature-custom-order-forms',
         name: 'Custom Order Forms',
-        description: 'Create tailored order forms for different product categories, special occasions, and customer types with conditional fields.',
+        description:
+          'Create tailored order forms for different product categories, special occasions, and customer types with conditional fields.',
         iconName: 'clipboard-list',
         category: 'orders' as const,
-        availableInPlans: ['plan-professional', 'plan-business', 'plan-enterprise'],
+        availableInPlans: [
+          'plan-professional',
+          'plan-business',
+          'plan-enterprise',
+        ],
         demoUrl: 'https://demo.bakewind.com/custom-forms',
         helpDocUrl: 'https://docs.bakewind.com/features/custom-forms',
         sortOrder: 2,
@@ -43,10 +54,15 @@ export class SoftwareFeaturesSeed {
       {
         id: 'feature-order-templates',
         name: 'Order Templates',
-        description: 'Save frequent orders as templates for quick reordering by customers and staff members.',
+        description:
+          'Save frequent orders as templates for quick reordering by customers and staff members.',
         iconName: 'copy',
         category: 'orders' as const,
-        availableInPlans: ['plan-professional', 'plan-business', 'plan-enterprise'],
+        availableInPlans: [
+          'plan-professional',
+          'plan-business',
+          'plan-enterprise',
+        ],
         sortOrder: 3,
         isHighlighted: false,
         isActive: true,
@@ -56,10 +72,16 @@ export class SoftwareFeaturesSeed {
       {
         id: 'feature-inventory-control',
         name: 'Inventory Control',
-        description: 'Monitor ingredients and supplies with automatic low-stock alerts, reorder suggestions, and waste tracking.',
+        description:
+          'Monitor ingredients and supplies with automatic low-stock alerts, reorder suggestions, and waste tracking.',
         iconName: 'box',
         category: 'inventory' as const,
-        availableInPlans: ['plan-starter', 'plan-professional', 'plan-business', 'plan-enterprise'],
+        availableInPlans: [
+          'plan-starter',
+          'plan-professional',
+          'plan-business',
+          'plan-enterprise',
+        ],
         demoUrl: 'https://demo.bakewind.com/inventory',
         helpDocUrl: 'https://docs.bakewind.com/features/inventory-control',
         sortOrder: 4,
@@ -69,10 +91,15 @@ export class SoftwareFeaturesSeed {
       {
         id: 'feature-supplier-management',
         name: 'Supplier Management',
-        description: 'Manage supplier relationships, track deliveries, compare prices, and optimize purchasing decisions.',
+        description:
+          'Manage supplier relationships, track deliveries, compare prices, and optimize purchasing decisions.',
         iconName: 'truck',
         category: 'inventory' as const,
-        availableInPlans: ['plan-professional', 'plan-business', 'plan-enterprise'],
+        availableInPlans: [
+          'plan-professional',
+          'plan-business',
+          'plan-enterprise',
+        ],
         demoUrl: 'https://demo.bakewind.com/suppliers',
         helpDocUrl: 'https://docs.bakewind.com/features/supplier-management',
         sortOrder: 5,
@@ -82,7 +109,8 @@ export class SoftwareFeaturesSeed {
       {
         id: 'feature-cost-tracking',
         name: 'Cost Tracking',
-        description: 'Track ingredient costs, calculate recipe costs automatically, and monitor cost variations over time.',
+        description:
+          'Track ingredient costs, calculate recipe costs automatically, and monitor cost variations over time.',
         iconName: 'calculator',
         category: 'inventory' as const,
         availableInPlans: ['plan-business', 'plan-enterprise'],
@@ -95,10 +123,15 @@ export class SoftwareFeaturesSeed {
       {
         id: 'feature-production-planning',
         name: 'Production Planning',
-        description: 'Plan daily production schedules based on orders, optimize batch sizes, and coordinate kitchen operations.',
+        description:
+          'Plan daily production schedules based on orders, optimize batch sizes, and coordinate kitchen operations.',
         iconName: 'calendar',
         category: 'production' as const,
-        availableInPlans: ['plan-professional', 'plan-business', 'plan-enterprise'],
+        availableInPlans: [
+          'plan-professional',
+          'plan-business',
+          'plan-enterprise',
+        ],
         demoUrl: 'https://demo.bakewind.com/production',
         helpDocUrl: 'https://docs.bakewind.com/features/production-planning',
         sortOrder: 7,
@@ -108,10 +141,16 @@ export class SoftwareFeaturesSeed {
       {
         id: 'feature-recipe-management',
         name: 'Recipe Management',
-        description: 'Store and scale recipes with automatic cost calculations, yield tracking, and nutritional information.',
+        description:
+          'Store and scale recipes with automatic cost calculations, yield tracking, and nutritional information.',
         iconName: 'book-open',
         category: 'production' as const,
-        availableInPlans: ['plan-starter', 'plan-professional', 'plan-business', 'plan-enterprise'],
+        availableInPlans: [
+          'plan-starter',
+          'plan-professional',
+          'plan-business',
+          'plan-enterprise',
+        ],
         demoUrl: 'https://demo.bakewind.com/recipes',
         helpDocUrl: 'https://docs.bakewind.com/features/recipe-management',
         sortOrder: 8,
@@ -121,7 +160,8 @@ export class SoftwareFeaturesSeed {
       {
         id: 'feature-batch-tracking',
         name: 'Batch Tracking',
-        description: 'Track production batches from ingredients to finished products with full traceability for quality control.',
+        description:
+          'Track production batches from ingredients to finished products with full traceability for quality control.',
         iconName: 'layers',
         category: 'production' as const,
         availableInPlans: ['plan-business', 'plan-enterprise'],
@@ -134,10 +174,16 @@ export class SoftwareFeaturesSeed {
       {
         id: 'feature-sales-analytics',
         name: 'Sales Analytics',
-        description: 'Track sales performance with detailed reports, trend analysis, and forecasting tools for better business decisions.',
+        description:
+          'Track sales performance with detailed reports, trend analysis, and forecasting tools for better business decisions.',
         iconName: 'chart-line',
         category: 'analytics' as const,
-        availableInPlans: ['plan-starter', 'plan-professional', 'plan-business', 'plan-enterprise'],
+        availableInPlans: [
+          'plan-starter',
+          'plan-professional',
+          'plan-business',
+          'plan-enterprise',
+        ],
         demoUrl: 'https://demo.bakewind.com/analytics',
         helpDocUrl: 'https://docs.bakewind.com/features/sales-analytics',
         sortOrder: 10,
@@ -147,7 +193,8 @@ export class SoftwareFeaturesSeed {
       {
         id: 'feature-profit-insights',
         name: 'Profit Insights',
-        description: 'Analyze profitability by product, customer, and location with AI-powered recommendations for optimization.',
+        description:
+          'Analyze profitability by product, customer, and location with AI-powered recommendations for optimization.',
         iconName: 'dollar-sign',
         category: 'analytics' as const,
         availableInPlans: ['plan-business', 'plan-enterprise'],
@@ -160,7 +207,8 @@ export class SoftwareFeaturesSeed {
       {
         id: 'feature-custom-reports',
         name: 'Custom Reports',
-        description: 'Create custom reports and dashboards tailored to your specific business needs and KPIs.',
+        description:
+          'Create custom reports and dashboards tailored to your specific business needs and KPIs.',
         iconName: 'file-chart',
         category: 'analytics' as const,
         availableInPlans: ['plan-enterprise'],
@@ -173,10 +221,16 @@ export class SoftwareFeaturesSeed {
       {
         id: 'feature-customer-database',
         name: 'Customer Database',
-        description: 'Build comprehensive customer profiles with order history, preferences, allergies, and special requirements.',
+        description:
+          'Build comprehensive customer profiles with order history, preferences, allergies, and special requirements.',
         iconName: 'users',
         category: 'customers' as const,
-        availableInPlans: ['plan-starter', 'plan-professional', 'plan-business', 'plan-enterprise'],
+        availableInPlans: [
+          'plan-starter',
+          'plan-professional',
+          'plan-business',
+          'plan-enterprise',
+        ],
         demoUrl: 'https://demo.bakewind.com/customers',
         helpDocUrl: 'https://docs.bakewind.com/features/customer-database',
         sortOrder: 13,
@@ -186,10 +240,15 @@ export class SoftwareFeaturesSeed {
       {
         id: 'feature-loyalty-program',
         name: 'Loyalty Program',
-        description: 'Create and manage customer loyalty programs with points, rewards, discounts, and automated campaigns.',
+        description:
+          'Create and manage customer loyalty programs with points, rewards, discounts, and automated campaigns.',
         iconName: 'gift',
         category: 'customers' as const,
-        availableInPlans: ['plan-professional', 'plan-business', 'plan-enterprise'],
+        availableInPlans: [
+          'plan-professional',
+          'plan-business',
+          'plan-enterprise',
+        ],
         demoUrl: 'https://demo.bakewind.com/loyalty',
         helpDocUrl: 'https://docs.bakewind.com/features/loyalty-program',
         sortOrder: 14,
@@ -199,10 +258,15 @@ export class SoftwareFeaturesSeed {
       {
         id: 'feature-customer-communications',
         name: 'Customer Communications',
-        description: 'Send automated emails, SMS notifications, and marketing campaigns to keep customers engaged.',
+        description:
+          'Send automated emails, SMS notifications, and marketing campaigns to keep customers engaged.',
         iconName: 'mail',
         category: 'customers' as const,
-        availableInPlans: ['plan-professional', 'plan-business', 'plan-enterprise'],
+        availableInPlans: [
+          'plan-professional',
+          'plan-business',
+          'plan-enterprise',
+        ],
         sortOrder: 15,
         isHighlighted: false,
         isActive: true,
@@ -212,10 +276,16 @@ export class SoftwareFeaturesSeed {
       {
         id: 'feature-product-catalog',
         name: 'Product Catalog',
-        description: 'Manage your complete product catalog with pricing, images, descriptions, and availability scheduling.',
+        description:
+          'Manage your complete product catalog with pricing, images, descriptions, and availability scheduling.',
         iconName: 'package',
         category: 'products' as const,
-        availableInPlans: ['plan-starter', 'plan-professional', 'plan-business', 'plan-enterprise'],
+        availableInPlans: [
+          'plan-starter',
+          'plan-professional',
+          'plan-business',
+          'plan-enterprise',
+        ],
         demoUrl: 'https://demo.bakewind.com/products',
         helpDocUrl: 'https://docs.bakewind.com/features/product-catalog',
         sortOrder: 16,
@@ -225,10 +295,15 @@ export class SoftwareFeaturesSeed {
       {
         id: 'feature-seasonal-menus',
         name: 'Seasonal Menus',
-        description: 'Create and schedule seasonal product offerings with automatic activation and promotional campaigns.',
+        description:
+          'Create and schedule seasonal product offerings with automatic activation and promotional campaigns.',
         iconName: 'sun',
         category: 'products' as const,
-        availableInPlans: ['plan-professional', 'plan-business', 'plan-enterprise'],
+        availableInPlans: [
+          'plan-professional',
+          'plan-business',
+          'plan-enterprise',
+        ],
         demoUrl: 'https://demo.bakewind.com/seasonal',
         helpDocUrl: 'https://docs.bakewind.com/features/seasonal-menus',
         sortOrder: 17,
@@ -238,10 +313,15 @@ export class SoftwareFeaturesSeed {
       {
         id: 'feature-custom-products',
         name: 'Custom Products',
-        description: 'Handle custom cake orders and special requests with detailed specification forms and approval workflows.',
+        description:
+          'Handle custom cake orders and special requests with detailed specification forms and approval workflows.',
         iconName: 'palette',
         category: 'products' as const,
-        availableInPlans: ['plan-professional', 'plan-business', 'plan-enterprise'],
+        availableInPlans: [
+          'plan-professional',
+          'plan-business',
+          'plan-enterprise',
+        ],
         sortOrder: 18,
         isHighlighted: false,
         isActive: true,
@@ -258,7 +338,9 @@ export class SoftwareFeaturesSeed {
           .limit(1);
 
         if (existingFeature) {
-          this.logger.log(`Feature ${featureData.name} already exists, skipping...`);
+          this.logger.log(
+            `Feature ${featureData.name} already exists, skipping...`,
+          );
           continue;
         }
 
@@ -284,7 +366,8 @@ export class SoftwareFeaturesSeed {
       {
         id: 'feature-test-basic',
         name: 'Test Basic Feature',
-        description: 'Basic test feature for development and testing purposes only.',
+        description:
+          'Basic test feature for development and testing purposes only.',
         iconName: 'test-tube',
         category: 'orders' as const,
         availableInPlans: ['plan-test-free', 'plan-test-paid'],
@@ -295,7 +378,8 @@ export class SoftwareFeaturesSeed {
       {
         id: 'feature-test-advanced',
         name: 'Test Advanced Feature',
-        description: 'Advanced test feature for development and testing purposes only.',
+        description:
+          'Advanced test feature for development and testing purposes only.',
         iconName: 'beaker',
         category: 'analytics' as const,
         availableInPlans: ['plan-test-paid'],
@@ -315,7 +399,9 @@ export class SoftwareFeaturesSeed {
           .limit(1);
 
         if (existingFeature) {
-          this.logger.log(`Test feature ${featureData.name} already exists, updating...`);
+          this.logger.log(
+            `Test feature ${featureData.name} already exists, updating...`,
+          );
 
           // Update existing test feature
           await this.databaseService.database
@@ -342,7 +428,9 @@ export class SoftwareFeaturesSeed {
     }
   }
 
-  async updateFeaturePlans(featureUpdates: Array<{ featureId: string; availableInPlans: string[] }>): Promise<void> {
+  async updateFeaturePlans(
+    featureUpdates: Array<{ featureId: string; availableInPlans: string[] }>,
+  ): Promise<void> {
     this.logger.log('Updating feature plan availability...');
 
     try {
@@ -355,10 +443,14 @@ export class SoftwareFeaturesSeed {
           })
           .where(eq(softwareFeaturesTable.id, update.featureId));
 
-        this.logger.log(`Updated plan availability for feature: ${update.featureId}`);
+        this.logger.log(
+          `Updated plan availability for feature: ${update.featureId}`,
+        );
       }
 
-      this.logger.log('Feature plan availability update completed successfully');
+      this.logger.log(
+        'Feature plan availability update completed successfully',
+      );
     } catch (error) {
       this.logger.error('Failed to update feature plan availability:', error);
       throw error;
@@ -415,7 +507,8 @@ export class SoftwareFeaturesSeed {
       const categoryCount: Record<string, number> = {};
 
       for (const feature of features) {
-        categoryCount[feature.category] = (categoryCount[feature.category] || 0) + 1;
+        categoryCount[feature.category] =
+          (categoryCount[feature.category] || 0) + 1;
       }
 
       return categoryCount;
@@ -425,7 +518,10 @@ export class SoftwareFeaturesSeed {
     }
   }
 
-  async validateFeatureConsistency(): Promise<{ isValid: boolean; issues: string[] }> {
+  async validateFeatureConsistency(): Promise<{
+    isValid: boolean;
+    issues: string[];
+  }> {
     this.logger.log('Validating feature consistency...');
 
     const issues: string[] = [];
@@ -436,8 +532,15 @@ export class SoftwareFeaturesSeed {
         .from(softwareFeaturesTable);
 
       // Check for required categories
-      const requiredCategories = ['orders', 'inventory', 'production', 'analytics', 'customers', 'products'] as const;
-      const existingCategories = [...new Set(features.map(f => f.category))];
+      const requiredCategories = [
+        'orders',
+        'inventory',
+        'production',
+        'analytics',
+        'customers',
+        'products',
+      ] as const;
+      const existingCategories = [...new Set(features.map((f) => f.category))];
 
       for (const requiredCategory of requiredCategories) {
         if (!existingCategories.includes(requiredCategory as any)) {
@@ -446,25 +549,35 @@ export class SoftwareFeaturesSeed {
       }
 
       // Check for highlighted features
-      const highlightedFeatures = features.filter(f => f.isHighlighted && f.isActive);
+      const highlightedFeatures = features.filter(
+        (f) => f.isHighlighted && f.isActive,
+      );
       if (highlightedFeatures.length < 3) {
-        issues.push(`Only ${highlightedFeatures.length} highlighted features found, recommend at least 3`);
+        issues.push(
+          `Only ${highlightedFeatures.length} highlighted features found, recommend at least 3`,
+        );
       }
       if (highlightedFeatures.length > 5) {
-        issues.push(`Too many highlighted features (${highlightedFeatures.length}), recommend max 5`);
+        issues.push(
+          `Too many highlighted features (${highlightedFeatures.length}), recommend max 5`,
+        );
       }
 
       // Check for features in starter plan
-      const starterFeatures = features.filter(f =>
-        f.availableInPlans.includes('plan-starter') && f.isActive
+      const starterFeatures = features.filter(
+        (f) => f.availableInPlans.includes('plan-starter') && f.isActive,
       );
       if (starterFeatures.length < 5) {
-        issues.push(`Only ${starterFeatures.length} features in starter plan, recommend at least 5`);
+        issues.push(
+          `Only ${starterFeatures.length} features in starter plan, recommend at least 5`,
+        );
       }
 
       // Check sort order consistency
-      const activeFeaturesWithSortOrder = features.filter(f => f.isActive && f.sortOrder > 0);
-      const sortOrders = activeFeaturesWithSortOrder.map(f => f.sortOrder);
+      const activeFeaturesWithSortOrder = features.filter(
+        (f) => f.isActive && f.sortOrder > 0,
+      );
+      const sortOrders = activeFeaturesWithSortOrder.map((f) => f.sortOrder);
       const uniqueSortOrders = [...new Set(sortOrders)];
 
       if (sortOrders.length !== uniqueSortOrders.length) {
@@ -485,7 +598,10 @@ export class SoftwareFeaturesSeed {
           issues.push(`Feature ${feature.id}: Missing icon name`);
         }
 
-        if (!feature.availableInPlans || feature.availableInPlans.length === 0) {
+        if (
+          !feature.availableInPlans ||
+          feature.availableInPlans.length === 0
+        ) {
           issues.push(`Feature ${feature.id}: No plans specified`);
         }
 
@@ -498,13 +614,16 @@ export class SoftwareFeaturesSeed {
       if (isValid) {
         this.logger.log('Feature consistency validation passed');
       } else {
-        this.logger.warn(`Feature consistency validation failed with ${issues.length} issues`);
+        this.logger.warn(
+          `Feature consistency validation failed with ${issues.length} issues`,
+        );
       }
 
       return { isValid, issues };
     } catch (error) {
       this.logger.error('Failed to validate feature consistency:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       return { isValid: false, issues: [`Validation error: ${errorMessage}`] };
     }
   }

@@ -12,7 +12,12 @@ import {
   ConflictException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { Response as ExpressResponse } from 'express';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -22,7 +27,11 @@ import { UserSessionsService } from '../../user-sessions/user-sessions.service';
 import { StripeService } from '../../stripe/stripe.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { Public } from '../decorators/public.decorator';
-import { CreateTrialSignupDto, LoginDto, RefreshTokenDto } from '../dto/auth.dto';
+import {
+  CreateTrialSignupDto,
+  LoginDto,
+  RefreshTokenDto,
+} from '../dto/auth.dto';
 
 @ApiTags('SaaS Authentication')
 @Controller('saas-auth')
@@ -40,7 +49,10 @@ export class SaasAuthController {
   @Post('trial-signup')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create trial account for prospects' })
-  @ApiResponse({ status: 201, description: 'Trial account created successfully' })
+  @ApiResponse({
+    status: 201,
+    description: 'Trial account created successfully',
+  })
   @ApiResponse({ status: 400, description: 'Invalid input data' })
   @ApiResponse({ status: 409, description: 'Email already exists' })
   async createTrialAccount(
@@ -67,7 +79,7 @@ export class SaasAuthController {
       const stripeCustomer = await this.stripeService.createCustomer(
         email,
         fullName,
-        businessName
+        businessName,
       );
 
       // Parse full name
@@ -95,22 +107,29 @@ export class SaasAuthController {
       // Generate tokens
       const payload = { sub: user.id, email: user.email, role: user.role };
       const accessToken = this.jwtService.sign(payload);
+      const refreshSecret = this.configService.get('JWT_REFRESH_SECRET');
+      const refreshExpiresIn = this.configService.get('JWT_REFRESH_EXPIRES_IN');
+      if (!refreshSecret || !refreshExpiresIn) {
+        throw new UnauthorizedException('JWT refresh configuration missing');
+      }
       const refreshToken = this.jwtService.sign(payload, {
-        secret: this.configService.get('JWT_REFRESH_SECRET'),
-        expiresIn: this.configService.get('JWT_REFRESH_EXPIRES_IN'),
+        secret: refreshSecret,
+        expiresIn: refreshExpiresIn,
       });
 
       // Create session
       const expiresAt = new Date();
       expiresAt.setMilliseconds(
         expiresAt.getMilliseconds() +
-        this.parseTimeToMs(this.configService.get('JWT_EXPIRES_IN', '15m'))
+          this.parseTimeToMs(this.configService.get('JWT_EXPIRES_IN', '15m')),
       );
 
       const session = await this.userSessionsService.create({
         userId: user.id,
-        accessTokenHash: this.userSessionsService.generateTokenHash(accessToken),
-        refreshTokenHash: this.userSessionsService.generateTokenHash(refreshToken),
+        accessTokenHash:
+          this.userSessionsService.generateTokenHash(accessToken),
+        refreshTokenHash:
+          this.userSessionsService.generateTokenHash(refreshToken),
         expiresAt,
         ipAddress: req.ip,
         userAgent: req.get('user-agent'),
@@ -122,7 +141,9 @@ export class SaasAuthController {
         httpOnly: true,
         secure: this.configService.get('NODE_ENV') === 'production',
         sameSite: 'strict',
-        maxAge: this.parseTimeToMs(this.configService.get('JWT_REFRESH_EXPIRES_IN', '7d')),
+        maxAge: this.parseTimeToMs(
+          this.configService.get('JWT_REFRESH_EXPIRES_IN', '7d'),
+        ),
       });
 
       const userProfile = {
@@ -133,7 +154,9 @@ export class SaasAuthController {
         businessName: user.companyName,
         role: 'trial_user',
         subscriptionStatus: 'trial',
-        trialEndsAt: this.trialAccountsService.calculateTrialEndDate(trial).toISOString(),
+        trialEndsAt: this.trialAccountsService
+          .calculateTrialEndDate(trial)
+          .toISOString(),
         isEmailVerified: user.emailVerified,
         createdAt: user.createdAt,
       };
@@ -144,7 +167,6 @@ export class SaasAuthController {
         refreshToken,
         dashboardUrl: '/admin/overview',
       });
-
     } catch (error) {
       if (error instanceof Error && error.message.includes('already exists')) {
         throw new ConflictException('Email already exists');
@@ -182,22 +204,28 @@ export class SaasAuthController {
     // Generate tokens
     const payload = { sub: user.id, email: user.email, role: user.role };
     const accessToken = this.jwtService.sign(payload);
+    const refreshSecret = this.configService.get('JWT_REFRESH_SECRET');
+    const refreshExpiresIn = this.configService.get('JWT_REFRESH_EXPIRES_IN');
+    if (!refreshSecret || !refreshExpiresIn) {
+      throw new UnauthorizedException('JWT refresh configuration missing');
+    }
     const refreshToken = this.jwtService.sign(payload, {
-      secret: this.configService.get('JWT_REFRESH_SECRET'),
-      expiresIn: this.configService.get('JWT_REFRESH_EXPIRES_IN'),
+      secret: refreshSecret,
+      expiresIn: refreshExpiresIn,
     });
 
     // Create session
     const expiresAt = new Date();
     expiresAt.setMilliseconds(
       expiresAt.getMilliseconds() +
-      this.parseTimeToMs(this.configService.get('JWT_EXPIRES_IN', '15m'))
+        this.parseTimeToMs(this.configService.get('JWT_EXPIRES_IN', '15m')),
     );
 
     const session = await this.userSessionsService.create({
       userId: user.id,
       accessTokenHash: this.userSessionsService.generateTokenHash(accessToken),
-      refreshTokenHash: this.userSessionsService.generateTokenHash(refreshToken),
+      refreshTokenHash:
+        this.userSessionsService.generateTokenHash(refreshToken),
       expiresAt,
       ipAddress: req.ip,
       userAgent: req.get('user-agent'),
@@ -209,7 +237,9 @@ export class SaasAuthController {
       httpOnly: true,
       secure: this.configService.get('NODE_ENV') === 'production',
       sameSite: 'strict',
-      maxAge: this.parseTimeToMs(this.configService.get('JWT_REFRESH_EXPIRES_IN', '7d')),
+      maxAge: this.parseTimeToMs(
+        this.configService.get('JWT_REFRESH_EXPIRES_IN', '7d'),
+      ),
     });
 
     // Get trial info if exists
@@ -223,7 +253,9 @@ export class SaasAuthController {
       businessName: user.companyName,
       role: trial ? 'trial_user' : 'subscriber',
       subscriptionStatus: trial && !trial.convertedAt ? 'trial' : 'active',
-      trialEndsAt: trial ? this.trialAccountsService.calculateTrialEndDate(trial).toISOString() : null,
+      trialEndsAt: trial
+        ? this.trialAccountsService.calculateTrialEndDate(trial).toISOString()
+        : null,
       isEmailVerified: user.emailVerified,
       createdAt: user.createdAt,
     };
@@ -242,10 +274,7 @@ export class SaasAuthController {
   @ApiOperation({ summary: 'Refresh authentication tokens' })
   @ApiResponse({ status: 200, description: 'Token refreshed successfully' })
   @ApiResponse({ status: 401, description: 'Invalid refresh token' })
-  async refreshToken(
-    @Request() req: any,
-    @Response() res: ExpressResponse,
-  ) {
+  async refreshToken(@Request() req: any, @Response() res: ExpressResponse) {
     const refreshToken = req.cookies?.refreshToken;
 
     if (!refreshToken) {
@@ -254,32 +283,42 @@ export class SaasAuthController {
 
     try {
       // Verify refresh token
+      const refreshSecret = this.configService.get('JWT_REFRESH_SECRET');
+      if (!refreshSecret) {
+        throw new UnauthorizedException('JWT refresh secret not configured');
+      }
       const payload = this.jwtService.verify(refreshToken, {
-        secret: this.configService.get('JWT_REFRESH_SECRET'),
+        secret: refreshSecret,
       });
 
       // Find session by refresh token hash
-      const refreshTokenHash = this.userSessionsService.generateTokenHash(refreshToken);
-      const session = await this.userSessionsService.findByRefreshTokenHash(refreshTokenHash);
+      const refreshTokenHash =
+        this.userSessionsService.generateTokenHash(refreshToken);
+      const session =
+        await this.userSessionsService.findByRefreshTokenHash(refreshTokenHash);
 
       if (!session) {
         throw new UnauthorizedException('Invalid refresh token');
       }
 
       // Generate new access token
-      const newPayload = { sub: payload.sub, email: payload.email, role: payload.role };
+      const newPayload = {
+        sub: payload.sub,
+        email: payload.email,
+        role: payload.role,
+      };
       const newAccessToken = this.jwtService.sign(newPayload);
 
       // Update session
       await this.userSessionsService.update(session.id, {
-        accessTokenHash: this.userSessionsService.generateTokenHash(newAccessToken),
+        accessTokenHash:
+          this.userSessionsService.generateTokenHash(newAccessToken),
         lastActivityAt: new Date(),
       });
 
       return res.status(200).json({
         accessToken: newAccessToken,
       });
-
     } catch (error) {
       throw new UnauthorizedException('Invalid refresh token');
     }
@@ -292,17 +331,17 @@ export class SaasAuthController {
   @ApiOperation({ summary: 'Logout user and revoke session' })
   @ApiResponse({ status: 204, description: 'Logout successful' })
   @ApiResponse({ status: 401, description: 'Not authenticated' })
-  async logout(
-    @Request() req: any,
-    @Response() res: ExpressResponse,
-  ) {
+  async logout(@Request() req: any, @Response() res: ExpressResponse) {
     const authHeader = req.headers.authorization;
     if (authHeader && authHeader.startsWith('Bearer ')) {
       const accessToken = authHeader.substring(7);
-      const accessTokenHash = this.userSessionsService.generateTokenHash(accessToken);
+      const accessTokenHash =
+        this.userSessionsService.generateTokenHash(accessToken);
 
       // Revoke the session
-      await this.userSessionsService.revokeSessionByAccessToken(accessTokenHash);
+      await this.userSessionsService.revokeSessionByAccessToken(
+        accessTokenHash,
+      );
     }
 
     // Clear refresh token cookie
@@ -332,7 +371,9 @@ export class SaasAuthController {
       businessName: user.companyName,
       role: trial ? 'trial_user' : 'subscriber',
       subscriptionStatus: trial && !trial.convertedAt ? 'trial' : 'active',
-      trialEndsAt: trial ? this.trialAccountsService.calculateTrialEndDate(trial).toISOString() : null,
+      trialEndsAt: trial
+        ? this.trialAccountsService.calculateTrialEndDate(trial).toISOString()
+        : null,
       isEmailVerified: user.emailVerified,
       createdAt: user.createdAt,
     };
@@ -344,7 +385,7 @@ export class SaasAuthController {
     const regex = /^(\d+)([smhd])$/;
     const match = timeString.match(regex);
 
-    if (!match) {
+    if (!match || !match[1]) {
       throw new Error(`Invalid time format: ${timeString}`);
     }
 
@@ -352,11 +393,16 @@ export class SaasAuthController {
     const unit = match[2];
 
     switch (unit) {
-      case 's': return value * 1000;
-      case 'm': return value * 60 * 1000;
-      case 'h': return value * 60 * 60 * 1000;
-      case 'd': return value * 24 * 60 * 60 * 1000;
-      default: throw new Error(`Unknown time unit: ${unit}`);
+      case 's':
+        return value * 1000;
+      case 'm':
+        return value * 60 * 1000;
+      case 'h':
+        return value * 60 * 60 * 1000;
+      case 'd':
+        return value * 24 * 60 * 60 * 1000;
+      default:
+        throw new Error(`Unknown time unit: ${unit}`);
     }
   }
 }

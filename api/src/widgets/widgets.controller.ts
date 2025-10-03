@@ -1,9 +1,17 @@
 import { Controller, Get, Put, Body, UseGuards, Request } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 import { WidgetsService } from './widgets.service';
-import { updateWidgetConfigSchema, UpdateWidgetConfigDto } from './dto/widget-config.dto';
+import {
+  updateWidgetConfigSchema,
+  UpdateWidgetConfigDto,
+} from './dto/widget-config.dto';
 
 @ApiTags('widgets')
 @Controller('api/v1/widgets')

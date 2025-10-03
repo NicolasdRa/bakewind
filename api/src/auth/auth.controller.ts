@@ -77,7 +77,11 @@ export class AuthController {
             businessName: { type: 'string' },
             role: { type: 'string' },
             subscriptionStatus: { type: 'string' },
-            trialEndsAt: { type: 'string', format: 'date-time', nullable: true },
+            trialEndsAt: {
+              type: 'string',
+              format: 'date-time',
+              nullable: true,
+            },
             isEmailVerified: { type: 'boolean' },
             isActive: { type: 'boolean' },
             lastLoginAt: { type: 'string', format: 'date-time' },
@@ -174,7 +178,7 @@ export class AuthController {
   })
   async trialSignup(
     @Body() trialSignupDto: TrialSignupDto,
-    @Request() req: any
+    @Request() req: any,
   ) {
     const auditContext = req.auditContext || {};
     return this.authService.trialSignup(trialSignupDto, auditContext);
@@ -370,7 +374,8 @@ export class AuthController {
   @HttpCode(HttpStatus.CREATED)
   @Throttle({ default: { limit: 10, ttl: 60000 } }) // 10 per minute
   @ApiOperation({
-    summary: 'Create a secure auth transfer session for cross-domain authentication',
+    summary:
+      'Create a secure auth transfer session for cross-domain authentication',
     description:
       'Creates a one-time, short-lived (30s) session for securely transferring tokens between domains. ' +
       'This is used when redirecting from the customer website to the admin dashboard.',

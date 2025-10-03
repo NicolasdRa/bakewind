@@ -135,60 +135,75 @@ export const locationsRelations = relations(locationsTable, ({ many }) => ({
 }));
 
 // User-Location junction table relations
-export const userLocationsRelations = relations(userLocationsTable, ({ one }) => ({
-  user: one(usersTable, {
-    fields: [userLocationsTable.userId],
-    references: [usersTable.id],
+export const userLocationsRelations = relations(
+  userLocationsTable,
+  ({ one }) => ({
+    user: one(usersTable, {
+      fields: [userLocationsTable.userId],
+      references: [usersTable.id],
+    }),
+    location: one(locationsTable, {
+      fields: [userLocationsTable.locationId],
+      references: [locationsTable.id],
+    }),
   }),
-  location: one(locationsTable, {
-    fields: [userLocationsTable.locationId],
-    references: [locationsTable.id],
-  }),
-}));
+);
 
 // SaaS User relations
-export const saasUsersRelations = relations(saasUsersTable, ({ one, many }) => ({
-  subscriptionPlan: one(subscriptionPlansTable, {
-    fields: [saasUsersTable.subscriptionPlanId],
-    references: [subscriptionPlansTable.id],
+export const saasUsersRelations = relations(
+  saasUsersTable,
+  ({ one, many }) => ({
+    subscriptionPlan: one(subscriptionPlansTable, {
+      fields: [saasUsersTable.subscriptionPlanId],
+      references: [subscriptionPlansTable.id],
+    }),
+    trialAccount: one(trialAccountsTable, {
+      fields: [saasUsersTable.trialAccountId],
+      references: [trialAccountsTable.id],
+    }),
+    userSessions: many(userSessionsTable),
   }),
-  trialAccount: one(trialAccountsTable, {
-    fields: [saasUsersTable.trialAccountId],
-    references: [trialAccountsTable.id],
-  }),
-  userSessions: many(userSessionsTable),
-}));
+);
 
 // Subscription Plan relations
-export const subscriptionPlansRelations = relations(subscriptionPlansTable, ({ many }) => ({
-  saasUsers: many(saasUsersTable),
-  convertedTrials: many(trialAccountsTable),
-}));
+export const subscriptionPlansRelations = relations(
+  subscriptionPlansTable,
+  ({ many }) => ({
+    saasUsers: many(saasUsersTable),
+    convertedTrials: many(trialAccountsTable),
+  }),
+);
 
 // Trial Account relations
-export const trialAccountsRelations = relations(trialAccountsTable, ({ one }) => ({
-  user: one(usersTable, {
-    fields: [trialAccountsTable.userId],
-    references: [usersTable.id],
+export const trialAccountsRelations = relations(
+  trialAccountsTable,
+  ({ one }) => ({
+    user: one(usersTable, {
+      fields: [trialAccountsTable.userId],
+      references: [usersTable.id],
+    }),
+    convertedToPlan: one(subscriptionPlansTable, {
+      fields: [trialAccountsTable.convertedToPlanId],
+      references: [subscriptionPlansTable.id],
+    }),
+    saasUser: one(saasUsersTable, {
+      fields: [trialAccountsTable.id],
+      references: [saasUsersTable.trialAccountId],
+    }),
   }),
-  convertedToPlan: one(subscriptionPlansTable, {
-    fields: [trialAccountsTable.convertedToPlanId],
-    references: [subscriptionPlansTable.id],
-  }),
-  saasUser: one(saasUsersTable, {
-    fields: [trialAccountsTable.id],
-    references: [saasUsersTable.trialAccountId],
-  }),
-}));
+);
 
 // User Session relations
-export const userSessionsRelations = relations(userSessionsTable, ({ one }) => ({
-  user: one(usersTable, {
-    fields: [userSessionsTable.userId],
-    references: [usersTable.id],
+export const userSessionsRelations = relations(
+  userSessionsTable,
+  ({ one }) => ({
+    user: one(usersTable, {
+      fields: [userSessionsTable.userId],
+      references: [usersTable.id],
+    }),
+    saasUser: one(saasUsersTable, {
+      fields: [userSessionsTable.userId],
+      references: [saasUsersTable.id],
+    }),
   }),
-  saasUser: one(saasUsersTable, {
-    fields: [userSessionsTable.userId],
-    references: [saasUsersTable.id],
-  }),
-}));
+);

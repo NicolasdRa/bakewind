@@ -26,7 +26,7 @@ describe('Customer Registration API (e2e)', () => {
         password: 'SecurePassword123!',
         firstName: 'John',
         lastName: 'Doe',
-        phoneNumber: '+1234567890'
+        phoneNumber: '+1234567890',
       };
 
       const response = await request(app.getHttpServer())
@@ -36,8 +36,14 @@ describe('Customer Registration API (e2e)', () => {
 
       expect(response.body).toHaveProperty('id');
       expect(response.body).toHaveProperty('email', registrationData.email);
-      expect(response.body).toHaveProperty('firstName', registrationData.firstName);
-      expect(response.body).toHaveProperty('lastName', registrationData.lastName);
+      expect(response.body).toHaveProperty(
+        'firstName',
+        registrationData.firstName,
+      );
+      expect(response.body).toHaveProperty(
+        'lastName',
+        registrationData.lastName,
+      );
       expect(response.body).not.toHaveProperty('password'); // Should not return password
       expect(response.body.role).toBe('CUSTOMER');
       expect(response.body.isActive).toBe(true);
@@ -49,7 +55,7 @@ describe('Customer Registration API (e2e)', () => {
         email: 'existing@example.com',
         password: 'SecurePassword123!',
         firstName: 'Jane',
-        lastName: 'Smith'
+        lastName: 'Smith',
       };
 
       // Register first time
@@ -70,7 +76,7 @@ describe('Customer Registration API (e2e)', () => {
         email: 'invalid-email-format',
         password: 'SecurePassword123!',
         firstName: 'Test',
-        lastName: 'User'
+        lastName: 'User',
       };
 
       await request(app.getHttpServer())
@@ -81,10 +87,10 @@ describe('Customer Registration API (e2e)', () => {
 
     it('should validate password strength', async () => {
       const weakPasswords = [
-        'weak',           // Too short
-        '12345678',       // No letters
-        'password',       // No numbers/symbols
-        'PASSWORD123'     // No lowercase
+        'weak', // Too short
+        '12345678', // No letters
+        'password', // No numbers/symbols
+        'PASSWORD123', // No lowercase
       ];
 
       for (const password of weakPasswords) {
@@ -92,7 +98,7 @@ describe('Customer Registration API (e2e)', () => {
           email: `test${Date.now()}@example.com`,
           password,
           firstName: 'Test',
-          lastName: 'User'
+          lastName: 'User',
         };
 
         await request(app.getHttpServer())
@@ -104,7 +110,7 @@ describe('Customer Registration API (e2e)', () => {
 
     it('should validate required fields', async () => {
       const incompleteData = {
-        email: 'test@example.com'
+        email: 'test@example.com',
         // Missing password, firstName, lastName
       };
 
@@ -120,7 +126,7 @@ describe('Customer Registration API (e2e)', () => {
         password: 'SecurePassword123!',
         firstName: '  John  ',
         lastName: '  Doe  ',
-        phoneNumber: ' +1-234-567-8900 '
+        phoneNumber: ' +1-234-567-8900 ',
       };
 
       const response = await request(app.getHttpServer())
@@ -138,7 +144,7 @@ describe('Customer Registration API (e2e)', () => {
         email: 'profile@example.com',
         password: 'SecurePassword123!',
         firstName: 'Profile',
-        lastName: 'Test'
+        lastName: 'Test',
       };
 
       const response = await request(app.getHttpServer())
@@ -156,7 +162,7 @@ describe('Customer Registration API (e2e)', () => {
         email: 'verify@example.com',
         password: 'SecurePassword123!',
         firstName: 'Verify',
-        lastName: 'Email'
+        lastName: 'Email',
       };
 
       const response = await request(app.getHttpServer())
@@ -173,7 +179,7 @@ describe('Customer Registration API (e2e)', () => {
     it('should verify email with valid token', async () => {
       // This would need to be implemented with actual email verification flow
       const verificationData = {
-        token: 'valid-verification-token'
+        token: 'valid-verification-token',
       };
 
       // This test would need to be implemented once email verification is set up

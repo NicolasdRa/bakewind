@@ -11,11 +11,20 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 import { InventoryService } from './inventory.service';
-import { setCustomThresholdSchema, SetCustomThresholdDto } from './dto/consumption-tracking.dto';
+import {
+  setCustomThresholdSchema,
+  SetCustomThresholdDto,
+} from './dto/consumption-tracking.dto';
 
 @ApiTags('inventory')
 @Controller('api/v1/inventory')
@@ -40,7 +49,10 @@ export class InventoryController {
   @Get(':itemId/consumption')
   @ApiOperation({ summary: 'Get consumption tracking data for item' })
   @ApiResponse({ status: 200, description: 'Consumption data retrieved' })
-  @ApiResponse({ status: 404, description: 'Item not found or no tracking data' })
+  @ApiResponse({
+    status: 404,
+    description: 'Item not found or no tracking data',
+  })
   async getConsumption(@Param('itemId') itemId: string) {
     return this.inventoryService.getConsumptionTracking(itemId);
   }
@@ -52,7 +64,8 @@ export class InventoryController {
   @ApiResponse({ status: 404, description: 'Item not found' })
   async setThreshold(
     @Param('itemId') itemId: string,
-    @Body(new ZodValidationPipe(setCustomThresholdSchema)) dto: SetCustomThresholdDto,
+    @Body(new ZodValidationPipe(setCustomThresholdSchema))
+    dto: SetCustomThresholdDto,
   ) {
     return this.inventoryService.setCustomThreshold(itemId, dto);
   }

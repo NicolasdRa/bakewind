@@ -32,7 +32,7 @@ describe('JwtAuthGuard', () => {
     const mockUser = {
       id: '123',
       email: 'test@example.com',
-      role: 'customer'
+      role: 'customer',
     };
 
     jest.spyOn(jwtService, 'verify').mockReturnValue(mockUser);
@@ -41,10 +41,10 @@ describe('JwtAuthGuard', () => {
       switchToHttp: () => ({
         getRequest: () => ({
           headers: {
-            authorization: 'Bearer valid-jwt-token'
-          }
-        })
-      })
+            authorization: 'Bearer valid-jwt-token',
+          },
+        }),
+      }),
     } as ExecutionContext;
 
     const result = await guard.canActivate(mockContext);
@@ -55,12 +55,14 @@ describe('JwtAuthGuard', () => {
     const mockContext = {
       switchToHttp: () => ({
         getRequest: () => ({
-          headers: {}
-        })
-      })
+          headers: {},
+        }),
+      }),
     } as ExecutionContext;
 
-    await expect(guard.canActivate(mockContext)).rejects.toThrow(UnauthorizedException);
+    await expect(guard.canActivate(mockContext)).rejects.toThrow(
+      UnauthorizedException,
+    );
   });
 
   it('should reject malformed authorization header', async () => {
@@ -68,13 +70,15 @@ describe('JwtAuthGuard', () => {
       switchToHttp: () => ({
         getRequest: () => ({
           headers: {
-            authorization: 'InvalidFormat token'
-          }
-        })
-      })
+            authorization: 'InvalidFormat token',
+          },
+        }),
+      }),
     } as ExecutionContext;
 
-    await expect(guard.canActivate(mockContext)).rejects.toThrow(UnauthorizedException);
+    await expect(guard.canActivate(mockContext)).rejects.toThrow(
+      UnauthorizedException,
+    );
   });
 
   it('should reject invalid JWT token', async () => {
@@ -86,34 +90,36 @@ describe('JwtAuthGuard', () => {
       switchToHttp: () => ({
         getRequest: () => ({
           headers: {
-            authorization: 'Bearer invalid-jwt-token'
-          }
-        })
-      })
+            authorization: 'Bearer invalid-jwt-token',
+          },
+        }),
+      }),
     } as ExecutionContext;
 
-    await expect(guard.canActivate(mockContext)).rejects.toThrow(UnauthorizedException);
+    await expect(guard.canActivate(mockContext)).rejects.toThrow(
+      UnauthorizedException,
+    );
   });
 
   it('should extract user from valid token', async () => {
     const mockUser = {
       id: '123',
       email: 'test@example.com',
-      role: 'admin'
+      role: 'admin',
     };
 
     jest.spyOn(jwtService, 'verify').mockReturnValue(mockUser);
 
     const mockRequest = {
       headers: {
-        authorization: 'Bearer valid-jwt-token'
-      }
+        authorization: 'Bearer valid-jwt-token',
+      },
     };
 
     const mockContext = {
       switchToHttp: () => ({
-        getRequest: () => mockRequest
-      })
+        getRequest: () => mockRequest,
+      }),
     } as ExecutionContext;
 
     await guard.canActivate(mockContext);

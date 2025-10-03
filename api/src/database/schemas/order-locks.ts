@@ -4,7 +4,9 @@ import { usersTable } from './users.schema';
 import { orders } from './orders.schema';
 
 export const orderLocks = pgTable('order_locks', {
-  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  id: uuid('id')
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   orderId: uuid('order_id')
     .notNull()
     .references(() => orders.id, { onDelete: 'cascade' })

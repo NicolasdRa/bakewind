@@ -16,7 +16,8 @@ export class SubscriptionPlansSeed {
       {
         id: 'plan-starter',
         name: 'Starter',
-        description: 'Perfect for small bakeries and home-based businesses. Get started with essential features to manage your orders, inventory, and basic analytics.',
+        description:
+          'Perfect for small bakeries and home-based businesses. Get started with essential features to manage your orders, inventory, and basic analytics.',
         priceMonthlyUsd: 29.99,
         priceAnnualUsd: 299.99,
         maxLocations: 1,
@@ -40,7 +41,8 @@ export class SubscriptionPlansSeed {
       {
         id: 'plan-professional',
         name: 'Professional',
-        description: 'Ideal for growing bakeries with multiple staff members. Advanced features for production planning, custom forms, and enhanced customer management.',
+        description:
+          'Ideal for growing bakeries with multiple staff members. Advanced features for production planning, custom forms, and enhanced customer management.',
         priceMonthlyUsd: 79.99,
         priceAnnualUsd: 799.99,
         maxLocations: 2,
@@ -66,7 +68,8 @@ export class SubscriptionPlansSeed {
       {
         id: 'plan-business',
         name: 'Business',
-        description: 'Designed for established bakeries with multiple locations. Complete business management suite with profit insights and advanced integrations.',
+        description:
+          'Designed for established bakeries with multiple locations. Complete business management suite with profit insights and advanced integrations.',
         priceMonthlyUsd: 149.99,
         priceAnnualUsd: 1499.99,
         maxLocations: 5,
@@ -93,7 +96,8 @@ export class SubscriptionPlansSeed {
       {
         id: 'plan-enterprise',
         name: 'Enterprise',
-        description: 'For large bakery chains and franchises. Enterprise-grade features with unlimited locations, custom development, and dedicated support.',
+        description:
+          'For large bakery chains and franchises. Enterprise-grade features with unlimited locations, custom development, and dedicated support.',
         priceMonthlyUsd: 299.99,
         priceAnnualUsd: 2999.99,
         maxLocations: null, // Unlimited
@@ -172,7 +176,8 @@ export class SubscriptionPlansSeed {
       {
         id: 'plan-test-paid',
         name: 'Test Paid',
-        description: 'Test paid plan for development and testing purposes only.',
+        description:
+          'Test paid plan for development and testing purposes only.',
         priceMonthlyUsd: 1.99,
         priceAnnualUsd: 19.99,
         maxLocations: 1,
@@ -196,7 +201,9 @@ export class SubscriptionPlansSeed {
           .limit(1);
 
         if (existingPlan) {
-          this.logger.log(`Test plan ${planData.name} already exists, updating...`);
+          this.logger.log(
+            `Test plan ${planData.name} already exists, updating...`,
+          );
 
           // Update existing test plan
           await this.databaseService.database
@@ -223,7 +230,13 @@ export class SubscriptionPlansSeed {
     }
   }
 
-  async updateStripePriceIds(planUpdates: Array<{ planId: string; monthlyPriceId: string; annualPriceId: string }>): Promise<void> {
+  async updateStripePriceIds(
+    planUpdates: Array<{
+      planId: string;
+      monthlyPriceId: string;
+      annualPriceId: string;
+    }>,
+  ): Promise<void> {
     this.logger.log('Updating Stripe price IDs for existing plans...');
 
     try {
@@ -287,7 +300,10 @@ export class SubscriptionPlansSeed {
     }
   }
 
-  async validatePlanConsistency(): Promise<{ isValid: boolean; issues: string[] }> {
+  async validatePlanConsistency(): Promise<{
+    isValid: boolean;
+    issues: string[];
+  }> {
     this.logger.log('Validating plan consistency...');
 
     const issues: string[] = [];
@@ -298,8 +314,13 @@ export class SubscriptionPlansSeed {
         .from(subscriptionPlansTable);
 
       // Check for required plans
-      const requiredPlanIds = ['plan-starter', 'plan-professional', 'plan-business', 'plan-enterprise'];
-      const existingPlanIds = plans.map(p => p.id);
+      const requiredPlanIds = [
+        'plan-starter',
+        'plan-professional',
+        'plan-business',
+        'plan-enterprise',
+      ];
+      const existingPlanIds = plans.map((p) => p.id);
 
       for (const requiredId of requiredPlanIds) {
         if (!existingPlanIds.includes(requiredId)) {
@@ -310,11 +331,19 @@ export class SubscriptionPlansSeed {
       // Check for pricing consistency
       for (const plan of plans) {
         if (plan.priceAnnualUsd > plan.priceMonthlyUsd * 12) {
-          issues.push(`Plan ${plan.id}: Annual price (${plan.priceAnnualUsd}) is higher than 12x monthly price (${plan.priceMonthlyUsd * 12})`);
+          issues.push(
+            `Plan ${plan.id}: Annual price (${plan.priceAnnualUsd}) is higher than 12x monthly price (${plan.priceMonthlyUsd * 12})`,
+          );
         }
 
-        if (plan.priceMonthlyUsd <= 0 && !plan.id.includes('test') && !plan.id.includes('free')) {
-          issues.push(`Plan ${plan.id}: Monthly price should be greater than 0`);
+        if (
+          plan.priceMonthlyUsd <= 0 &&
+          !plan.id.includes('test') &&
+          !plan.id.includes('free')
+        ) {
+          issues.push(
+            `Plan ${plan.id}: Monthly price should be greater than 0`,
+          );
         }
 
         if (!plan.stripePriceIdMonthly || !plan.stripePriceIdAnnual) {
@@ -327,8 +356,8 @@ export class SubscriptionPlansSeed {
       }
 
       // Check sort order uniqueness among active plans
-      const activePlans = plans.filter(p => p.isActive);
-      const sortOrders = activePlans.map(p => p.sortOrder);
+      const activePlans = plans.filter((p) => p.isActive);
+      const sortOrders = activePlans.map((p) => p.sortOrder);
       const uniqueSortOrders = [...new Set(sortOrders)];
 
       if (sortOrders.length !== uniqueSortOrders.length) {
@@ -340,13 +369,16 @@ export class SubscriptionPlansSeed {
       if (isValid) {
         this.logger.log('Plan consistency validation passed');
       } else {
-        this.logger.warn(`Plan consistency validation failed with ${issues.length} issues`);
+        this.logger.warn(
+          `Plan consistency validation failed with ${issues.length} issues`,
+        );
       }
 
       return { isValid, issues };
     } catch (error) {
       this.logger.error('Failed to validate plan consistency:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       return { isValid: false, issues: [`Validation error: ${errorMessage}`] };
     }
   }

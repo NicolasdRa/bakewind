@@ -21,17 +21,15 @@ describe('POST /auth/login (Contract Test)', () => {
       password: 'LoginTestPass123!',
     };
 
-    await request(app.getHttpServer())
-      .post('/auth/trial-signup')
-      .send({
-        businessName: 'Login Test Bakery',
-        fullName: 'Login Tester',
-        email: testUserCredentials.email,
-        phone: '+1 555-777-8888',
-        password: testUserCredentials.password,
-        locations: '1',
-        agreeToTerms: true,
-      });
+    await request(app.getHttpServer()).post('/auth/trial-signup').send({
+      businessName: 'Login Test Bakery',
+      fullName: 'Login Tester',
+      email: testUserCredentials.email,
+      phone: '+1 555-777-8888',
+      password: testUserCredentials.password,
+      locations: '1',
+      agreeToTerms: true,
+    });
   });
 
   afterAll(async () => {
@@ -65,7 +63,9 @@ describe('POST /auth/login (Contract Test)', () => {
       });
 
       // Verify JWT token format
-      expect(response.body.accessToken).toMatch(/^eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/);
+      expect(response.body.accessToken).toMatch(
+        /^eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/,
+      );
 
       // Verify dashboard URL based on user role
       expect(response.body.dashboardUrl).toMatch(/^\/admin\/overview$/);
@@ -77,8 +77,8 @@ describe('POST /auth/login (Contract Test)', () => {
         .send(testUserCredentials);
 
       expect(response.headers['set-cookie']).toBeDefined();
-      const refreshTokenCookie = response.headers['set-cookie'].find((cookie: string) =>
-        cookie.startsWith('refreshToken=')
+      const refreshTokenCookie = response.headers['set-cookie'].find(
+        (cookie: string) => cookie.startsWith('refreshToken='),
       );
       expect(refreshTokenCookie).toBeDefined();
       expect(refreshTokenCookie).toContain('HttpOnly');
@@ -201,13 +201,15 @@ describe('POST /auth/login (Contract Test)', () => {
       const requests = Array.from({ length: 10 }, () =>
         request(app.getHttpServer())
           .post('/auth/login')
-          .send(invalidCredentials)
+          .send(invalidCredentials),
       );
 
       const responses = await Promise.all(requests);
 
       // Should eventually be rate limited
-      const rateLimitedResponses = responses.filter(res => res.status === 429);
+      const rateLimitedResponses = responses.filter(
+        (res) => res.status === 429,
+      );
       expect(rateLimitedResponses.length).toBeGreaterThan(0);
     });
 
@@ -230,24 +232,20 @@ describe('POST /auth/login (Contract Test)', () => {
       const startTime = Date.now();
 
       // Login with non-existent user
-      await request(app.getHttpServer())
-        .post('/auth/login')
-        .send({
-          email: 'nonexistent@testbakery.com',
-          password: 'SomePassword123!',
-        });
+      await request(app.getHttpServer()).post('/auth/login').send({
+        email: 'nonexistent@testbakery.com',
+        password: 'SomePassword123!',
+      });
 
       const nonExistentUserTime = Date.now() - startTime;
 
       const startTime2 = Date.now();
 
       // Login with wrong password for existing user
-      await request(app.getHttpServer())
-        .post('/auth/login')
-        .send({
-          email: testUserCredentials.email,
-          password: 'WrongPassword123!',
-        });
+      await request(app.getHttpServer()).post('/auth/login').send({
+        email: testUserCredentials.email,
+        password: 'WrongPassword123!',
+      });
 
       const wrongPasswordTime = Date.now() - startTime2;
 

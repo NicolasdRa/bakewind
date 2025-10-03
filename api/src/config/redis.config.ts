@@ -7,7 +7,8 @@ export class RedisConfigService {
   private readonly redis: Redis;
 
   constructor(private configService: ConfigService) {
-    const redisUrl = this.configService.get<string>('REDIS_URL') || 'redis://localhost:6379';
+    const redisUrl =
+      this.configService.get<string>('REDIS_URL') || 'redis://localhost:6379';
 
     this.redis = new Redis(redisUrl, {
       maxRetriesPerRequest: 3,

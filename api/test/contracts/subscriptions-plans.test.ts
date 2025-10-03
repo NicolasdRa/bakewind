@@ -48,7 +48,7 @@ describe('GET /subscriptions/plans (Contract Test)', () => {
 
         // Verify UUID format for ID
         expect(plan.id).toMatch(
-          /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+          /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
         );
 
         // Verify pricing is in cents (positive integers)
@@ -103,7 +103,9 @@ describe('GET /subscriptions/plans (Contract Test)', () => {
         .get('/subscriptions/plans')
         .expect(200);
 
-      const popularPlans = response.body.filter((plan: any) => plan.isPopular === true);
+      const popularPlans = response.body.filter(
+        (plan: any) => plan.isPopular === true,
+      );
 
       // Should have exactly one popular plan
       expect(popularPlans.length).toBeLessThanOrEqual(1);
@@ -153,17 +155,29 @@ describe('GET /subscriptions/plans (Contract Test)', () => {
 
       // Verify pricing increases with plan tiers
       const starterPlan = response.body.find((p: any) => p.name === 'Starter');
-      const professionalPlan = response.body.find((p: any) => p.name === 'Professional');
-      const businessPlan = response.body.find((p: any) => p.name === 'Business');
+      const professionalPlan = response.body.find(
+        (p: any) => p.name === 'Professional',
+      );
+      const businessPlan = response.body.find(
+        (p: any) => p.name === 'Business',
+      );
 
       if (starterPlan && professionalPlan) {
-        expect(professionalPlan.priceMonthlyUsd).toBeGreaterThan(starterPlan.priceMonthlyUsd);
-        expect(professionalPlan.priceAnnualUsd).toBeGreaterThan(starterPlan.priceAnnualUsd);
+        expect(professionalPlan.priceMonthlyUsd).toBeGreaterThan(
+          starterPlan.priceMonthlyUsd,
+        );
+        expect(professionalPlan.priceAnnualUsd).toBeGreaterThan(
+          starterPlan.priceAnnualUsd,
+        );
       }
 
       if (professionalPlan && businessPlan) {
-        expect(businessPlan.priceMonthlyUsd).toBeGreaterThan(professionalPlan.priceMonthlyUsd);
-        expect(businessPlan.priceAnnualUsd).toBeGreaterThan(professionalPlan.priceAnnualUsd);
+        expect(businessPlan.priceMonthlyUsd).toBeGreaterThan(
+          professionalPlan.priceMonthlyUsd,
+        );
+        expect(businessPlan.priceAnnualUsd).toBeGreaterThan(
+          professionalPlan.priceAnnualUsd,
+        );
       }
     });
 
@@ -174,7 +188,8 @@ describe('GET /subscriptions/plans (Contract Test)', () => {
 
       response.body.forEach((plan: any) => {
         const monthlyAnnualCost = plan.priceMonthlyUsd * 12;
-        const discountPercent = ((monthlyAnnualCost - plan.priceAnnualUsd) / monthlyAnnualCost) * 100;
+        const discountPercent =
+          ((monthlyAnnualCost - plan.priceAnnualUsd) / monthlyAnnualCost) * 100;
 
         // Annual discount should be between 10% and 30%
         expect(discountPercent).toBeGreaterThan(10);
@@ -207,15 +222,23 @@ describe('GET /subscriptions/plans (Contract Test)', () => {
         .expect(200);
 
       const starterPlan = response.body.find((p: any) => p.name === 'Starter');
-      const professionalPlan = response.body.find((p: any) => p.name === 'Professional');
-      const businessPlan = response.body.find((p: any) => p.name === 'Business');
+      const professionalPlan = response.body.find(
+        (p: any) => p.name === 'Professional',
+      );
+      const businessPlan = response.body.find(
+        (p: any) => p.name === 'Business',
+      );
 
       if (starterPlan && professionalPlan) {
-        expect(professionalPlan.features.length).toBeGreaterThanOrEqual(starterPlan.features.length);
+        expect(professionalPlan.features.length).toBeGreaterThanOrEqual(
+          starterPlan.features.length,
+        );
       }
 
       if (professionalPlan && businessPlan) {
-        expect(businessPlan.features.length).toBeGreaterThanOrEqual(professionalPlan.features.length);
+        expect(businessPlan.features.length).toBeGreaterThanOrEqual(
+          professionalPlan.features.length,
+        );
       }
     });
 
@@ -228,8 +251,9 @@ describe('GET /subscriptions/plans (Contract Test)', () => {
       const coreFeatures = ['order_management', 'basic_reporting'];
 
       response.body.forEach((plan: any) => {
-        coreFeatures.forEach(feature => {
-          if (plan.name !== 'Enterprise') { // Enterprise might have different feature structure
+        coreFeatures.forEach((feature) => {
+          if (plan.name !== 'Enterprise') {
+            // Enterprise might have different feature structure
             // At least some basic features should be included
             expect(plan.features.length).toBeGreaterThan(0);
           }
@@ -243,13 +267,19 @@ describe('GET /subscriptions/plans (Contract Test)', () => {
         .expect(200);
 
       const starterPlan = response.body.find((p: any) => p.name === 'Starter');
-      const businessPlan = response.body.find((p: any) => p.name === 'Business');
+      const businessPlan = response.body.find(
+        (p: any) => p.name === 'Business',
+      );
 
       // Premium features should not be in starter plan
-      const premiumFeatures = ['advanced_analytics', 'multi_location', 'api_access'];
+      const premiumFeatures = [
+        'advanced_analytics',
+        'multi_location',
+        'api_access',
+      ];
 
       if (starterPlan) {
-        premiumFeatures.forEach(feature => {
+        premiumFeatures.forEach((feature) => {
           expect(starterPlan.features).not.toContain(feature);
         });
       }
@@ -267,7 +297,7 @@ describe('GET /subscriptions/plans (Contract Test)', () => {
       // For now, we verify the endpoint exists and responds
       await request(app.getHttpServer())
         .get('/subscriptions/plans')
-        .expect(res => {
+        .expect((res) => {
           expect([200, 500, 503]).toContain(res.status);
         });
     });
@@ -299,14 +329,13 @@ describe('GET /subscriptions/plans (Contract Test)', () => {
 
     it('should handle concurrent requests efficiently', async () => {
       const concurrentRequests = Array.from({ length: 10 }, () =>
-        request(app.getHttpServer())
-          .get('/subscriptions/plans')
+        request(app.getHttpServer()).get('/subscriptions/plans'),
       );
 
       const responses = await Promise.all(concurrentRequests);
 
       // All requests should succeed
-      responses.forEach(response => {
+      responses.forEach((response) => {
         expect(response.status).toBe(200);
         expect(Array.isArray(response.body)).toBe(true);
       });
@@ -346,14 +375,15 @@ describe('GET /subscriptions/plans (Contract Test)', () => {
 
     it('should rate limit requests appropriately', async () => {
       const rapidRequests = Array.from({ length: 100 }, () =>
-        request(app.getHttpServer())
-          .get('/subscriptions/plans')
+        request(app.getHttpServer()).get('/subscriptions/plans'),
       );
 
       const responses = await Promise.all(rapidRequests);
 
       // Should eventually rate limit, but be generous for public endpoint
-      const rateLimitedResponses = responses.filter(res => res.status === 429);
+      const rateLimitedResponses = responses.filter(
+        (res) => res.status === 429,
+      );
       expect(rateLimitedResponses.length).toBeLessThan(responses.length);
     });
   });

@@ -56,7 +56,9 @@ describe('Inventory API - GET /api/v1/inventory/:itemId/consumption (e2e)', () =
       expect(response.body).toHaveProperty('days_of_supply_remaining');
 
       // Validate calculation_method enum
-      expect(['historical_orders', 'manual', 'predicted']).toContain(response.body.calculation_method);
+      expect(['historical_orders', 'manual', 'predicted']).toContain(
+        response.body.calculation_method,
+      );
 
       // Validate numeric fields
       expect(typeof response.body.avg_daily_consumption).toBe('number');

@@ -1,4 +1,9 @@
-import { Injectable, NestMiddleware, UnauthorizedException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  NestMiddleware,
+  UnauthorizedException,
+  Logger,
+} from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -41,12 +46,18 @@ export class JwtAuthMiddleware implements NestMiddleware {
       req.userAuthenticated = true;
 
       // Log successful authentication
-      this.logger.debug(`User ${payload.sub} authenticated for ${req.method} ${req.path}`);
+      this.logger.debug(
+        `User ${payload.sub} authenticated for ${req.method} ${req.path}`,
+      );
 
       next();
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`Authentication failed for ${req.method} ${req.path}:`, errorMessage);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(
+        `Authentication failed for ${req.method} ${req.path}:`,
+        errorMessage,
+      );
 
       // Clear any potentially invalid cookies
       this.clearAuthCookies(res);
@@ -121,7 +132,7 @@ export class JwtAuthMiddleware implements NestMiddleware {
       /^\/public\//, // Public assets
     ];
 
-    return publicPatterns.some(pattern => pattern.test(path));
+    return publicPatterns.some((pattern) => pattern.test(path));
   }
 
   /**
@@ -165,11 +176,17 @@ export class JwtAuthMiddleware implements NestMiddleware {
         throw new UnauthorizedException('Authentication required');
       }
 
-      const userRoles = Array.isArray(req.user.role) ? req.user.role : [req.user.role];
-      const hasRequiredRole = roles.some(role => userRoles.includes(role)) || userRoles.includes('admin');
+      const userRoles = Array.isArray(req.user.role)
+        ? req.user.role
+        : [req.user.role];
+      const hasRequiredRole =
+        roles.some((role) => userRoles.includes(role)) ||
+        userRoles.includes('admin');
 
       if (!hasRequiredRole) {
-        throw new UnauthorizedException(`One of the following roles required: ${roles.join(', ')}`);
+        throw new UnauthorizedException(
+          `One of the following roles required: ${roles.join(', ')}`,
+        );
       }
 
       next();
@@ -189,7 +206,9 @@ export class JwtAuthMiddleware implements NestMiddleware {
       const currentUserId = req.user.sub;
 
       if (currentUserId !== resourceUserId && req.user.role !== 'admin') {
-        throw new UnauthorizedException('Access denied - can only access own resources');
+        throw new UnauthorizedException(
+          'Access denied - can only access own resources',
+        );
       }
 
       next();
@@ -200,7 +219,10 @@ export class JwtAuthMiddleware implements NestMiddleware {
    * Rate limiting based on user ID
    */
   static createUserRateLimit(maxRequests: number, windowMs: number) {
-    const requestCounts = new Map<string, { count: number; resetTime: number }>();
+    const requestCounts = new Map<
+      string,
+      { count: number; resetTime: number }
+    >();
 
     return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
       if (!req.user) {

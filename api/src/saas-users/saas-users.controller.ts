@@ -51,7 +51,9 @@ export class SaasUsersController {
     status: 401,
     description: 'Unauthorized',
   })
-  async getCurrentUserProfile(@Request() req: any): Promise<UserProfileResponseDto> {
+  async getCurrentUserProfile(
+    @Request() req: any,
+  ): Promise<UserProfileResponseDto> {
     const userId = req.user.sub;
     return this.saasUsersService.getUserProfile(userId);
   }
@@ -138,7 +140,9 @@ export class SaasUsersController {
     status: 401,
     description: 'Unauthorized',
   })
-  async getAccountSettings(@Request() req: any): Promise<UserAccountSettingsDto> {
+  async getAccountSettings(
+    @Request() req: any,
+  ): Promise<UserAccountSettingsDto> {
     const userId = req.user.sub;
     return this.saasUsersService.getAccountSettings(userId);
   }
@@ -187,8 +191,16 @@ export class SaasUsersController {
         },
         planId: { type: 'string', nullable: true },
         planName: { type: 'string', nullable: true },
-        currentPeriodStart: { type: 'string', format: 'date-time', nullable: true },
-        currentPeriodEnd: { type: 'string', format: 'date-time', nullable: true },
+        currentPeriodStart: {
+          type: 'string',
+          format: 'date-time',
+          nullable: true,
+        },
+        currentPeriodEnd: {
+          type: 'string',
+          format: 'date-time',
+          nullable: true,
+        },
         trialEndsAt: { type: 'string', format: 'date-time', nullable: true },
         cancelAtPeriodEnd: { type: 'boolean' },
         usage: {
@@ -255,10 +267,7 @@ export class SaasUsersController {
     status: 401,
     description: 'Unauthorized',
   })
-  async getBillingHistory(
-    @Request() req: any,
-    @Query('limit') limit?: string,
-  ) {
+  async getBillingHistory(@Request() req: any, @Query('limit') limit?: string) {
     const userId = req.user.sub;
     const limitNum = limit ? parseInt(limit, 10) : 10;
     return this.saasUsersService.getBillingHistory(userId, limitNum);
@@ -345,7 +354,9 @@ export class SaasUsersController {
     status: 404,
     description: 'User not found',
   })
-  async getUserById(@Param('userId') userId: string): Promise<UserProfileResponseDto> {
+  async getUserById(
+    @Param('userId') userId: string,
+  ): Promise<UserProfileResponseDto> {
     return this.saasUsersService.getUserProfile(userId);
   }
 
@@ -464,8 +475,13 @@ export class SaasUsersController {
   })
   async updateUserStatus(
     @Param('userId') userId: string,
-    @Body() statusDto: { status: 'active' | 'inactive' | 'suspended'; reason?: string },
+    @Body()
+    statusDto: { status: 'active' | 'inactive' | 'suspended'; reason?: string },
   ): Promise<UserProfileResponseDto> {
-    return this.saasUsersService.updateUserStatus(userId, statusDto.status, statusDto.reason);
+    return this.saasUsersService.updateUserStatus(
+      userId,
+      statusDto.status,
+      statusDto.reason,
+    );
   }
 }

@@ -21,7 +21,9 @@ describe('Trial Expiration Flow (T088)', () => {
     businessSize: '1' as const,
     onboardingStatus: 'completed' as const,
     onboardingStepsCompleted: ['business_info', 'trial_setup', 'first_login'],
-    lastOnboardingActivity: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days ago
+    lastOnboardingActivity: new Date(
+      Date.now() - 5 * 24 * 60 * 60 * 1000,
+    ).toISOString(), // 5 days ago
     hasConvertedToPaid: false,
     convertedAt: null,
     subscriptionPlanId: null,
@@ -69,7 +71,9 @@ describe('Trial Expiration Flow (T088)', () => {
     it('should calculate days remaining correctly', async () => {
       const activeTrialUser = {
         ...mockUser,
-        trialEndsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days from now
+        trialEndsAt: new Date(
+          Date.now() + 7 * 24 * 60 * 60 * 1000,
+        ).toISOString(), // 7 days from now
       };
 
       const trialEndDate = new Date(activeTrialUser.trialEndsAt);
@@ -84,7 +88,9 @@ describe('Trial Expiration Flow (T088)', () => {
     it('should identify trials approaching expiration', async () => {
       const soonToExpireUser = {
         ...mockUser,
-        trialEndsAt: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days from now
+        trialEndsAt: new Date(
+          Date.now() + 2 * 24 * 60 * 60 * 1000,
+        ).toISOString(), // 2 days from now
       };
 
       const trialEndDate = new Date(soonToExpireUser.trialEndsAt);
@@ -101,13 +107,16 @@ describe('Trial Expiration Flow (T088)', () => {
   describe('Trial Expiration API Endpoints', () => {
     it('should handle trial status check requests', async () => {
       try {
-        const response = await fetch(`${apiUrl}/trials/${mockTrialAccount.id}/status`, {
-          method: 'GET',
-          headers: {
-            'Authorization': 'Bearer mock-token',
-            'Content-Type': 'application/json',
+        const response = await fetch(
+          `${apiUrl}/trials/${mockTrialAccount.id}/status`,
+          {
+            method: 'GET',
+            headers: {
+              Authorization: 'Bearer mock-token',
+              'Content-Type': 'application/json',
+            },
           },
-        });
+        );
 
         // API should either exist and return status or return 404 (not implemented)
         expect([200, 404, 401]).toContain(response.status);
@@ -117,7 +126,6 @@ describe('Trial Expiration Flow (T088)', () => {
           expect(data).toHaveProperty('status');
           expect(['active', 'expired', 'expiring_soon']).toContain(data.status);
         }
-
       } catch (error) {
         console.log('Trial status API not available:', error);
       }
@@ -128,7 +136,7 @@ describe('Trial Expiration Flow (T088)', () => {
         const response = await fetch(`${apiUrl}/trials/expired`, {
           method: 'GET',
           headers: {
-            'Authorization': 'Bearer mock-admin-token',
+            Authorization: 'Bearer mock-admin-token',
             'Content-Type': 'application/json',
           },
         });
@@ -137,7 +145,6 @@ describe('Trial Expiration Flow (T088)', () => {
           const data = await response.json();
           expect(Array.isArray(data.trials || data)).toBe(true);
         }
-
       } catch (error) {
         console.log('Expired trials API not available:', error);
       }
@@ -150,14 +157,17 @@ describe('Trial Expiration Flow (T088)', () => {
       };
 
       try {
-        const response = await fetch(`${apiUrl}/trials/${mockTrialAccount.id}/convert`, {
-          method: 'POST',
-          headers: {
-            'Authorization': 'Bearer mock-token',
-            'Content-Type': 'application/json',
+        const response = await fetch(
+          `${apiUrl}/trials/${mockTrialAccount.id}/convert`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: 'Bearer mock-token',
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(conversionData),
           },
-          body: JSON.stringify(conversionData),
-        });
+        );
 
         if (response.status !== 404) {
           expect([200, 201, 400, 401]).toContain(response.status);
@@ -169,7 +179,6 @@ describe('Trial Expiration Flow (T088)', () => {
             expect(data.trial.hasConvertedToPaid).toBe(true);
           }
         }
-
       } catch (error) {
         console.log('Trial conversion API not available:', error);
       }
@@ -198,12 +207,17 @@ describe('Trial Expiration Flow (T088)', () => {
       const gracePeriodDays = 7;
       const recentlyExpiredUser = {
         ...mockUser,
-        trialEndsAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // Expired 2 days ago
+        trialEndsAt: new Date(
+          Date.now() - 2 * 24 * 60 * 60 * 1000,
+        ).toISOString(), // Expired 2 days ago
       };
 
       const trialEndDate = new Date(recentlyExpiredUser.trialEndsAt);
       const currentDate = new Date();
-      const daysSinceExpiration = Math.floor((currentDate.getTime() - trialEndDate.getTime()) / (1000 * 60 * 60 * 24));
+      const daysSinceExpiration = Math.floor(
+        (currentDate.getTime() - trialEndDate.getTime()) /
+          (1000 * 60 * 60 * 24),
+      );
 
       const inGracePeriod = daysSinceExpiration <= gracePeriodDays;
       expect(inGracePeriod).toBe(true);
@@ -224,12 +238,17 @@ describe('Trial Expiration Flow (T088)', () => {
       const gracePeriodDays = 7;
       const longExpiredUser = {
         ...mockUser,
-        trialEndsAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(), // Expired 10 days ago
+        trialEndsAt: new Date(
+          Date.now() - 10 * 24 * 60 * 60 * 1000,
+        ).toISOString(), // Expired 10 days ago
       };
 
       const trialEndDate = new Date(longExpiredUser.trialEndsAt);
       const currentDate = new Date();
-      const daysSinceExpiration = Math.floor((currentDate.getTime() - trialEndDate.getTime()) / (1000 * 60 * 60 * 24));
+      const daysSinceExpiration = Math.floor(
+        (currentDate.getTime() - trialEndDate.getTime()) /
+          (1000 * 60 * 60 * 24),
+      );
 
       const inGracePeriod = daysSinceExpiration <= gracePeriodDays;
       expect(inGracePeriod).toBe(false);
@@ -264,7 +283,8 @@ describe('Trial Expiration Flow (T088)', () => {
 
       // Should trigger 3-day warning
       const shouldSendWarning = warningSchedule.some(
-        warning => warning.daysBeforeExpiration === daysRemaining && !warning.sent
+        (warning) =>
+          warning.daysBeforeExpiration === daysRemaining && !warning.sent,
       );
 
       expect(shouldSendWarning).toBe(true);
@@ -322,7 +342,7 @@ describe('Trial Expiration Flow (T088)', () => {
         const response = await fetch(`${apiUrl}/users/${mockUser.id}/export`, {
           method: 'POST',
           headers: {
-            'Authorization': 'Bearer mock-token',
+            Authorization: 'Bearer mock-token',
             'Content-Type': 'application/json',
           },
         });
@@ -331,7 +351,6 @@ describe('Trial Expiration Flow (T088)', () => {
           // Should allow data export even for expired users
           expect([200, 202, 401]).toContain(response.status);
         }
-
       } catch (error) {
         console.log('Data export API not available:', error);
       }
@@ -355,7 +374,9 @@ describe('Trial Expiration Flow (T088)', () => {
 
       expect(conversionMetrics.conversionRate).toBe(0.25);
       expect(conversionMetrics.totalTrials).toBeGreaterThan(0);
-      expect(conversionMetrics.convertedTrials).toBeLessThanOrEqual(conversionMetrics.totalTrials);
+      expect(conversionMetrics.convertedTrials).toBeLessThanOrEqual(
+        conversionMetrics.totalTrials,
+      );
     });
 
     it('should analyze trial completion patterns', async () => {

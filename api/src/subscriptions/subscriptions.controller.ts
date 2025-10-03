@@ -11,7 +11,12 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { SubscriptionPlansService } from './subscription-plans.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Public } from '../auth/decorators/public.decorator';
@@ -63,10 +68,8 @@ export class SubscriptionsController {
     status: 200,
     description: 'Plan comparison data retrieved',
   })
-  async comparePlans(
-    @Query('planIds') planIds: string,
-  ) {
-    const planIdArray = planIds.split(',').filter(id => id.trim());
+  async comparePlans(@Query('planIds') planIds: string) {
+    const planIdArray = planIds.split(',').filter((id) => id.trim());
     return this.subscriptionPlansService.comparePlans(planIdArray);
   }
 

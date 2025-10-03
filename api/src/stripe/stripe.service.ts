@@ -14,7 +14,11 @@ export class StripeService {
   /**
    * Create a Stripe customer for a trial user
    */
-  async createCustomer(email: string, name: string, businessName?: string): Promise<Stripe.Customer> {
+  async createCustomer(
+    email: string,
+    name: string,
+    businessName?: string,
+  ): Promise<Stripe.Customer> {
     try {
       const customer = await this.stripe.customers.create({
         email,
@@ -28,7 +32,10 @@ export class StripeService {
       this.logger.log(`Created Stripe customer ${customer.id} for ${email}`);
       return customer;
     } catch (error) {
-      this.logger.error(`Failed to create Stripe customer for ${email}:`, error);
+      this.logger.error(
+        `Failed to create Stripe customer for ${email}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -54,10 +61,15 @@ export class StripeService {
         },
       });
 
-      this.logger.log(`Created subscription ${subscription.id} for customer ${customerId}`);
+      this.logger.log(
+        `Created subscription ${subscription.id} for customer ${customerId}`,
+      );
       return subscription;
     } catch (error) {
-      this.logger.error(`Failed to create subscription for customer ${customerId}:`, error);
+      this.logger.error(
+        `Failed to create subscription for customer ${customerId}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -91,10 +103,15 @@ export class StripeService {
         },
       });
 
-      this.logger.log(`Created checkout session ${session.id} for customer ${customerId}`);
+      this.logger.log(
+        `Created checkout session ${session.id} for customer ${customerId}`,
+      );
       return session;
     } catch (error) {
-      this.logger.error(`Failed to create checkout session for customer ${customerId}:`, error);
+      this.logger.error(
+        `Failed to create checkout session for customer ${customerId}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -102,13 +119,19 @@ export class StripeService {
   /**
    * Cancel a subscription
    */
-  async cancelSubscription(subscriptionId: string): Promise<Stripe.Subscription> {
+  async cancelSubscription(
+    subscriptionId: string,
+  ): Promise<Stripe.Subscription> {
     try {
-      const subscription = await this.stripe.subscriptions.cancel(subscriptionId);
+      const subscription =
+        await this.stripe.subscriptions.cancel(subscriptionId);
       this.logger.log(`Canceled subscription ${subscriptionId}`);
       return subscription;
     } catch (error) {
-      this.logger.error(`Failed to cancel subscription ${subscriptionId}:`, error);
+      this.logger.error(
+        `Failed to cancel subscription ${subscriptionId}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -120,7 +143,10 @@ export class StripeService {
     try {
       return await this.stripe.subscriptions.retrieve(subscriptionId);
     } catch (error) {
-      this.logger.error(`Failed to retrieve subscription ${subscriptionId}:`, error);
+      this.logger.error(
+        `Failed to retrieve subscription ${subscriptionId}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -129,14 +155,20 @@ export class StripeService {
    * Construct webhook event from raw body and signature
    */
   constructWebhookEvent(body: Buffer, signature: string): Stripe.Event {
-    const webhookSecret = this.configService.get<string>('STRIPE_WEBHOOK_SECRET');
+    const webhookSecret = this.configService.get<string>(
+      'STRIPE_WEBHOOK_SECRET',
+    );
 
     if (!webhookSecret) {
       throw new Error('STRIPE_WEBHOOK_SECRET is not configured');
     }
 
     try {
-      return this.stripe.webhooks.constructEvent(body, signature, webhookSecret);
+      return this.stripe.webhooks.constructEvent(
+        body,
+        signature,
+        webhookSecret,
+      );
     } catch (error) {
       this.logger.error('Failed to construct webhook event:', error);
       throw error;
@@ -154,7 +186,9 @@ export class StripeService {
       case 'customer.subscription.updated':
       case 'customer.subscription.deleted':
         const subscription = event.data.object as Stripe.Subscription;
-        this.logger.log(`Subscription ${subscription.id} status: ${subscription.status}`);
+        this.logger.log(
+          `Subscription ${subscription.id} status: ${subscription.status}`,
+        );
         // TODO: Update database subscription status
         break;
 

@@ -1,5 +1,5 @@
-import { Injectable, Logger } from "@nestjs/common";
-import { RealtimeGateway } from "./realtime.gateway";
+import { Injectable, Logger } from '@nestjs/common';
+import { RealtimeGateway } from './realtime.gateway';
 
 interface DashboardMetrics {
   total_orders?: number;
@@ -46,9 +46,7 @@ export class RealtimeService {
 
     // Check throttle
     if (this.isThrottled(throttleKey)) {
-      this.logger.debug(
-        `Metrics broadcast throttled for user ${userId}`,
-      );
+      this.logger.debug(`Metrics broadcast throttled for user ${userId}`);
       return;
     }
 
@@ -61,10 +59,7 @@ export class RealtimeService {
       metrics: deltaMetrics,
     });
 
-    this.logger.debug(
-      `Broadcast metrics to user ${userId}:`,
-      deltaMetrics,
-    );
+    this.logger.debug(`Broadcast metrics to user ${userId}:`, deltaMetrics);
   }
 
   /**
@@ -72,9 +67,7 @@ export class RealtimeService {
    */
   broadcastOrderLocked(lockInfo: OrderLockNotification): void {
     this.gateway.emitToAll('order:locked', lockInfo);
-    this.logger.log(
-      `Broadcast order:locked for order ${lockInfo.order_id}`,
-    );
+    this.logger.log(`Broadcast order:locked for order ${lockInfo.order_id}`);
   }
 
   /**

@@ -7,13 +7,19 @@ export const trialSignupSchema = z.object({
     .string()
     .min(2, 'Business name must be at least 2 characters')
     .max(100, 'Business name must not exceed 100 characters')
-    .regex(/^[a-zA-Z0-9\s\-\.'&]+$/, 'Business name contains invalid characters'),
+    .regex(
+      /^[a-zA-Z0-9\s\-\.'&]+$/,
+      'Business name contains invalid characters',
+    ),
 
   fullName: z
     .string()
     .min(2, 'Full name must be at least 2 characters')
     .max(100, 'Full name must not exceed 100 characters')
-    .regex(/^[a-zA-Z\s\-'\.]+$/, 'Full name must contain only letters, spaces, hyphens, apostrophes, and periods'),
+    .regex(
+      /^[a-zA-Z\s\-'\.]+$/,
+      'Full name must contain only letters, spaces, hyphens, apostrophes, and periods',
+    ),
 
   email: z
     .string()
@@ -32,9 +38,9 @@ export const trialSignupSchema = z.object({
           'throwaway.email',
         ];
         const domain = email.split('@')[1];
-        return !disposableDomains.includes(domain);
+        return domain ? !disposableDomains.includes(domain) : false;
       },
-      { message: 'Disposable email addresses are not allowed' }
+      { message: 'Disposable email addresses are not allowed' },
     ),
 
   phone: z
@@ -47,7 +53,7 @@ export const trialSignupSchema = z.object({
         const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
         return phoneRegex.test(phone.replace(/[\s\-\(\)]/g, ''));
       },
-      { message: 'Invalid phone number format' }
+      { message: 'Invalid phone number format' },
     ),
 
   password: z
@@ -56,18 +62,18 @@ export const trialSignupSchema = z.object({
     .max(128, 'Password must not exceed 128 characters')
     .regex(
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
-      'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'
+      'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
     ),
 
   locations: z.enum(['1', '2-3', '4-10', '10+'], {
-    errorMap: () => ({ message: 'Locations must be one of: 1, 2-3, 4-10, 10+' }),
+    errorMap: () => ({
+      message: 'Locations must be one of: 1, 2-3, 4-10, 10+',
+    }),
   }),
 
-  agreeToTerms: z
-    .boolean()
-    .refine((agree) => agree === true, {
-      message: 'You must agree to the terms and conditions',
-    }),
+  agreeToTerms: z.boolean().refine((agree) => agree === true, {
+    message: 'You must agree to the terms and conditions',
+  }),
 
   // Optional marketing consent
   marketingConsent: z.boolean().optional().default(false),
@@ -96,7 +102,7 @@ export class TrialSignupValidationPipe implements PipeTransform {
       return trialSignupSchema.parse(processedValue);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        const errorMessages = error.errors.map(err => {
+        const errorMessages = error.errors.map((err) => {
           const path = err.path.join('.');
           return `${path}: ${err.message}`;
         });
@@ -118,9 +124,18 @@ export class TrialSignupValidationPipe implements PipeTransform {
     return {
       ...data,
       // Trim string fields
-      businessName: typeof data.businessName === 'string' ? data.businessName.trim() : data.businessName,
-      fullName: typeof data.fullName === 'string' ? data.fullName.trim() : data.fullName,
-      email: typeof data.email === 'string' ? data.email.trim().toLowerCase() : data.email,
+      businessName:
+        typeof data.businessName === 'string'
+          ? data.businessName.trim()
+          : data.businessName,
+      fullName:
+        typeof data.fullName === 'string'
+          ? data.fullName.trim()
+          : data.fullName,
+      email:
+        typeof data.email === 'string'
+          ? data.email.trim().toLowerCase()
+          : data.email,
       phone: typeof data.phone === 'string' ? data.phone.trim() : data.phone,
 
       // Parse fullName into firstName and lastName
@@ -174,7 +189,7 @@ export class TrialSignupValidationHelpers {
    */
   static async validateBusinessNameUniqueness(
     businessName: string,
-    userService: any // Type would be your user service
+    userService: any, // Type would be your user service
   ): Promise<void> {
     const existingUser = await userService.findByBusinessName(businessName);
     if (existingUser) {
@@ -187,11 +202,13 @@ export class TrialSignupValidationHelpers {
    */
   static async validateEmailUniqueness(
     email: string,
-    userService: any
+    userService: any,
   ): Promise<void> {
     const existingUser = await userService.findByEmail(email);
     if (existingUser) {
-      throw new BadRequestException('An account with this email already exists');
+      throw new BadRequestException(
+        'An account with this email already exists',
+      );
     }
   }
 
@@ -202,16 +219,16 @@ export class TrialSignupValidationHelpers {
     ipAddress: string,
     rateLimitService: any,
     maxTrialsPerIp = 3,
-    windowHours = 24
+    windowHours = 24,
   ): Promise<void> {
     const recentTrials = await rateLimitService.countTrialSignupsFromIp(
       ipAddress,
-      windowHours
+      windowHours,
     );
 
     if (recentTrials >= maxTrialsPerIp) {
       throw new BadRequestException(
-        `Too many trial accounts created from this IP address. Limit: ${maxTrialsPerIp} per ${windowHours} hours.`
+        `Too many trial accounts created from this IP address. Limit: ${maxTrialsPerIp} per ${windowHours} hours.`,
       );
     }
   }
@@ -221,28 +238,47 @@ export class TrialSignupValidationHelpers {
    */
   static validateBusinessSizeConsistency(
     businessSize: string,
-    expectedFeatures?: string[]
+    expectedFeatures?: string[],
   ): { isValid: boolean; recommendations?: string[] } {
     const businessSizeMapping = {
       '1': {
         recommendedPlan: 'plan-starter',
-        keyFeatures: ['Order Management', 'Inventory Control', 'Recipe Management'],
+        keyFeatures: [
+          'Order Management',
+          'Inventory Control',
+          'Recipe Management',
+        ],
       },
       '2-3': {
         recommendedPlan: 'plan-professional',
-        keyFeatures: ['Order Management', 'Inventory Control', 'Production Planning', 'Customer Database'],
+        keyFeatures: [
+          'Order Management',
+          'Inventory Control',
+          'Production Planning',
+          'Customer Database',
+        ],
       },
       '4-10': {
         recommendedPlan: 'plan-business',
-        keyFeatures: ['All Professional features', 'Supplier Management', 'Loyalty Program', 'Profit Insights'],
+        keyFeatures: [
+          'All Professional features',
+          'Supplier Management',
+          'Loyalty Program',
+          'Profit Insights',
+        ],
       },
       '10+': {
         recommendedPlan: 'plan-enterprise',
-        keyFeatures: ['All Business features', 'Advanced Analytics', 'Multi-location Support'],
+        keyFeatures: [
+          'All Business features',
+          'Advanced Analytics',
+          'Multi-location Support',
+        ],
       },
     };
 
-    const mapping = businessSizeMapping[businessSize as keyof typeof businessSizeMapping];
+    const mapping =
+      businessSizeMapping[businessSize as keyof typeof businessSizeMapping];
     if (!mapping) {
       return { isValid: false };
     }

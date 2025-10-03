@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { eq, and, lt, gte, isNull } from 'drizzle-orm';
 import { DatabaseService } from '../database/database.service';
 import { userSessionsTable } from '../database/schemas/user-sessions.schema';
@@ -65,7 +69,7 @@ export class UserSessionsService {
     if (onlyActive) {
       conditions.push(
         eq(userSessionsTable.isRevoked, false),
-        gte(userSessionsTable.expiresAt, new Date())
+        gte(userSessionsTable.expiresAt, new Date()),
       );
     }
 
@@ -85,8 +89,8 @@ export class UserSessionsService {
         and(
           eq(userSessionsTable.accessTokenHash, accessTokenHash),
           eq(userSessionsTable.isRevoked, false),
-          gte(userSessionsTable.expiresAt, new Date())
-        )
+          gte(userSessionsTable.expiresAt, new Date()),
+        ),
       );
 
     return session || null;
@@ -100,8 +104,8 @@ export class UserSessionsService {
         and(
           eq(userSessionsTable.refreshTokenHash, refreshTokenHash),
           eq(userSessionsTable.isRevoked, false),
-          gte(userSessionsTable.expiresAt, new Date())
-        )
+          gte(userSessionsTable.expiresAt, new Date()),
+        ),
       );
 
     return session || null;
@@ -136,7 +140,7 @@ export class UserSessionsService {
     refreshTokenHash: string,
     newAccessTokenHash: string,
     newRefreshTokenHash: string,
-    newExpiresAt: Date
+    newExpiresAt: Date,
   ) {
     const session = await this.findByRefreshTokenHash(refreshTokenHash);
 
@@ -191,8 +195,8 @@ export class UserSessionsService {
       .where(
         and(
           eq(userSessionsTable.userId, userId),
-          eq(userSessionsTable.isRevoked, false)
-        )
+          eq(userSessionsTable.isRevoked, false),
+        ),
       )
       .returning();
 
@@ -211,12 +215,12 @@ export class UserSessionsService {
           eq(userSessionsTable.userId, userId),
           eq(userSessionsTable.isRevoked, false),
           // ne(userSessionsTable.id, exceptSessionId) // 'ne' not available, use NOT
-        )
+        ),
       )
       .returning();
 
     // Filter out the exception session client-side
-    return revokedSessions.filter(session => session.id !== exceptSessionId);
+    return revokedSessions.filter((session) => session.id !== exceptSessionId);
   }
 
   async isSessionValid(sessionId: string): Promise<boolean> {
@@ -227,8 +231,8 @@ export class UserSessionsService {
         and(
           eq(userSessionsTable.id, sessionId),
           eq(userSessionsTable.isRevoked, false),
-          gte(userSessionsTable.expiresAt, new Date())
-        )
+          gte(userSessionsTable.expiresAt, new Date()),
+        ),
       );
 
     return !!session;
@@ -282,8 +286,8 @@ export class UserSessionsService {
       .where(
         and(
           eq(userSessionsTable.isRevoked, true),
-          lt(userSessionsTable.lastActivityAt, cutoffDate)
-        )
+          lt(userSessionsTable.lastActivityAt, cutoffDate),
+        ),
       )
       .returning();
 
@@ -291,29 +295,30 @@ export class UserSessionsService {
   }
 
   async getSessionStats() {
-    const allSessions = await this.db.database
-      .select()
-      .from(userSessionsTable);
+    const allSessions = await this.db.database.select().from(userSessionsTable);
 
     const now = new Date();
 
     const stats = {
       total: allSessions.length,
-      active: allSessions.filter(s => !s.isRevoked && s.expiresAt > now).length,
-      expired: allSessions.filter(s => !s.isRevoked && s.expiresAt <= now).length,
-      revoked: allSessions.filter(s => s.isRevoked).length,
+      active: allSessions.filter((s) => !s.isRevoked && s.expiresAt > now)
+        .length,
+      expired: allSessions.filter((s) => !s.isRevoked && s.expiresAt <= now)
+        .length,
+      revoked: allSessions.filter((s) => s.isRevoked).length,
       byDevice: {} as Record<string, number>,
       byLocation: {} as Record<string, number>,
     };
 
-    allSessions.forEach(session => {
+    allSessions.forEach((session) => {
       // Parse user agent to get device info
       const deviceInfo = this.parseUserAgent(session.userAgent || '');
       stats.byDevice[deviceInfo] = (stats.byDevice[deviceInfo] || 0) + 1;
 
       // Use IP address as location approximation
       if (session.ipAddress) {
-        stats.byLocation[session.ipAddress] = (stats.byLocation[session.ipAddress] || 0) + 1;
+        stats.byLocation[session.ipAddress] =
+          (stats.byLocation[session.ipAddress] || 0) + 1;
       }
     });
 
@@ -338,7 +343,8 @@ export class UserSessionsService {
     if (userAgent.includes('Tablet')) return 'Tablet';
     if (userAgent.includes('Chrome')) return 'Chrome Desktop';
     if (userAgent.includes('Firefox')) return 'Firefox Desktop';
-    if (userAgent.includes('Safari') && !userAgent.includes('Chrome')) return 'Safari Desktop';
+    if (userAgent.includes('Safari') && !userAgent.includes('Chrome'))
+      return 'Safari Desktop';
     if (userAgent.includes('Edge')) return 'Edge Desktop';
 
     return 'Other';

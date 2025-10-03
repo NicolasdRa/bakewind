@@ -22,17 +22,15 @@ describe('GET /auth/me (Contract Test)', () => {
       password: 'ProfileTestPass123!',
     };
 
-    await request(app.getHttpServer())
-      .post('/auth/trial-signup')
-      .send({
-        businessName: 'Profile Test Bakery',
-        fullName: 'Profile Tester',
-        email: testUserCredentials.email,
-        phone: '+1 555-333-4444',
-        password: testUserCredentials.password,
-        locations: '2-3',
-        agreeToTerms: true,
-      });
+    await request(app.getHttpServer()).post('/auth/trial-signup').send({
+      businessName: 'Profile Test Bakery',
+      fullName: 'Profile Tester',
+      email: testUserCredentials.email,
+      phone: '+1 555-333-4444',
+      password: testUserCredentials.password,
+      locations: '2-3',
+      agreeToTerms: true,
+    });
 
     // Login to get access token
     const loginResponse = await request(app.getHttpServer())
@@ -69,15 +67,19 @@ describe('GET /auth/me (Contract Test)', () => {
 
       // Verify UUID format for ID
       expect(response.body.id).toMatch(
-        /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
       );
 
       // Verify email format
       expect(response.body.email).toMatch(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
 
       // Verify ISO 8601 timestamp format
-      expect(response.body.createdAt).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.*Z$/);
-      expect(response.body.trialEndsAt).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.*Z$/);
+      expect(response.body.createdAt).toMatch(
+        /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.*Z$/,
+      );
+      expect(response.body.trialEndsAt).toMatch(
+        /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.*Z$/,
+      );
 
       // Verify trial end date is in the future
       const trialEndsAt = new Date(response.body.trialEndsAt);
@@ -113,7 +115,8 @@ describe('GET /auth/me (Contract Test)', () => {
       // Trial should be approximately 14 days from creation
       const createdAt = new Date(response.body.createdAt);
       const trialEndsAt = new Date(response.body.trialEndsAt);
-      const trialLengthDays = (trialEndsAt.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24);
+      const trialLengthDays =
+        (trialEndsAt.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24);
       expect(trialLengthDays).toBeCloseTo(14, 1);
     });
 
@@ -131,7 +134,9 @@ describe('GET /auth/me (Contract Test)', () => {
 
       // For subscribers (when implemented)
       if (response.body.role === 'subscriber') {
-        expect(['active', 'past_due', 'canceled']).toContain(response.body.subscriptionStatus);
+        expect(['active', 'past_due', 'canceled']).toContain(
+          response.body.subscriptionStatus,
+        );
         expect(response.body.trialEndsAt).toBeNull();
       }
     });
@@ -209,7 +214,6 @@ describe('GET /auth/me (Contract Test)', () => {
     it('should handle subscriber profile correctly', async () => {
       // This test would require creating a subscriber user
       // For now, we'll outline the expected behavior
-
       // Expected for subscriber:
       // expect(response.body.role).toBe('subscriber');
       // expect(['active', 'past_due', 'canceled']).toContain(response.body.subscriptionStatus);
@@ -219,7 +223,6 @@ describe('GET /auth/me (Contract Test)', () => {
     it('should handle admin profile correctly', async () => {
       // This test would require creating an admin user
       // For now, we'll outline the expected behavior
-
       // Expected for admin:
       // expect(response.body.role).toBe('admin');
       // expect(response.body.subscriptionStatus).toBe('active');
@@ -234,7 +237,7 @@ describe('GET /auth/me (Contract Test)', () => {
         .expect(200);
 
       // Wait a moment
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       const response2 = await request(app.getHttpServer())
         .get('/auth/me')
@@ -254,7 +257,6 @@ describe('GET /auth/me (Contract Test)', () => {
     it('should reflect profile updates in real-time', async () => {
       // This test would verify that profile changes are immediately reflected
       // It would require implementing a profile update endpoint first
-
       // Example flow:
       // 1. Get current profile
       // 2. Update profile (e.g., business name)
@@ -271,17 +273,15 @@ describe('GET /auth/me (Contract Test)', () => {
         password: 'OtherUserPass123!',
       };
 
-      await request(app.getHttpServer())
-        .post('/auth/trial-signup')
-        .send({
-          businessName: 'Other Test Bakery',
-          fullName: 'Other User',
-          email: otherUserCredentials.email,
-          phone: '+1 555-555-5555',
-          password: otherUserCredentials.password,
-          locations: '1',
-          agreeToTerms: true,
-        });
+      await request(app.getHttpServer()).post('/auth/trial-signup').send({
+        businessName: 'Other Test Bakery',
+        fullName: 'Other User',
+        email: otherUserCredentials.email,
+        phone: '+1 555-555-5555',
+        password: otherUserCredentials.password,
+        locations: '1',
+        agreeToTerms: true,
+      });
 
       // Original user's profile should only contain their data
       const response = await request(app.getHttpServer())
@@ -297,13 +297,15 @@ describe('GET /auth/me (Contract Test)', () => {
       const requests = Array.from({ length: 50 }, () =>
         request(app.getHttpServer())
           .get('/auth/me')
-          .set('Authorization', `Bearer ${accessToken}`)
+          .set('Authorization', `Bearer ${accessToken}`),
       );
 
       const responses = await Promise.all(requests);
 
       // Should eventually be rate limited
-      const rateLimitedResponses = responses.filter(res => res.status === 429);
+      const rateLimitedResponses = responses.filter(
+        (res) => res.status === 429,
+      );
       expect(rateLimitedResponses.length).toBeGreaterThanOrEqual(0);
     });
 
@@ -315,7 +317,9 @@ describe('GET /auth/me (Contract Test)', () => {
 
       // Should include last login timestamp when available
       if (response.body.lastLoginAt) {
-        expect(response.body.lastLoginAt).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.*Z$/);
+        expect(response.body.lastLoginAt).toMatch(
+          /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.*Z$/,
+        );
       }
 
       // Email verification status should be present

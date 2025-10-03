@@ -243,7 +243,9 @@ describe('OrderLocksService (T041)', () => {
       const lockInsertQuery = {
         insert: jest.fn().mockReturnThis(),
         values: jest.fn().mockReturnThis(),
-        returning: jest.fn().mockRejectedValue(new Error('DB connection error')),
+        returning: jest
+          .fn()
+          .mockRejectedValue(new Error('DB connection error')),
       };
 
       let callCount = 0;
@@ -407,12 +409,12 @@ describe('OrderLocksService (T041)', () => {
         select: () => selectQuery,
       } as any;
 
-      await expect(
-        service.renewLock(mockUserId, mockOrderId),
-      ).rejects.toThrow(NotFoundException);
-      await expect(
-        service.renewLock(mockUserId, mockOrderId),
-      ).rejects.toThrow('Lock not found or expired');
+      await expect(service.renewLock(mockUserId, mockOrderId)).rejects.toThrow(
+        NotFoundException,
+      );
+      await expect(service.renewLock(mockUserId, mockOrderId)).rejects.toThrow(
+        'Lock not found or expired',
+      );
     });
   });
 
@@ -435,9 +437,15 @@ describe('OrderLocksService (T041)', () => {
         select: jest.fn().mockReturnThis(),
         from: jest.fn().mockReturnThis(),
         where: jest.fn().mockReturnThis(),
-        limit: jest.fn().mockResolvedValue(
-          callCount++ === 0 ? [mockOrder] : callCount === 2 ? [mockLock] : [mockUser],
-        ),
+        limit: jest
+          .fn()
+          .mockResolvedValue(
+            callCount++ === 0
+              ? [mockOrder]
+              : callCount === 2
+                ? [mockLock]
+                : [mockUser],
+          ),
       });
 
       mockDatabase.database = {
@@ -461,9 +469,9 @@ describe('OrderLocksService (T041)', () => {
         select: jest.fn().mockReturnThis(),
         from: jest.fn().mockReturnThis(),
         where: jest.fn().mockReturnThis(),
-        limit: jest.fn().mockResolvedValue(
-          callCount++ === 0 ? [mockOrder] : [],
-        ),
+        limit: jest
+          .fn()
+          .mockResolvedValue(callCount++ === 0 ? [mockOrder] : []),
       });
 
       mockDatabase.database = {

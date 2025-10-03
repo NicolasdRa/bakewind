@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { eq, and, isNull, lte, gte } from 'drizzle-orm';
 import { DatabaseService } from '../database/database.service';
 import { trialAccountsTable } from '../database/schemas/trial-accounts.schema';
@@ -30,7 +34,8 @@ export class TrialAccountsService {
   ) {}
 
   async create(createDto: CreateTrialAccountDto) {
-    const trialLengthDays = createDto.trialLengthDays ||
+    const trialLengthDays =
+      createDto.trialLengthDays ||
       this.configService.get<number>('TRIAL_LENGTH_DAYS', 14);
 
     const [newTrial] = await this.db.database
@@ -108,10 +113,13 @@ export class TrialAccountsService {
     return updatedTrial;
   }
 
-  async updateOnboarding(id: string, onboardingData: {
-    onboardingCompleted?: boolean;
-    sampleDataLoaded?: boolean;
-  }) {
+  async updateOnboarding(
+    id: string,
+    onboardingData: {
+      onboardingCompleted?: boolean;
+      sampleDataLoaded?: boolean;
+    },
+  ) {
     const existingTrial = await this.findById(id);
 
     const [updatedTrial] = await this.db.database
@@ -219,11 +227,11 @@ export class TrialAccountsService {
           isNull(trialAccountsTable.cancellationReason),
           // This would need a calculated expiry date field
           // For now, we'll return all unconverted trials
-        )
+        ),
       );
 
     // Filter by calculated expiry date
-    return trials.filter(trial => {
+    return trials.filter((trial) => {
       const trialEndDate = new Date(trial.createdAt);
       trialEndDate.setDate(trialEndDate.getDate() + trial.trialLengthDays);
       return trialEndDate <= expiryThreshold && trialEndDate >= now;
@@ -239,12 +247,12 @@ export class TrialAccountsService {
       .where(
         and(
           isNull(trialAccountsTable.convertedAt),
-          isNull(trialAccountsTable.cancellationReason)
-        )
+          isNull(trialAccountsTable.cancellationReason),
+        ),
       );
 
     // Filter by calculated expiry date
-    return trials.filter(trial => {
+    return trials.filter((trial) => {
       const trialEndDate = new Date(trial.createdAt);
       trialEndDate.setDate(trialEndDate.getDate() + trial.trialLengthDays);
       return trialEndDate >= now;
@@ -260,12 +268,12 @@ export class TrialAccountsService {
       .where(
         and(
           isNull(trialAccountsTable.convertedAt),
-          isNull(trialAccountsTable.cancellationReason)
-        )
+          isNull(trialAccountsTable.cancellationReason),
+        ),
       );
 
     // Filter by calculated expiry date
-    return trials.filter(trial => {
+    return trials.filter((trial) => {
       const trialEndDate = new Date(trial.createdAt);
       trialEndDate.setDate(trialEndDate.getDate() + trial.trialLengthDays);
       return trialEndDate < now;
@@ -273,13 +281,11 @@ export class TrialAccountsService {
   }
 
   async getConversionRate(startDate?: Date, endDate?: Date) {
-    let allTrials = await this.db.database
-      .select()
-      .from(trialAccountsTable);
+    let allTrials = await this.db.database.select().from(trialAccountsTable);
 
     // Filter by date range if provided
     if (startDate || endDate) {
-      allTrials = allTrials.filter(trial => {
+      allTrials = allTrials.filter((trial) => {
         const trialDate = new Date(trial.createdAt);
         if (startDate && trialDate < startDate) return false;
         if (endDate && trialDate > endDate) return false;
@@ -288,23 +294,24 @@ export class TrialAccountsService {
     }
 
     const totalTrials = allTrials.length;
-    const convertedTrials = allTrials.filter(trial => trial.convertedAt !== null).length;
+    const convertedTrials = allTrials.filter(
+      (trial) => trial.convertedAt !== null,
+    ).length;
 
     return {
       totalTrials,
       convertedTrials,
-      conversionRate: totalTrials > 0 ? (convertedTrials / totalTrials) * 100 : 0,
+      conversionRate:
+        totalTrials > 0 ? (convertedTrials / totalTrials) * 100 : 0,
     };
   }
 
   async getTrialsByBusinessSize() {
-    const trials = await this.db.database
-      .select()
-      .from(trialAccountsTable);
+    const trials = await this.db.database.select().from(trialAccountsTable);
 
     const bySize: Record<string, number> = {};
 
-    trials.forEach(trial => {
+    trials.forEach((trial) => {
       bySize[trial.businessSize] = (bySize[trial.businessSize] || 0) + 1;
     });
 
@@ -312,13 +319,11 @@ export class TrialAccountsService {
   }
 
   async getTrialsBySignupSource() {
-    const trials = await this.db.database
-      .select()
-      .from(trialAccountsTable);
+    const trials = await this.db.database.select().from(trialAccountsTable);
 
     const bySource: Record<string, number> = {};
 
-    trials.forEach(trial => {
+    trials.forEach((trial) => {
       bySource[trial.signupSource] = (bySource[trial.signupSource] || 0) + 1;
     });
 
@@ -381,22 +386,21 @@ export class TrialAccountsService {
   }
 
   async getOnboardingProgressStats() {
-    const trials = await this.db.database
-      .select()
-      .from(trialAccountsTable);
+    const trials = await this.db.database.select().from(trialAccountsTable);
 
-    const completed = trials.filter(t => t.onboardingCompleted).length;
+    const completed = trials.filter((t) => t.onboardingCompleted).length;
 
     return {
       totalTrials: trials.length,
       completedOnboarding: completed,
-      averageStepsCompleted: trials.length > 0 ? (completed / trials.length) * 100 : 0
+      averageStepsCompleted:
+        trials.length > 0 ? (completed / trials.length) * 100 : 0,
     };
   }
 
   async bulkUpdateTrials(trialIds: string[], updateData: any) {
     const updates = await Promise.all(
-      trialIds.map(id => this.update(id, updateData))
+      trialIds.map((id) => this.update(id, updateData)),
     );
     return { updated: updates.length };
   }

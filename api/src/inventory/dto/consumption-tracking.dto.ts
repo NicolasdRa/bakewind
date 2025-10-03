@@ -29,7 +29,9 @@ export const consumptionTrackingSummarySchema = z.object({
 // TypeScript types
 export type SetCustomThresholdDto = z.infer<typeof setCustomThresholdSchema>;
 export type ConsumptionTrackingDto = z.infer<typeof consumptionTrackingSchema>;
-export type ConsumptionTrackingSummaryDto = z.infer<typeof consumptionTrackingSummarySchema>;
+export type ConsumptionTrackingSummaryDto = z.infer<
+  typeof consumptionTrackingSummarySchema
+>;
 
 // Extended inventory item with tracking
 export interface InventoryItemWithTrackingDto {

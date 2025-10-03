@@ -71,17 +71,21 @@ export class ContractTestSetup {
       // Check if test database exists
       const result = await adminPool.query(
         'SELECT 1 FROM pg_database WHERE datname = $1',
-        [contractTestConfig.database.database]
+        [contractTestConfig.database.database],
       );
 
       if (result.rows.length === 0) {
         // Create test database
         await adminPool.query(
-          `CREATE DATABASE "${contractTestConfig.database.database}"`
+          `CREATE DATABASE "${contractTestConfig.database.database}"`,
         );
-        console.log(`📦 Created test database: ${contractTestConfig.database.database}`);
+        console.log(
+          `📦 Created test database: ${contractTestConfig.database.database}`,
+        );
       } else {
-        console.log(`📦 Test database already exists: ${contractTestConfig.database.database}`);
+        console.log(
+          `📦 Test database already exists: ${contractTestConfig.database.database}`,
+        );
       }
     } finally {
       await adminPool.end();
@@ -89,12 +93,14 @@ export class ContractTestSetup {
   }
 
   private async seedTestData(): Promise<void> {
-    const { subscriptionPlans, softwareFeatures, products } = contractTestConfig.testData;
+    const { subscriptionPlans, softwareFeatures, products } =
+      contractTestConfig.testData;
 
     try {
       // Seed subscription plans
       for (const plan of subscriptionPlans) {
-        await this.db.insert(schemas.subscriptionPlansTable)
+        await this.db
+          .insert(schemas.subscriptionPlansTable)
           .values({
             ...plan,
             createdAt: new Date(),
@@ -105,7 +111,8 @@ export class ContractTestSetup {
 
       // Seed software features
       for (const feature of softwareFeatures) {
-        await this.db.insert(schemas.softwareFeaturesTable)
+        await this.db
+          .insert(schemas.softwareFeaturesTable)
           .values({
             ...feature,
             createdAt: new Date(),
@@ -116,7 +123,8 @@ export class ContractTestSetup {
 
       // Seed products
       for (const product of products) {
-        await this.db.insert(schemas.products)
+        await this.db
+          .insert(schemas.products)
           .values({
             ...product,
             createdAt: new Date(),

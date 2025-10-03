@@ -23,7 +23,7 @@ describe('Authentication (e2e)', () => {
     it('should login user with valid credentials', async () => {
       const loginDto = {
         email: 'test@example.com',
-        password: 'password123'
+        password: 'password123',
       };
 
       const response = await request(app.getHttpServer())
@@ -40,7 +40,7 @@ describe('Authentication (e2e)', () => {
     it('should reject login with invalid credentials', async () => {
       const loginDto = {
         email: 'test@example.com',
-        password: 'wrongpassword'
+        password: 'wrongpassword',
       };
 
       await request(app.getHttpServer())
@@ -52,7 +52,7 @@ describe('Authentication (e2e)', () => {
     it('should validate email format', async () => {
       const loginDto = {
         email: 'invalid-email',
-        password: 'password123'
+        password: 'password123',
       };
 
       await request(app.getHttpServer())
@@ -69,7 +69,7 @@ describe('Authentication (e2e)', () => {
         .post('/api/v1/auth/login')
         .send({
           email: 'test@example.com',
-          password: 'password123'
+          password: 'password123',
         });
 
       const refreshCookie = loginResponse.headers['set-cookie'];
@@ -77,7 +77,7 @@ describe('Authentication (e2e)', () => {
       // Then refresh the token
       const response = await request(app.getHttpServer())
         .post('/api/v1/auth/refresh')
-        .set('Cookie', refreshCookie)
+        .set('Cookie', Array.isArray(refreshCookie) ? refreshCookie : (refreshCookie ? [refreshCookie] : []))
         .expect(200);
 
       expect(response.body).toHaveProperty('accessToken');
@@ -99,7 +99,7 @@ describe('Authentication (e2e)', () => {
         .post('/api/v1/auth/login')
         .send({
           email: 'test@example.com',
-          password: 'password123'
+          password: 'password123',
         });
 
       const refreshCookie = loginResponse.headers['set-cookie'];
@@ -107,13 +107,13 @@ describe('Authentication (e2e)', () => {
       // Logout
       await request(app.getHttpServer())
         .post('/api/v1/auth/logout')
-        .set('Cookie', refreshCookie)
+        .set('Cookie', Array.isArray(refreshCookie) ? refreshCookie : (refreshCookie ? [refreshCookie] : []))
         .expect(200);
 
       // Try to use refresh token after logout (should fail)
       await request(app.getHttpServer())
         .post('/api/v1/auth/refresh')
-        .set('Cookie', refreshCookie)
+        .set('Cookie', Array.isArray(refreshCookie) ? refreshCookie : (refreshCookie ? [refreshCookie] : []))
         .expect(401);
     });
   });

@@ -1,4 +1,9 @@
-import { Injectable, Logger, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  UnauthorizedException,
+  BadRequestException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { eq, and, lt, gte, or } from 'drizzle-orm';
@@ -45,7 +50,10 @@ export class UserSessionsService {
   /**
    * Create a new session and generate tokens
    */
-  async createSession(sessionData: CreateSessionData, userData: any): Promise<TokenPair & { sessionId: string }> {
+  async createSession(
+    sessionData: CreateSessionData,
+    userData: any,
+  ): Promise<TokenPair & { sessionId: string }> {
     try {
       // Generate tokens
       const tokens = await this.generateTokenPair(userData);
@@ -56,7 +64,10 @@ export class UserSessionsService {
 
       // Calculate expiration
       const expiresAt = new Date();
-      const refreshExpiresIn = this.configService.get<string>('JWT_REFRESH_EXPIRES_IN', '7d');
+      const refreshExpiresIn = this.configService.get<string>(
+        'JWT_REFRESH_EXPIRES_IN',
+        '7d',
+      );
       const daysToAdd = parseInt(refreshExpiresIn.replace('d', ''), 10);
       expiresAt.setDate(expiresAt.getDate() + daysToAdd);
 
@@ -75,14 +86,23 @@ export class UserSessionsService {
         })
         .returning();
 
-      this.logger.log(`Created session ${session.id} for user ${sessionData.userId}`);
+      if (!session) {
+        throw new Error('Failed to create session');
+      }
+
+      this.logger.log(
+        `Created session ${session.id} for user ${sessionData.userId}`,
+      );
 
       return {
         sessionId: session.id,
         ...tokens,
       };
     } catch (error) {
-      this.logger.error(`Failed to create session for user ${sessionData.userId}:`, error);
+      this.logger.error(
+        `Failed to create session for user ${sessionData.userId}:`,
+        error,
+      );
       throw new BadRequestException('Failed to create session');
     }
   }
@@ -102,17 +122,29 @@ export class UserSessionsService {
       iss: 'bakewind-api',
     };
 
+    const jwtSecret = this.configService.get<string>('JWT_SECRET');
+    const jwtExpiresIn = this.configService.get<string>('JWT_EXPIRES_IN', '15m');
+    const refreshSecret = this.configService.get<string>('JWT_REFRESH_SECRET');
+    const refreshExpiresIn = this.configService.get<string>(
+      'JWT_REFRESH_EXPIRES_IN',
+      '7d',
+    );
+
+    if (!jwtSecret || !refreshSecret) {
+      throw new Error('JWT secrets not configured');
+    }
+
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
-        secret: this.configService.get<string>('JWT_SECRET'),
-        expiresIn: this.configService.get<string>('JWT_EXPIRES_IN', '15m'),
+        secret: jwtSecret,
+        expiresIn: jwtExpiresIn,
       }),
       this.jwtService.signAsync(
         { sub: userData.id, type: 'refresh' },
         {
-          secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-          expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRES_IN', '7d'),
-        }
+          secret: refreshSecret,
+          expiresIn: refreshExpiresIn,
+        },
       ),
     ]);
 
@@ -124,8 +156,12 @@ export class UserSessionsService {
    */
   async validateAccessToken(token: string): Promise<JwtPayload> {
     try {
+      const jwtSecret = this.configService.get<string>('JWT_SECRET');
+      if (!jwtSecret) {
+        throw new UnauthorizedException('JWT secret not configured');
+      }
       const payload = await this.jwtService.verifyAsync<JwtPayload>(token, {
-        secret: this.configService.get<string>('JWT_SECRET'),
+        secret: jwtSecret,
       });
 
       // Additional validation
@@ -157,8 +193,12 @@ export class UserSessionsService {
   async refreshTokens(refreshToken: string): Promise<TokenPair> {
     try {
       // Verify refresh token
+      const refreshSecret = this.configService.get<string>('JWT_REFRESH_SECRET');
+      if (!refreshSecret) {
+        throw new UnauthorizedException('JWT refresh secret not configured');
+      }
       const payload = await this.jwtService.verifyAsync(refreshToken, {
-        secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+        secret: refreshSecret,
       });
 
       // Find session by refresh token
@@ -209,10 +249,12 @@ export class UserSessionsService {
           isRevoked: true,
           lastActivityAt: new Date(),
         })
-        .where(and(
-          eq(userSessionsTable.id, sessionId),
-          eq(userSessionsTable.isRevoked, false)
-        ))
+        .where(
+          and(
+            eq(userSessionsTable.id, sessionId),
+            eq(userSessionsTable.isRevoked, false),
+          ),
+        )
         .returning({ id: userSessionsTable.id });
 
       if (!revokedSession) {
@@ -238,10 +280,12 @@ export class UserSessionsService {
           isRevoked: true,
           lastActivityAt: new Date(),
         })
-        .where(and(
-          eq(userSessionsTable.userId, userId),
-          eq(userSessionsTable.isRevoked, false)
-        ));
+        .where(
+          and(
+            eq(userSessionsTable.userId, userId),
+            eq(userSessionsTable.isRevoked, false),
+          ),
+        );
 
       this.logger.log(`Revoked all sessions for user ${userId}`);
       return { success: true };
@@ -262,11 +306,13 @@ export class UserSessionsService {
       const [session] = await this.databaseService.database
         .select()
         .from(userSessionsTable)
-        .where(and(
-          eq(userSessionsTable.accessTokenHash, tokenHash),
-          eq(userSessionsTable.isRevoked, false),
-          gte(userSessionsTable.expiresAt, now)
-        ))
+        .where(
+          and(
+            eq(userSessionsTable.accessTokenHash, tokenHash),
+            eq(userSessionsTable.isRevoked, false),
+            gte(userSessionsTable.expiresAt, now),
+          ),
+        )
         .limit(1);
 
       if (session) {
@@ -292,11 +338,13 @@ export class UserSessionsService {
       const [session] = await this.databaseService.database
         .select()
         .from(userSessionsTable)
-        .where(and(
-          eq(userSessionsTable.refreshTokenHash, tokenHash),
-          eq(userSessionsTable.isRevoked, false),
-          gte(userSessionsTable.expiresAt, now)
-        ))
+        .where(
+          and(
+            eq(userSessionsTable.refreshTokenHash, tokenHash),
+            eq(userSessionsTable.isRevoked, false),
+            gte(userSessionsTable.expiresAt, now),
+          ),
+        )
         .limit(1);
 
       return session;
@@ -317,12 +365,14 @@ export class UserSessionsService {
       const [session] = await this.databaseService.database
         .select()
         .from(userSessionsTable)
-        .where(and(
-          eq(userSessionsTable.id, sessionId),
-          eq(userSessionsTable.accessTokenHash, tokenHash),
-          eq(userSessionsTable.isRevoked, false),
-          gte(userSessionsTable.expiresAt, now)
-        ))
+        .where(
+          and(
+            eq(userSessionsTable.id, sessionId),
+            eq(userSessionsTable.accessTokenHash, tokenHash),
+            eq(userSessionsTable.isRevoked, false),
+            gte(userSessionsTable.expiresAt, now),
+          ),
+        )
         .limit(1);
 
       return session;
@@ -363,7 +413,10 @@ export class UserSessionsService {
         })
         .where(eq(userSessionsTable.id, sessionId));
     } catch (error) {
-      this.logger.error(`Failed to update last activity for session ${sessionId}:`, error);
+      this.logger.error(
+        `Failed to update last activity for session ${sessionId}:`,
+        error,
+      );
       // Don't throw - this is not critical
     }
   }
@@ -379,13 +432,15 @@ export class UserSessionsService {
 
       await this.databaseService.database
         .delete(userSessionsTable)
-        .where(or(
-          lt(userSessionsTable.expiresAt, now),
-          and(
-            eq(userSessionsTable.isRevoked, true),
-            lt(userSessionsTable.lastActivityAt, cleanupDate)
-          )
-        ));
+        .where(
+          or(
+            lt(userSessionsTable.expiresAt, now),
+            and(
+              eq(userSessionsTable.isRevoked, true),
+              lt(userSessionsTable.lastActivityAt, cleanupDate),
+            ),
+          ),
+        );
 
       this.logger.log('Cleaned up expired sessions');
     } catch (error) {
@@ -410,15 +465,20 @@ export class UserSessionsService {
           expiresAt: userSessionsTable.expiresAt,
         })
         .from(userSessionsTable)
-        .where(and(
-          eq(userSessionsTable.userId, userId),
-          eq(userSessionsTable.isRevoked, false),
-          gte(userSessionsTable.expiresAt, now)
-        ));
+        .where(
+          and(
+            eq(userSessionsTable.userId, userId),
+            eq(userSessionsTable.isRevoked, false),
+            gte(userSessionsTable.expiresAt, now),
+          ),
+        );
 
       return sessions;
     } catch (error) {
-      this.logger.error(`Failed to get active sessions for user ${userId}:`, error);
+      this.logger.error(
+        `Failed to get active sessions for user ${userId}:`,
+        error,
+      );
       return [];
     }
   }
@@ -441,10 +501,12 @@ export class UserSessionsService {
         this.databaseService.database
           .select({ count: userSessionsTable.id })
           .from(userSessionsTable)
-          .where(and(
-            eq(userSessionsTable.isRevoked, false),
-            gte(userSessionsTable.expiresAt, now)
-          )),
+          .where(
+            and(
+              eq(userSessionsTable.isRevoked, false),
+              gte(userSessionsTable.expiresAt, now),
+            ),
+          ),
         this.databaseService.database
           .select({ count: userSessionsTable.id })
           .from(userSessionsTable)

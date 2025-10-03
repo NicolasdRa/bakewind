@@ -10,7 +10,12 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 import { OrderLocksService } from './order-locks.service';
@@ -26,7 +31,10 @@ export class OrderLocksController {
   @Post('acquire')
   @ApiOperation({ summary: 'Acquire lock on an order' })
   @ApiResponse({ status: 200, description: 'Lock acquired successfully' })
-  @ApiResponse({ status: 409, description: 'Order already locked by another user' })
+  @ApiResponse({
+    status: 409,
+    description: 'Order already locked by another user',
+  })
   @ApiResponse({ status: 404, description: 'Order not found' })
   async acquireLock(
     @Request() req: { user: { userId: string } },
@@ -39,8 +47,14 @@ export class OrderLocksController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Release lock on an order' })
   @ApiResponse({ status: 204, description: 'Lock released successfully' })
-  @ApiResponse({ status: 404, description: 'No lock found or not owned by current user' })
-  async releaseLock(@Request() req: { user: { userId: string } }, @Param('orderId') orderId: string) {
+  @ApiResponse({
+    status: 404,
+    description: 'No lock found or not owned by current user',
+  })
+  async releaseLock(
+    @Request() req: { user: { userId: string } },
+    @Param('orderId') orderId: string,
+  ) {
     await this.orderLocksService.releaseLock(req.user.userId, orderId);
   }
 
@@ -48,7 +62,10 @@ export class OrderLocksController {
   @ApiOperation({ summary: 'Renew lock on an order' })
   @ApiResponse({ status: 200, description: 'Lock renewed' })
   @ApiResponse({ status: 404, description: 'Lock not found or expired' })
-  async renewLock(@Request() req: { user: { userId: string } }, @Param('orderId') orderId: string) {
+  async renewLock(
+    @Request() req: { user: { userId: string } },
+    @Param('orderId') orderId: string,
+  ) {
     return this.orderLocksService.renewLock(req.user.userId, orderId);
   }
 

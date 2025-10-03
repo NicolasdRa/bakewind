@@ -10,7 +10,9 @@ export const createTransferSessionSchema = z.object({
   userId: z.string().uuid('Invalid user ID format'),
 });
 
-export class CreateTransferSessionDto extends createZodDto(createTransferSessionSchema) {}
+export class CreateTransferSessionDto extends createZodDto(
+  createTransferSessionSchema,
+) {}
 
 /**
  * DTO for exchanging a session ID for tokens
@@ -19,7 +21,9 @@ export const exchangeTransferSessionSchema = z.object({
   sessionId: z.string().min(1, 'Session ID is required'),
 });
 
-export class ExchangeTransferSessionDto extends createZodDto(exchangeTransferSessionSchema) {}
+export class ExchangeTransferSessionDto extends createZodDto(
+  exchangeTransferSessionSchema,
+) {}
 
 /**
  * Response type for transfer session creation

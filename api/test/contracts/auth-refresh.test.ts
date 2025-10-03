@@ -23,25 +23,24 @@ describe('POST /auth/refresh (Contract Test)', () => {
     };
 
     // Sign up test user
-    await request(app.getHttpServer())
-      .post('/auth/trial-signup')
-      .send({
-        businessName: 'Refresh Test Bakery',
-        fullName: 'Refresh Tester',
-        email: testUserCredentials.email,
-        phone: '+1 555-999-0000',
-        password: testUserCredentials.password,
-        locations: '1',
-        agreeToTerms: true,
-      });
+    await request(app.getHttpServer()).post('/auth/trial-signup').send({
+      businessName: 'Refresh Test Bakery',
+      fullName: 'Refresh Tester',
+      email: testUserCredentials.email,
+      phone: '+1 555-999-0000',
+      password: testUserCredentials.password,
+      locations: '1',
+      agreeToTerms: true,
+    });
 
     // Login to get refresh token
     const loginResponse = await request(app.getHttpServer())
       .post('/auth/login')
       .send(testUserCredentials);
 
-    refreshTokenCookie = loginResponse.headers['set-cookie']
-      .find((cookie: string) => cookie.startsWith('refreshToken='));
+    refreshTokenCookie = loginResponse.headers['set-cookie'].find(
+      (cookie: string) => cookie.startsWith('refreshToken='),
+    );
   });
 
   afterAll(async () => {
@@ -61,7 +60,9 @@ describe('POST /auth/refresh (Contract Test)', () => {
       });
 
       // Verify JWT token format
-      expect(response.body.accessToken).toMatch(/^eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/);
+      expect(response.body.accessToken).toMatch(
+        /^eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/,
+      );
 
       // New access token should be different from any previous ones
       expect(response.body.accessToken).toBeDefined();
@@ -76,7 +77,7 @@ describe('POST /auth/refresh (Contract Test)', () => {
 
       // Check if new refresh token cookie is set (refresh token rotation)
       const newRefreshTokenCookie = response.headers['set-cookie']?.find(
-        (cookie: string) => cookie.startsWith('refreshToken=')
+        (cookie: string) => cookie.startsWith('refreshToken='),
       );
 
       if (newRefreshTokenCookie) {
@@ -99,7 +100,10 @@ describe('POST /auth/refresh (Contract Test)', () => {
 
       // Access token should have reasonable expiration
       const tokenPayload = JSON.parse(
-        Buffer.from(response.body.accessToken.split('.')[1], 'base64').toString()
+        Buffer.from(
+          response.body.accessToken.split('.')[1],
+          'base64',
+        ).toString(),
       );
       expect(tokenPayload.exp).toBeDefined();
       expect(tokenPayload.iat).toBeDefined();
@@ -150,8 +154,9 @@ describe('POST /auth/refresh (Contract Test)', () => {
         .post('/auth/login')
         .send(testUserCredentials);
 
-      const newRefreshTokenCookie = loginResponse.headers['set-cookie']
-        .find((cookie: string) => cookie.startsWith('refreshToken='));
+      const newRefreshTokenCookie = loginResponse.headers['set-cookie'].find(
+        (cookie: string) => cookie.startsWith('refreshToken='),
+      );
 
       // Use the refresh token once
       await request(app.getHttpServer())
@@ -169,13 +174,15 @@ describe('POST /auth/refresh (Contract Test)', () => {
       const requests = Array.from({ length: 20 }, () =>
         request(app.getHttpServer())
           .post('/auth/refresh')
-          .set('Cookie', refreshTokenCookie)
+          .set('Cookie', refreshTokenCookie),
       );
 
       const responses = await Promise.all(requests);
 
       // Should eventually be rate limited
-      const rateLimitedResponses = responses.filter(res => res.status === 429);
+      const rateLimitedResponses = responses.filter(
+        (res) => res.status === 429,
+      );
       expect(rateLimitedResponses.length).toBeGreaterThanOrEqual(0); // May or may not be rate limited
     });
 
@@ -185,8 +192,9 @@ describe('POST /auth/refresh (Contract Test)', () => {
         .post('/auth/login')
         .send(testUserCredentials);
 
-      const freshRefreshTokenCookie = loginResponse.headers['set-cookie']
-        .find((cookie: string) => cookie.startsWith('refreshToken='));
+      const freshRefreshTokenCookie = loginResponse.headers['set-cookie'].find(
+        (cookie: string) => cookie.startsWith('refreshToken='),
+      );
 
       const accessToken = loginResponse.body.accessToken;
 
@@ -224,7 +232,10 @@ describe('POST /auth/refresh (Contract Test)', () => {
         .expect(200);
 
       const tokenPayload = JSON.parse(
-        Buffer.from(response.body.accessToken.split('.')[1], 'base64').toString()
+        Buffer.from(
+          response.body.accessToken.split('.')[1],
+          'base64',
+        ).toString(),
       );
 
       // Verify standard JWT claims
@@ -248,18 +259,18 @@ describe('POST /auth/refresh (Contract Test)', () => {
       const concurrentRequests = Array.from({ length: 5 }, () =>
         request(app.getHttpServer())
           .post('/auth/refresh')
-          .set('Cookie', refreshTokenCookie)
+          .set('Cookie', refreshTokenCookie),
       );
 
       const responses = await Promise.all(concurrentRequests);
 
       // All should either succeed or fail gracefully
-      responses.forEach(response => {
+      responses.forEach((response) => {
         expect([200, 401, 429]).toContain(response.status);
       });
 
       // At least one should succeed
-      const successfulResponses = responses.filter(res => res.status === 200);
+      const successfulResponses = responses.filter((res) => res.status === 200);
       expect(successfulResponses.length).toBeGreaterThan(0);
     });
   });

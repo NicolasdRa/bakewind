@@ -51,12 +51,18 @@ describe('GET /features (Contract Test)', () => {
 
         // Verify UUID format for ID
         expect(feature.id).toMatch(
-          /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+          /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
         );
 
         // Verify category is valid enum value
-        expect(['orders', 'inventory', 'production', 'analytics', 'customers', 'products'])
-          .toContain(feature.category);
+        expect([
+          'orders',
+          'inventory',
+          'production',
+          'analytics',
+          'customers',
+          'products',
+        ]).toContain(feature.category);
 
         // Verify availableInPlans is array of strings (plan IDs)
         expect(Array.isArray(feature.availableInPlans)).toBe(true);
@@ -89,7 +95,9 @@ describe('GET /features (Contract Test)', () => {
         .get('/features')
         .expect(200);
 
-      const categories = [...new Set(response.body.map((feature: any) => feature.category))];
+      const categories = [
+        ...new Set(response.body.map((feature: any) => feature.category)),
+      ];
 
       // Should include core business categories
       expect(categories).toContain('orders');
@@ -131,7 +139,9 @@ describe('GET /features (Contract Test)', () => {
         .get('/features')
         .expect(200);
 
-      const highlightedFeatures = response.body.filter((feature: any) => feature.isHighlighted === true);
+      const highlightedFeatures = response.body.filter(
+        (feature: any) => feature.isHighlighted === true,
+      );
 
       // Should have at least 1 but not more than 3 highlighted features
       expect(highlightedFeatures.length).toBeGreaterThanOrEqual(1);
@@ -151,9 +161,17 @@ describe('GET /features (Contract Test)', () => {
         expect(feature.description.length).toBeLessThan(200);
 
         // Should focus on business benefits, not technical details
-        const businessKeywords = ['manage', 'track', 'optimize', 'increase', 'reduce', 'improve', 'streamline'];
-        const hasBusinessKeyword = businessKeywords.some(keyword =>
-          feature.description.toLowerCase().includes(keyword)
+        const businessKeywords = [
+          'manage',
+          'track',
+          'optimize',
+          'increase',
+          'reduce',
+          'improve',
+          'streamline',
+        ];
+        const hasBusinessKeyword = businessKeywords.some((keyword) =>
+          feature.description.toLowerCase().includes(keyword),
         );
         expect(hasBusinessKeyword).toBe(true);
       });
@@ -208,7 +226,7 @@ describe('GET /features (Contract Test)', () => {
 
       // Most features should be available in multiple plans
       const multiPlanFeatures = response.body.filter(
-        (feature: any) => feature.availableInPlans.length > 1
+        (feature: any) => feature.availableInPlans.length > 1,
       );
 
       expect(multiPlanFeatures.length).toBeGreaterThan(0);
@@ -220,19 +238,25 @@ describe('GET /features (Contract Test)', () => {
         request(app.getHttpServer()).get('/subscriptions/plans'),
       ]);
 
-      const starterPlan = plansResponse.body.find((p: any) => p.name === 'Starter');
-      const enterprisePlan = plansResponse.body.find((p: any) => p.name === 'Enterprise');
+      const starterPlan = plansResponse.body.find(
+        (p: any) => p.name === 'Starter',
+      );
+      const enterprisePlan = plansResponse.body.find(
+        (p: any) => p.name === 'Enterprise',
+      );
 
       if (starterPlan && enterprisePlan) {
         const starterFeatures = featuresResponse.body.filter((f: any) =>
-          f.availableInPlans.includes(starterPlan.id)
+          f.availableInPlans.includes(starterPlan.id),
         );
         const enterpriseFeatures = featuresResponse.body.filter((f: any) =>
-          f.availableInPlans.includes(enterprisePlan.id)
+          f.availableInPlans.includes(enterprisePlan.id),
         );
 
         // Enterprise should have more features than Starter
-        expect(enterpriseFeatures.length).toBeGreaterThanOrEqual(starterFeatures.length);
+        expect(enterpriseFeatures.length).toBeGreaterThanOrEqual(
+          starterFeatures.length,
+        );
       }
     });
   });
@@ -247,8 +271,8 @@ describe('GET /features (Contract Test)', () => {
 
       // Should include essential bakery features
       const coreFeatures = ['order', 'inventory', 'production', 'recipe'];
-      const hasCoreFeatures = coreFeatures.some(core =>
-        featureNames.some(name => name.includes(core))
+      const hasCoreFeatures = coreFeatures.some((core) =>
+        featureNames.some((name) => name.includes(core)),
       );
       expect(hasCoreFeatures).toBe(true);
     });
@@ -282,7 +306,7 @@ describe('GET /features (Contract Test)', () => {
       // For now, we verify the endpoint exists and responds
       await request(app.getHttpServer())
         .get('/features')
-        .expect(res => {
+        .expect((res) => {
           expect([200, 500, 503]).toContain(res.status);
         });
     });
@@ -302,9 +326,7 @@ describe('GET /features (Contract Test)', () => {
     it('should respond within acceptable time limits', async () => {
       const startTime = Date.now();
 
-      await request(app.getHttpServer())
-        .get('/features')
-        .expect(200);
+      await request(app.getHttpServer()).get('/features').expect(200);
 
       const responseTime = Date.now() - startTime;
 
@@ -314,14 +336,13 @@ describe('GET /features (Contract Test)', () => {
 
     it('should handle concurrent requests efficiently', async () => {
       const concurrentRequests = Array.from({ length: 15 }, () =>
-        request(app.getHttpServer())
-          .get('/features')
+        request(app.getHttpServer()).get('/features'),
       );
 
       const responses = await Promise.all(concurrentRequests);
 
       // All requests should succeed
-      responses.forEach(response => {
+      responses.forEach((response) => {
         expect(response.status).toBe(200);
         expect(Array.isArray(response.body)).toBe(true);
       });
@@ -340,9 +361,7 @@ describe('GET /features (Contract Test)', () => {
   describe('Public endpoint security', () => {
     it('should not require authentication', async () => {
       // This endpoint should be public for landing page display
-      await request(app.getHttpServer())
-        .get('/features')
-        .expect(200);
+      await request(app.getHttpServer()).get('/features').expect(200);
     });
 
     it('should not expose sensitive feature information', async () => {
@@ -361,14 +380,15 @@ describe('GET /features (Contract Test)', () => {
 
     it('should rate limit requests appropriately', async () => {
       const rapidRequests = Array.from({ length: 100 }, () =>
-        request(app.getHttpServer())
-          .get('/features')
+        request(app.getHttpServer()).get('/features'),
       );
 
       const responses = await Promise.all(rapidRequests);
 
       // Should eventually rate limit, but be generous for public endpoint
-      const rateLimitedResponses = responses.filter(res => res.status === 429);
+      const rateLimitedResponses = responses.filter(
+        (res) => res.status === 429,
+      );
       expect(rateLimitedResponses.length).toBeLessThan(responses.length);
     });
   });
@@ -396,13 +416,25 @@ describe('GET /features (Contract Test)', () => {
         .get('/features')
         .expect(200);
 
-      const highlightedFeatures = response.body.filter((f: any) => f.isHighlighted);
-      const nonHighlightedFeatures = response.body.filter((f: any) => !f.isHighlighted);
+      const highlightedFeatures = response.body.filter(
+        (f: any) => f.isHighlighted,
+      );
+      const nonHighlightedFeatures = response.body.filter(
+        (f: any) => !f.isHighlighted,
+      );
 
       // Highlighted features should generally have lower sort order (appear first)
       if (highlightedFeatures.length > 0 && nonHighlightedFeatures.length > 0) {
-        const avgHighlightedSort = highlightedFeatures.reduce((sum: number, f: any) => sum + f.sortOrder, 0) / highlightedFeatures.length;
-        const avgNonHighlightedSort = nonHighlightedFeatures.reduce((sum: number, f: any) => sum + f.sortOrder, 0) / nonHighlightedFeatures.length;
+        const avgHighlightedSort =
+          highlightedFeatures.reduce(
+            (sum: number, f: any) => sum + f.sortOrder,
+            0,
+          ) / highlightedFeatures.length;
+        const avgNonHighlightedSort =
+          nonHighlightedFeatures.reduce(
+            (sum: number, f: any) => sum + f.sortOrder,
+            0,
+          ) / nonHighlightedFeatures.length;
 
         expect(avgHighlightedSort).toBeLessThan(avgNonHighlightedSort);
       }

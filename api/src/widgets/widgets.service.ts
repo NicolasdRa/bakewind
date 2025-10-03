@@ -58,11 +58,16 @@ export class WidgetsService {
         .update(widgetConfigurations)
         .set({
           layoutType: dto.layout_type,
-          widgets: dto.widgets as unknown as typeof widgetConfigurations.widgets.dataType,
+          widgets:
+            dto.widgets as unknown as typeof widgetConfigurations.widgets.dataType,
           updatedAt: new Date(),
         })
         .where(eq(widgetConfigurations.userId, userId))
         .returning();
+
+      if (!updated) {
+        throw new Error('Failed to update widget configuration');
+      }
 
       return {
         id: updated.id,
@@ -79,9 +84,14 @@ export class WidgetsService {
         .values({
           userId,
           layoutType: dto.layout_type,
-          widgets: dto.widgets as unknown as typeof widgetConfigurations.widgets.dataType,
+          widgets:
+            dto.widgets as unknown as typeof widgetConfigurations.widgets.dataType,
         })
         .returning();
+
+      if (!created) {
+        throw new Error('Failed to create widget configuration');
+      }
 
       return {
         id: created.id,
@@ -122,9 +132,14 @@ export class WidgetsService {
       .values({
         userId,
         layoutType: 'grid',
-        widgets: defaultWidgets as unknown as typeof widgetConfigurations.widgets.dataType,
+        widgets:
+          defaultWidgets as unknown as typeof widgetConfigurations.widgets.dataType,
       })
       .returning();
+
+    if (!created) {
+      throw new Error('Failed to create default widget configuration');
+    }
 
     return {
       id: created.id,

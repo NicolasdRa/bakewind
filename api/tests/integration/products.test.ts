@@ -38,9 +38,11 @@ describe('Products API (e2e)', () => {
         .get('/api/v1/products?category=bread')
         .expect(200);
 
-      expect(response.body.data.every((product: any) =>
-        product.category === 'bread'
-      )).toBe(true);
+      expect(
+        response.body.data.every(
+          (product: any) => product.category === 'bread',
+        ),
+      ).toBe(true);
     });
 
     it('should filter products by availability', async () => {
@@ -48,9 +50,11 @@ describe('Products API (e2e)', () => {
         .get('/api/v1/products?available=true')
         .expect(200);
 
-      expect(response.body.data.every((product: any) =>
-        product.isAvailable === true
-      )).toBe(true);
+      expect(
+        response.body.data.every(
+          (product: any) => product.isAvailable === true,
+        ),
+      ).toBe(true);
     });
 
     it('should support pagination', async () => {

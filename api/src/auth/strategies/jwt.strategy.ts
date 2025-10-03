@@ -27,7 +27,10 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     });
   }
 
-  async validate(req: any, payload: JwtPayload): Promise<{
+  async validate(
+    req: any,
+    payload: JwtPayload,
+  ): Promise<{
     id: string;
     userId: string;
     email: string;
@@ -38,8 +41,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
 
     // Extract token from cookie or Authorization header
     const token =
-      req.cookies?.accessToken ||
-      ExtractJwt.fromAuthHeaderAsBearerToken()(req);
+      req.cookies?.accessToken || ExtractJwt.fromAuthHeaderAsBearerToken()(req);
 
     // Check if token is blacklisted
     if (token) {

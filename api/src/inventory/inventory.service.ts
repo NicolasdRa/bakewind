@@ -25,9 +25,14 @@ export class InventoryService {
     category?: string,
   ): Promise<InventoryItemWithTrackingDto[]> {
     // Build query conditions
-    const conditions = [];
+    const conditions: any[] = [];
     if (category) {
-      conditions.push(eq(inventoryItems.category, category as 'ingredient' | 'packaging' | 'supplies'));
+      conditions.push(
+        eq(
+          inventoryItems.category,
+          category as 'ingredient' | 'packaging' | 'supplies',
+        ),
+      );
     }
 
     // Get all inventory items
@@ -37,8 +42,17 @@ export class InventoryService {
       .where(conditions.length > 0 ? and(...conditions) : undefined);
 
     // Get consumption tracking for all items
-    const trackingRecords = await this.databaseService.database.select().from(inventoryConsumptionTracking);
-    const trackingMap = new Map(trackingRecords.map((t: typeof inventoryConsumptionTracking.$inferSelect) => [t.inventoryItemId, t]));
+    const trackingRecords = await this.databaseService.database
+      .select()
+      .from(inventoryConsumptionTracking);
+    const trackingMap = new Map(
+      trackingRecords.map(
+        (t: typeof inventoryConsumptionTracking.$inferSelect) => [
+          t.inventoryItemId,
+          t,
+        ],
+      ),
+    );
 
     // Map to response DTOs with low_stock calculation
     const result = items.map((item) => {
@@ -74,9 +88,15 @@ export class InventoryService {
     return result;
   }
 
-  async getConsumptionTracking(itemId: string): Promise<ConsumptionTrackingDto> {
+  async getConsumptionTracking(
+    itemId: string,
+  ): Promise<ConsumptionTrackingDto> {
     // Check if item exists
-    const [item] = await this.databaseService.database.select().from(inventoryItems).where(eq(inventoryItems.id, itemId)).limit(1);
+    const [item] = await this.databaseService.database
+      .select()
+      .from(inventoryItems)
+      .where(eq(inventoryItems.id, itemId))
+      .limit(1);
     if (!item) {
       throw new NotFoundException('Inventory item not found');
     }
@@ -94,7 +114,10 @@ export class InventoryService {
 
     const avgDailyConsumption = parseFloat(tracking.avgDailyConsumption);
     const currentStock = parseFloat(item.currentStock);
-    const daysRemaining = this.calculateDaysRemaining(currentStock, avgDailyConsumption);
+    const daysRemaining = this.calculateDaysRemaining(
+      currentStock,
+      avgDailyConsumption,
+    );
 
     return {
       id: tracking.id,
@@ -102,20 +125,33 @@ export class InventoryService {
       avg_daily_consumption: avgDailyConsumption,
       calculation_period_days: tracking.calculationPeriodDays,
       last_calculated_at: tracking.lastCalculatedAt.toISOString(),
-      calculation_method: tracking.calculationMethod as 'historical_orders' | 'manual' | 'predicted',
+      calculation_method: tracking.calculationMethod as
+        | 'historical_orders'
+        | 'manual'
+        | 'predicted',
       custom_reorder_threshold: tracking.customReorderThreshold
         ? parseFloat(tracking.customReorderThreshold)
         : null,
       custom_lead_time_days: tracking.customLeadTimeDays,
       sample_size: tracking.sampleSize,
       days_of_supply_remaining: daysRemaining,
-      predicted_stockout_date: this.calculateStockoutDate(currentStock, avgDailyConsumption),
+      predicted_stockout_date: this.calculateStockoutDate(
+        currentStock,
+        avgDailyConsumption,
+      ),
     };
   }
 
-  async setCustomThreshold(itemId: string, dto: SetCustomThresholdDto): Promise<ConsumptionTrackingDto> {
+  async setCustomThreshold(
+    itemId: string,
+    dto: SetCustomThresholdDto,
+  ): Promise<ConsumptionTrackingDto> {
     // Check if item exists
-    const [item] = await this.databaseService.database.select().from(inventoryItems).where(eq(inventoryItems.id, itemId)).limit(1);
+    const [item] = await this.databaseService.database
+      .select()
+      .from(inventoryItems)
+      .where(eq(inventoryItems.id, itemId))
+      .limit(1);
     if (!item) {
       throw new NotFoundException('Inventory item not found');
     }
@@ -138,6 +174,10 @@ export class InventoryService {
         .where(eq(inventoryConsumptionTracking.id, existing.id))
         .returning();
 
+      if (!updated) {
+        throw new Error('Failed to update consumption tracking');
+      }
+
       return this.mapToConsumptionDto(updated, parseFloat(item.currentStock));
     } else {
       // Create new tracking record with custom threshold
@@ -154,6 +194,10 @@ export class InventoryService {
           sampleSize: 0,
         })
         .returning();
+
+      if (!created) {
+        throw new Error('Failed to create consumption tracking');
+      }
 
       return this.mapToConsumptionDto(created, parseFloat(item.currentStock));
     }
@@ -180,7 +224,11 @@ export class InventoryService {
 
   async recalculate(itemId: string): Promise<ConsumptionTrackingDto> {
     // Check if item exists
-    const [item] = await this.databaseService.database.select().from(inventoryItems).where(eq(inventoryItems.id, itemId)).limit(1);
+    const [item] = await this.databaseService.database
+      .select()
+      .from(inventoryItems)
+      .where(eq(inventoryItems.id, itemId))
+      .limit(1);
     if (!item) {
       throw new NotFoundException('Inventory item not found');
     }
@@ -234,6 +282,10 @@ export class InventoryService {
         .where(eq(inventoryConsumptionTracking.id, existing.id))
         .returning();
 
+      if (!updated) {
+        throw new Error('Failed to update consumption tracking');
+      }
+
       return this.mapToConsumptionDto(updated, parseFloat(item.currentStock));
     } else {
       const [created] = await this.databaseService.database
@@ -247,6 +299,10 @@ export class InventoryService {
           sampleSize,
         })
         .returning();
+
+      if (!created) {
+        throw new Error('Failed to create consumption tracking');
+      }
 
       return this.mapToConsumptionDto(created, parseFloat(item.currentStock));
     }
@@ -263,7 +319,10 @@ export class InventoryService {
 
     // Use custom threshold if set
     if (tracking.customReorderThreshold) {
-      return parseFloat(item.currentStock) < parseFloat(tracking.customReorderThreshold);
+      return (
+        parseFloat(item.currentStock) <
+        parseFloat(tracking.customReorderThreshold)
+      );
     }
 
     // Predictive calculation: (current_stock / avg_daily_consumption) < (lead_time + safety_buffer)
@@ -278,14 +337,20 @@ export class InventoryService {
     return daysRemaining < leadTime + this.SAFETY_BUFFER_DAYS;
   }
 
-  private calculateDaysRemaining(currentStock: number, avgDailyConsumption: number): number {
+  private calculateDaysRemaining(
+    currentStock: number,
+    avgDailyConsumption: number,
+  ): number {
     if (avgDailyConsumption === 0) {
       return 999; // Essentially infinite if no consumption
     }
     return Math.round((currentStock / avgDailyConsumption) * 10) / 10; // Round to 1 decimal
   }
 
-  private calculateStockoutDate(currentStock: number, avgDailyConsumption: number): string | null {
+  private calculateStockoutDate(
+    currentStock: number,
+    avgDailyConsumption: number,
+  ): string | null {
     if (avgDailyConsumption === 0) {
       return null;
     }
@@ -294,7 +359,8 @@ export class InventoryService {
     const stockoutDate = new Date();
     stockoutDate.setDate(stockoutDate.getDate() + Math.ceil(daysUntilStockout));
 
-    return stockoutDate.toISOString().split('T')[0]; // Return YYYY-MM-DD
+    const dateString = stockoutDate.toISOString().split('T')[0];
+    return dateString || null; // Return YYYY-MM-DD
   }
 
   private mapToConsumptionDto(
@@ -308,14 +374,23 @@ export class InventoryService {
       avg_daily_consumption: avgDailyConsumption,
       calculation_period_days: tracking.calculationPeriodDays,
       last_calculated_at: tracking.lastCalculatedAt.toISOString(),
-      calculation_method: tracking.calculationMethod as 'historical_orders' | 'manual' | 'predicted',
+      calculation_method: tracking.calculationMethod as
+        | 'historical_orders'
+        | 'manual'
+        | 'predicted',
       custom_reorder_threshold: tracking.customReorderThreshold
         ? parseFloat(tracking.customReorderThreshold)
         : null,
       custom_lead_time_days: tracking.customLeadTimeDays,
       sample_size: tracking.sampleSize,
-      days_of_supply_remaining: this.calculateDaysRemaining(currentStock, avgDailyConsumption),
-      predicted_stockout_date: this.calculateStockoutDate(currentStock, avgDailyConsumption),
+      days_of_supply_remaining: this.calculateDaysRemaining(
+        currentStock,
+        avgDailyConsumption,
+      ),
+      predicted_stockout_date: this.calculateStockoutDate(
+        currentStock,
+        avgDailyConsumption,
+      ),
     };
   }
 }

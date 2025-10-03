@@ -19,6 +19,10 @@ export async function seedLocations(db: NodePgDatabase<typeof schema>) {
     }
 
     const testUser = existingUsers[0];
+    if (!testUser) {
+      console.log('⚠️ No test user found. Run users seed first.');
+      return;
+    }
     console.log('👤 Found test user:', testUser.email);
 
     // Check if locations already exist
@@ -35,7 +39,9 @@ export async function seedLocations(db: NodePgDatabase<typeof schema>) {
       .limit(1);
 
     if (existingLocations.length > 0 && existingUserLocations.length > 0) {
-      console.log('📍 Locations and user assignments already exist, skipping...');
+      console.log(
+        '📍 Locations and user assignments already exist, skipping...',
+      );
       return;
     }
 
@@ -54,7 +60,7 @@ export async function seedLocations(db: NodePgDatabase<typeof schema>) {
           timezone: 'America/Los_Angeles',
           phoneNumber: '+1-555-0101',
           email: 'downtown@bakewind.com',
-          description: 'Our flagship location in the heart of downtown'
+          description: 'Our flagship location in the heart of downtown',
         },
         {
           name: 'Uptown Bakery',
@@ -66,8 +72,8 @@ export async function seedLocations(db: NodePgDatabase<typeof schema>) {
           timezone: 'America/Los_Angeles',
           phoneNumber: '+1-555-0102',
           email: 'uptown@bakewind.com',
-          description: 'Our cozy uptown location with artisanal specialties'
-        }
+          description: 'Our cozy uptown location with artisanal specialties',
+        },
       ];
 
       // Insert locations
@@ -83,18 +89,19 @@ export async function seedLocations(db: NodePgDatabase<typeof schema>) {
     }
 
     // Associate locations with the test user
-    const userLocationAssignments = locationsToAssign.map((location, index) => ({
-      userId: testUser.id,
-      locationId: location.id,
-      isDefault: index === 0 // First location is default
-    }));
+    const userLocationAssignments = locationsToAssign.map(
+      (location, index) => ({
+        userId: testUser.id,
+        locationId: location.id,
+        isDefault: index === 0, // First location is default
+      }),
+    );
 
-    await db
-      .insert(schema.userLocationsTable)
-      .values(userLocationAssignments);
+    await db.insert(schema.userLocationsTable).values(userLocationAssignments);
 
-    console.log(`🔗 Assigned ${userLocationAssignments.length} locations to test user`);
-
+    console.log(
+      `🔗 Assigned ${userLocationAssignments.length} locations to test user`,
+    );
   } catch (error) {
     console.error('❌ Failed to seed locations:', error);
     throw error;

@@ -137,7 +137,7 @@ describe('Realtime Gateway - Dashboard Join (T018)', () => {
       });
 
       clientSocket.on('dashboard:joined', () => {
-        done(new Error('Should not be able to join another user\'s room'));
+        done(new Error("Should not be able to join another user's room"));
       });
     });
 

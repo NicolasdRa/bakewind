@@ -11,7 +11,14 @@ const widgetPositionSchema = z.object({
 // Widget schema
 const widgetSchema = z.object({
   id: z.string().min(1),
-  type: z.enum(['metrics', 'orders', 'inventory', 'production', 'chart', 'preferences']),
+  type: z.enum([
+    'metrics',
+    'orders',
+    'inventory',
+    'production',
+    'chart',
+    'preferences',
+  ]),
   position: widgetPositionSchema,
   config: z.record(z.unknown()).optional(),
 });

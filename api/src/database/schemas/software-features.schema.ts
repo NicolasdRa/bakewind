@@ -35,7 +35,10 @@ export const softwareFeaturesTable = pgTable(
     category: featureCategoryEnum('category').notNull(),
 
     // Plan availability
-    availableInPlans: json('available_in_plans').$type<string[]>().notNull().default([]),
+    availableInPlans: json('available_in_plans')
+      .$type<string[]>()
+      .notNull()
+      .default([]),
 
     // Marketing
     demoUrl: varchar('demo_url', { length: 500 }),
@@ -66,11 +69,15 @@ export const softwareFeaturesTable = pgTable(
     idxFeatureCategory: index('idx_feature_category').on(table.category),
     idxFeatureActive: index('idx_feature_active').on(table.isActive),
     idxFeatureSortOrder: index('idx_feature_sort_order').on(table.sortOrder),
-    idxFeatureHighlighted: index('idx_feature_highlighted').on(table.isHighlighted),
+    idxFeatureHighlighted: index('idx_feature_highlighted').on(
+      table.isHighlighted,
+    ),
     idxFeatureActiveSort: index('idx_feature_active_sort')
       .on(table.isActive, table.sortOrder)
       .where(sql`${table.isActive} = true`),
-    idxFeatureCategorySort: index('idx_feature_category_sort')
-      .on(table.category, table.sortOrder),
+    idxFeatureCategorySort: index('idx_feature_category_sort').on(
+      table.category,
+      table.sortOrder,
+    ),
   }),
 );

@@ -173,9 +173,7 @@ describe('Customer API Contract Tests', () => {
       });
 
       it('should return 401 for unauthenticated request', async () => {
-        await request(app.getHttpServer())
-          .post('/api/auth/logout')
-          .expect(401);
+        await request(app.getHttpServer()).post('/api/auth/logout').expect(401);
       });
     });
   });
@@ -218,9 +216,7 @@ describe('Customer API Contract Tests', () => {
       });
 
       it('should return 401 for unauthenticated request', async () => {
-        await request(app.getHttpServer())
-          .get('/api/auth/me')
-          .expect(401);
+        await request(app.getHttpServer()).get('/api/auth/me').expect(401);
       });
     });
 
@@ -329,7 +325,7 @@ describe('Customer API Contract Tests', () => {
         });
 
         // Calculate expected total
-        const expectedTotal = (2 * 2500) + (12 * 300); // $86.00
+        const expectedTotal = 2 * 2500 + 12 * 300; // $86.00
         expect(response.body.totalAmount).toBe(expectedTotal);
 
         orderId = response.body.id;

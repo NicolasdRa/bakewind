@@ -67,7 +67,9 @@ export const usersTable = pgTable(
 
     // SaaS-specific fields
     businessName: varchar('business_name', { length: 255 }),
-    subscriptionStatus: subscriptionStatusEnum('subscription_status').default('trial'),
+    subscriptionStatus: subscriptionStatusEnum('subscription_status').default(
+      'trial',
+    ),
     trialEndsAt: timestamp('trial_ends_at', {
       mode: 'date',
       withTimezone: true,
@@ -148,7 +150,9 @@ export const usersTable = pgTable(
     idxUserActiveVerified: index('idx_user_active_verified')
       .on(table.isActive, table.isEmailVerified)
       .where(sql`${table.isActive} = true AND ${table.isEmailVerified} = true`),
-    idxUserSubscriptionStatus: index('idx_user_subscription_status').on(table.subscriptionStatus),
+    idxUserSubscriptionStatus: index('idx_user_subscription_status').on(
+      table.subscriptionStatus,
+    ),
     idxUserTrialEndsAt: index('idx_user_trial_ends_at').on(table.trialEndsAt),
     idxUserBusinessName: index('idx_user_business_name').on(table.businessName),
   }),

@@ -58,9 +58,15 @@ describe('Inventory API - GET /api/v1/inventory (with low_stock) (e2e)', () => {
 
         // Validate consumption_tracking summary
         if (item.consumption_tracking) {
-          expect(item.consumption_tracking).toHaveProperty('avg_daily_consumption');
-          expect(item.consumption_tracking).toHaveProperty('days_of_supply_remaining');
-          expect(item.consumption_tracking).toHaveProperty('has_custom_threshold');
+          expect(item.consumption_tracking).toHaveProperty(
+            'avg_daily_consumption',
+          );
+          expect(item.consumption_tracking).toHaveProperty(
+            'days_of_supply_remaining',
+          );
+          expect(item.consumption_tracking).toHaveProperty(
+            'has_custom_threshold',
+          );
         }
       }
     });
@@ -88,8 +94,12 @@ describe('Inventory API - GET /api/v1/inventory (with low_stock) (e2e)', () => {
       expect(Array.isArray(response.body)).toBe(true);
 
       // Response may include both low_stock=true and low_stock=false
-      const hasLowStock = response.body.some((item: { low_stock: boolean }) => item.low_stock === true);
-      const hasNormalStock = response.body.some((item: { low_stock: boolean }) => item.low_stock === false);
+      const hasLowStock = response.body.some(
+        (item: { low_stock: boolean }) => item.low_stock === true,
+      );
+      const hasNormalStock = response.body.some(
+        (item: { low_stock: boolean }) => item.low_stock === false,
+      );
 
       // At least one of these should be true (unless all items have same status)
       expect(hasLowStock || hasNormalStock).toBe(true);
@@ -117,10 +127,12 @@ describe('Inventory API - GET /api/v1/inventory (with low_stock) (e2e)', () => {
 
       expect(Array.isArray(response.body)).toBe(true);
 
-      response.body.forEach((item: { low_stock: boolean; category: string }) => {
-        expect(item.low_stock).toBe(true);
-        expect(item.category).toBe('ingredients');
-      });
+      response.body.forEach(
+        (item: { low_stock: boolean; category: string }) => {
+          expect(item.low_stock).toBe(true);
+          expect(item.category).toBe('ingredients');
+        },
+      );
     });
 
     it('should return 401 for unauthenticated request', async () => {
@@ -136,25 +148,29 @@ describe('Inventory API - GET /api/v1/inventory (with low_stock) (e2e)', () => {
         .expect(HttpStatus.OK);
 
       if (response.body.length > 0) {
-        const lowStockItems = response.body.filter((item: { low_stock: boolean }) => item.low_stock);
+        const lowStockItems = response.body.filter(
+          (item: { low_stock: boolean }) => item.low_stock,
+        );
 
-        lowStockItems.forEach((item: {
-          low_stock: boolean;
-          current_stock: number;
-          lead_time_days?: number;
-          consumption_tracking: {
-            avg_daily_consumption: number;
-            days_of_supply_remaining: number;
-          };
-        }) => {
-          if (item.consumption_tracking) {
-            const { days_of_supply_remaining } = item.consumption_tracking;
-            const leadTime = item.lead_time_days || 0;
+        lowStockItems.forEach(
+          (item: {
+            low_stock: boolean;
+            current_stock: number;
+            lead_time_days?: number;
+            consumption_tracking: {
+              avg_daily_consumption: number;
+              days_of_supply_remaining: number;
+            };
+          }) => {
+            if (item.consumption_tracking) {
+              const { days_of_supply_remaining } = item.consumption_tracking;
+              const leadTime = item.lead_time_days || 0;
 
-            // Verify low_stock flag follows formula: days_remaining < (lead_time + 1)
-            expect(days_of_supply_remaining).toBeLessThan(leadTime + 1);
-          }
-        });
+              // Verify low_stock flag follows formula: days_remaining < (lead_time + 1)
+              expect(days_of_supply_remaining).toBeLessThan(leadTime + 1);
+            }
+          },
+        );
       }
     });
 
@@ -174,12 +190,14 @@ describe('Inventory API - GET /api/v1/inventory (with low_stock) (e2e)', () => {
 
         // For items with custom thresholds, low_stock should be based on that threshold
         // This is validated by the backend implementation
-        itemsWithCustomThreshold.forEach((item: {
-          low_stock: boolean;
-          consumption_tracking: { has_custom_threshold: boolean };
-        }) => {
-          expect(item.consumption_tracking.has_custom_threshold).toBe(true);
-        });
+        itemsWithCustomThreshold.forEach(
+          (item: {
+            low_stock: boolean;
+            consumption_tracking: { has_custom_threshold: boolean };
+          }) => {
+            expect(item.consumption_tracking.has_custom_threshold).toBe(true);
+          },
+        );
       }
     });
   });

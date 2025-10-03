@@ -107,10 +107,7 @@ export class RealtimeGateway
         client.disconnect();
       }
     } catch (error) {
-      this.logger.error(
-        `Error during client ${client.id} connection:`,
-        error,
-      );
+      this.logger.error(`Error during client ${client.id} connection:`, error);
       client.emit('error', {
         code: 'SERVER_ERROR',
         message: 'Internal server error during connection',

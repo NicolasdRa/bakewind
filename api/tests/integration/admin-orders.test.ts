@@ -21,7 +21,7 @@ describe('Admin Orders API (e2e)', () => {
       .post('/api/v1/auth/login')
       .send({
         email: 'admin@bakewind.com',
-        password: 'admin123'
+        password: 'admin123',
       });
     adminToken = adminLogin.body.accessToken;
 
@@ -30,7 +30,7 @@ describe('Admin Orders API (e2e)', () => {
       .post('/api/v1/auth/login')
       .send({
         email: 'manager@bakewind.com',
-        password: 'manager123'
+        password: 'manager123',
       });
     managerToken = managerLogin.body.accessToken;
   });
@@ -61,7 +61,9 @@ describe('Admin Orders API (e2e)', () => {
         .expect(200);
 
       if (response.body.data.length > 0) {
-        expect(response.body.data.every((order: any) => order.status === 'pending')).toBe(true);
+        expect(
+          response.body.data.every((order: any) => order.status === 'pending'),
+        ).toBe(true);
       }
     });
 
@@ -85,7 +87,11 @@ describe('Admin Orders API (e2e)', () => {
         .expect(200);
 
       if (response.body.data.length > 0) {
-        expect(response.body.data.every((order: any) => order.customerId === customerId)).toBe(true);
+        expect(
+          response.body.data.every(
+            (order: any) => order.customerId === customerId,
+          ),
+        ).toBe(true);
       }
     });
 
@@ -127,7 +133,7 @@ describe('Admin Orders API (e2e)', () => {
         .post('/api/v1/auth/login')
         .send({
           email: 'customer@example.com',
-          password: 'customer123'
+          password: 'customer123',
         });
 
       await request(app.getHttpServer())
@@ -150,7 +156,7 @@ describe('Admin Orders API (e2e)', () => {
 
         const updateData = {
           status: 'in_production',
-          notes: 'Started baking bread items'
+          notes: 'Started baking bread items',
         };
 
         const response = await request(app.getHttpServer())
@@ -250,7 +256,7 @@ describe('Admin Orders API (e2e)', () => {
         .post('/api/v1/auth/login')
         .send({
           email: 'customer@example.com',
-          password: 'customer123'
+          password: 'customer123',
         });
 
       const orderId = '123e4567-e89b-12d3-a456-426614174000';

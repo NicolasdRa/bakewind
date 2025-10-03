@@ -20,7 +20,7 @@ describe('Admin Analytics API (e2e)', () => {
       .post('/api/v1/auth/login')
       .send({
         email: 'admin@bakewind.com',
-        password: 'admin123'
+        password: 'admin123',
       });
     adminToken = adminLogin.body.accessToken;
   });
@@ -260,7 +260,7 @@ describe('Admin Analytics API (e2e)', () => {
         .post('/api/v1/auth/login')
         .send({
           email: 'customer@example.com',
-          password: 'customer123'
+          password: 'customer123',
         });
 
       await request(app.getHttpServer())
@@ -280,7 +280,7 @@ describe('Admin Analytics API (e2e)', () => {
         .post('/api/v1/auth/login')
         .send({
           email: 'manager@bakewind.com',
-          password: 'manager123'
+          password: 'manager123',
         });
 
       await request(app.getHttpServer())

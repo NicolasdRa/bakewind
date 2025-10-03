@@ -108,10 +108,7 @@ export class CustomersController {
     status: 401,
     description: 'Unauthorized',
   })
-  async getCustomers(
-    @Request() req: any,
-    @Query() query: CustomerQueryDto,
-  ) {
+  async getCustomers(@Request() req: any, @Query() query: CustomerQueryDto) {
     const userId = req.user.sub;
     return this.customersService.findAllByUser(userId, query);
   }
@@ -208,7 +205,11 @@ export class CustomersController {
     @Body() updateCustomerDto: UpdateCustomerDto,
   ): Promise<CustomerResponseDto> {
     const userId = req.user.sub;
-    return this.customersService.updateByIdAndUser(customerId, userId, updateCustomerDto);
+    return this.customersService.updateByIdAndUser(
+      customerId,
+      userId,
+      updateCustomerDto,
+    );
   }
 
   @Delete(':customerId')
@@ -265,7 +266,14 @@ export class CustomersController {
     name: 'status',
     description: 'Filter by order status',
     required: false,
-    enum: ['pending', 'confirmed', 'in_production', 'ready', 'completed', 'cancelled'],
+    enum: [
+      'pending',
+      'confirmed',
+      'in_production',
+      'ready',
+      'completed',
+      'cancelled',
+    ],
   })
   @ApiResponse({
     status: 200,
@@ -283,7 +291,11 @@ export class CustomersController {
               status: { type: 'string' },
               totalAmount: { type: 'number' },
               orderDate: { type: 'string', format: 'date-time' },
-              completedAt: { type: 'string', format: 'date-time', nullable: true },
+              completedAt: {
+                type: 'string',
+                format: 'date-time',
+                nullable: true,
+              },
               items: {
                 type: 'array',
                 items: {
@@ -314,7 +326,11 @@ export class CustomersController {
             totalOrders: { type: 'number' },
             totalSpent: { type: 'number' },
             averageOrderValue: { type: 'number' },
-            lastOrderDate: { type: 'string', format: 'date-time', nullable: true },
+            lastOrderDate: {
+              type: 'string',
+              format: 'date-time',
+              nullable: true,
+            },
           },
         },
       },
@@ -374,8 +390,16 @@ export class CustomersController {
             totalOrders: { type: 'number' },
             totalSpent: { type: 'number' },
             averageOrderValue: { type: 'number' },
-            firstOrderDate: { type: 'string', format: 'date-time', nullable: true },
-            lastOrderDate: { type: 'string', format: 'date-time', nullable: true },
+            firstOrderDate: {
+              type: 'string',
+              format: 'date-time',
+              nullable: true,
+            },
+            lastOrderDate: {
+              type: 'string',
+              format: 'date-time',
+              nullable: true,
+            },
             customerLifetimeValue: { type: 'number' },
           },
         },
@@ -384,7 +408,11 @@ export class CustomersController {
           properties: {
             averageDaysBetweenOrders: { type: 'number' },
             orderFrequencyCategory: { type: 'string' },
-            predictedNextOrder: { type: 'string', format: 'date', nullable: true },
+            predictedNextOrder: {
+              type: 'string',
+              format: 'date',
+              nullable: true,
+            },
           },
         },
         preferences: {
@@ -419,7 +447,10 @@ export class CustomersController {
                 },
               },
             },
-            orderValueTrend: { type: 'string', enum: ['increasing', 'decreasing', 'stable'] },
+            orderValueTrend: {
+              type: 'string',
+              enum: ['increasing', 'decreasing', 'stable'],
+            },
             riskLevel: { type: 'string', enum: ['low', 'medium', 'high'] },
           },
         },
@@ -444,7 +475,11 @@ export class CustomersController {
     @Query('period') period?: string,
   ) {
     const userId = req.user.sub;
-    return this.customersService.getCustomerAnalytics(customerId, userId, period || '90d');
+    return this.customersService.getCustomerAnalytics(
+      customerId,
+      userId,
+      period || '90d',
+    );
   }
 
   @Post('import')
@@ -507,7 +542,9 @@ export class CustomersController {
     description: 'CSV file data',
     headers: {
       'Content-Type': { description: 'text/csv' },
-      'Content-Disposition': { description: 'attachment; filename=customers.csv' },
+      'Content-Disposition': {
+        description: 'attachment; filename=customers.csv',
+      },
     },
   })
   @ApiResponse({

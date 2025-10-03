@@ -13,7 +13,10 @@ import { RedisService } from '../redis/redis.service';
 import type { UsersData, UserLogin } from '../users/users.validation';
 import type { AppConfig } from '../config/configuration';
 import type { TrialSignupDto } from './trial-signup.validation';
-import type { TransferSessionResponse, TransferSessionTokens } from './dto/auth-transfer.dto';
+import type {
+  TransferSessionResponse,
+  TransferSessionTokens,
+} from './dto/auth-transfer.dto';
 
 export interface JwtPayload {
   sub: string;
@@ -150,7 +153,10 @@ export class AuthService {
 
       // CRITICAL: Immediately invalidate old refresh token and store new one
       // This implements refresh token rotation
-      await this.usersService.updateRefreshToken(user.id, newTokens.refreshToken);
+      await this.usersService.updateRefreshToken(
+        user.id,
+        newTokens.refreshToken,
+      );
 
       this.logger.log(
         `Refresh token rotated for user ${user.id}. Old token invalidated.`,
@@ -307,7 +313,10 @@ export class AuthService {
     return this.usersService.getUserLocationIds(userId);
   }
 
-  async trialSignup(trialSignupDto: TrialSignupDto, auditContext: any): Promise<AuthResult> {
+  async trialSignup(
+    trialSignupDto: TrialSignupDto,
+    auditContext: any,
+  ): Promise<AuthResult> {
     // Extract names from fullName (with safe handling)
     const fullName = trialSignupDto.fullName || '';
     const nameParts = fullName.trim().split(/\s+/);
@@ -374,7 +383,9 @@ export class AuthService {
       sessionData,
     );
 
-    this.logger.log(`Auth transfer session created for user ${userId}: ${sessionId}`);
+    this.logger.log(
+      `Auth transfer session created for user ${userId}: ${sessionId}`,
+    );
 
     return {
       sessionId,
@@ -413,5 +424,4 @@ export class AuthService {
       userId,
     };
   }
-
 }

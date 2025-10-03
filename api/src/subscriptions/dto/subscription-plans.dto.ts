@@ -1,5 +1,12 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsNumber, IsArray, IsBoolean, IsOptional, Min } from 'class-validator';
+import {
+  IsString,
+  IsNumber,
+  IsArray,
+  IsBoolean,
+  IsOptional,
+  Min,
+} from 'class-validator';
 
 export class CreateSubscriptionPlanDto {
   @ApiProperty({
@@ -150,7 +157,12 @@ export class UpdateSubscriptionPlanDto {
 
   @ApiPropertyOptional({
     description: 'List of feature IDs included in this plan',
-    example: ['advanced_analytics', 'multi_location', 'staff_management', 'api_access'],
+    example: [
+      'advanced_analytics',
+      'multi_location',
+      'staff_management',
+      'api_access',
+    ],
   })
   @IsOptional()
   @IsArray()

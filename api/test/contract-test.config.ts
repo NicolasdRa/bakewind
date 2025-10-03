@@ -68,7 +68,11 @@ export const contractTestConfig = {
         priceAnnualUsd: 287040,
         maxLocations: null,
         maxUsers: null,
-        features: ['custom_integrations', 'priority_support', 'advanced_reporting'],
+        features: [
+          'custom_integrations',
+          'priority_support',
+          'advanced_reporting',
+        ],
         isPopular: false,
         sortOrder: 3,
         isActive: true,
@@ -79,10 +83,14 @@ export const contractTestConfig = {
       {
         id: '550e8400-e29b-41d4-a716-446655440011',
         name: 'Order Management',
-        description: 'Track customer orders and delivery schedules in real-time',
+        description:
+          'Track customer orders and delivery schedules in real-time',
         iconName: 'orders',
         category: 'orders',
-        availableInPlans: ['550e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440002'],
+        availableInPlans: [
+          '550e8400-e29b-41d4-a716-446655440001',
+          '550e8400-e29b-41d4-a716-446655440002',
+        ],
         demoUrl: 'https://demo.bakewind.com/orders',
         isHighlighted: true,
         sortOrder: 1,
@@ -94,7 +102,11 @@ export const contractTestConfig = {
         description: 'Monitor ingredient levels and automate reorder alerts',
         iconName: 'inventory',
         category: 'inventory',
-        availableInPlans: ['550e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440002', '550e8400-e29b-41d4-a716-446655440003'],
+        availableInPlans: [
+          '550e8400-e29b-41d4-a716-446655440001',
+          '550e8400-e29b-41d4-a716-446655440002',
+          '550e8400-e29b-41d4-a716-446655440003',
+        ],
         demoUrl: 'https://demo.bakewind.com/inventory',
         isHighlighted: false,
         sortOrder: 2,
@@ -103,10 +115,14 @@ export const contractTestConfig = {
       {
         id: '550e8400-e29b-41d4-a716-446655440013',
         name: 'Production Scheduling',
-        description: 'Plan and optimize baking schedules for maximum efficiency',
+        description:
+          'Plan and optimize baking schedules for maximum efficiency',
         iconName: 'production',
         category: 'production',
-        availableInPlans: ['550e8400-e29b-41d4-a716-446655440002', '550e8400-e29b-41d4-a716-446655440003'],
+        availableInPlans: [
+          '550e8400-e29b-41d4-a716-446655440002',
+          '550e8400-e29b-41d4-a716-446655440003',
+        ],
         demoUrl: 'https://demo.bakewind.com/production',
         isHighlighted: true,
         sortOrder: 3,
@@ -118,7 +134,10 @@ export const contractTestConfig = {
         description: 'Comprehensive business insights and performance metrics',
         iconName: 'analytics',
         category: 'analytics',
-        availableInPlans: ['550e8400-e29b-41d4-a716-446655440002', '550e8400-e29b-41d4-a716-446655440003'],
+        availableInPlans: [
+          '550e8400-e29b-41d4-a716-446655440002',
+          '550e8400-e29b-41d4-a716-446655440003',
+        ],
         demoUrl: 'https://demo.bakewind.com/analytics',
         isHighlighted: false,
         sortOrder: 4,
@@ -144,12 +163,29 @@ export const contractTestConfig = {
         },
         customizable: true,
         customizationOptions: [
-          { name: 'size', type: 'select', options: ['small', 'medium', 'large'], priceAdjustment: 0, required: true },
-          { name: 'frosting_flavor', type: 'select', options: ['chocolate', 'vanilla', 'strawberry'], priceAdjustment: 0, required: false },
-          { name: 'decorations', type: 'text', priceAdjustment: 5, required: false }
+          {
+            name: 'size',
+            type: 'select',
+            options: ['small', 'medium', 'large'],
+            priceAdjustment: 0,
+            required: true,
+          },
+          {
+            name: 'frosting_flavor',
+            type: 'select',
+            options: ['chocolate', 'vanilla', 'strawberry'],
+            priceAdjustment: 0,
+            required: false,
+          },
+          {
+            name: 'decorations',
+            type: 'text',
+            priceAdjustment: 5,
+            required: false,
+          },
         ],
         estimatedPrepTime: 120,
-        shelfLife: 72
+        shelfLife: 72,
       },
       {
         id: '550e8400-e29b-41d4-a716-446655440022',
@@ -168,11 +204,22 @@ export const contractTestConfig = {
         },
         customizable: true,
         customizationOptions: [
-          { name: 'frosting_color', type: 'select', options: ['white', 'pink', 'blue', 'yellow'], priceAdjustment: 0, required: false },
-          { name: 'sprinkles', type: 'checkbox', priceAdjustment: 0.50, required: false }
+          {
+            name: 'frosting_color',
+            type: 'select',
+            options: ['white', 'pink', 'blue', 'yellow'],
+            priceAdjustment: 0,
+            required: false,
+          },
+          {
+            name: 'sprinkles',
+            type: 'checkbox',
+            priceAdjustment: 0.5,
+            required: false,
+          },
         ],
         estimatedPrepTime: 45,
-        shelfLife: 48
+        shelfLife: 48,
       },
       {
         id: '550e8400-e29b-41d4-a716-446655440023',
@@ -191,34 +238,53 @@ export const contractTestConfig = {
         },
         customizable: true,
         customizationOptions: [
-          { name: 'size', type: 'select', options: ['half', 'full'], priceAdjustment: 0, required: true },
-          { name: 'slicing', type: 'checkbox', priceAdjustment: 0, required: false }
+          {
+            name: 'size',
+            type: 'select',
+            options: ['half', 'full'],
+            priceAdjustment: 0,
+            required: true,
+          },
+          {
+            name: 'slicing',
+            type: 'checkbox',
+            priceAdjustment: 0,
+            required: false,
+          },
         ],
         estimatedPrepTime: 480,
-        shelfLife: 120
+        shelfLife: 120,
       },
     ],
   },
 
   // Test utilities
   utils: {
-    generateTestEmail: () => `test-${Date.now()}-${Math.random().toString(36).substr(2, 9)}@example.com`,
-    generateTestPhone: () => `+1 (555) ${Math.floor(Math.random() * 900) + 100}-${Math.floor(Math.random() * 9000) + 1000}`,
-    generateTestBusinessName: () => `Test Bakery ${Math.floor(Math.random() * 1000)}`,
+    generateTestEmail: () =>
+      `test-${Date.now()}-${Math.random().toString(36).substr(2, 9)}@example.com`,
+    generateTestPhone: () =>
+      `+1 (555) ${Math.floor(Math.random() * 900) + 100}-${Math.floor(Math.random() * 9000) + 1000}`,
+    generateTestBusinessName: () =>
+      `Test Bakery ${Math.floor(Math.random() * 1000)}`,
 
     // Password validation helper
     generateValidPassword: () => 'TestPassword123!',
 
     // UUID validation helper
     isValidUUID: (uuid: string) => {
-      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      const uuidRegex =
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
       return uuidRegex.test(uuid);
     },
 
     // Date validation helper
     isValidISODate: (dateString: string) => {
       const date = new Date(dateString);
-      return date instanceof Date && !isNaN(date.getTime()) && dateString === date.toISOString();
+      return (
+        date instanceof Date &&
+        !isNaN(date.getTime()) &&
+        dateString === date.toISOString()
+      );
     },
 
     // Price validation helper (cents)
@@ -227,7 +293,7 @@ export const contractTestConfig = {
     },
 
     // Sleep utility for test delays
-    sleep: (ms: number) => new Promise(resolve => setTimeout(resolve, ms)),
+    sleep: (ms: number) => new Promise((resolve) => setTimeout(resolve, ms)),
   },
 
   // Test expectations

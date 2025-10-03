@@ -20,7 +20,7 @@ describe('Orders API (e2e)', () => {
       .post('/api/v1/auth/login')
       .send({
         email: 'customer@example.com',
-        password: 'password123'
+        password: 'password123',
       });
 
     accessToken = loginResponse.body.accessToken;
@@ -37,12 +37,12 @@ describe('Orders API (e2e)', () => {
           {
             productId: '123e4567-e89b-12d3-a456-426614174000',
             quantity: 2,
-            customizations: ['extra frosting']
-          }
+            customizations: ['extra frosting'],
+          },
         ],
         deliveryType: 'pickup',
         scheduledFor: new Date(Date.now() + 24 * 60 * 60 * 1000), // Tomorrow
-        customerNotes: 'Please call when ready'
+        customerNotes: 'Please call when ready',
       };
 
       const response = await request(app.getHttpServer())
@@ -65,10 +65,10 @@ describe('Orders API (e2e)', () => {
         items: [
           {
             productId: '123e4567-e89b-12d3-a456-426614174000',
-            quantity: 1
-          }
+            quantity: 1,
+          },
         ],
-        deliveryType: 'pickup'
+        deliveryType: 'pickup',
       };
 
       await request(app.getHttpServer())
@@ -90,10 +90,10 @@ describe('Orders API (e2e)', () => {
         items: [
           {
             productId: '123e4567-e89b-12d3-a456-426614174000',
-            quantity: 0
-          }
+            quantity: 0,
+          },
         ],
-        deliveryType: 'pickup'
+        deliveryType: 'pickup',
       };
 
       await request(app.getHttpServer())
@@ -108,10 +108,10 @@ describe('Orders API (e2e)', () => {
         items: [
           {
             productId: '123e4567-e89b-12d3-a456-426614174000',
-            quantity: 3
-          }
+            quantity: 3,
+          },
         ],
-        deliveryType: 'pickup'
+        deliveryType: 'pickup',
       };
 
       const response = await request(app.getHttpServer())
@@ -132,10 +132,10 @@ describe('Orders API (e2e)', () => {
         items: [
           {
             productId: '123e4567-e89b-12d3-a456-426614174000',
-            quantity: 1
-          }
+            quantity: 1,
+          },
         ],
-        deliveryType: 'pickup'
+        deliveryType: 'pickup',
       };
 
       const createResponse = await request(app.getHttpServer())
@@ -199,7 +199,9 @@ describe('Orders API (e2e)', () => {
         .expect(200);
 
       if (response.body.data.length > 0) {
-        expect(response.body.data.every((order: any) => order.status === 'pending')).toBe(true);
+        expect(
+          response.body.data.every((order: any) => order.status === 'pending'),
+        ).toBe(true);
       }
     });
   });

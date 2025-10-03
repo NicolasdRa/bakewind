@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+  BadRequestException,
+} from '@nestjs/common';
 import { eq, and, isNull } from 'drizzle-orm';
 import { DatabaseService } from '../database/database.service';
 import { saasUsersTable } from '../database/schemas/saas-users';
@@ -76,6 +81,10 @@ export class SaasUsersService {
       })
       .returning();
 
+    if (!newUser) {
+      throw new Error('Failed to create user');
+    }
+
     // Remove password hash from response
     const { passwordHash: _, ...userWithoutPassword } = newUser;
     return userWithoutPassword;
@@ -126,7 +135,9 @@ export class SaasUsersService {
     const [user] = await this.db.database
       .select()
       .from(saasUsersTable)
-      .where(and(eq(saasUsersTable.email, email), isNull(saasUsersTable.deletedAt)));
+      .where(
+        and(eq(saasUsersTable.email, email), isNull(saasUsersTable.deletedAt)),
+      );
 
     return user;
   }
@@ -135,7 +146,9 @@ export class SaasUsersService {
     const [user] = await this.db.database
       .select()
       .from(saasUsersTable)
-      .where(and(eq(saasUsersTable.email, email), isNull(saasUsersTable.deletedAt)));
+      .where(
+        and(eq(saasUsersTable.email, email), isNull(saasUsersTable.deletedAt)),
+      );
 
     return user;
   }
@@ -147,8 +160,8 @@ export class SaasUsersService {
       .where(
         and(
           eq(saasUsersTable.stripeCustomerId, stripeCustomerId),
-          isNull(saasUsersTable.deletedAt)
-        )
+          isNull(saasUsersTable.deletedAt),
+        ),
       );
 
     if (!user) {
@@ -165,10 +178,12 @@ export class SaasUsersService {
     const [user] = await this.db.database
       .select()
       .from(saasUsersTable)
-      .where(and(
-        eq(saasUsersTable.stripeCustomerId, subscriptionId), // Note: This is not ideal, should be subscription ID
-        isNull(saasUsersTable.deletedAt)
-      ));
+      .where(
+        and(
+          eq(saasUsersTable.stripeCustomerId, subscriptionId), // Note: This is not ideal, should be subscription ID
+          isNull(saasUsersTable.deletedAt),
+        ),
+      );
 
     if (!user) {
       return null;
@@ -190,11 +205,18 @@ export class SaasUsersService {
       .where(eq(saasUsersTable.id, id))
       .returning();
 
+    if (!updatedUser) {
+      throw new Error('Failed to update user');
+    }
+
     const { passwordHash, ...userWithoutPassword } = updatedUser;
     return userWithoutPassword;
   }
 
-  async updateSubscription(userId: string, subscriptionDto: UpdateSubscriptionDto) {
+  async updateSubscription(
+    userId: string,
+    subscriptionDto: UpdateSubscriptionDto,
+  ) {
     const user = await this.findById(userId);
 
     const updateData: any = {
@@ -211,6 +233,10 @@ export class SaasUsersService {
       .set(updateData)
       .where(eq(saasUsersTable.id, userId))
       .returning();
+
+    if (!updatedUser) {
+      throw new Error('Failed to update subscription');
+    }
 
     const { passwordHash, ...userWithoutPassword } = updatedUser;
     return userWithoutPassword;
@@ -252,6 +278,10 @@ export class SaasUsersService {
       .where(eq(saasUsersTable.id, id))
       .returning();
 
+    if (!updatedUser) {
+      throw new Error('Failed to verify email');
+    }
+
     const { passwordHash, ...userWithoutPassword } = updatedUser;
     return userWithoutPassword;
   }
@@ -265,6 +295,10 @@ export class SaasUsersService {
       })
       .where(eq(saasUsersTable.id, id))
       .returning();
+
+    if (!updatedUser) {
+      throw new Error('Failed to complete onboarding');
+    }
 
     const { passwordHash, ...userWithoutPassword } = updatedUser;
     return userWithoutPassword;
@@ -292,6 +326,10 @@ export class SaasUsersService {
       .where(eq(saasUsersTable.id, id))
       .returning();
 
+    if (!deletedUser) {
+      throw new Error('Failed to delete user');
+    }
+
     const { passwordHash, ...userWithoutPassword } = deletedUser;
     return userWithoutPassword;
   }
@@ -303,8 +341,8 @@ export class SaasUsersService {
       .where(
         and(
           isNull(saasUsersTable.deletedAt),
-          eq(saasUsersTable.emailVerified, true)
-        )
+          eq(saasUsersTable.emailVerified, true),
+        ),
       );
 
     return result.length;
@@ -323,8 +361,8 @@ export class SaasUsersService {
       .where(
         and(
           eq(saasUsersTable.subscriptionPlanId, planId),
-          isNull(saasUsersTable.deletedAt)
-        )
+          isNull(saasUsersTable.deletedAt),
+        ),
       );
 
     return users;
@@ -381,14 +419,21 @@ export class SaasUsersService {
   }
 
   // Method for changing password
-  async changePassword(userId: string, currentPassword: string, newPassword: string) {
+  async changePassword(
+    userId: string,
+    currentPassword: string,
+    newPassword: string,
+  ) {
     // Verify current password
     const user = await this.findByIdWithPassword(userId);
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
-    const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.passwordHash);
+    const isCurrentPasswordValid = await bcrypt.compare(
+      currentPassword,
+      user.passwordHash,
+    );
     if (!isCurrentPasswordValid) {
       throw new BadRequestException('Current password is incorrect');
     }

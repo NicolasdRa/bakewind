@@ -7,7 +7,13 @@ export interface CreateSoftwareFeatureDto {
   name: string;
   description: string;
   iconName: string;
-  category: 'orders' | 'inventory' | 'production' | 'analytics' | 'customers' | 'products';
+  category:
+    | 'orders'
+    | 'inventory'
+    | 'production'
+    | 'analytics'
+    | 'customers'
+    | 'products';
   availableInPlans?: string[];
   demoUrl?: string | null;
   helpDocUrl?: string | null;
@@ -20,7 +26,13 @@ export interface UpdateSoftwareFeatureDto {
   name?: string;
   description?: string;
   iconName?: string;
-  category?: 'orders' | 'inventory' | 'production' | 'analytics' | 'customers' | 'products';
+  category?:
+    | 'orders'
+    | 'inventory'
+    | 'production'
+    | 'analytics'
+    | 'customers'
+    | 'products';
   availableInPlans?: string[];
   demoUrl?: string | null;
   helpDocUrl?: string | null;
@@ -60,7 +72,7 @@ export class SoftwareFeaturesService {
       .where(whereCondition)
       .orderBy(asc(softwareFeaturesTable.sortOrder));
 
-    return features.map(feature => this.formatFeature(feature));
+    return features.map((feature) => this.formatFeature(feature));
   }
 
   async findById(id: string) {
@@ -92,12 +104,12 @@ export class SoftwareFeaturesService {
       .where(
         and(
           eq(softwareFeaturesTable.category, category as any),
-          eq(softwareFeaturesTable.isActive, true)
-        )
+          eq(softwareFeaturesTable.isActive, true),
+        ),
       )
       .orderBy(asc(softwareFeaturesTable.sortOrder));
 
-    return features.map(feature => this.formatFeature(feature));
+    return features.map((feature) => this.formatFeature(feature));
   }
 
   async getHighlightedFeatures() {
@@ -107,27 +119,29 @@ export class SoftwareFeaturesService {
       .where(
         and(
           eq(softwareFeaturesTable.isActive, true),
-          eq(softwareFeaturesTable.isHighlighted, true)
-        )
+          eq(softwareFeaturesTable.isHighlighted, true),
+        ),
       )
       .orderBy(asc(softwareFeaturesTable.sortOrder));
 
-    return features.map(feature => this.formatFeature(feature));
+    return features.map((feature) => this.formatFeature(feature));
   }
 
   async getFeaturesForPlan(planId: string) {
     const allFeatures = await this.findAll(true);
 
-    return allFeatures.filter(feature =>
-      feature.availableInPlans.includes(planId)
+    return allFeatures.filter((feature) =>
+      feature.availableInPlans.includes(planId),
     );
   }
 
   async getFeaturesForPlans(planIds: string[]) {
     const allFeatures = await this.findAll(true);
 
-    return allFeatures.filter(feature =>
-      feature.availableInPlans.some((planId: string) => planIds.includes(planId))
+    return allFeatures.filter((feature) =>
+      feature.availableInPlans.some((planId: string) =>
+        planIds.includes(planId),
+      ),
     );
   }
 
@@ -206,7 +220,7 @@ export class SoftwareFeaturesService {
           updatedAt: new Date(),
         })
         .where(eq(softwareFeaturesTable.id, id))
-        .returning()
+        .returning(),
     );
 
     await Promise.all(updatePromises);
@@ -239,7 +253,9 @@ export class SoftwareFeaturesService {
     const feature = await this.findById(featureId);
 
     if (feature.availableInPlans.includes(planId)) {
-      const updatedPlans = feature.availableInPlans.filter((id: string) => id !== planId);
+      const updatedPlans = feature.availableInPlans.filter(
+        (id: string) => id !== planId,
+      );
 
       const [updatedFeature] = await this.db.database
         .update(softwareFeaturesTable)
@@ -261,11 +277,11 @@ export class SoftwareFeaturesService {
 
     const byCategory: Record<string, any[]> = {};
 
-    features.forEach(feature => {
+    features.forEach((feature) => {
       if (!byCategory[feature.category]) {
         byCategory[feature.category] = [];
       }
-      byCategory[feature.category].push(feature);
+      byCategory[feature.category]?.push(feature);
     });
 
     return byCategory;
@@ -276,7 +292,12 @@ export class SoftwareFeaturesService {
     const features = await this.db.database
       .select()
       .from(softwareFeaturesTable)
-      .where(and(eq(softwareFeaturesTable.category, category as any), eq(softwareFeaturesTable.isActive, true)))
+      .where(
+        and(
+          eq(softwareFeaturesTable.category, category as any),
+          eq(softwareFeaturesTable.isActive, true),
+        ),
+      )
       .orderBy(asc(softwareFeaturesTable.sortOrder));
 
     return features.map(this.formatFeature);
@@ -294,7 +315,7 @@ export class SoftwareFeaturesService {
       .from(softwareFeaturesTable)
       .where(eq(softwareFeaturesTable.isActive, true));
 
-    return categories.map(row => row.category);
+    return categories.map((row) => row.category);
   }
 
   // Method for getting feature availability matrix
@@ -303,7 +324,7 @@ export class SoftwareFeaturesService {
 
     const matrix: Record<string, string[]> = {};
 
-    features.forEach(feature => {
+    features.forEach((feature) => {
       feature.availableInPlans.forEach((planId: string) => {
         if (!matrix[planId]) {
           matrix[planId] = [];
@@ -319,15 +340,18 @@ export class SoftwareFeaturesService {
   async compareFeatures(planIds: string[]) {
     const features = await this.findAll(true);
 
-    return features.map(feature => ({
+    return features.map((feature) => ({
       id: feature.id,
       name: feature.name,
       description: feature.description,
       category: feature.category,
-      availability: planIds.reduce((acc, planId) => {
-        acc[planId] = feature.availableInPlans.includes(planId);
-        return acc;
-      }, {} as Record<string, boolean>)
+      availability: planIds.reduce(
+        (acc, planId) => {
+          acc[planId] = feature.availableInPlans.includes(planId);
+          return acc;
+        },
+        {} as Record<string, boolean>,
+      ),
     }));
   }
 
@@ -360,18 +384,20 @@ export class SoftwareFeaturesService {
   async seedDefaultFeatures() {
     // This would typically be handled by a dedicated seeding service
     // For now, return success message
-    return { message: 'Default features seeding not implemented in this service' };
+    return {
+      message: 'Default features seeding not implemented in this service',
+    };
   }
 
   async getFeatureComparison(planIds: string[]) {
     const allFeatures = await this.findAll(true);
 
-    return allFeatures.map(feature => ({
+    return allFeatures.map((feature) => ({
       id: feature.id,
       name: feature.name,
       description: feature.description,
       category: feature.category,
-      availability: planIds.map(planId => ({
+      availability: planIds.map((planId) => ({
         planId,
         included: feature.availableInPlans.includes(planId),
       })),
@@ -383,19 +409,21 @@ export class SoftwareFeaturesService {
 
     const searchLower = query.toLowerCase();
 
-    return allFeatures.filter(feature =>
-      feature.name.toLowerCase().includes(searchLower) ||
-      feature.description.toLowerCase().includes(searchLower) ||
-      feature.category.toLowerCase().includes(searchLower)
+    return allFeatures.filter(
+      (feature) =>
+        feature.name.toLowerCase().includes(searchLower) ||
+        feature.description.toLowerCase().includes(searchLower) ||
+        feature.category.toLowerCase().includes(searchLower),
     );
   }
 
   private formatFeature(feature: any) {
     return {
       ...feature,
-      availableInPlans: typeof feature.availableInPlans === 'string'
-        ? JSON.parse(feature.availableInPlans)
-        : feature.availableInPlans,
+      availableInPlans:
+        typeof feature.availableInPlans === 'string'
+          ? JSON.parse(feature.availableInPlans)
+          : feature.availableInPlans,
     };
   }
 
@@ -404,15 +432,16 @@ export class SoftwareFeaturesService {
 
     const stats = {
       total: features.length,
-      active: features.filter(f => f.isActive).length,
-      highlighted: features.filter(f => f.isHighlighted).length,
+      active: features.filter((f) => f.isActive).length,
+      highlighted: features.filter((f) => f.isHighlighted).length,
       byCategory: {} as Record<string, number>,
-      withDemo: features.filter(f => f.demoUrl).length,
-      withHelp: features.filter(f => f.helpDocUrl).length,
+      withDemo: features.filter((f) => f.demoUrl).length,
+      withHelp: features.filter((f) => f.helpDocUrl).length,
     };
 
-    features.forEach(feature => {
-      stats.byCategory[feature.category] = (stats.byCategory[feature.category] || 0) + 1;
+    features.forEach((feature) => {
+      stats.byCategory[feature.category] =
+        (stats.byCategory[feature.category] || 0) + 1;
     });
 
     return stats;

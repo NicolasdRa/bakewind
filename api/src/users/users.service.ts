@@ -29,6 +29,10 @@ export class UsersService {
       })
       .returning();
 
+    if (!user) {
+      throw new Error('Failed to create user');
+    }
+
     this.logger.log(`Created new user: ${user.email}`);
 
     // Return user without password
@@ -162,6 +166,10 @@ export class UsersService {
       .where(eq(usersTable.id, id))
       .returning();
 
+    if (!updatedUser) {
+      throw new Error('Failed to update user');
+    }
+
     this.logger.log(`✅ Successfully updated user: ${updatedUser.email}`);
 
     // Return user without password
@@ -215,6 +223,10 @@ export class UsersService {
       })
       .where(eq(usersTable.id, id))
       .returning();
+
+    if (!updatedUser) {
+      throw new Error('Failed to toggle user status');
+    }
 
     this.logger.log(
       `Toggled user status: ${updatedUser.email}, isActive: ${updatedUser.isActive}`,

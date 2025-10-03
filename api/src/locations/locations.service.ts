@@ -53,6 +53,10 @@ export class LocationsService {
       .values(locationData)
       .returning();
 
+    if (!location) {
+      throw new Error('Failed to create location');
+    }
+
     this.logger.log(
       `Created new location: ${location.name} in ${location.city}`,
     );
@@ -159,6 +163,10 @@ export class LocationsService {
       })
       .where(eq(locationsTable.id, id))
       .returning();
+
+    if (!updatedLocation) {
+      throw new Error('Failed to update location');
+    }
 
     this.logger.log(`Updated location: ${updatedLocation.name}`);
 
@@ -269,7 +277,10 @@ export class LocationsService {
       )
       .orderBy(locationsTable.name);
 
-    console.log('📍 [LOCATIONS_SERVICE] Found locations:', userLocations.length);
+    console.log(
+      '📍 [LOCATIONS_SERVICE] Found locations:',
+      userLocations.length,
+    );
 
     return userLocations.map((ul) =>
       locationResponseDataSchema.parse(ul.location),

@@ -9,7 +9,12 @@ import {
   BadRequestException,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiExcludeEndpoint } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiExcludeEndpoint,
+} from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
 import { SubscriptionPlansService } from '../subscriptions/subscription-plans.service';
@@ -30,10 +35,14 @@ export class StripeWebhookController {
     private readonly trialAccountsService: TrialAccountsService,
     private readonly saasUsersService: SaasUsersService,
   ) {
-    this.stripe = new Stripe(this.configService.get<string>('STRIPE_SECRET_KEY') || 'sk_test_dummy', {
-      apiVersion: '2025-08-27.basil' as any,
-    });
-    this.webhookSecret = this.configService.get<string>('STRIPE_WEBHOOK_SECRET') || 'whsec_dummy';
+    this.stripe = new Stripe(
+      this.configService.get<string>('STRIPE_SECRET_KEY') || 'sk_test_dummy',
+      {
+        apiVersion: '2025-08-27.basil' as any,
+      },
+    );
+    this.webhookSecret =
+      this.configService.get<string>('STRIPE_WEBHOOK_SECRET') || 'whsec_dummy';
   }
 
   @Public()
@@ -70,7 +79,8 @@ export class StripeWebhookController {
 
       this.logger.log(`Received Stripe webhook: ${event.type} (${event.id})`);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       this.logger.error('Webhook signature verification failed:', errorMessage);
       throw new BadRequestException('Invalid webhook signature');
     }
@@ -79,10 +89,15 @@ export class StripeWebhookController {
       // Process webhook event
       await this.processWebhookEvent(event);
 
-      this.logger.log(`Successfully processed webhook: ${event.type} (${event.id})`);
+      this.logger.log(
+        `Successfully processed webhook: ${event.type} (${event.id})`,
+      );
       return { received: true, eventId: event.id };
     } catch (error) {
-      this.logger.error(`Failed to process webhook ${event.type} (${event.id}):`, error);
+      this.logger.error(
+        `Failed to process webhook ${event.type} (${event.id}):`,
+        error,
+      );
       throw new InternalServerErrorException('Webhook processing failed');
     }
   }
@@ -91,15 +106,21 @@ export class StripeWebhookController {
     switch (event.type) {
       // Subscription lifecycle events
       case 'customer.subscription.created':
-        await this.handleSubscriptionCreated(event.data.object as Stripe.Subscription);
+        await this.handleSubscriptionCreated(
+          event.data.object as Stripe.Subscription,
+        );
         break;
 
       case 'customer.subscription.updated':
-        await this.handleSubscriptionUpdated(event.data.object as Stripe.Subscription);
+        await this.handleSubscriptionUpdated(
+          event.data.object as Stripe.Subscription,
+        );
         break;
 
       case 'customer.subscription.deleted':
-        await this.handleSubscriptionDeleted(event.data.object as Stripe.Subscription);
+        await this.handleSubscriptionDeleted(
+          event.data.object as Stripe.Subscription,
+        );
         break;
 
       // Trial events
@@ -121,7 +142,9 @@ export class StripeWebhookController {
     }
   }
 
-  private async handleSubscriptionCreated(subscription: Stripe.Subscription): Promise<void> {
+  private async handleSubscriptionCreated(
+    subscription: Stripe.Subscription,
+  ): Promise<void> {
     this.logger.log(`Processing subscription created: ${subscription.id}`);
 
     try {
@@ -133,24 +156,31 @@ export class StripeWebhookController {
       }
 
       // Find the plan by Stripe price ID
-      const plan = await this.subscriptionPlansService.getPlanByStripePriceId(priceId);
+      const plan =
+        await this.subscriptionPlansService.getPlanByStripePriceId(priceId);
       if (!plan) {
         throw new Error(`No plan found for Stripe price ID: ${priceId}`);
       }
 
       // Find user by Stripe customer ID
-      const user = await this.saasUsersService.getUserByStripeCustomerId(customerId);
+      const user =
+        await this.saasUsersService.getUserByStripeCustomerId(customerId);
       if (!user) {
         throw new Error(`No user found for Stripe customer ID: ${customerId}`);
       }
 
       // Update user subscription status
       await this.saasUsersService.updateSubscription(user.id, {
-        subscriptionStatus: subscription.status === 'active' ? 'active' : 'pending',
+        subscriptionStatus:
+          subscription.status === 'active' ? 'active' : 'pending',
         stripeSubscriptionId: subscription.id,
-        subscriptionPlanId: plan.id,
-        subscriptionStartDate: new Date((subscription as any).current_period_start * 1000),
-        subscriptionEndDate: new Date((subscription as any).current_period_end * 1000),
+        subscriptionPlanId: plan?.id || undefined,
+        subscriptionStartDate: new Date(
+          (subscription as any).current_period_start * 1000,
+        ),
+        subscriptionEndDate: new Date(
+          (subscription as any).current_period_end * 1000,
+        ),
       });
 
       // If user was on trial, mark trial as converted
@@ -166,13 +196,19 @@ export class StripeWebhookController {
     }
   }
 
-  private async handleSubscriptionUpdated(subscription: Stripe.Subscription): Promise<void> {
+  private async handleSubscriptionUpdated(
+    subscription: Stripe.Subscription,
+  ): Promise<void> {
     this.logger.log(`Processing subscription updated: ${subscription.id}`);
 
     try {
-      const user = await this.saasUsersService.getUserByStripeSubscriptionId(subscription.id);
+      const user = await this.saasUsersService.getUserByStripeSubscriptionId(
+        subscription.id,
+      );
       if (!user) {
-        this.logger.warn(`No user found for subscription ID: ${subscription.id}`);
+        this.logger.warn(
+          `No user found for subscription ID: ${subscription.id}`,
+        );
         return;
       }
 
@@ -181,19 +217,29 @@ export class StripeWebhookController {
 
       // Check if plan changed
       if (priceId) {
-        const plan = await this.subscriptionPlansService.getPlanByStripePriceId(priceId);
+        const plan =
+          await this.subscriptionPlansService.getPlanByStripePriceId(priceId);
         if (plan) {
           planId = plan.id;
         }
       }
 
       // Update subscription details
-      await this.saasUsersService.updateSubscription(user.id, {
+      const updateDto: any = {
         subscriptionStatus: this.mapStripeStatusToInternal(subscription.status),
-        subscriptionPlanId: planId || undefined,
-        subscriptionStartDate: new Date((subscription as any).current_period_start * 1000),
-        subscriptionEndDate: new Date((subscription as any).current_period_end * 1000),
-      });
+        subscriptionStartDate: new Date(
+          (subscription as any).current_period_start * 1000,
+        ),
+        subscriptionEndDate: new Date(
+          (subscription as any).current_period_end * 1000,
+        ),
+      };
+
+      if (planId) {
+        updateDto.subscriptionPlanId = planId;
+      }
+
+      await this.saasUsersService.updateSubscription(user.id, updateDto);
 
       this.logger.log(`Subscription updated successfully for user ${user.id}`);
     } catch (error) {
@@ -202,13 +248,19 @@ export class StripeWebhookController {
     }
   }
 
-  private async handleSubscriptionDeleted(subscription: Stripe.Subscription): Promise<void> {
+  private async handleSubscriptionDeleted(
+    subscription: Stripe.Subscription,
+  ): Promise<void> {
     this.logger.log(`Processing subscription deleted: ${subscription.id}`);
 
     try {
-      const user = await this.saasUsersService.getUserByStripeSubscriptionId(subscription.id);
+      const user = await this.saasUsersService.getUserByStripeSubscriptionId(
+        subscription.id,
+      );
       if (!user) {
-        this.logger.warn(`No user found for subscription ID: ${subscription.id}`);
+        this.logger.warn(
+          `No user found for subscription ID: ${subscription.id}`,
+        );
         return;
       }
 
@@ -225,20 +277,28 @@ export class StripeWebhookController {
     }
   }
 
-  private async handleTrialWillEnd(subscription: Stripe.Subscription): Promise<void> {
+  private async handleTrialWillEnd(
+    subscription: Stripe.Subscription,
+  ): Promise<void> {
     this.logger.log(`Processing trial will end: ${subscription.id}`);
 
     try {
-      const user = await this.saasUsersService.getUserByStripeSubscriptionId(subscription.id);
+      const user = await this.saasUsersService.getUserByStripeSubscriptionId(
+        subscription.id,
+      );
       if (!user) {
-        this.logger.warn(`No user found for subscription ID: ${subscription.id}`);
+        this.logger.warn(
+          `No user found for subscription ID: ${subscription.id}`,
+        );
         return;
       }
 
       // Send trial ending notification (implement email service)
       // await this.emailService.sendTrialEndingNotification(user);
 
-      this.logger.log(`Trial ending notification processed for user ${user.id}`);
+      this.logger.log(
+        `Trial ending notification processed for user ${user.id}`,
+      );
     } catch (error) {
       this.logger.error('Failed to process trial will end:', error);
       throw error;
@@ -255,9 +315,14 @@ export class StripeWebhookController {
         return;
       }
 
-      const user = await this.saasUsersService.getUserByStripeSubscriptionId(subscriptionId);
+      const user =
+        await this.saasUsersService.getUserByStripeSubscriptionId(
+          subscriptionId,
+        );
       if (!user) {
-        this.logger.warn(`No user found for subscription ID: ${subscriptionId}`);
+        this.logger.warn(
+          `No user found for subscription ID: ${subscriptionId}`,
+        );
         return;
       }
 
@@ -288,9 +353,14 @@ export class StripeWebhookController {
         return;
       }
 
-      const user = await this.saasUsersService.getUserByStripeSubscriptionId(subscriptionId);
+      const user =
+        await this.saasUsersService.getUserByStripeSubscriptionId(
+          subscriptionId,
+        );
       if (!user) {
-        this.logger.warn(`No user found for subscription ID: ${subscriptionId}`);
+        this.logger.warn(
+          `No user found for subscription ID: ${subscriptionId}`,
+        );
         return;
       }
 
@@ -313,13 +383,13 @@ export class StripeWebhookController {
 
   private mapStripeStatusToInternal(stripeStatus: string): string {
     const statusMap: Record<string, string> = {
-      'active': 'active',
-      'trialing': 'trial',
-      'past_due': 'past_due',
-      'canceled': 'canceled',
-      'unpaid': 'past_due',
-      'incomplete': 'pending',
-      'incomplete_expired': 'canceled',
+      active: 'active',
+      trialing: 'trial',
+      past_due: 'past_due',
+      canceled: 'canceled',
+      unpaid: 'past_due',
+      incomplete: 'pending',
+      incomplete_expired: 'canceled',
     };
 
     return statusMap[stripeStatus] || 'unknown';

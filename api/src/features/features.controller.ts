@@ -30,7 +30,9 @@ import { Public } from '../auth/decorators/public.decorator';
 @ApiTags('Features')
 @Controller('features')
 export class FeaturesController {
-  constructor(private readonly softwareFeaturesService: SoftwareFeaturesService) {}
+  constructor(
+    private readonly softwareFeaturesService: SoftwareFeaturesService,
+  ) {}
 
   @Public()
   @Get()
@@ -41,7 +43,14 @@ export class FeaturesController {
     name: 'category',
     description: 'Filter features by category',
     required: false,
-    enum: ['orders', 'inventory', 'production', 'analytics', 'customers', 'products'],
+    enum: [
+      'orders',
+      'inventory',
+      'production',
+      'analytics',
+      'customers',
+      'products',
+    ],
   })
   @ApiQuery({
     name: 'highlighted',
@@ -63,7 +72,14 @@ export class FeaturesController {
           iconName: { type: 'string' },
           category: {
             type: 'string',
-            enum: ['orders', 'inventory', 'production', 'analytics', 'customers', 'products']
+            enum: [
+              'orders',
+              'inventory',
+              'production',
+              'analytics',
+              'customers',
+              'products',
+            ],
           },
           availableInPlans: { type: 'array', items: { type: 'string' } },
           demoUrl: { type: 'string', nullable: true },
@@ -83,7 +99,7 @@ export class FeaturesController {
   })
   async getFeatures(
     @Query('category') category?: string,
-    @Query('highlighted') highlighted?: string
+    @Query('highlighted') highlighted?: string,
   ) {
     if (highlighted === 'true') {
       return this.softwareFeaturesService.getHighlightedFeatures();
@@ -202,9 +218,11 @@ export class FeaturesController {
       throw new BadRequestException('planIds query parameter is required');
     }
 
-    const planIdArray = planIds.split(',').map(id => id.trim());
+    const planIdArray = planIds.split(',').map((id) => id.trim());
     if (planIdArray.length < 2) {
-      throw new BadRequestException('At least 2 plan IDs are required for comparison');
+      throw new BadRequestException(
+        'At least 2 plan IDs are required for comparison',
+      );
     }
 
     return this.softwareFeaturesService.compareFeatures(planIdArray);
@@ -303,17 +321,24 @@ export class FeaturesController {
     description: 'Forbidden - Admin access required',
   })
   async createFeature(
-    @Body() createFeatureDto: {
+    @Body()
+    createFeatureDto: {
       name: string;
       description: string;
       iconName: string;
-      category: 'orders' | 'inventory' | 'production' | 'analytics' | 'customers' | 'products';
+      category:
+        | 'orders'
+        | 'inventory'
+        | 'production'
+        | 'analytics'
+        | 'customers'
+        | 'products';
       availableInPlans: string[];
       demoUrl?: string;
       helpDocUrl?: string;
       sortOrder: number;
       isHighlighted?: boolean;
-    }
+    },
   ) {
     return this.softwareFeaturesService.createFeature(createFeatureDto);
   }
@@ -346,19 +371,29 @@ export class FeaturesController {
   })
   async updateFeature(
     @Param('featureId') featureId: string,
-    @Body() updateFeatureDto: {
+    @Body()
+    updateFeatureDto: {
       description?: string;
       iconName?: string;
-      category?: 'orders' | 'inventory' | 'production' | 'analytics' | 'customers' | 'products';
+      category?:
+        | 'orders'
+        | 'inventory'
+        | 'production'
+        | 'analytics'
+        | 'customers'
+        | 'products';
       availableInPlans?: string[];
       demoUrl?: string;
       helpDocUrl?: string;
       sortOrder?: number;
       isHighlighted?: boolean;
       isActive?: boolean;
-    }
+    },
   ) {
-    return this.softwareFeaturesService.updateFeature(featureId, updateFeatureDto);
+    return this.softwareFeaturesService.updateFeature(
+      featureId,
+      updateFeatureDto,
+    );
   }
 
   @Delete(':featureId')

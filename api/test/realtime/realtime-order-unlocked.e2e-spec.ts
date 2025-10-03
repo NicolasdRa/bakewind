@@ -340,8 +340,8 @@ describe('Realtime Gateway - Order Unlocked (T021)', () => {
         events.push({ type: 'locked', orderId: data.order_id });
         if (events.length === expectedEvents) {
           // Verify alternating pattern
-          expect(events.filter(e => e.type === 'locked').length).toBe(3);
-          expect(events.filter(e => e.type === 'unlocked').length).toBe(3);
+          expect(events.filter((e) => e.type === 'locked').length).toBe(3);
+          expect(events.filter((e) => e.type === 'unlocked').length).toBe(3);
           done();
         }
       });
@@ -349,8 +349,8 @@ describe('Realtime Gateway - Order Unlocked (T021)', () => {
       client1Socket.on('order:unlocked', (data) => {
         events.push({ type: 'unlocked', orderId: data.order_id });
         if (events.length === expectedEvents) {
-          expect(events.filter(e => e.type === 'locked').length).toBe(3);
-          expect(events.filter(e => e.type === 'unlocked').length).toBe(3);
+          expect(events.filter((e) => e.type === 'locked').length).toBe(3);
+          expect(events.filter((e) => e.type === 'unlocked').length).toBe(3);
           done();
         }
       });

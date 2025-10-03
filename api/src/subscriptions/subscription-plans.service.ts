@@ -64,7 +64,7 @@ export class SubscriptionPlansService {
       .where(whereCondition)
       .orderBy(asc(subscriptionPlansTable.sortOrder));
 
-    return plans.map(plan => this.formatPlan(plan));
+    return plans.map((plan) => this.formatPlan(plan));
   }
 
   async findById(id: string) {
@@ -96,8 +96,8 @@ export class SubscriptionPlansService {
       .where(
         and(
           eq(subscriptionPlansTable.isActive, true),
-          eq(subscriptionPlansTable.stripePriceIdMonthly, stripePriceId)
-        )
+          eq(subscriptionPlansTable.stripePriceIdMonthly, stripePriceId),
+        ),
       );
 
     if (!plan) {
@@ -108,8 +108,8 @@ export class SubscriptionPlansService {
         .where(
           and(
             eq(subscriptionPlansTable.isActive, true),
-            eq(subscriptionPlansTable.stripePriceIdAnnual, stripePriceId)
-          )
+            eq(subscriptionPlansTable.stripePriceIdAnnual, stripePriceId),
+          ),
         );
 
       return annualPlan ? this.formatPlan(annualPlan) : null;
@@ -125,12 +125,12 @@ export class SubscriptionPlansService {
       .where(
         and(
           eq(subscriptionPlansTable.isActive, true),
-          eq(subscriptionPlansTable.isPopular, true)
-        )
+          eq(subscriptionPlansTable.isPopular, true),
+        ),
       )
       .orderBy(asc(subscriptionPlansTable.sortOrder));
 
-    return plans.map(plan => this.formatPlan(plan));
+    return plans.map((plan) => this.formatPlan(plan));
   }
 
   async update(id: string, updateDto: UpdateSubscriptionPlanDto) {
@@ -157,7 +157,7 @@ export class SubscriptionPlansService {
   async updateStripePriceIds(
     id: string,
     monthlyPriceId?: string,
-    annualPriceId?: string
+    annualPriceId?: string,
   ) {
     const existingPlan = await this.findById(id);
 
@@ -236,7 +236,7 @@ export class SubscriptionPlansService {
           updatedAt: new Date(),
         })
         .where(eq(subscriptionPlansTable.id, id))
-        .returning()
+        .returning(),
     );
 
     await Promise.all(updatePromises);
@@ -260,18 +260,16 @@ export class SubscriptionPlansService {
   }
 
   async comparePlans(planIds: string[]) {
-    const plans = await Promise.all(
-      planIds.map(id => this.findById(id))
-    );
+    const plans = await Promise.all(planIds.map((id) => this.findById(id)));
 
     // Create a feature comparison matrix
     const allFeatures = new Set<string>();
-    plans.forEach(plan => {
+    plans.forEach((plan) => {
       plan.features.forEach((feature: string) => allFeatures.add(feature));
     });
 
     const comparison = {
-      plans: plans.map(plan => ({
+      plans: plans.map((plan) => ({
         id: plan.id,
         name: plan.name,
         priceMonthlyUsd: plan.priceMonthlyUsd,
@@ -279,9 +277,9 @@ export class SubscriptionPlansService {
         maxLocations: plan.maxLocations,
         maxUsers: plan.maxUsers,
       })),
-      features: Array.from(allFeatures).map(feature => ({
+      features: Array.from(allFeatures).map((feature) => ({
         feature,
-        availability: plans.map(plan => ({
+        availability: plans.map((plan) => ({
           planId: plan.id,
           included: plan.features.includes(feature),
         })),
@@ -294,26 +292,31 @@ export class SubscriptionPlansService {
   private formatPlan(plan: any) {
     return {
       ...plan,
-      features: typeof plan.features === 'string'
-        ? JSON.parse(plan.features)
-        : plan.features,
+      features:
+        typeof plan.features === 'string'
+          ? JSON.parse(plan.features)
+          : plan.features,
     };
   }
 
   async validatePlanLimits(
     planId: string,
     currentLocations: number,
-    currentUsers: number
+    currentUsers: number,
   ): Promise<{ valid: boolean; errors: string[] }> {
     const plan = await this.findById(planId);
     const errors: string[] = [];
 
     if (plan.maxLocations !== null && currentLocations > plan.maxLocations) {
-      errors.push(`Plan allows maximum ${plan.maxLocations} locations, but you have ${currentLocations}`);
+      errors.push(
+        `Plan allows maximum ${plan.maxLocations} locations, but you have ${currentLocations}`,
+      );
     }
 
     if (plan.maxUsers !== null && currentUsers > plan.maxUsers) {
-      errors.push(`Plan allows maximum ${plan.maxUsers} users, but you have ${currentUsers}`);
+      errors.push(
+        `Plan allows maximum ${plan.maxUsers} users, but you have ${currentUsers}`,
+      );
     }
 
     return {

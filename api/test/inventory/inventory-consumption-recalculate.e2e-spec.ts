@@ -47,7 +47,9 @@ describe('Inventory API - POST /api/v1/inventory/:itemId/consumption/recalculate
         .set('Authorization', `Bearer ${authToken}`)
         .expect(HttpStatus.OK);
 
-      const beforeCalculatedAt = new Date(beforeResponse.body.last_calculated_at);
+      const beforeCalculatedAt = new Date(
+        beforeResponse.body.last_calculated_at,
+      );
 
       // Wait a moment
       await new Promise((resolve) => setTimeout(resolve, 100));
@@ -59,13 +61,20 @@ describe('Inventory API - POST /api/v1/inventory/:itemId/consumption/recalculate
         .expect(HttpStatus.OK);
 
       // Validate ConsumptionTracking schema
-      expect(recalcResponse.body).toHaveProperty('inventory_item_id', testItemId);
+      expect(recalcResponse.body).toHaveProperty(
+        'inventory_item_id',
+        testItemId,
+      );
       expect(recalcResponse.body).toHaveProperty('avg_daily_consumption');
       expect(recalcResponse.body).toHaveProperty('last_calculated_at');
 
       // Verify last_calculated_at was updated
-      const afterCalculatedAt = new Date(recalcResponse.body.last_calculated_at);
-      expect(afterCalculatedAt.getTime()).toBeGreaterThanOrEqual(beforeCalculatedAt.getTime());
+      const afterCalculatedAt = new Date(
+        recalcResponse.body.last_calculated_at,
+      );
+      expect(afterCalculatedAt.getTime()).toBeGreaterThanOrEqual(
+        beforeCalculatedAt.getTime(),
+      );
     });
 
     it('should recalculate based on 7-day rolling window', async () => {
@@ -109,8 +118,12 @@ describe('Inventory API - POST /api/v1/inventory/:itemId/consumption/recalculate
         .expect(HttpStatus.OK);
 
       // Timestamps should be different
-      const firstCalculatedAt = new Date(firstResponse.body.last_calculated_at).getTime();
-      const secondCalculatedAt = new Date(secondResponse.body.last_calculated_at).getTime();
+      const firstCalculatedAt = new Date(
+        firstResponse.body.last_calculated_at,
+      ).getTime();
+      const secondCalculatedAt = new Date(
+        secondResponse.body.last_calculated_at,
+      ).getTime();
       expect(secondCalculatedAt).toBeGreaterThanOrEqual(firstCalculatedAt);
     });
   });

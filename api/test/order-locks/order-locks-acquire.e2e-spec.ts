@@ -60,14 +60,21 @@ describe('OrderLocks API - POST /api/v1/order-locks/acquire (e2e)', () => {
       expect(response.body).toHaveProperty('order_id', testOrderId);
       expect(response.body).toHaveProperty('locked_by_user_id');
       expect(response.body).toHaveProperty('locked_by_user_name');
-      expect(response.body).toHaveProperty('locked_by_session_id', 'test-session-123');
+      expect(response.body).toHaveProperty(
+        'locked_by_session_id',
+        'test-session-123',
+      );
       expect(response.body).toHaveProperty('locked_at');
       expect(response.body).toHaveProperty('expires_at');
       expect(response.body).toHaveProperty('last_activity_at');
 
       // Validate timestamps
-      expect(new Date(response.body.locked_at).getTime()).toBeLessThanOrEqual(Date.now());
-      expect(new Date(response.body.expires_at).getTime()).toBeGreaterThan(Date.now());
+      expect(new Date(response.body.locked_at).getTime()).toBeLessThanOrEqual(
+        Date.now(),
+      );
+      expect(new Date(response.body.expires_at).getTime()).toBeGreaterThan(
+        Date.now(),
+      );
 
       // Validate expires_at is ~5 minutes from locked_at
       const lockedAt = new Date(response.body.locked_at).getTime();
@@ -109,7 +116,10 @@ describe('OrderLocks API - POST /api/v1/order-locks/acquire (e2e)', () => {
       expect(response.body).toHaveProperty('message');
       expect(response.body).toHaveProperty('locked_by');
       expect(response.body.locked_by).toHaveProperty('locked_by_user_name');
-      expect(response.body.locked_by).toHaveProperty('locked_by_session_id', 'test-session-first');
+      expect(response.body.locked_by).toHaveProperty(
+        'locked_by_session_id',
+        'test-session-first',
+      );
 
       // Clean up
       await request(app.getHttpServer())

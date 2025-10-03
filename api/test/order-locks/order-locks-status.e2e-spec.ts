@@ -79,14 +79,19 @@ describe('OrderLocks API - GET /api/v1/order-locks/status/:orderId (e2e)', () =>
       expect(statusResponse.body).toHaveProperty('order_id', testOrderId);
       expect(statusResponse.body).toHaveProperty('locked_by_user_id');
       expect(statusResponse.body).toHaveProperty('locked_by_user_name');
-      expect(statusResponse.body).toHaveProperty('locked_by_session_id', 'test-session-123');
+      expect(statusResponse.body).toHaveProperty(
+        'locked_by_session_id',
+        'test-session-123',
+      );
       expect(statusResponse.body).toHaveProperty('locked_at');
       expect(statusResponse.body).toHaveProperty('expires_at');
       expect(statusResponse.body).toHaveProperty('last_activity_at');
 
       // Verify it matches the acquired lock
       expect(statusResponse.body.id).toBe(acquireResponse.body.id);
-      expect(statusResponse.body.locked_by_user_id).toBe(acquireResponse.body.locked_by_user_id);
+      expect(statusResponse.body.locked_by_user_id).toBe(
+        acquireResponse.body.locked_by_user_id,
+      );
 
       // Clean up
       await request(app.getHttpServer())
@@ -133,7 +138,10 @@ describe('OrderLocks API - GET /api/v1/order-locks/status/:orderId (e2e)', () =>
 
       // Verify second user can see the lock
       expect(statusResponse.body).toHaveProperty('order_id', testOrderId);
-      expect(statusResponse.body).toHaveProperty('locked_by_user_id', acquireResponse.body.locked_by_user_id);
+      expect(statusResponse.body).toHaveProperty(
+        'locked_by_user_id',
+        acquireResponse.body.locked_by_user_id,
+      );
       expect(statusResponse.body).toHaveProperty('locked_by_user_name');
       expect(statusResponse.body.locked_by_user_name).toBeTruthy();
 

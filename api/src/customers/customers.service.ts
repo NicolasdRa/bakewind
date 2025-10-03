@@ -1,6 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
-import { CreateCustomerDto, UpdateCustomerDto, CustomerResponseDto } from './dto/customers.dto';
+import {
+  CreateCustomerDto,
+  UpdateCustomerDto,
+  CustomerResponseDto,
+} from './dto/customers.dto';
 
 @Injectable()
 export class CustomersService {
@@ -19,7 +23,10 @@ export class CustomersService {
     };
   }
 
-  async findByIdAndUser(customerId: string, userId: string): Promise<CustomerResponseDto> {
+  async findByIdAndUser(
+    customerId: string,
+    userId: string,
+  ): Promise<CustomerResponseDto> {
     // Placeholder implementation
     return {
       id: customerId,
@@ -42,7 +49,10 @@ export class CustomersService {
     };
   }
 
-  async create(userId: string, createCustomerDto: CreateCustomerDto): Promise<CustomerResponseDto> {
+  async create(
+    userId: string,
+    createCustomerDto: CreateCustomerDto,
+  ): Promise<CustomerResponseDto> {
     // Placeholder implementation
     return {
       id: 'placeholder-id',
@@ -65,7 +75,11 @@ export class CustomersService {
     };
   }
 
-  async updateByIdAndUser(customerId: string, userId: string, updateCustomerDto: UpdateCustomerDto): Promise<CustomerResponseDto> {
+  async updateByIdAndUser(
+    customerId: string,
+    userId: string,
+    updateCustomerDto: UpdateCustomerDto,
+  ): Promise<CustomerResponseDto> {
     // Placeholder implementation
     return {
       id: customerId,
@@ -112,7 +126,11 @@ export class CustomersService {
     };
   }
 
-  async getCustomerAnalytics(customerId: string, userId: string, period: string) {
+  async getCustomerAnalytics(
+    customerId: string,
+    userId: string,
+    period: string,
+  ) {
     // Placeholder implementation
     return {
       overview: {

@@ -39,7 +39,11 @@ export class TrialsController {
   @ApiBearerAuth('JWT-auth')
   @Throttle({ default: { limit: 10, ttl: 60000 } }) // 10 requests per minute
   @ApiOperation({ summary: 'Update trial onboarding progress' })
-  @ApiParam({ name: 'trialId', description: 'Trial Account ID', type: 'string' })
+  @ApiParam({
+    name: 'trialId',
+    description: 'Trial Account ID',
+    type: 'string',
+  })
   @ApiResponse({
     status: 200,
     description: 'Onboarding progress updated successfully',
@@ -51,7 +55,7 @@ export class TrialsController {
         businessSize: { type: 'string' },
         onboardingStatus: {
           type: 'string',
-          enum: ['pending', 'started', 'in_progress', 'completed', 'abandoned']
+          enum: ['pending', 'started', 'in_progress', 'completed', 'abandoned'],
         },
         onboardingStepsCompleted: { type: 'array', items: { type: 'string' } },
         lastOnboardingActivity: { type: 'string', format: 'date-time' },
@@ -78,11 +82,17 @@ export class TrialsController {
   })
   async updateOnboarding(
     @Param('trialId') trialId: string,
-    @Body() updateOnboardingDto: {
-      onboardingStatus?: 'pending' | 'started' | 'in_progress' | 'completed' | 'abandoned';
+    @Body()
+    updateOnboardingDto: {
+      onboardingStatus?:
+        | 'pending'
+        | 'started'
+        | 'in_progress'
+        | 'completed'
+        | 'abandoned';
       onboardingStepsCompleted?: string[];
     },
-    @Request() req: any
+    @Request() req: any,
   ) {
     const userId = req.user.id;
 
@@ -92,7 +102,10 @@ export class TrialsController {
       throw new ForbiddenException('Can only update your own trial onboarding');
     }
 
-    return this.trialAccountsService.updateOnboardingProgress(trialId, updateOnboardingDto);
+    return this.trialAccountsService.updateOnboardingProgress(
+      trialId,
+      updateOnboardingDto,
+    );
   }
 
   @Get(':trialId')
@@ -100,7 +113,11 @@ export class TrialsController {
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Get trial account details' })
-  @ApiParam({ name: 'trialId', description: 'Trial Account ID', type: 'string' })
+  @ApiParam({
+    name: 'trialId',
+    description: 'Trial Account ID',
+    type: 'string',
+  })
   @ApiResponse({
     status: 200,
     description: 'Trial account details',
@@ -112,7 +129,11 @@ export class TrialsController {
         businessSize: { type: 'string' },
         onboardingStatus: { type: 'string' },
         onboardingStepsCompleted: { type: 'array', items: { type: 'string' } },
-        lastOnboardingActivity: { type: 'string', format: 'date-time', nullable: true },
+        lastOnboardingActivity: {
+          type: 'string',
+          format: 'date-time',
+          nullable: true,
+        },
         hasConvertedToPaid: { type: 'boolean' },
         convertedAt: { type: 'string', format: 'date-time', nullable: true },
         subscriptionPlanId: { type: 'string', nullable: true },
@@ -162,7 +183,11 @@ export class TrialsController {
         businessSize: { type: 'string' },
         onboardingStatus: { type: 'string' },
         onboardingStepsCompleted: { type: 'array', items: { type: 'string' } },
-        lastOnboardingActivity: { type: 'string', format: 'date-time', nullable: true },
+        lastOnboardingActivity: {
+          type: 'string',
+          format: 'date-time',
+          nullable: true,
+        },
         hasConvertedToPaid: { type: 'boolean' },
         convertedAt: { type: 'string', format: 'date-time', nullable: true },
         subscriptionPlanId: { type: 'string', nullable: true },
@@ -197,7 +222,11 @@ export class TrialsController {
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Convert trial to paid subscription' })
-  @ApiParam({ name: 'trialId', description: 'Trial Account ID', type: 'string' })
+  @ApiParam({
+    name: 'trialId',
+    description: 'Trial Account ID',
+    type: 'string',
+  })
   @ApiResponse({
     status: 200,
     description: 'Trial converted successfully',
@@ -228,10 +257,11 @@ export class TrialsController {
   })
   async convertTrial(
     @Param('trialId') trialId: string,
-    @Body() convertTrialDto: {
+    @Body()
+    convertTrialDto: {
       subscriptionPlanId: string;
     },
-    @Request() req: any
+    @Request() req: any,
   ) {
     const userId = req.user.id;
 
@@ -241,7 +271,10 @@ export class TrialsController {
       throw new ForbiddenException('Can only convert your own trial');
     }
 
-    return this.trialAccountsService.convertToPaid(trialId, convertTrialDto.subscriptionPlanId);
+    return this.trialAccountsService.convertToPaid(
+      trialId,
+      convertTrialDto.subscriptionPlanId,
+    );
   }
 
   // Admin endpoints below require admin access
@@ -250,7 +283,9 @@ export class TrialsController {
   @UseGuards(JwtAuthGuard, AdminGuard)
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Get all trial accounts with pagination (Admin only)' })
+  @ApiOperation({
+    summary: 'Get all trial accounts with pagination (Admin only)',
+  })
   @ApiQuery({
     name: 'page',
     description: 'Page number (1-based)',
@@ -298,10 +333,21 @@ export class TrialsController {
               userId: { type: 'string' },
               businessSize: { type: 'string' },
               onboardingStatus: { type: 'string' },
-              onboardingStepsCompleted: { type: 'array', items: { type: 'string' } },
-              lastOnboardingActivity: { type: 'string', format: 'date-time', nullable: true },
+              onboardingStepsCompleted: {
+                type: 'array',
+                items: { type: 'string' },
+              },
+              lastOnboardingActivity: {
+                type: 'string',
+                format: 'date-time',
+                nullable: true,
+              },
               hasConvertedToPaid: { type: 'boolean' },
-              convertedAt: { type: 'string', format: 'date-time', nullable: true },
+              convertedAt: {
+                type: 'string',
+                format: 'date-time',
+                nullable: true,
+              },
               subscriptionPlanId: { type: 'string', nullable: true },
               createdAt: { type: 'string', format: 'date-time' },
               updatedAt: { type: 'string', format: 'date-time' },
@@ -333,11 +379,12 @@ export class TrialsController {
     @Query('limit') limit?: string,
     @Query('status') status?: string,
     @Query('businessSize') businessSize?: string,
-    @Query('converted') converted?: string
+    @Query('converted') converted?: string,
   ) {
     const pageNum = page ? parseInt(page, 10) : 1;
     const limitNum = limit ? parseInt(limit, 10) : 20;
-    const convertedBool = converted === 'true' ? true : converted === 'false' ? false : undefined;
+    const convertedBool =
+      converted === 'true' ? true : converted === 'false' ? false : undefined;
 
     return this.trialAccountsService.getAllTrials({
       page: pageNum,
@@ -352,7 +399,9 @@ export class TrialsController {
   @UseGuards(JwtAuthGuard, AdminGuard)
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Get trial analytics and conversion metrics (Admin only)' })
+  @ApiOperation({
+    summary: 'Get trial analytics and conversion metrics (Admin only)',
+  })
   @ApiQuery({
     name: 'period',
     description: 'Analytics period',
@@ -469,13 +518,22 @@ export class TrialsController {
     description: 'Forbidden - Admin access required',
   })
   async bulkUpdateTrials(
-    @Body() bulkUpdateDto: {
+    @Body()
+    bulkUpdateDto: {
       trialIds: string[];
       updateData: {
-        onboardingStatus?: 'pending' | 'started' | 'in_progress' | 'completed' | 'abandoned';
+        onboardingStatus?:
+          | 'pending'
+          | 'started'
+          | 'in_progress'
+          | 'completed'
+          | 'abandoned';
       };
-    }
+    },
   ) {
-    return this.trialAccountsService.bulkUpdateTrials(bulkUpdateDto.trialIds, bulkUpdateDto.updateData);
+    return this.trialAccountsService.bulkUpdateTrials(
+      bulkUpdateDto.trialIds,
+      bulkUpdateDto.updateData,
+    );
   }
 }
