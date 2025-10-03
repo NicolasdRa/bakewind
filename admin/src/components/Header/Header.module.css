@@ -1,0 +1,317 @@
+/* Header Component - Tailwind CSS Module */
+@reference "tailwindcss";
+
+/* Enhanced Main Container */
+.container {
+  @apply mb-6;
+  animation: slideIn 0.3s ease-out;
+}
+
+/* Header Section */
+.header {
+  @apply flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6;
+}
+
+.headerContent {
+  @apply flex items-center gap-4;
+}
+
+/* Mobile Menu Button */
+.mobileMenuButton {
+  @apply lg:hidden p-2 rounded-lg transition-all duration-200;
+  color: var(--text-secondary);
+}
+
+.mobileMenuButton:hover {
+  color: var(--text-primary);
+  background-color: var(--bg-tertiary);
+}
+
+.mobileMenuIcon {
+  @apply w-6 h-6;
+}
+
+/* Enhanced Title Section */
+.titleSection {
+  animation: fadeIn 0.4s ease-out;
+}
+
+.title {
+  @apply text-3xl font-bold mb-2;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, var(--text-primary), var(--text-secondary));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: slideInLeft 0.5s ease-out;
+}
+
+.subtitle {
+  color: var(--text-secondary);
+  animation: slideInLeft 0.5s ease-out 0.1s both;
+}
+
+/* Controls Section */
+.controls {
+  @apply flex flex-wrap items-center gap-3;
+}
+
+/* Enhanced Layout Controls */
+.layoutControls {
+  @apply flex items-center gap-1 rounded-lg border p-1;
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
+  position: relative;
+  overflow: hidden;
+}
+
+.layoutControls::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--primary-light), transparent);
+  opacity: 0.05;
+}
+
+.layoutButton {
+  @apply px-3 py-2 rounded-md text-sm font-medium;
+  transition: var(--transition-base);
+  position: relative;
+  z-index: 1;
+}
+
+.layoutButtonActive {
+  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+  color: white;
+  box-shadow: 0 2px 8px var(--shadow-colored);
+  transform: scale(1.05);
+}
+
+.layoutButtonInactive {
+  color: var(--text-secondary);
+  background: transparent;
+}
+
+.layoutButtonInactive:hover {
+  color: var(--text-primary);
+  background-color: var(--bg-hover);
+  transform: translateY(-1px);
+}
+
+.layoutButtonText {
+  @apply block lg:hidden;
+}
+
+.layoutButtonTextDesktop {
+  @apply hidden lg:block;
+}
+
+/* Enhanced Action Buttons */
+.actionButtons {
+  @apply flex items-center gap-2;
+}
+
+.addButton {
+  @apply px-4 py-2 rounded-lg font-medium focus:outline-none flex items-center gap-2;
+  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+  color: white;
+  transition: var(--transition-base);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 8px var(--shadow-colored);
+}
+
+.addButton::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.addButton:hover::before {
+  width: 200px;
+  height: 200px;
+}
+
+.addButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px var(--shadow-colored);
+}
+
+.addButton:active {
+  transform: translateY(0);
+}
+
+.addButton:focus {
+  box-shadow: 0 0 0 3px var(--shadow-colored);
+}
+
+.addButtonIcon {
+  @apply text-lg;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.addButton:hover .addButtonIcon {
+  transform: rotate(90deg);
+}
+
+.addButtonText {
+  @apply hidden sm:inline;
+  position: relative;
+  z-index: 1;
+}
+
+/* Enhanced Dropdown Menu */
+.dropdownContainer {
+  @apply relative;
+}
+
+.dropdownTrigger {
+  @apply p-2 rounded-lg;
+  color: var(--text-secondary);
+  transition: var(--transition-base);
+  position: relative;
+}
+
+.dropdownTrigger::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--bg-hover);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.dropdownTrigger:hover::before {
+  opacity: 1;
+}
+
+.dropdownTrigger:hover {
+  color: var(--text-primary);
+  transform: scale(1.05);
+}
+
+.dropdownIcon {
+  @apply text-xl;
+  position: relative;
+  z-index: 1;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.dropdownTrigger:hover .dropdownIcon {
+  transform: rotate(180deg);
+}
+
+.dropdownMenu {
+  @apply absolute right-0 w-48 rounded-lg border py-2 opacity-0 invisible z-10;
+  background: var(--bg-primary);
+  border-color: var(--border-color);
+  box-shadow: var(--shadow-lg);
+  top: 100%;
+  margin-top: 0.5rem;
+  transition: opacity 0.2s, transform 0.2s;
+  transform: translateY(-10px);
+  transform-origin: top right;
+}
+
+.dropdownContainer:hover .dropdownMenu {
+  @apply opacity-100 visible;
+  transform: translateY(0);
+  animation: scaleIn 0.2s ease-out;
+}
+
+.dropdownItem {
+  @apply w-full text-left px-4 py-2 text-sm;
+  transition: var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+}
+
+.dropdownItem::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  background: var(--primary-color);
+  transition: width 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.dropdownItem:hover::before {
+  width: 3px;
+}
+
+.dropdownItemDefault {
+  color: var(--text-secondary);
+}
+
+.dropdownItemDefault:hover {
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
+  padding-left: 1.25rem;
+}
+
+.dropdownItemDanger {
+  color: var(--error-color);
+}
+
+.dropdownItemDanger:hover {
+  background-color: var(--error-light);
+  padding-left: 1.25rem;
+}
+
+.dropdownItemDanger:hover::before {
+  background: var(--error-color);
+}
+
+/* Animations */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

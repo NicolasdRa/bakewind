@@ -1,0 +1,131 @@
+/* DashboardLayout Component - Tailwind CSS Module */
+@reference "tailwindcss";
+
+/* CSS Custom Properties for Layout Stability */
+:root {
+  --sidebar-width-expanded: 288px; /* w-72 = 18rem = 288px */
+  --sidebar-width-collapsed: 64px;  /* w-16 = 4rem = 64px */
+}
+
+/* Main Container */
+.container {
+  background-color: var(--bg-secondary);
+  /* Prevent layout shifts during hydration and navigation */
+  contain: layout style;
+  /* Use CSS Grid for proper layout */
+  display: grid;
+  grid-template-columns: var(--sidebar-width-expanded) 1fr;
+  grid-template-areas: "sidebar content";
+  /* Fixed height for desktop/tablets */
+  height: 100vh;
+  max-height: 100vh;
+  /* Ensure full available width */
+  width: 100%;
+  overflow: hidden;
+  /* Force layout stability */
+  will-change: auto;
+  backface-visibility: hidden;
+}
+
+/* Desktop specific constraints */
+@media (min-width: 769px) {
+  .container {
+    /* Ensure exactly 100vh on desktop */
+    height: 100vh;
+    max-height: 100vh;
+    /* Clip any content that overflows, including dropdowns */
+    overflow: hidden;
+    position: relative;
+  }
+}
+
+.containerCollapsed {
+  grid-template-columns: var(--sidebar-width-collapsed) 1fr;
+  grid-template-rows: 1fr;
+  transition: grid-template-columns 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.containerExpanded {
+  grid-template-columns: var(--sidebar-width-expanded) 1fr;
+  grid-template-rows: 1fr;
+  transition: grid-template-columns 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Content Area */
+.contentArea {
+  @apply flex flex-col min-w-0;
+  grid-area: content;
+  width: 100%;
+  height: 100%;
+  /* Create stacking context for proper dropdown positioning */
+  position: relative;
+  z-index: 1;
+  /* Prevent overflow from the grid container */
+  overflow: hidden;
+}
+
+/* Mobile Adjustments */
+@media (max-width: 768px) {
+  .container,
+  .containerCollapsed,
+  .containerExpanded {
+    /* Stack layout on mobile */
+    display: block;
+    grid-template-columns: none;
+    grid-template-areas: none;
+  }
+
+  .contentArea {
+    /* Content area takes full width on mobile */
+    @apply w-full;
+    grid-area: none;
+  }
+}
+
+/* Fixed Header Section */
+.headerSection {
+  /* Fixed header that doesn't scroll */
+  flex-shrink: 0;
+  @apply p-6 pb-0;
+  width: 100%;
+  box-sizing: border-box;
+  /* Ensure header stays on top */
+  position: relative;
+  z-index: 2;
+}
+
+/* Scrollable Inner Content */
+.innerContent {
+  @apply flex-1 px-6 pb-6 overflow-y-auto;
+  /* Prevent content jumping during layout changes */
+  contain: layout style;
+  /* Ensure content can expand to full width */
+  width: 100%;
+  box-sizing: border-box;
+  /* Allow flexbox to shrink this area for proper scrolling */
+  min-height: 0;
+  /* Smooth transitions for content changes */
+  transition: opacity 150ms ease-in-out;
+}
+
+@media (max-width: 640px) {
+  .headerSection {
+    @apply p-3 pb-0;
+  }
+
+  .innerContent {
+    @apply px-3 pb-3;
+  }
+}
+
+/* SSR stability - prevent flash of unstyled content */
+/* Default to expanded state during SSR/initial render */
+
+/* Responsive behavior */
+@media (prefers-reduced-motion: reduce) {
+  .container,
+  .containerCollapsed,
+  .containerExpanded {
+    transition: none !important;
+  }
+}

@@ -1,257 +1,287 @@
-import { Component, createSignal, createEffect, For, Show } from 'solid-js';
-import OrderCard from '../components/orders/OrderCard';
-import { orderLocksStore } from '../stores/order-locks';
+import { createSignal, For, Show, onMount } from 'solid-js'
+import { useBakeryStore } from '~/stores/bakeryStore'
+import ActionButton from '~/components/ActionButton/ActionButton'
+import styles from './Orders.module.css'
+import type { Order, OrderStatus } from '~/types/bakery'
 
-// Mock orders data - Replace with actual API call
-interface Order {
-  id: string;
-  customer_name: string;
-  customer_phone: string;
-  customer_email: string;
-  status: 'pending' | 'confirmed' | 'in_production' | 'ready' | 'delivered' | 'cancelled';
-  total_price: number;
-  order_date: string;
-  delivery_date?: string;
-}
+export default function Orders() {
+  const { state, actions } = useBakeryStore()
+  const [selectedStatus, setSelectedStatus] = createSignal<OrderStatus | 'all'>('all')
+  const [searchTerm, setSearchTerm] = createSignal('')
+  const [selectedOrder, setSelectedOrder] = createSignal<Order | null>(null)
 
-const Orders: Component = () => {
-  const [orders, setOrders] = createSignal<Order[]>([]);
-  const [filteredOrders, setFilteredOrders] = createSignal<Order[]>([]);
-  const [searchQuery, setSearchQuery] = createSignal('');
-  const [statusFilter, setStatusFilter] = createSignal<string>('all');
-  const [loading, setLoading] = createSignal(true);
-  const [selectedOrderId, setSelectedOrderId] = createSignal<string | null>(null);
-  const [modalOpen, setModalOpen] = createSignal(false);
-
-  // Fetch orders on mount
-  createEffect(() => {
-    fetchOrders();
-  });
-
-  const fetchOrders = async () => {
-    setLoading(true);
-    try {
-      // TODO: Replace with actual API call
-      // const data = await ordersApi.getOrders();
-
-      // Mock data for demonstration
-      const mockOrders: Order[] = [
-        {
-          id: '1',
-          customer_name: 'John Doe',
-          customer_phone: '(555) 123-4567',
-          customer_email: 'john@example.com',
-          status: 'pending',
-          total_price: 125.50,
-          order_date: '2025-01-15T10:30:00Z',
-          delivery_date: '2025-01-20T14:00:00Z',
-        },
-        {
-          id: '2',
-          customer_name: 'Jane Smith',
-          customer_phone: '(555) 987-6543',
-          customer_email: 'jane@example.com',
-          status: 'confirmed',
-          total_price: 89.99,
-          order_date: '2025-01-14T09:15:00Z',
-          delivery_date: '2025-01-19T16:00:00Z',
-        },
-        {
-          id: '3',
-          customer_name: 'Bob Johnson',
-          customer_phone: '(555) 456-7890',
-          customer_email: 'bob@example.com',
-          status: 'in_production',
-          total_price: 245.00,
-          order_date: '2025-01-13T14:45:00Z',
-          delivery_date: '2025-01-18T10:00:00Z',
-        },
-      ];
-
-      setOrders(mockOrders);
-      setFilteredOrders(mockOrders);
-    } catch (error) {
-      console.error('Failed to fetch orders:', error);
-    } finally {
-      setLoading(false);
+  onMount(() => {
+    // Load mock data if orders are empty
+    if (state.orders.list.length === 0) {
+      actions.loadMockData()
     }
-  };
+  })
 
-  // Filter orders based on search and status
-  createEffect(() => {
-    const query = searchQuery().toLowerCase();
-    const status = statusFilter();
+  const statusFilters: { value: OrderStatus | 'all'; label: string; color: string }[] = [
+    { value: 'all', label: 'All Orders', color: 'var(--text-primary)' },
+    { value: 'pending', label: 'Pending', color: '#f59e0b' },
+    { value: 'confirmed', label: 'Confirmed', color: '#3b82f6' },
+    { value: 'in_production', label: 'In Production', color: '#f59e0b' },
+    { value: 'ready', label: 'Ready', color: '#10b981' },
+    { value: 'delivered', label: 'Delivered', color: '#6366f1' },
+    { value: 'cancelled', label: 'Cancelled', color: '#ef4444' }
+  ]
 
-    let filtered = orders();
+  const filteredOrders = () => {
+    let orders = state.orders.list
 
-    // Filter by search query
-    if (query) {
-      filtered = filtered.filter(
-        (order) =>
-          order.customer_name.toLowerCase().includes(query) ||
-          order.customer_email.toLowerCase().includes(query) ||
-          order.customer_phone.includes(query),
-      );
+    if (selectedStatus() !== 'all') {
+      orders = orders.filter(order => order.status === selectedStatus())
     }
 
-    // Filter by status
-    if (status !== 'all') {
-      filtered = filtered.filter((order) => order.status === status);
+    if (searchTerm()) {
+      const search = searchTerm().toLowerCase()
+      orders = orders.filter(order =>
+        order.customerName.toLowerCase().includes(search) ||
+        order.orderNumber.toLowerCase().includes(search) ||
+        order.customerPhone?.includes(search) ||
+        order.customerEmail?.toLowerCase().includes(search)
+      )
     }
 
-    setFilteredOrders(filtered);
-  });
+    return orders
+  }
 
-  const handleOrderClick = async (orderId: string) => {
-    setSelectedOrderId(orderId);
-
-    // Try to acquire lock
-    const acquired = await orderLocksStore.acquireLock(orderId);
-
-    if (acquired) {
-      // Open modal to edit order
-      setModalOpen(true);
-    } else {
-      // Show error - order is locked by another user
-      alert(`This order is currently being edited by ${orderLocksStore.getLock(orderId)?.locked_by_user_name}`);
+  const getStatusColor = (status: OrderStatus) => {
+    const colors = {
+      pending: '#f59e0b',
+      confirmed: '#3b82f6',
+      in_production: '#f59e0b',
+      ready: '#10b981',
+      delivered: '#6366f1',
+      cancelled: '#ef4444'
     }
-  };
+    return colors[status] || 'var(--text-secondary)'
+  }
 
-  const handleCloseModal = async () => {
-    if (selectedOrderId()) {
-      await orderLocksStore.releaseLock(selectedOrderId()!);
-    }
-    setModalOpen(false);
-    setSelectedOrderId(null);
-  };
+  const formatDateTime = (date: Date | undefined) => {
+    if (!date) return 'N/A'
+    const d = new Date(date)
+    return d.toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit'
+    })
+  }
 
-  const getOrderLock = (orderId: string) => {
-    return orderLocksStore.getLock(orderId);
-  };
+  const updateOrderStatus = (orderId: string, newStatus: OrderStatus) => {
+    actions.updateOrder(orderId, { status: newStatus, updatedAt: new Date() })
+  }
 
   return (
-    <div class="p-6">
-      <div class="mb-6">
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Orders</h1>
-        <p class="text-gray-600 dark:text-gray-400">
-          Manage customer orders and track their status
-        </p>
-      </div>
+    <div class={styles.container}>
+      <div class={styles.header}>
+        <div class={styles.headerContent}>
+          <h1 class={styles.title}>Orders Management</h1>
+          <p class={styles.subtitle}>Track and manage all customer orders</p>
+        </div>
 
-      {/* Filters */}
-      <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 mb-6">
-        <div class="flex flex-col md:flex-row gap-4">
-          {/* Search */}
-          <div class="flex-1">
-            <input
-              type="text"
-              placeholder="Search by name, email, or phone..."
-              value={searchQuery()}
-              onInput={(e) => setSearchQuery(e.currentTarget.value)}
-              class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-
-          {/* Status Filter */}
-          <div class="w-full md:w-48">
-            <select
-              value={statusFilter()}
-              onChange={(e) => setStatusFilter(e.currentTarget.value)}
-              class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="all">All Status</option>
-              <option value="pending">Pending</option>
-              <option value="confirmed">Confirmed</option>
-              <option value="in_production">In Production</option>
-              <option value="ready">Ready</option>
-              <option value="delivered">Delivered</option>
-              <option value="cancelled">Cancelled</option>
-            </select>
-          </div>
+        <div class={styles.headerActions}>
+          <ActionButton icon="+">
+            New Order
+          </ActionButton>
         </div>
       </div>
 
-      {/* Orders List */}
-      <Show
-        when={!loading()}
-        fallback={
-          <div class="flex items-center justify-center py-12">
-            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500" />
-          </div>
-        }
-      >
+      <div class={styles.filters}>
+        <div class={styles.searchBar}>
+          <input
+            type="text"
+            placeholder="Search orders..."
+            value={searchTerm()}
+            onInput={(e) => setSearchTerm(e.currentTarget.value)}
+            class={styles.searchInput}
+          />
+        </div>
+
+        <div class={styles.statusFilters}>
+          <For each={statusFilters}>
+            {(filter) => (
+              <button
+                class={`${styles.filterBtn} ${selectedStatus() === filter.value ? styles.filterBtnActive : ''}`}
+                onClick={() => setSelectedStatus(filter.value)}
+                style={{ '--filter-color': filter.color }}
+              >
+                {filter.label}
+                <Show when={filter.value !== 'all'}>
+                  <span class={styles.filterCount}>
+                    {state.orders.list.filter(o => filter.value === 'all' || o.status === filter.value).length}
+                  </span>
+                </Show>
+              </button>
+            )}
+          </For>
+        </div>
+      </div>
+
+      <div class={styles.ordersGrid}>
         <Show
-          when={filteredOrders().length > 0}
+          when={!state.orders.loading && filteredOrders().length > 0}
           fallback={
-            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-12 text-center">
-              <p class="text-gray-500 dark:text-gray-400">No orders found</p>
+            <div class={styles.emptyState}>
+              {state.orders.loading ? 'Loading orders...' : 'No orders found'}
             </div>
           }
         >
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <For each={filteredOrders()}>
-              {(order) => (
-                <OrderCard
-                  order={order}
-                  isLocked={orderLocksStore.isLocked(order.id)}
-                  lockedBy={getOrderLock(order.id)}
-                  onClick={() => handleOrderClick(order.id)}
-                />
-              )}
-            </For>
-          </div>
-        </Show>
-      </Show>
-
-      {/* Order Modal - Placeholder */}
-      <Show when={modalOpen()}>
-        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-2xl w-full mx-4">
-            <div class="flex items-center justify-between mb-4">
-              <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
-                Edit Order
-              </h2>
-              <button
-                onClick={handleCloseModal}
-                class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+          <For each={filteredOrders()}>
+            {(order) => (
+              <div
+                class={styles.orderCard}
+                onClick={() => setSelectedOrder(order)}
               >
-                ✕
-              </button>
-            </div>
+                <div class={styles.orderHeader}>
+                  <div class={styles.orderNumber}>#{order.orderNumber}</div>
+                  <div
+                    class={styles.orderStatus}
+                    style={{ 'background-color': `${getStatusColor(order.status)}20`, color: getStatusColor(order.status) }}
+                  >
+                    {order.status.replace('_', ' ')}
+                  </div>
+                </div>
 
-            <div class="mb-4">
-              <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
-                <p class="text-green-800 dark:text-green-400">
-                  🔒 You have acquired the lock on this order. Other users cannot edit it while you're working.
-                </p>
+                <div class={styles.customerInfo}>
+                  <h3 class={styles.customerName}>{order.customerName}</h3>
+                  <div class={styles.customerContact}>
+                    {order.customerPhone && <span>📞 {order.customerPhone}</span>}
+                    {order.customerEmail && <span>✉️ {order.customerEmail}</span>}
+                  </div>
+                </div>
+
+                <div class={styles.orderItems}>
+                  <For each={order.items.slice(0, 3)}>
+                    {(item) => (
+                      <div class={styles.orderItem}>
+                        <span class={styles.itemQty}>{item.quantity}x</span>
+                        <span class={styles.itemName}>{item.productName}</span>
+                        <span class={styles.itemPrice}>${(item.quantity * item.unitPrice).toFixed(2)}</span>
+                      </div>
+                    )}
+                  </For>
+                  <Show when={order.items.length > 3}>
+                    <div class={styles.moreItems}>+{order.items.length - 3} more items</div>
+                  </Show>
+                </div>
+
+                <div class={styles.orderFooter}>
+                  <div class={styles.orderTime}>
+                    {order.pickupTime ? '🕐 Pickup' : '🚚 Delivery'}: {formatDateTime(order.pickupTime || order.deliveryTime)}
+                  </div>
+                  <div class={styles.orderTotal}>${order.total.toFixed(2)}</div>
+                </div>
+
+                <div class={styles.orderActions}>
+                  <Show when={order.status === 'pending'}>
+                    <button
+                      class={styles.actionBtn}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        updateOrderStatus(order.id, 'confirmed')
+                      }}
+                    >
+                      Confirm
+                    </button>
+                  </Show>
+                  <Show when={order.status === 'confirmed'}>
+                    <button
+                      class={styles.actionBtn}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        updateOrderStatus(order.id, 'in_production')
+                      }}
+                    >
+                      Start Production
+                    </button>
+                  </Show>
+                  <Show when={order.status === 'in_production'}>
+                    <button
+                      class={styles.actionBtn}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        updateOrderStatus(order.id, 'ready')
+                      }}
+                    >
+                      Mark Ready
+                    </button>
+                  </Show>
+                  <Show when={order.status === 'ready'}>
+                    <button
+                      class={styles.actionBtn}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        updateOrderStatus(order.id, 'delivered')
+                      }}
+                    >
+                      Complete
+                    </button>
+                  </Show>
+                </div>
               </div>
+            )}
+          </For>
+        </Show>
+      </div>
+
+      {/* Order Detail Modal */}
+      <Show when={selectedOrder()}>
+        <div class={styles.modal} onClick={() => setSelectedOrder(null)}>
+          <div class={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <div class={styles.modalHeader}>
+              <h2>Order #{selectedOrder()!.orderNumber}</h2>
+              <button class={styles.modalClose} onClick={() => setSelectedOrder(null)}>×</button>
             </div>
 
-            <div class="text-gray-600 dark:text-gray-400 mb-6">
-              <p>Order ID: {selectedOrderId()}</p>
-              <p class="text-sm mt-2">
-                Order editing functionality will be implemented here. The lock will auto-renew every 30 seconds while this modal is open.
-              </p>
-            </div>
+            <div class={styles.modalBody}>
+              <div class={styles.detailSection}>
+                <h3>Customer Information</h3>
+                <p>Name: {selectedOrder()!.customerName}</p>
+                {selectedOrder()!.customerPhone && <p>Phone: {selectedOrder()!.customerPhone}</p>}
+                {selectedOrder()!.customerEmail && <p>Email: {selectedOrder()!.customerEmail}</p>}
+              </div>
 
-            <div class="flex justify-end space-x-3">
-              <button
-                onClick={handleCloseModal}
-                class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-              >
-                Close
-              </button>
-              <button
-                class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-              >
-                Save Changes
-              </button>
+              <div class={styles.detailSection}>
+                <h3>Order Items</h3>
+                <For each={selectedOrder()!.items}>
+                  {(item) => (
+                    <div class={styles.detailItem}>
+                      <span>{item.quantity}x {item.productName}</span>
+                      <span>${(item.quantity * item.unitPrice).toFixed(2)}</span>
+                    </div>
+                  )}
+                </For>
+              </div>
+
+              <div class={styles.detailSection}>
+                <h3>Order Summary</h3>
+                <div class={styles.detailItem}>
+                  <span>Subtotal:</span>
+                  <span>${selectedOrder()!.subtotal.toFixed(2)}</span>
+                </div>
+                <div class={styles.detailItem}>
+                  <span>Tax:</span>
+                  <span>${selectedOrder()!.tax.toFixed(2)}</span>
+                </div>
+                <div class={styles.detailItem}>
+                  <strong>Total:</strong>
+                  <strong>${selectedOrder()!.total.toFixed(2)}</strong>
+                </div>
+              </div>
+
+              {selectedOrder()!.specialRequests && (
+                <div class={styles.detailSection}>
+                  <h3>Special Requests</h3>
+                  <p>{selectedOrder()!.specialRequests}</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </Show>
     </div>
-  );
-};
-
-export default Orders;
+  )
+}
