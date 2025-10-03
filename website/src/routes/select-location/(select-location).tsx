@@ -1,7 +1,7 @@
 import { type Component, createSignal, For, Show } from "solid-js";
 import { useSubmission } from "@solidjs/router";
 import { useAuthUser } from "~/hooks/useAuthUser";
-import { useUserLocationsServer } from "~/queries/useUserLocationsServer";
+import { useUserLocationsServer } from "~/hooks/useUserLocationsServer";
 import { selectLocation } from "~/routes/api/auth/select-location";
 import { ProtectedRoute } from "~/components/ProtectedRoute";
 import SEO from "~/components/SEO/SEO";

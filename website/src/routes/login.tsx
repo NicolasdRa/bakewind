@@ -1,40 +1,17 @@
 import { Title, Meta } from "@solidjs/meta";
-import { createSignal, Show, createEffect } from "solid-js";
-import { A, useNavigate } from "@solidjs/router";
-import { useAuth } from "../stores/authStore";
-import { getRedirectUrlBasedOnPermission } from "../lib/permissions";
+import { createSignal, Show } from "solid-js";
+import { A, useAction } from "@solidjs/router";
+import { loginUser } from "./api/auth/login";
 import "../styles/globals.css";
 
 export default function LoginPage() {
-  const auth = useAuth();
-  const navigate = useNavigate();
-
   const [email, setEmail] = createSignal("");
   const [password, setPassword] = createSignal("");
   const [error, setError] = createSignal("");
   const [isSubmitting, setIsSubmitting] = createSignal(false);
 
-  // Redirect if already authenticated
-  createEffect(() => {
-    if (auth.user && auth.isAuthenticated) {
-      // Get redirect URL based on permissions
-      const redirectUrl = getRedirectUrlBasedOnPermission(auth.user.role);
-
-      console.log('[Login] Authenticated user:', auth.user.email, 'role:', auth.user.role);
-      console.log('[Login] Redirect URL:', redirectUrl);
-
-      // If redirecting to admin app (external URL), use getDashboardUrl() with auth tokens
-      if (redirectUrl.startsWith('http')) {
-        const dashboardUrl = auth.getDashboardUrl();
-        console.log('[Login] Redirecting to dashboard:', dashboardUrl);
-        window.location.href = dashboardUrl;
-      } else {
-        // Internal customer app route
-        console.log('[Login] Navigating to internal route:', redirectUrl);
-        navigate(redirectUrl);
-      }
-    }
-  });
+  // Use the server action for login
+  const loginAction = useAction(loginUser);
 
   const handleSubmit = async (e: Event) => {
     e.preventDefault();
@@ -42,11 +19,15 @@ export default function LoginPage() {
     setIsSubmitting(true);
 
     try {
-      await auth.login(email(), password());
-      // Navigation will be handled by the createEffect above
+      // Create FormData and submit via server action
+      const formData = new FormData();
+      formData.append("email", email());
+      formData.append("password", password());
+
+      await loginAction(formData);
+      // Server action will handle redirect to admin app via transfer session
     } catch (err: any) {
       setError(err.message || "Login failed. Please check your credentials and try again.");
-    } finally {
       setIsSubmitting(false);
     }
   };
@@ -104,19 +85,19 @@ export default function LoginPage() {
               </div>
 
               {/* Error Message */}
-              <Show when={error() || auth.error}>
+              <Show when={error()}>
                 <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-                  {error() || auth.error}
+                  {error()}
                 </div>
               </Show>
 
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={isSubmitting() || auth.isLoading || !email() || !password()}
+                disabled={isSubmitting() || !email() || !password()}
                 class="btn-primary w-full justify-center"
               >
-                <Show when={!(isSubmitting() || auth.isLoading)} fallback="Signing In...">
+                <Show when={!isSubmitting()} fallback="Signing In...">
                   Sign In
                 </Show>
               </button>

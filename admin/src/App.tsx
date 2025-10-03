@@ -20,6 +20,12 @@ const SettingsPage = lazy(() => import("./pages/Settings"));
 const AuthCallback = lazy(() => import("./pages/AuthCallback"));
 const DevLogin = lazy(() => import("./pages/DevLogin"));
 
+// Auth pages (public routes)
+const Login = lazy(() => import("./pages/auth/Login"));
+const TrialSignup = lazy(() => import("./pages/auth/TrialSignup"));
+const Register = lazy(() => import("./pages/auth/Register"));
+const ForgotPassword = lazy(() => import("./pages/auth/ForgotPassword"));
+
 const App: Component = () => {
   console.log('[App] Rendering App component');
 
@@ -29,6 +35,12 @@ const App: Component = () => {
 
   return (
     <Router base={basePath} root={RootLayout}>
+      {/* PUBLIC AUTH ROUTES - No protection needed */}
+      <Route path="/login" component={Login} />
+      <Route path="/trial-signup" component={TrialSignup} />
+      <Route path="/register" component={Register} />
+      <Route path="/forgot-password" component={ForgotPassword} />
+
       {/* Auth callback route - public, no protection */}
       <Route path="/auth/callback" component={AuthCallback} />
 

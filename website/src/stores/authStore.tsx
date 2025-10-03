@@ -128,29 +128,6 @@ export const authStore = {
     });
   },
 
-  getDashboardUrl() {
-    const user = authState.user;
-    if (!user) return '/';
-
-    // Get admin app URL from environment or use default
-    const adminAppUrl = import.meta.env.VITE_ADMIN_APP_URL || 'http://localhost:3001';
-
-    // Redirect to admin app with authentication tokens
-    const accessToken = authState.accessToken;
-    const refreshToken = authState.refreshToken;
-
-    if (accessToken && refreshToken) {
-      // Encode user data for URL
-      const userData = encodeURIComponent(JSON.stringify(user));
-
-      // Build URL with auth params
-      return `${adminAppUrl}?accessToken=${accessToken}&refreshToken=${refreshToken}&user=${userData}`;
-    }
-
-    // Fallback to admin app root
-    return adminAppUrl;
-  },
-
   // Actions
   async initialize() {
     setIsInitializing(true);

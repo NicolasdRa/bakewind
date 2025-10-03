@@ -11,15 +11,28 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { FastifyReply } from 'fastify';
+
+interface RequestWithUser {
+  user: {
+    id: string;
+    email: string;
+    role: string;
+  };
+  auditContext?: Record<string, any>;
+  cookies?: Record<string, string>;
+  headers: {
+    authorization?: string;
+  };
+}
+
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
-  ApiBody,
 } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
-import { AuthService } from './auth.service';
+import { AuthService, type AuthResult } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 import { LoginUserDto } from '../users/dto/login-user.dto';
@@ -56,8 +69,6 @@ export class AuthController {
    * Must be consistent across all endpoints
    */
   private getCookieOptions() {
-    const isProduction = process.env.NODE_ENV === 'production';
-
     // Development: Using reverse proxy on localhost:8080
     // Production: Using subdomain with shared parent domain
     return {
@@ -95,23 +106,27 @@ export class AuthController {
   })
   async login(
     @Body() loginDto: LoginUserDto,
-    @Request() req: any,
+    @Request() req: RequestWithUser,
     @Res({ passthrough: true }) res: FastifyReply,
   ) {
     console.log('🚀 Auth Controller login method called with:', loginDto);
     const auditContext = req.auditContext;
 
     // Try SaaS login first, fall back to regular login
-    let result: any;
+    let result: AuthResult | null = null;
     try {
       result = await this.authService.saasLogin(
         loginDto.email,
         loginDto.password,
         auditContext,
       );
-    } catch (error) {
+    } catch {
       // If SaaS login fails, try regular user login
       result = await this.authService.login(loginDto, auditContext);
+    }
+
+    if (!result) {
+      throw new UnauthorizedException('Login failed');
     }
 
     // Set httpOnly cookies for tokens
@@ -141,7 +156,9 @@ export class AuthController {
   @Post('trial-signup')
   @HttpCode(HttpStatus.CREATED)
   @Throttle({ default: { limit: 3, ttl: 60000 } }) // 3 trial signups per minute
-  @ApiOperation({ summary: 'Sign up for a 14-day free trial with Stripe integration' })
+  @ApiOperation({
+    summary: 'Sign up for a 14-day free trial with Stripe integration',
+  })
   @ApiResponse({
     status: 201,
     description: 'Trial account created successfully with Stripe customer',
@@ -163,7 +180,7 @@ export class AuthController {
   })
   async trialSignup(
     @Body() trialSignupDto: TrialSignupDto,
-    @Request() req: any,
+    @Request() req: RequestWithUser,
     @Res({ passthrough: true }) res: FastifyReply,
   ) {
     const auditContext = req.auditContext || {};
@@ -200,7 +217,8 @@ export class AuthController {
   @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 registrations per minute
   @ApiOperation({
     summary: 'Register a new user account',
-    description: 'Create a new user account with email and password. Password must be at least 8 characters and contain uppercase, lowercase, and number.',
+    description:
+      'Create a new user account with email and password. Password must be at least 8 characters and contain uppercase, lowercase, and number.',
   })
   @ApiResponse({
     status: 201,
@@ -248,7 +266,7 @@ export class AuthController {
     type: ErrorResponseDto,
   })
   async refresh(
-    @Request() req: any,
+    @Request() req: RequestWithUser,
     @Res({ passthrough: true }) res: FastifyReply,
   ) {
     // Extract refresh token from cookie
@@ -298,7 +316,7 @@ export class AuthController {
     type: ErrorResponseDto,
   })
   async logout(
-    @Request() req: any,
+    @Request() req: RequestWithUser,
     @Res({ passthrough: true }) res: FastifyReply,
   ) {
     // Extract access token from cookie or Authorization header
@@ -330,8 +348,8 @@ export class AuthController {
     description: 'Unauthorized',
     type: ErrorResponseDto,
   })
-  async getProfile(@Request() req: any) {
-    const userId = req.user.id;
+  async getProfile(@Request() req: RequestWithUser) {
+    const userId: string = req.user.id;
     const locationIds = await this.authService.getUserLocationIds(userId);
     return {
       ...req.user,
@@ -383,7 +401,7 @@ export class AuthController {
     description: 'Cookies set successfully',
     type: CreateCookieSessionResponseDto,
   })
-  async createCookieSession(
+  createCookieSession(
     @Body() body: CreateCookieSessionDto,
     @Res({ passthrough: true }) res: FastifyReply,
   ) {

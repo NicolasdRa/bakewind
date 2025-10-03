@@ -107,15 +107,17 @@ export const appActions = {
 // Export the store state (read-only)
 export { appState }
 
-// Set up theme reactive effect on client only
-if (!isServer) {
-  createEffect(() => {
-    document.documentElement.setAttribute('data-theme', appState.theme)
-  })
-}
-
 // Export a composable for easy component integration
-export const useAppStore = () => ({
-  state: appState,
-  actions: appActions
-})
+export const useAppStore = () => {
+  // Set up theme reactive effect on client only (inside component context)
+  if (!isServer) {
+    createEffect(() => {
+      document.documentElement.setAttribute('data-theme', appState.theme)
+    })
+  }
+
+  return {
+    state: appState,
+    actions: appActions
+  }
+}
