@@ -1,180 +1,14 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { createZodDto } from 'nestjs-zod';
 import {
-  IsString,
-  IsEmail,
-  IsOptional,
-  IsBoolean,
-  IsEnum,
-  IsPhoneNumber,
-} from 'class-validator';
+  customerCreationSchema,
+  customerUpdateSchema,
+} from '../customers.validation';
+import { IsEnum, IsOptional, IsString } from 'class-validator';
 
-export class CreateCustomerDto {
-  @ApiProperty({
-    description: 'Customer full name',
-    example: 'Jane Smith',
-  })
-  @IsString()
-  name!: string;
+export class CreateCustomerDto extends createZodDto(customerCreationSchema) {}
 
-  @ApiProperty({
-    description: 'Customer email address',
-    example: 'jane.smith@email.com',
-  })
-  @IsEmail()
-  email!: string;
-
-  @ApiPropertyOptional({
-    description: 'Customer phone number',
-    example: '+1 (555) 987-6543',
-  })
-  @IsOptional()
-  @IsString()
-  phone?: string;
-
-  @ApiPropertyOptional({
-    description: 'Customer address',
-    example: '456 Oak Avenue, Springfield, IL 62701',
-  })
-  @IsOptional()
-  @IsString()
-  address?: string;
-
-  @ApiPropertyOptional({
-    description: 'Company or organization name',
-    example: 'Springfield Elementary School',
-  })
-  @IsOptional()
-  @IsString()
-  company?: string;
-
-  @ApiPropertyOptional({
-    description: 'Customer notes or preferences',
-    example: 'Prefers gluten-free options, large orders for school events',
-  })
-  @IsOptional()
-  @IsString()
-  notes?: string;
-
-  @ApiPropertyOptional({
-    description: 'Customer type',
-    example: 'business',
-    enum: ['individual', 'business', 'restaurant', 'event_planner'],
-  })
-  @IsOptional()
-  @IsEnum(['individual', 'business', 'restaurant', 'event_planner'])
-  customerType?: 'individual' | 'business' | 'restaurant' | 'event_planner';
-
-  @ApiPropertyOptional({
-    description: 'Preferred contact method',
-    example: 'email',
-    enum: ['email', 'phone', 'text'],
-  })
-  @IsOptional()
-  @IsEnum(['email', 'phone', 'text'])
-  preferredContact?: 'email' | 'phone' | 'text';
-
-  @ApiPropertyOptional({
-    description: 'Customer status',
-    example: 'active',
-    enum: ['active', 'inactive'],
-  })
-  @IsOptional()
-  @IsEnum(['active', 'inactive'])
-  status?: 'active' | 'inactive';
-
-  @ApiPropertyOptional({
-    description: 'Marketing opt-in status',
-    example: true,
-  })
-  @IsOptional()
-  @IsBoolean()
-  marketingOptIn?: boolean;
-}
-
-export class UpdateCustomerDto {
-  @ApiPropertyOptional({
-    description: 'Customer full name',
-    example: 'Jane Smith',
-  })
-  @IsOptional()
-  @IsString()
-  name?: string;
-
-  @ApiPropertyOptional({
-    description: 'Customer email address',
-    example: 'jane.smith@email.com',
-  })
-  @IsOptional()
-  @IsEmail()
-  email?: string;
-
-  @ApiPropertyOptional({
-    description: 'Customer phone number',
-    example: '+1 (555) 987-6543',
-  })
-  @IsOptional()
-  @IsString()
-  phone?: string;
-
-  @ApiPropertyOptional({
-    description: 'Customer address',
-    example: '456 Oak Avenue, Springfield, IL 62701',
-  })
-  @IsOptional()
-  @IsString()
-  address?: string;
-
-  @ApiPropertyOptional({
-    description: 'Company or organization name',
-    example: 'Springfield Elementary School',
-  })
-  @IsOptional()
-  @IsString()
-  company?: string;
-
-  @ApiPropertyOptional({
-    description: 'Customer notes or preferences',
-    example: 'Prefers gluten-free options, large orders for school events',
-  })
-  @IsOptional()
-  @IsString()
-  notes?: string;
-
-  @ApiPropertyOptional({
-    description: 'Customer type',
-    example: 'business',
-    enum: ['individual', 'business', 'restaurant', 'event_planner'],
-  })
-  @IsOptional()
-  @IsEnum(['individual', 'business', 'restaurant', 'event_planner'])
-  customerType?: 'individual' | 'business' | 'restaurant' | 'event_planner';
-
-  @ApiPropertyOptional({
-    description: 'Preferred contact method',
-    example: 'email',
-    enum: ['email', 'phone', 'text'],
-  })
-  @IsOptional()
-  @IsEnum(['email', 'phone', 'text'])
-  preferredContact?: 'email' | 'phone' | 'text';
-
-  @ApiPropertyOptional({
-    description: 'Customer status',
-    example: 'active',
-    enum: ['active', 'inactive'],
-  })
-  @IsOptional()
-  @IsEnum(['active', 'inactive'])
-  status?: 'active' | 'inactive';
-
-  @ApiPropertyOptional({
-    description: 'Marketing opt-in status',
-    example: true,
-  })
-  @IsOptional()
-  @IsBoolean()
-  marketingOptIn?: boolean;
-}
+export class UpdateCustomerDto extends createZodDto(customerUpdateSchema) {}
 
 export class CustomerResponseDto {
   @ApiProperty({
@@ -192,8 +26,9 @@ export class CustomerResponseDto {
   @ApiProperty({
     description: 'Customer email address',
     example: 'jane.smith@email.com',
+    nullable: true,
   })
-  email!: string;
+  email!: string | null;
 
   @ApiProperty({
     description: 'Customer phone number',

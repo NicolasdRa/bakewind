@@ -1,81 +1,27 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsEmail,
-  IsString,
-  IsBoolean,
-  IsEnum,
-  MinLength,
-} from 'class-validator';
-import { userRoleValues } from '../../common/constants/roles.constants';
+import { createZodDto } from 'nestjs-zod';
 import { subscriptionStatusValues } from '../../common/constants/subscription-status.constants';
+import {
+  userRegistrationSchema,
+  userLoginSchema,
+} from '../../users/users.validation';
+import { trialSignupSchema } from '../trial-signup.validation';
+import { userRoleValues } from 'src/common/constants/roles.constants';
 
-export class CreateTrialSignupDto {
-  @ApiProperty({
-    description: 'Name of the bakery or business',
-    example: 'Sweet Dreams Bakery',
-  })
-  @IsString()
-  businessName!: string;
+export class CreateTrialSignupDto extends createZodDto(trialSignupSchema) {}
 
+export class LoginDto extends createZodDto(userLoginSchema) {
+  // only pick email and password
   @ApiProperty({
-    description: "User's full name",
-    example: 'John Smith',
+    description: 'User email',
+    example: 'john.doe@example.com',
   })
-  @IsString()
-  fullName!: string;
-
-  @ApiProperty({
-    description: 'Business email address',
-    example: 'john@sweetdreamsbakery.com',
-  })
-  @IsEmail()
   email!: string;
 
   @ApiProperty({
-    description: 'Contact phone number',
-    example: '+1 (555) 123-4567',
+    description: 'User password',
+    example: 'password123',
   })
-  @IsString()
-  phone!: string;
-
-  @ApiProperty({
-    description: 'Account password',
-    example: 'SecurePassword123!',
-    minLength: 8,
-  })
-  @IsString()
-  @MinLength(8)
-  password!: string;
-
-  @ApiProperty({
-    description: 'Number of bakery locations',
-    example: '2-3',
-    enum: ['1', '2-3', '4-10', '10+'],
-  })
-  @IsEnum(['1', '2-3', '4-10', '10+'])
-  locations!: '1' | '2-3' | '4-10' | '10+';
-
-  @ApiProperty({
-    description: 'Agreement to terms of service',
-    example: true,
-  })
-  @IsBoolean()
-  agreeToTerms!: boolean;
-}
-
-export class LoginDto {
-  @ApiProperty({
-    description: 'User email address',
-    example: 'john@sweetdreamsbakery.com',
-  })
-  @IsEmail()
-  email!: string;
-
-  @ApiProperty({
-    description: 'Account password',
-    example: 'SecurePassword123!',
-  })
-  @IsString()
   password!: string;
 }
 
@@ -84,7 +30,6 @@ export class RefreshTokenDto {
     description: 'Refresh token',
     example: 'refresh_token_value',
   })
-  @IsString()
   refreshToken!: string;
 }
 
@@ -186,79 +131,7 @@ export class TokenResponseDto {
   accessToken!: string;
 }
 
-export class RegisterUserDto {
-  @ApiProperty({
-    description: 'User email address',
-    example: 'john.doe@example.com',
-    format: 'email',
-  })
-  @IsEmail()
-  email!: string;
-
-  @ApiProperty({
-    description: 'User password (min 8 characters, must contain uppercase, lowercase, and number)',
-    example: 'SecurePass123',
-    minLength: 8,
-  })
-  @IsString()
-  @MinLength(8)
-  password!: string;
-
-  @ApiProperty({
-    description: 'Password confirmation (must match password)',
-    example: 'SecurePass123',
-  })
-  @IsString()
-  confirmPassword!: string;
-
-  @ApiProperty({
-    description: 'User first name',
-    example: 'John',
-    minLength: 1,
-    maxLength: 100,
-  })
-  @IsString()
-  @MinLength(1)
-  firstName!: string;
-
-  @ApiProperty({
-    description: 'User last name',
-    example: 'Doe',
-    minLength: 1,
-    maxLength: 100,
-  })
-  @IsString()
-  @MinLength(1)
-  lastName!: string;
-
-  @ApiProperty({
-    description: 'Phone number in international format (optional)',
-    example: '+1234567890',
-    required: false,
-    nullable: true,
-  })
-  @IsString()
-  phoneNumber?: string | null;
-
-  @ApiProperty({
-    description: 'User biography (optional)',
-    example: 'Experienced baker with 10+ years in artisan bread making',
-    maxLength: 1000,
-    required: false,
-    nullable: true,
-  })
-  @IsString()
-  bio?: string | null;
-
-  @ApiProperty({
-    description: 'User role (optional, defaults to GUEST)',
-    example: 'GUEST',
-    enum: userRoleValues,
-    required: false,
-  })
-  @IsEnum(userRoleValues)
-  role?: string;
-}
+export class RegisterUserDto extends createZodDto(userRegistrationSchema) {}
 
 export class RegisteredUserDto {
   @ApiProperty({
@@ -319,13 +192,15 @@ export class RegisterResponseDto {
 
   @ApiProperty({
     description: 'JWT access token',
-    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjNlNDU2Ny1lODliLTEyZDMtYTQ1Ni00MjY2MTQxNzQwMDAiLCJlbWFpbCI6ImpvaG4uZG9lQGV4YW1wbGUuY29tIiwicm9sZSI6Ikd1ZXN0IiwiaWF0IjoxNjk2MzM5MjAwLCJleHAiOjE2OTYzNDAxMDB9.xxxxxxxxxxx',
+    example:
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjNlNDU2Ny1lODliLTEyZDMtYTQ1Ni00MjY2MTQxNzQwMDAiLCJlbWFpbCI6ImpvaG4uZG9lQGV4YW1wbGUuY29tIiwicm9sZSI6Ikd1ZXN0IiwiaWF0IjoxNjk2MzM5MjAwLCJleHAiOjE2OTYzNDAxMDB9.xxxxxxxxxxx',
   })
   accessToken!: string;
 
   @ApiProperty({
     description: 'JWT refresh token',
-    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjNlNDU2Ny1lODliLTEyZDMtYTQ1Ni00MjY2MTQxNzQwMDAiLCJ0eXBlIjoicmVmcmVzaCIsImlhdCI6MTY5NjMzOTIwMCwiZXhwIjoxNjk2OTQ0MDAwfQ.xxxxxxxxxxx',
+    example:
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjNlNDU2Ny1lODliLTEyZDMtYTQ1Ni00MjY2MTQxNzQwMDAiLCJ0eXBlIjoicmVmcmVzaCIsImlhdCI6MTY5NjMzOTIwMCwiZXhwIjoxNjk2OTQ0MDAwfQ.xxxxxxxxxxx',
   })
   refreshToken!: string;
 }

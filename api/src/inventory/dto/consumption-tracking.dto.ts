@@ -1,4 +1,6 @@
 import { z } from 'zod';
+import { createZodDto } from 'nestjs-zod';
+import { ApiProperty } from '@nestjs/swagger';
 
 // Zod validation schemas
 export const setCustomThresholdSchema = z.object({
@@ -26,21 +28,68 @@ export const consumptionTrackingSummarySchema = z.object({
   has_custom_threshold: z.boolean(),
 });
 
-// TypeScript types
-export type SetCustomThresholdDto = z.infer<typeof setCustomThresholdSchema>;
-export type ConsumptionTrackingDto = z.infer<typeof consumptionTrackingSchema>;
-export type ConsumptionTrackingSummaryDto = z.infer<
-  typeof consumptionTrackingSummarySchema
->;
+// DTOs using createZodDto
+export class SetCustomThresholdDto extends createZodDto(
+  setCustomThresholdSchema,
+) {}
+
+export class ConsumptionTrackingDto extends createZodDto(
+  consumptionTrackingSchema,
+) {}
+
+export class ConsumptionTrackingSummaryDto extends createZodDto(
+  consumptionTrackingSummarySchema,
+) {}
 
 // Extended inventory item with tracking
-export interface InventoryItemWithTrackingDto {
-  id: string;
-  name: string;
-  current_stock: number;
-  unit: string;
-  category: string;
+export class InventoryItemWithTrackingDto {
+  @ApiProperty({
+    description: 'Inventory item ID',
+    example: '550e8400-e29b-41d4-a716-446655440000',
+  })
+  id!: string;
+
+  @ApiProperty({
+    description: 'Item name',
+    example: 'All-Purpose Flour',
+  })
+  name!: string;
+
+  @ApiProperty({
+    description: 'Current stock quantity',
+    example: 50.5,
+  })
+  current_stock!: number;
+
+  @ApiProperty({
+    description: 'Unit of measurement',
+    example: 'kg',
+  })
+  unit!: string;
+
+  @ApiProperty({
+    description: 'Item category',
+    example: 'Ingredients',
+  })
+  category!: string;
+
+  @ApiProperty({
+    description: 'Lead time in days',
+    example: 3,
+    required: false,
+  })
   lead_time_days?: number;
-  low_stock: boolean;
-  consumption_tracking: ConsumptionTrackingSummaryDto | null;
+
+  @ApiProperty({
+    description: 'Whether stock is low',
+    example: false,
+  })
+  low_stock!: boolean;
+
+  @ApiProperty({
+    description: 'Consumption tracking summary',
+    type: ConsumptionTrackingSummaryDto,
+    nullable: true,
+  })
+  consumption_tracking!: ConsumptionTrackingSummaryDto | null;
 }

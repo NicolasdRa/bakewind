@@ -21,7 +21,6 @@ import {
 import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { JwtRefreshAuthGuard } from './guards/jwt-refresh-auth.guard';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 import { LoginUserDto } from '../users/dto/login-user.dto';
 import { userRegistrationSchema } from '../users/users.validation';

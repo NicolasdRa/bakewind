@@ -88,14 +88,17 @@ export class SaasAuthController {
       const lastName = nameParts.slice(1).join(' ') || '';
 
       // Create SaaS user
-      const user = await this.saasUsersService.create({
+      const createUserDto: any = {
         email,
         password,
         companyName: businessName,
-        companyPhone: phone,
         role: 'owner',
         stripeCustomerId: stripeCustomer.id,
-      });
+      };
+      if (phone) {
+        createUserDto.companyPhone = phone;
+      }
+      const user = await this.saasUsersService.create(createUserDto);
 
       // Create trial account
       const trial = await this.trialAccountsService.create({

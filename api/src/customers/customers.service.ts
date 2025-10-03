@@ -57,7 +57,7 @@ export class CustomersService {
     return {
       id: 'placeholder-id',
       name: createCustomerDto.name,
-      email: createCustomerDto.email,
+      email: createCustomerDto.email ?? null,
       phone: createCustomerDto.phone ?? null,
       address: createCustomerDto.address ?? null,
       company: createCustomerDto.company ?? null,

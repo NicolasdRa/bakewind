@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { createZodDto } from 'nestjs-zod';
 
 // Widget position schema
 const widgetPositionSchema = z.object({
@@ -32,7 +33,14 @@ export const updateWidgetConfigSchema = z.object({
   widgets: z.array(widgetSchema).max(20, 'Maximum 20 widgets allowed per user'),
 });
 
-export type UpdateWidgetConfigDto = z.infer<typeof updateWidgetConfigSchema>;
-export type WidgetDto = z.infer<typeof widgetSchema>;
-export type WidgetPositionDto = z.infer<typeof widgetPositionSchema>;
-export type LayoutTypeDto = z.infer<typeof layoutTypeSchema>;
+// DTOs using createZodDto
+export class UpdateWidgetConfigDto extends createZodDto(
+  updateWidgetConfigSchema,
+) {}
+
+export class WidgetDto extends createZodDto(widgetSchema) {}
+
+export class WidgetPositionDto extends createZodDto(widgetPositionSchema) {}
+
+// LayoutTypeDto cannot extend createZodDto directly from z.enum, so we use a type alias
+export type LayoutType = z.infer<typeof layoutTypeSchema>;

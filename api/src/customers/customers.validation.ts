@@ -23,6 +23,13 @@ export const customerCreationSchema = z.object({
   phone: z.string().min(1).max(50),
   address: z.string().optional(),
   notes: z.string().optional(),
+  company: z.string().optional(),
+  customerType: z
+    .enum(['individual', 'business', 'restaurant', 'event_planner'])
+    .optional(),
+  preferredContact: z.enum(['email', 'phone', 'text']).optional(),
+  status: z.enum(['active', 'inactive']).optional(),
+  marketingOptIn: z.boolean().optional(),
 });
 
 // Customer update schema
@@ -33,6 +40,16 @@ export const customerUpdateSchema = z
     phone: z.string().min(1).max(50),
     address: z.string().nullable(),
     notes: z.string().nullable(),
+    company: z.string().nullable(),
+    customerType: z.enum([
+      'individual',
+      'business',
+      'restaurant',
+      'event_planner',
+    ]),
+    preferredContact: z.enum(['email', 'phone', 'text']).nullable(),
+    status: z.enum(['active', 'inactive']),
+    marketingOptIn: z.boolean(),
   })
   .partial();
 

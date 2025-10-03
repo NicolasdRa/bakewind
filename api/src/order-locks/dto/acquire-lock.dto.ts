@@ -1,4 +1,6 @@
 import { z } from 'zod';
+import { createZodDto } from 'nestjs-zod';
+import { ApiProperty } from '@nestjs/swagger';
 
 // Zod validation schemas
 export const acquireLockSchema = z.object({
@@ -17,19 +19,45 @@ export const orderLockResponseSchema = z.object({
   last_activity_at: z.string().datetime(),
 });
 
-// TypeScript types inferred from schemas
-export type AcquireLockDto = z.infer<typeof acquireLockSchema>;
-export type OrderLockResponseDto = z.infer<typeof orderLockResponseSchema>;
+// DTOs using createZodDto
+export class AcquireLockDto extends createZodDto(acquireLockSchema) {}
+
+export class OrderLockResponseDto extends createZodDto(
+  orderLockResponseSchema,
+) {}
 
 // Unlocked status response
-export interface UnlockedStatusDto {
-  order_id: string;
-  locked: false;
+export class UnlockedStatusDto {
+  @ApiProperty({
+    description: 'Order ID',
+    example: '550e8400-e29b-41d4-a716-446655440000',
+  })
+  order_id!: string;
+
+  @ApiProperty({
+    description: 'Lock status',
+    example: false,
+  })
+  locked!: false;
 }
 
 // Lock conflict error
-export interface LockConflictErrorDto {
-  statusCode: 409;
-  message: string;
-  locked_by: OrderLockResponseDto;
+export class LockConflictErrorDto {
+  @ApiProperty({
+    description: 'HTTP status code',
+    example: 409,
+  })
+  statusCode!: 409;
+
+  @ApiProperty({
+    description: 'Error message',
+    example: 'Order is currently locked by another user',
+  })
+  message!: string;
+
+  @ApiProperty({
+    description: 'Current lock information',
+    type: OrderLockResponseDto,
+  })
+  locked_by!: OrderLockResponseDto;
 }
