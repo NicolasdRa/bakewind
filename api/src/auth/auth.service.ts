@@ -3,12 +3,17 @@ import {
   UnauthorizedException,
   ConflictException,
   Logger,
+  BadRequestException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
 import { randomBytes } from 'crypto';
 import { UsersService } from '../users/users.service';
+import { SaasUsersService } from '../saas-users/saas-users.service';
+import { TrialAccountsService } from '../trials/trial-accounts.service';
+import { UserSessionsService } from '../user-sessions/user-sessions.service';
+import { StripeService } from '../stripe/stripe.service';
 import { RedisService } from '../redis/redis.service';
 import type { UsersData, UserLogin } from '../users/users.validation';
 import type { AppConfig } from '../config/configuration';
@@ -42,6 +47,10 @@ export class AuthService {
 
   constructor(
     private usersService: UsersService,
+    private saasUsersService: SaasUsersService,
+    private trialAccountsService: TrialAccountsService,
+    private userSessionsService: UserSessionsService,
+    private stripeService: StripeService,
     private jwtService: JwtService,
     private configService: ConfigService,
     private redisService: RedisService,
@@ -313,47 +322,169 @@ export class AuthService {
     return this.usersService.getUserLocationIds(userId);
   }
 
-  async trialSignup(
-    trialSignupDto: TrialSignupDto,
-    auditContext: any,
+  async saasLogin(
+    email: string,
+    password: string,
+    auditContext?: any,
   ): Promise<AuthResult> {
-    // Extract names from fullName (with safe handling)
-    const fullName = trialSignupDto.fullName || '';
-    const nameParts = fullName.trim().split(/\s+/);
-    const firstName = nameParts[0] || fullName;
-    const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
+    // Validate credentials
+    const isValid = await this.saasUsersService.verifyPassword(email, password);
+    if (!isValid) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
 
-    // Create user data
-    const userData: any = {
-      email: trialSignupDto.email,
-      password: trialSignupDto.password,
-      confirmPassword: trialSignupDto.password,
-      firstName,
-      lastName,
-      businessName: trialSignupDto.businessName,
-      role: 'GUEST',
-      phoneNumber: trialSignupDto.phone,
-      isActive: true,
-      isEmailVerified: false,
-      subscriptionStatus: 'trial' as const,
-      trialEndsAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days trial
-    };
+    const saasUser = await this.saasUsersService.findByEmail(email);
+    if (!saasUser) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
 
-    // Create the user account
-    const user = await this.usersService.create(userData);
+    // Update last login
+    await this.saasUsersService.updateLastLogin(saasUser.id);
 
     // Generate tokens
-    const tokens = await this.generateTokens(user);
+    const tokens = await this.generateTokens({
+      id: saasUser.id,
+      email: saasUser.email,
+      role: saasUser.role,
+      firstName: saasUser.companyName.split(' ')[0],
+      lastName: saasUser.companyName.split(' ').slice(1).join(' '),
+      isActive: true,
+      createdAt: saasUser.createdAt,
+      updatedAt: saasUser.updatedAt,
+    } as any);
+
+    // Get trial info if exists
+    const trial = await this.trialAccountsService.getTrialByUserId(saasUser.id);
+
+    const userProfile = {
+      id: saasUser.id,
+      email: saasUser.email,
+      firstName: saasUser.companyName.split(' ')[0],
+      lastName: saasUser.companyName.split(' ').slice(1).join(' '),
+      businessName: saasUser.companyName,
+      role: trial ? 'trial_user' : 'subscriber',
+      subscriptionStatus: trial && !trial.convertedAt ? 'trial' : 'active',
+      trialEndsAt: trial
+        ? this.trialAccountsService.calculateTrialEndDate(trial).toISOString()
+        : null,
+      isEmailVerified: saasUser.emailVerified,
+      createdAt: saasUser.createdAt,
+      locationId: [],
+    };
+
+    this.logger.log(`SaaS user ${email} logged in successfully`);
 
     return {
-      user: {
-        ...user,
-        locationId: [],
-      },
+      user: userProfile as any,
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
       expiresIn: this.configService.get('JWT_EXPIRES_IN', '15m'),
     };
+  }
+
+  async trialSignup(
+    trialSignupDto: TrialSignupDto,
+    auditContext: any,
+  ): Promise<AuthResult> {
+    const {
+      businessName,
+      fullName,
+      email,
+      phone,
+      password,
+      locations,
+      agreeToTerms,
+    } = trialSignupDto;
+
+    if (!agreeToTerms) {
+      throw new BadRequestException('You must agree to the terms of service');
+    }
+
+    // Check if user already exists
+    const existingSaasUser = await this.saasUsersService.findByEmail(email);
+    if (existingSaasUser) {
+      throw new ConflictException('Email already exists');
+    }
+
+    try {
+      // Create Stripe customer
+      const stripeCustomer = await this.stripeService.createCustomer(
+        email,
+        fullName,
+        businessName,
+      );
+
+      // Parse full name
+      const nameParts = fullName.trim().split(' ');
+      const firstName = nameParts[0];
+      const lastName = nameParts.slice(1).join(' ') || '';
+
+      // Create SaaS user
+      const createUserDto: any = {
+        email,
+        password,
+        companyName: businessName,
+        role: 'owner',
+        stripeCustomerId: stripeCustomer.id,
+      };
+      if (phone) {
+        createUserDto.companyPhone = phone;
+      }
+      const saasUser = await this.saasUsersService.create(createUserDto);
+
+      // Create trial account
+      const trial = await this.trialAccountsService.create({
+        userId: saasUser.id,
+        signupSource: 'landing_page',
+        businessSize: locations,
+      });
+
+      // Generate tokens
+      const payload = { sub: saasUser.id, email: saasUser.email, role: saasUser.role };
+      const tokens = await this.generateTokens({
+        id: saasUser.id,
+        email: saasUser.email,
+        role: saasUser.role,
+        firstName,
+        lastName,
+        isActive: true,
+        createdAt: saasUser.createdAt,
+        updatedAt: saasUser.updatedAt,
+      } as any);
+
+      const userProfile = {
+        id: saasUser.id,
+        email: saasUser.email,
+        firstName,
+        lastName,
+        businessName: saasUser.companyName,
+        role: 'trial_user',
+        subscriptionStatus: 'trial',
+        trialEndsAt: this.trialAccountsService
+          .calculateTrialEndDate(trial)
+          .toISOString(),
+        isEmailVerified: saasUser.emailVerified,
+        createdAt: saasUser.createdAt,
+        locationId: [],
+      };
+
+      this.logger.log(`Trial user created: ${email}`);
+
+      return {
+        user: userProfile as any,
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+        expiresIn: this.configService.get('JWT_EXPIRES_IN', '15m'),
+      };
+    } catch (error) {
+      if (error instanceof ConflictException) {
+        throw error;
+      }
+      if (error instanceof Error && error.message.includes('already exists')) {
+        throw new ConflictException('Email already exists');
+      }
+      throw error;
+    }
   }
 
   /**

@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
-import { SaasAuthController } from './controllers/saas-auth.controller';
 import { UsersModule } from '../users/users.module';
 import { SaasUsersModule } from '../saas-users/saas-users.module';
 import { TrialsModule } from '../trials/trials.module';
@@ -40,7 +39,7 @@ import { LocalStrategy } from './strategies/local.strategy';
     }),
   ],
   providers: [AuthService, LocalStrategy, JwtStrategy],
-  controllers: [AuthController, SaasAuthController],
+  controllers: [AuthController],
   exports: [AuthService, JwtModule],
 })
 export class AuthModule {}

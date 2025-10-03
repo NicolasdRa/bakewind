@@ -73,7 +73,12 @@ export class AuthController {
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @Throttle({ default: { limit: 10, ttl: 60000 } }) // 10 attempts per minute
-  @ApiOperation({ summary: 'Login with email and password' })
+  @ApiOperation({
+    summary: 'Login with email and password',
+    description:
+      'Unified login endpoint that supports both regular users and SaaS trial/subscriber users. ' +
+      'Automatically detects user type and returns appropriate profile.',
+  })
   @ApiResponse({
     status: 200,
     description: 'Successful login',
@@ -95,7 +100,19 @@ export class AuthController {
   ) {
     console.log('🚀 Auth Controller login method called with:', loginDto);
     const auditContext = req.auditContext;
-    const result = await this.authService.login(loginDto, auditContext);
+
+    // Try SaaS login first, fall back to regular login
+    let result: any;
+    try {
+      result = await this.authService.saasLogin(
+        loginDto.email,
+        loginDto.password,
+        auditContext,
+      );
+    } catch (error) {
+      // If SaaS login fails, try regular user login
+      result = await this.authService.login(loginDto, auditContext);
+    }
 
     // Set httpOnly cookies for tokens
     const cookieOptions = this.getCookieOptions();
@@ -110,9 +127,12 @@ export class AuthController {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
-    // Return user data without tokens (tokens are in cookies)
+    // Return user data with dashboard URL
     return {
       user: result.user,
+      accessToken: result.accessToken,
+      refreshToken: result.refreshToken,
+      dashboardUrl: '/admin/overview',
       expiresIn: result.expiresIn,
     };
   }
@@ -121,10 +141,10 @@ export class AuthController {
   @Post('trial-signup')
   @HttpCode(HttpStatus.CREATED)
   @Throttle({ default: { limit: 3, ttl: 60000 } }) // 3 trial signups per minute
-  @ApiOperation({ summary: 'Sign up for a 14-day free trial' })
+  @ApiOperation({ summary: 'Sign up for a 14-day free trial with Stripe integration' })
   @ApiResponse({
     status: 201,
-    description: 'Trial account created successfully',
+    description: 'Trial account created successfully with Stripe customer',
     type: AuthSuccessResponseDto,
   })
   @ApiResponse({
@@ -144,9 +164,34 @@ export class AuthController {
   async trialSignup(
     @Body() trialSignupDto: TrialSignupDto,
     @Request() req: any,
+    @Res({ passthrough: true }) res: FastifyReply,
   ) {
     const auditContext = req.auditContext || {};
-    return this.authService.trialSignup(trialSignupDto, auditContext);
+    const result = await this.authService.trialSignup(
+      trialSignupDto,
+      auditContext,
+    );
+
+    // Set httpOnly cookies for tokens
+    const cookieOptions = this.getCookieOptions();
+
+    res.setCookie('accessToken', result.accessToken, {
+      ...cookieOptions,
+      maxAge: 15 * 60 * 1000, // 15 minutes
+    });
+
+    res.setCookie('refreshToken', result.refreshToken, {
+      ...cookieOptions,
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    // Return user data with tokens and dashboard URL
+    return {
+      user: result.user,
+      accessToken: result.accessToken,
+      refreshToken: result.refreshToken,
+      dashboardUrl: '/admin/overview',
+    };
   }
 
   @Public()
