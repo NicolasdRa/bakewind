@@ -6,6 +6,8 @@ import {
   IsEnum,
   MinLength,
 } from 'class-validator';
+import { userRoleValues } from '../../common/constants/roles.constants';
+import { subscriptionStatusValues } from '../../common/constants/subscription-status.constants';
 
 export class CreateTrialSignupDto {
   @ApiProperty({
@@ -120,14 +122,14 @@ export class UserProfileDto {
   @ApiProperty({
     description: 'User role',
     example: 'trial_user',
-    enum: ['trial_user', 'subscriber', 'admin'],
+    enum: userRoleValues,
   })
   role!: string;
 
   @ApiProperty({
     description: 'Subscription status',
     example: 'trial',
-    enum: ['trial', 'active', 'past_due', 'canceled'],
+    enum: subscriptionStatusValues,
   })
   subscriptionStatus!: string;
 
@@ -184,6 +186,150 @@ export class TokenResponseDto {
   accessToken!: string;
 }
 
+export class RegisterUserDto {
+  @ApiProperty({
+    description: 'User email address',
+    example: 'john.doe@example.com',
+    format: 'email',
+  })
+  @IsEmail()
+  email!: string;
+
+  @ApiProperty({
+    description: 'User password (min 8 characters, must contain uppercase, lowercase, and number)',
+    example: 'SecurePass123',
+    minLength: 8,
+  })
+  @IsString()
+  @MinLength(8)
+  password!: string;
+
+  @ApiProperty({
+    description: 'Password confirmation (must match password)',
+    example: 'SecurePass123',
+  })
+  @IsString()
+  confirmPassword!: string;
+
+  @ApiProperty({
+    description: 'User first name',
+    example: 'John',
+    minLength: 1,
+    maxLength: 100,
+  })
+  @IsString()
+  @MinLength(1)
+  firstName!: string;
+
+  @ApiProperty({
+    description: 'User last name',
+    example: 'Doe',
+    minLength: 1,
+    maxLength: 100,
+  })
+  @IsString()
+  @MinLength(1)
+  lastName!: string;
+
+  @ApiProperty({
+    description: 'Phone number in international format (optional)',
+    example: '+1234567890',
+    required: false,
+    nullable: true,
+  })
+  @IsString()
+  phoneNumber?: string | null;
+
+  @ApiProperty({
+    description: 'User biography (optional)',
+    example: 'Experienced baker with 10+ years in artisan bread making',
+    maxLength: 1000,
+    required: false,
+    nullable: true,
+  })
+  @IsString()
+  bio?: string | null;
+
+  @ApiProperty({
+    description: 'User role (optional, defaults to GUEST)',
+    example: 'GUEST',
+    enum: userRoleValues,
+    required: false,
+  })
+  @IsEnum(userRoleValues)
+  role?: string;
+}
+
+export class RegisteredUserDto {
+  @ApiProperty({
+    description: 'User ID',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  id!: string;
+
+  @ApiProperty({
+    description: 'User email',
+    example: 'john.doe@example.com',
+  })
+  email!: string;
+
+  @ApiProperty({
+    description: 'First name',
+    example: 'John',
+  })
+  firstName!: string;
+
+  @ApiProperty({
+    description: 'Last name',
+    example: 'Doe',
+  })
+  lastName!: string;
+
+  @ApiProperty({
+    description: 'User role',
+    example: 'GUEST',
+  })
+  role!: string;
+
+  @ApiProperty({
+    description: 'Account active status',
+    example: true,
+  })
+  isActive!: boolean;
+
+  @ApiProperty({
+    description: 'Account creation timestamp',
+    example: '2025-10-03T10:30:00.000Z',
+  })
+  createdAt!: string;
+
+  @ApiProperty({
+    description: 'Last update timestamp',
+    example: '2025-10-03T10:30:00.000Z',
+  })
+  updatedAt!: string;
+}
+
+export class RegisterResponseDto {
+  @ApiProperty({
+    description: 'Registered user information',
+    type: RegisteredUserDto,
+  })
+  user!: RegisteredUserDto;
+
+  @ApiProperty({
+    description: 'JWT access token',
+    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjNlNDU2Ny1lODliLTEyZDMtYTQ1Ni00MjY2MTQxNzQwMDAiLCJlbWFpbCI6ImpvaG4uZG9lQGV4YW1wbGUuY29tIiwicm9sZSI6Ikd1ZXN0IiwiaWF0IjoxNjk2MzM5MjAwLCJleHAiOjE2OTYzNDAxMDB9.xxxxxxxxxxx',
+  })
+  accessToken!: string;
+
+  @ApiProperty({
+    description: 'JWT refresh token',
+    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjNlNDU2Ny1lODliLTEyZDMtYTQ1Ni00MjY2MTQxNzQwMDAiLCJ0eXBlIjoicmVmcmVzaCIsImlhdCI6MTY5NjMzOTIwMCwiZXhwIjoxNjk2OTQ0MDAwfQ.xxxxxxxxxxx',
+  })
+  refreshToken!: string;
+}
+
 export class ErrorResponseDto {
   @ApiProperty({
     description: 'Error message',
@@ -205,4 +351,20 @@ export class ErrorResponseDto {
     },
   })
   details?: Record<string, string[]>;
+}
+
+export class RefreshResponseDto {
+  @ApiProperty({
+    description: 'Success message',
+    example: 'Tokens refreshed successfully',
+  })
+  message!: string;
+}
+
+export class LogoutResponseDto {
+  @ApiProperty({
+    description: 'Success message',
+    example: 'Successfully logged out',
+  })
+  message!: string;
 }

@@ -18,11 +18,11 @@ export const userRoleEnum = pgEnum('user_role', [
   'HEAD_PASTRY_CHEF',
   'PASTRY_CHEF',
   'CASHIER',
+  'INVENTORY_MANAGER',
   'CUSTOMER',
   'GUEST',
   'VIEWER',
-  'trial_user',
-  'subscriber',
+  'TRIAL_USER',
 ]);
 
 export const subscriptionStatusEnum = pgEnum('subscription_status', [
@@ -30,6 +30,7 @@ export const subscriptionStatusEnum = pgEnum('subscription_status', [
   'active',
   'past_due',
   'canceled',
+  'incomplete',
 ]);
 
 export const usersTable = pgTable(

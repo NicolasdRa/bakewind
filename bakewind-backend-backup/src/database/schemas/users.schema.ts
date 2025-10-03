@@ -18,9 +18,11 @@ export const userRoleEnum = pgEnum('user_role', [
   'HEAD_PASTRY_CHEF',
   'PASTRY_CHEF',
   'CASHIER',
+  'INVENTORY_MANAGER',
   'CUSTOMER',
   'GUEST',
   'VIEWER',
+  'TRIAL_USER',
 ]);
 
 export const usersTable = pgTable(

@@ -16,6 +16,7 @@ import {
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
+  ApiBody,
 } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
@@ -31,7 +32,20 @@ import {
   ExchangeTransferSessionDto,
   TransferSessionResponse,
   TransferSessionTokens,
+  TransferSessionResponseDto,
+  TransferSessionTokensDto,
+  CreateCookieSessionDto,
+  CreateCookieSessionResponseDto,
 } from './dto/auth-transfer.dto';
+import {
+  RegisterUserDto,
+  RegisterResponseDto,
+  ErrorResponseDto,
+  RefreshResponseDto,
+  LogoutResponseDto,
+  UserProfileDto,
+  AuthSuccessResponseDto,
+} from './dto/auth.dto';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -64,40 +78,12 @@ export class AuthController {
   @ApiResponse({
     status: 200,
     description: 'Successful login',
-    schema: {
-      type: 'object',
-      properties: {
-        user: {
-          type: 'object',
-          properties: {
-            id: { type: 'string' },
-            email: { type: 'string' },
-            firstName: { type: 'string' },
-            lastName: { type: 'string' },
-            businessName: { type: 'string' },
-            role: { type: 'string' },
-            subscriptionStatus: { type: 'string' },
-            trialEndsAt: {
-              type: 'string',
-              format: 'date-time',
-              nullable: true,
-            },
-            isEmailVerified: { type: 'boolean' },
-            isActive: { type: 'boolean' },
-            lastLoginAt: { type: 'string', format: 'date-time' },
-            createdAt: { type: 'string', format: 'date-time' },
-            updatedAt: { type: 'string', format: 'date-time' },
-          },
-        },
-        accessToken: { type: 'string' },
-        refreshToken: { type: 'string' },
-        dashboardUrl: { type: 'string' },
-      },
-    },
+    type: AuthSuccessResponseDto,
   })
   @ApiResponse({
     status: 401,
     description: 'Invalid credentials',
+    type: ErrorResponseDto,
   })
   @ApiResponse({
     status: 429,
@@ -140,37 +126,17 @@ export class AuthController {
   @ApiResponse({
     status: 201,
     description: 'Trial account created successfully',
-    schema: {
-      type: 'object',
-      properties: {
-        user: {
-          type: 'object',
-          properties: {
-            id: { type: 'string' },
-            email: { type: 'string' },
-            firstName: { type: 'string' },
-            lastName: { type: 'string' },
-            businessName: { type: 'string' },
-            role: { type: 'string', example: 'trial_user' },
-            subscriptionStatus: { type: 'string', example: 'trial' },
-            trialEndsAt: { type: 'string', format: 'date-time' },
-            isEmailVerified: { type: 'boolean' },
-            createdAt: { type: 'string', format: 'date-time' },
-          },
-        },
-        accessToken: { type: 'string' },
-        refreshToken: { type: 'string' },
-        dashboardUrl: { type: 'string', example: '/admin/overview' },
-      },
-    },
+    type: AuthSuccessResponseDto,
   })
   @ApiResponse({
     status: 400,
     description: 'Invalid input data',
+    type: ErrorResponseDto,
   })
   @ApiResponse({
     status: 409,
     description: 'Email already exists',
+    type: ErrorResponseDto,
   })
   @ApiResponse({
     status: 429,
@@ -188,34 +154,24 @@ export class AuthController {
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 registrations per minute
-  @ApiOperation({ summary: 'Register a new user account' })
+  @ApiOperation({
+    summary: 'Register a new user account',
+    description: 'Create a new user account with email and password. Password must be at least 8 characters and contain uppercase, lowercase, and number.',
+  })
   @ApiResponse({
     status: 201,
     description: 'User successfully registered',
-    schema: {
-      type: 'object',
-      properties: {
-        user: {
-          type: 'object',
-          properties: {
-            id: { type: 'string' },
-            email: { type: 'string' },
-            firstName: { type: 'string' },
-            lastName: { type: 'string' },
-            role: { type: 'string' },
-            isActive: { type: 'boolean' },
-            createdAt: { type: 'string', format: 'date-time' },
-            updatedAt: { type: 'string', format: 'date-time' },
-          },
-        },
-        accessToken: { type: 'string' },
-        refreshToken: { type: 'string' },
-      },
-    },
+    type: RegisterResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid input data',
+    type: ErrorResponseDto,
   })
   @ApiResponse({
     status: 409,
     description: 'User with this email already exists',
+    type: ErrorResponseDto,
   })
   @ApiResponse({
     status: 429,
@@ -223,13 +179,7 @@ export class AuthController {
   })
   async register(
     @Body(new ZodValidationPipe(userRegistrationSchema))
-    registerDto: {
-      email: string;
-      password: string;
-      firstName: string;
-      lastName: string;
-      role?: string;
-    },
+    registerDto: RegisterUserDto,
   ) {
     return this.authService.register(registerDto);
   }
@@ -246,16 +196,12 @@ export class AuthController {
   @ApiResponse({
     status: 200,
     description: 'Tokens refreshed successfully',
-    schema: {
-      type: 'object',
-      properties: {
-        message: { type: 'string', example: 'Tokens refreshed successfully' },
-      },
-    },
+    type: RefreshResponseDto,
   })
   @ApiResponse({
     status: 401,
     description: 'Invalid refresh token',
+    type: ErrorResponseDto,
   })
   async refresh(
     @Request() req: any,
@@ -300,16 +246,12 @@ export class AuthController {
   @ApiResponse({
     status: 200,
     description: 'Successfully logged out',
-    schema: {
-      type: 'object',
-      properties: {
-        message: { type: 'string', example: 'Successfully logged out' },
-      },
-    },
+    type: LogoutResponseDto,
   })
   @ApiResponse({
     status: 401,
     description: 'Unauthorized',
+    type: ErrorResponseDto,
   })
   async logout(
     @Request() req: any,
@@ -337,28 +279,12 @@ export class AuthController {
   @ApiResponse({
     status: 200,
     description: 'Current user information',
-    schema: {
-      type: 'object',
-      properties: {
-        id: { type: 'string' },
-        email: { type: 'string' },
-        firstName: { type: 'string' },
-        lastName: { type: 'string' },
-        businessName: { type: 'string' },
-        role: { type: 'string' },
-        subscriptionStatus: { type: 'string' },
-        trialEndsAt: { type: 'string', format: 'date-time', nullable: true },
-        isEmailVerified: { type: 'boolean' },
-        isActive: { type: 'boolean' },
-        lastLoginAt: { type: 'string', format: 'date-time' },
-        createdAt: { type: 'string', format: 'date-time' },
-        updatedAt: { type: 'string', format: 'date-time' },
-      },
-    },
+    type: UserProfileDto,
   })
   @ApiResponse({
     status: 401,
     description: 'Unauthorized',
+    type: ErrorResponseDto,
   })
   async getProfile(@Request() req: any) {
     const userId = req.user.id;
@@ -383,19 +309,7 @@ export class AuthController {
   @ApiResponse({
     status: 201,
     description: 'Transfer session created successfully',
-    schema: {
-      type: 'object',
-      properties: {
-        sessionId: {
-          type: 'string',
-          description: 'Unique session ID for token exchange',
-        },
-        expiresIn: {
-          type: 'number',
-          description: 'Time until session expires (seconds)',
-        },
-      },
-    },
+    type: TransferSessionResponseDto,
   })
   @ApiResponse({
     status: 429,
@@ -423,15 +337,10 @@ export class AuthController {
   @ApiResponse({
     status: 200,
     description: 'Cookies set successfully',
-    schema: {
-      type: 'object',
-      properties: {
-        message: { type: 'string', example: 'Session created successfully' },
-      },
-    },
+    type: CreateCookieSessionResponseDto,
   })
   async createCookieSession(
-    @Body() body: { accessToken: string; refreshToken: string },
+    @Body() body: CreateCookieSessionDto,
     @Res({ passthrough: true }) res: FastifyReply,
   ) {
     const { accessToken, refreshToken } = body;
@@ -465,18 +374,12 @@ export class AuthController {
   @ApiResponse({
     status: 200,
     description: 'Tokens retrieved successfully',
-    schema: {
-      type: 'object',
-      properties: {
-        accessToken: { type: 'string' },
-        refreshToken: { type: 'string' },
-        userId: { type: 'string' },
-      },
-    },
+    type: TransferSessionTokensDto,
   })
   @ApiResponse({
     status: 401,
     description: 'Invalid or expired session ID',
+    type: ErrorResponseDto,
   })
   @ApiResponse({
     status: 429,

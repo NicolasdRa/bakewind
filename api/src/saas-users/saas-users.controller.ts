@@ -25,6 +25,7 @@ import { Throttle } from '@nestjs/throttler';
 import { SaasUsersService } from './saas-users.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AdminGuard } from '../auth/guards/admin.guard';
+import { subscriptionStatusValues } from '../common/constants/subscription-status.constants';
 import {
   UpdateUserProfileDto,
   ChangePasswordDto,
@@ -187,7 +188,7 @@ export class SaasUsersController {
       properties: {
         status: {
           type: 'string',
-          enum: ['trial', 'active', 'past_due', 'canceled', 'incomplete'],
+          enum: [...subscriptionStatusValues],
         },
         planId: { type: 'string', nullable: true },
         planName: { type: 'string', nullable: true },
