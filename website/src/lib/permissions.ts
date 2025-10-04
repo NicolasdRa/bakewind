@@ -87,7 +87,9 @@ export const getRedirectUrlBasedOnPermission = (role: UserRole): string => {
     const adminAppUrl = import.meta.env.VITE_ADMIN_APP_URL || "http://localhost:3001";
     return adminAppUrl;
   } else if (permissions.includes("PROFILE_SCREEN")) {
-    return "/profile";
+    // Profile is in admin app now
+    const adminAppUrl = import.meta.env.VITE_ADMIN_APP_URL || "http://localhost:3001";
+    return `${adminAppUrl}/profile`;
   } else {
     const adminAppUrl = import.meta.env.VITE_ADMIN_APP_URL || "http://localhost:3001";
     return adminAppUrl;

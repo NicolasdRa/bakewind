@@ -47,13 +47,14 @@ export class ApiClient {
       console.log('📝 [API] Response status:', response.status, response.statusText);
 
       if (!response.ok) {
-        // Handle 401 errors by clearing tokens
+        // Handle 401 errors by clearing tokens and redirecting to admin app login
         if (response.status === 401) {
-          console.warn('🚫 [API] 401 Unauthorized - clearing tokens and redirecting');
+          console.warn('🚫 [API] 401 Unauthorized - clearing tokens and redirecting to admin app');
           localStorage.removeItem('accessToken');
           localStorage.removeItem('refreshToken');
-          // Redirect to login if needed
-          window.location.href = '/login';
+          // Redirect to admin app login
+          const adminAppUrl = import.meta.env.VITE_ADMIN_APP_URL || 'http://localhost:3001';
+          window.location.href = `${adminAppUrl}/login`;
         }
 
         const errorData = await response.json().catch(() => ({

@@ -1,6 +1,5 @@
 import { A } from '@solidjs/router'
-import { Show, createSignal, createEffect, onMount } from 'solid-js'
-import { useAuthUser } from '~/hooks/useAuthUser'
+import { createSignal, createEffect, onMount } from 'solid-js'
 import SEO from '~/components/SEO/SEO'
 import Logo from '~/components/Logo/Logo'
 import ThemeToggle from '~/components/ThemeToggle/ThemeToggle'
@@ -10,7 +9,6 @@ import { APP_URLS } from '~/lib/app-urls'
 import styles from './home/home.module.css'
 
 export default function LandingPage() {
-  const user = useAuthUser()
   const [theme, setTheme] = createSignal<'light' | 'dark'>('light')
   const [mobileMenuOpen, setMobileMenuOpen] = createSignal(false)
 
@@ -70,18 +68,9 @@ export default function LandingPage() {
               <A href="/pricing" class={styles.navLink}>Pricing</A>
               <ThemeToggle theme={theme()} onToggle={toggleTheme} />
 
-              <Show
-                when={user && user.id}
-                fallback={
-                  <a href={APP_URLS.login} class={styles.loginButton}>
-                    Sign In
-                  </a>
-                }
-              >
-                <a href={APP_URLS.dashboard} class={styles.dashboardButton}>
-                  My Dashboard
-                </a>
-              </Show>
+              <a href={APP_URLS.login} class={styles.loginButton}>
+                Sign In
+              </a>
             </div>
 
             {/* Mobile Menu Button */}
@@ -119,18 +108,9 @@ export default function LandingPage() {
                   <ThemeToggle theme={theme()} onToggle={toggleTheme} />
                 </div>
 
-                <Show
-                  when={user && user.id}
-                  fallback={
-                    <a href={APP_URLS.login} class={styles.mobileLoginButton} onClick={() => setMobileMenuOpen(false)}>
-                      Sign In
-                    </a>
-                  }
-                >
-                  <A href="/dashboard" class={styles.mobileDashboardButton} onClick={() => setMobileMenuOpen(false)}>
-                    My Dashboard
-                  </A>
-                </Show>
+                <a href={APP_URLS.login} class={styles.mobileLoginButton} onClick={() => setMobileMenuOpen(false)}>
+                  Sign In
+                </a>
               </div>
             </div>
           </div>
@@ -150,23 +130,12 @@ export default function LandingPage() {
               </p>
 
               <div class={styles.heroActions}>
-                <Show
-                  when={user && user.id}
-                  fallback={
-                    <>
-                      <a href={APP_URLS.trialSignup} class={styles.ctaPrimary}>
-                        Start Free Trial
-                      </a>
-                      <A href="/features" class={styles.ctaSecondary}>
-                        View Features
-                      </A>
-                    </>
-                  }
-                >
-                  <A href="/dashboard" class={styles.ctaPrimary}>
-                    Go to Dashboard
-                  </A>
-                </Show>
+                <a href={APP_URLS.trialSignup} class={styles.ctaPrimary}>
+                  Start Free Trial
+                </a>
+                <A href="/pricing" class={styles.ctaSecondary}>
+                  View Pricing
+                </A>
               </div>
             </div>
 

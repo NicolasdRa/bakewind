@@ -1,6 +1,5 @@
 import { createSignal, Show, For } from 'solid-js'
 import { A } from '@solidjs/router'
-import { useAuthUser } from '~/hooks/useAuthUser'
 import SEO from '~/components/SEO/SEO'
 import Logo from '~/components/Logo/Logo'
 import ThemeToggle from '~/components/ThemeToggle/ThemeToggle'
@@ -23,7 +22,6 @@ interface PricingTier {
 }
 
 export default function PricingPage() {
-  const user = useAuthUser()
   const [selectedRegion, setSelectedRegion] = createSignal<Region>('US')
   const [theme, setTheme] = createSignal<'light' | 'dark'>('light')
   const [mobileMenuOpen, setMobileMenuOpen] = createSignal(false)
@@ -176,18 +174,9 @@ export default function PricingPage() {
               <A href="/pricing" class={styles.navLink} classList={{ [styles.navLinkActive]: true }}>Pricing</A>
               <ThemeToggle theme={theme()} onToggle={toggleTheme} />
 
-              <Show
-                when={user && user.id}
-                fallback={
-                  <a href={APP_URLS.login} class={styles.loginButton}>
-                    Sign In
-                  </a>
-                }
-              >
-                <a href={APP_URLS.dashboard} class={styles.dashboardButton}>
-                  Dashboard
-                </a>
-              </Show>
+              <a href={APP_URLS.login} class={styles.loginButton}>
+                Sign In
+              </a>
             </div>
 
             {/* Mobile Menu Button */}
@@ -225,18 +214,9 @@ export default function PricingPage() {
                   <ThemeToggle theme={theme()} onToggle={toggleTheme} />
                 </div>
 
-                <Show
-                  when={user && user.id}
-                  fallback={
-                    <a href={APP_URLS.login} class={styles.mobileLoginButton} onClick={() => setMobileMenuOpen(false)}>
-                      Sign In
-                    </a>
-                  }
-                >
-                  <a href={APP_URLS.dashboard} class={styles.mobileDashboardButton} onClick={() => setMobileMenuOpen(false)}>
-                    Dashboard
-                  </a>
-                </Show>
+                <a href={APP_URLS.login} class={styles.mobileLoginButton} onClick={() => setMobileMenuOpen(false)}>
+                  Sign In
+                </a>
               </div>
             </div>
           </div>
@@ -328,18 +308,15 @@ export default function PricingPage() {
                   </div>
 
                   <div class={styles.cardFooter}>
-                    <Show
-                      when={tier.id === 'enterprise'}
-                      fallback={
-                        <a href={APP_URLS.login} class={styles.ctaButton}>
-                          {tier.cta}
-                        </a>
-                      }
-                    >
+                    {tier.id === 'enterprise' ? (
                       <button class={styles.ctaButtonSecondary}>
                         {tier.cta}
                       </button>
-                    </Show>
+                    ) : (
+                      <a href={APP_URLS.trialSignup} class={styles.ctaButton}>
+                        {tier.cta}
+                      </a>
+                    )}
                   </div>
                   </div>
                 )}
@@ -396,7 +373,7 @@ export default function PricingPage() {
             <p class={styles.ctaDescription}>
               Join hundreds of bakeries already using BakeWind to streamline their operations
             </p>
-            <a href={APP_URLS.login} class={styles.ctaButtonLarge}>
+            <a href={APP_URLS.trialSignup} class={styles.ctaButtonLarge}>
               Start Free Trial
             </a>
           </div>
