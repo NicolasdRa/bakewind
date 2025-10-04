@@ -4,6 +4,7 @@ import { useAuthUser } from '~/hooks/useAuthUser'
 import SEO from '~/components/SEO/SEO'
 import Logo from '~/components/Logo/Logo'
 import ThemeToggle from '~/components/ThemeToggle/ThemeToggle'
+import { APP_URLS } from '~/lib/app-urls'
 import styles from './pricing.module.css'
 
 type Region = 'US' | 'UK' | 'DE'
@@ -167,25 +168,25 @@ export default function PricingPage() {
           <div class={styles.navContent}>
             <A href="/" class={styles.logoLink}>
               <Logo size="medium" />
-            </A>
+            </a>
 
             {/* Desktop Navigation */}
             <div class={styles.navActions}>
-              <A href="/" class={styles.navLink}>Home</A>
-              <A href="/pricing" class={styles.navLink} classList={{ [styles.navLinkActive]: true }}>Pricing</A>
+              <A href="/" class={styles.navLink}>Home</a>
+              <A href="/pricing" class={styles.navLink} classList={{ [styles.navLinkActive]: true }}>Pricing</a>
               <ThemeToggle theme={theme()} onToggle={toggleTheme} />
 
               <Show
                 when={user && user.id}
                 fallback={
-                  <A href="/login" class={styles.loginButton}>
+                  <a href={APP_URLS.login} class={styles.loginButton}>
                     Sign In
-                  </A>
+                  </a>
                 }
               >
                 <A href="/dashboard" class={styles.dashboardButton}>
                   Dashboard
-                </A>
+                </a>
               </Show>
             </div>
 
@@ -215,10 +216,10 @@ export default function PricingPage() {
               <div class={styles.mobileMenuContent}>
                 <A href="/" class={styles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>
                   Home
-                </A>
+                </a>
                 <A href="/pricing" class={styles.mobileNavLink} classList={{ [styles.mobileNavLinkActive]: true }} onClick={() => setMobileMenuOpen(false)}>
                   Pricing
-                </A>
+                </a>
 
                 <div class={styles.mobileThemeToggle}>
                   <ThemeToggle theme={theme()} onToggle={toggleTheme} />
@@ -227,14 +228,14 @@ export default function PricingPage() {
                 <Show
                   when={user && user.id}
                   fallback={
-                    <A href="/login" class={styles.mobileLoginButton} onClick={() => setMobileMenuOpen(false)}>
+                    <a href={APP_URLS.login} class={styles.mobileLoginButton} onClick={() => setMobileMenuOpen(false)}>
                       Sign In
-                    </A>
+                    </a>
                   }
                 >
                   <A href="/dashboard" class={styles.mobileDashboardButton} onClick={() => setMobileMenuOpen(false)}>
                     Dashboard
-                  </A>
+                  </a>
                 </Show>
               </div>
             </div>
@@ -330,9 +331,9 @@ export default function PricingPage() {
                     <Show
                       when={tier.id === 'enterprise'}
                       fallback={
-                        <A href="/login" class={styles.ctaButton}>
+                        <a href={APP_URLS.login} class={styles.ctaButton}>
                           {tier.cta}
-                        </A>
+                        </a>
                       }
                     >
                       <button class={styles.ctaButtonSecondary}>
@@ -395,9 +396,9 @@ export default function PricingPage() {
             <p class={styles.ctaDescription}>
               Join hundreds of bakeries already using BakeWind to streamline their operations
             </p>
-            <A href="/login" class={styles.ctaButtonLarge}>
+            <a href={APP_URLS.login} class={styles.ctaButtonLarge}>
               Start Free Trial
-            </A>
+            </a>
           </div>
         </section>
       </div>

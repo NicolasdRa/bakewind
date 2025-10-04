@@ -6,6 +6,7 @@ import Logo from '~/components/Logo/Logo'
 import ThemeToggle from '~/components/ThemeToggle/ThemeToggle'
 import FeatureIcon from '~/components/FeatureIcon/FeatureIcon'
 import DashboardPreview from '~/components/DashboardPreview/DashboardPreview'
+import { APP_URLS } from '~/lib/app-urls'
 import styles from './home/home.module.css'
 
 export default function LandingPage() {
@@ -72,14 +73,14 @@ export default function LandingPage() {
               <Show
                 when={user && user.id}
                 fallback={
-                  <A href="/login" class={styles.loginButton}>
+                  <a href={APP_URLS.login} class={styles.loginButton}>
                     Sign In
-                  </A>
+                  </a>
                 }
               >
-                <A href="/dashboard" class={styles.dashboardButton}>
+                <a href={APP_URLS.dashboard} class={styles.dashboardButton}>
                   My Dashboard
-                </A>
+                </a>
               </Show>
             </div>
 
@@ -121,9 +122,9 @@ export default function LandingPage() {
                 <Show
                   when={user && user.id}
                   fallback={
-                    <A href="/login" class={styles.mobileLoginButton} onClick={() => setMobileMenuOpen(false)}>
+                    <a href={APP_URLS.login} class={styles.mobileLoginButton} onClick={() => setMobileMenuOpen(false)}>
                       Sign In
-                    </A>
+                    </a>
                   }
                 >
                   <A href="/dashboard" class={styles.mobileDashboardButton} onClick={() => setMobileMenuOpen(false)}>
@@ -153,9 +154,9 @@ export default function LandingPage() {
                   when={user && user.id}
                   fallback={
                     <>
-                      <A href="/trial-signup" class={styles.ctaPrimary}>
+                      <a href={APP_URLS.trialSignup} class={styles.ctaPrimary}>
                         Start Free Trial
-                      </A>
+                      </a>
                       <A href="/features" class={styles.ctaSecondary}>
                         View Features
                       </A>
