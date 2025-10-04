@@ -39,16 +39,17 @@ import { LoginUserDto } from '../users/dto/login-user.dto';
 import { userRegistrationSchema } from '../users/users.validation';
 import { Public } from './decorators/public.decorator';
 import { TrialSignupDto } from './trial-signup.validation';
-import {
-  CreateTransferSessionDto,
-  ExchangeTransferSessionDto,
-  TransferSessionResponse,
-  TransferSessionTokens,
-  TransferSessionResponseDto,
-  TransferSessionTokensDto,
-  CreateCookieSessionDto,
-  CreateCookieSessionResponseDto,
-} from './dto/auth-transfer.dto';
+// DEPRECATED: Transfer session DTOs no longer needed with admin-centric auth
+// import {
+//   CreateTransferSessionDto,
+//   ExchangeTransferSessionDto,
+//   TransferSessionResponse,
+//   TransferSessionTokens,
+//   TransferSessionResponseDto,
+//   TransferSessionTokensDto,
+//   CreateCookieSessionDto,
+//   CreateCookieSessionResponseDto,
+// } from './dto/auth-transfer.dto';
 import {
   RegisterUserDto,
   RegisterResponseDto,
@@ -69,14 +70,16 @@ export class AuthController {
    * Must be consistent across all endpoints
    */
   private getCookieOptions() {
-    // Development: Using reverse proxy on localhost:8080
-    // Production: Using subdomain with shared parent domain
+    const isDevelopment = process.env.NODE_ENV !== 'production';
+
     return {
       httpOnly: true,
-      secure: false, // false for HTTP in development, true for HTTPS in production
-      sameSite: 'lax' as const,
+      secure: !isDevelopment, // true in production (HTTPS), false in dev (HTTP)
+      sameSite: 'lax' as const, // Lax allows cookies on same-site navigation
       path: '/', // Cookies accessible from all paths
-      // Domain not set - cookies will be scoped to the serving domain (localhost:8080 in dev)
+      // Domain not set - cookies scoped to serving domain
+      // Dev: Works with localhost:8080 proxy or direct localhost:3001
+      // Prod: Works with same domain (admin.bakewind.com)
     };
   }
 
@@ -357,6 +360,9 @@ export class AuthController {
     };
   }
 
+  // DEPRECATED: Transfer session endpoints no longer needed with admin-centric auth
+  // Keeping commented for rollback if needed during migration
+  /*
   @Public()
   @Post('create-transfer-session')
   @HttpCode(HttpStatus.CREATED)
@@ -386,7 +392,10 @@ export class AuthController {
       dto.userId,
     );
   }
+  */
 
+  // DEPRECATED: No longer needed - cookies set directly in login/trial-signup
+  /*
   @Public()
   @Post('create-cookie-session')
   @HttpCode(HttpStatus.OK)
@@ -422,7 +431,10 @@ export class AuthController {
 
     return { message: 'Session created successfully' };
   }
+  */
 
+  // DEPRECATED: Transfer session exchange no longer needed
+  /*
   @Public()
   @Post('exchange-transfer-session')
   @HttpCode(HttpStatus.OK)
@@ -452,4 +464,5 @@ export class AuthController {
   ): Promise<TransferSessionTokens> {
     return this.authService.exchangeAuthTransferSession(dto.sessionId);
   }
+  */
 }
