@@ -51,21 +51,14 @@ const Login: Component = () => {
     }
   };
 
-  const customerAppUrl = import.meta.env.VITE_CUSTOMER_APP_URL || 'http://localhost:3000';
-
   return (
     <div class={styles.container}>
       {/* Header */}
       <header class={styles.header}>
-        <a href={customerAppUrl} class={styles.logoLink}>
+        <div class={styles.logoLink}>
           <svg width="32" height="32" viewBox="0 0 100 100" fill="none">
             <path d="M50 10 L90 90 L10 90 Z" fill="#f59e0b" />
           </svg>
-        </a>
-        <div class={styles.headerControls}>
-          <a href={customerAppUrl} class={styles.backLink}>
-            ← Back to Home
-          </a>
         </div>
       </header>
 

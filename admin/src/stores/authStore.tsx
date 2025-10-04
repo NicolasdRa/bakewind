@@ -122,14 +122,12 @@ export const authStore = {
   async logout() {
     setAuthState('isLoading', true);
     try {
-      await authApi.logout(); // This will also redirect to customer app
+      await authApi.logout(); // This will also redirect to login
     } catch (error) {
       console.error('Logout failed:', error);
       // Even if API call fails, clear local state and redirect
       this.clearAuth();
-      window.location.href = import.meta.env.VITE_CUSTOMER_APP_URL
-        ? `${import.meta.env.VITE_CUSTOMER_APP_URL}/login`
-        : 'http://localhost:3001/login';
+      window.location.href = '/login';
     }
   },
 

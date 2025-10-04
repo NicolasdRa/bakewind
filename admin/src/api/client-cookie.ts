@@ -112,8 +112,12 @@ class ApiClient {
 
   private handleUnauthorized() {
     console.log('[ApiClient] Unauthorized - redirecting to login');
-    const customerAppUrl = import.meta.env.VITE_CUSTOMER_APP_URL || 'http://localhost:3000';
-    window.location.href = `${customerAppUrl}/login`;
+    // Only redirect if not already on an auth page
+    const authPages = ['/login', '/register', '/trial-signup', '/forgot-password'];
+    const currentPath = window.location.pathname;
+    if (!authPages.includes(currentPath)) {
+      window.location.href = '/login';
+    }
   }
 
   // Convenience methods
@@ -151,8 +155,7 @@ export const authApi = {
 
   async logout() {
     await apiClient.post('/auth/logout');
-    const customerAppUrl = import.meta.env.VITE_CUSTOMER_APP_URL || 'http://localhost:3000';
-    window.location.href = `${customerAppUrl}/login`;
+    window.location.href = '/login';
   },
 
   async refresh() {

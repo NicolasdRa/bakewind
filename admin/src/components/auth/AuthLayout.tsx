@@ -32,15 +32,6 @@ const AuthLayout: Component<AuthLayoutProps> = (props) => {
           {props.children}
         </div>
 
-        {/* Footer */}
-        <div class="mt-6 text-center">
-          <a
-            href={import.meta.env.VITE_CUSTOMER_APP_URL || 'http://localhost:3000'}
-            class="text-sm text-gray-600 hover:text-gray-700"
-          >
-            ← Back to Homepage
-          </a>
-        </div>
       </div>
     </div>
   );

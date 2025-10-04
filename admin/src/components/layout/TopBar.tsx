@@ -22,9 +22,8 @@ const TopBar: Component<TopBarProps> = (props) => {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
 
-    // Redirect to customer app login
-    const customerAppUrl = import.meta.env.VITE_CUSTOMER_APP_URL || 'http://localhost:3000';
-    window.location.href = `${customerAppUrl}/login`;
+    // Redirect to login page
+    window.location.href = '/login';
   };
 
   const getConnectionStatusColor = () => {
