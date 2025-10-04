@@ -32,7 +32,7 @@ export default function Sidebar(props: SidebarProps) {
       localStorage.removeItem('access_token')
       localStorage.removeItem('refresh_token')
       // Redirect to customer app login
-      window.location.href = import.meta.env.VITE_CUSTOMER_APP_URL || 'http://localhost:3000/login'
+      window.location.href = '/login' // Redirect to admin login
     } catch (error) {
       console.error('Logout failed:', error)
       setIsLoggingOut(false)

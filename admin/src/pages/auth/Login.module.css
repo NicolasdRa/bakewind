@@ -1,0 +1,347 @@
+/* Login Component - Theme-aware */
+
+.container {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  align-items: center;
+  justify-items: center;
+  min-height: 100vh;
+  padding: 2rem 2rem 5rem;
+  gap: 4rem;
+  position: relative;
+  overflow: hidden;
+  background: var(--bg-secondary);
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.1;
+  background: radial-gradient(circle at 30% 20%, var(--shadow-colored) 0%, transparent 50%),
+              radial-gradient(circle at 70% 80%, var(--accent-light) 0%, transparent 60%);
+  animation: float 6s ease-in-out infinite;
+}
+
+@media (min-width: 640px) {
+  .container {
+    padding: 5rem;
+  }
+}
+
+/* Header */
+.header {
+  grid-row-start: 1;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 20rem;
+  position: relative;
+  z-index: 10;
+}
+
+.headerControls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.logoLink {
+  display: flex;
+  align-items: center;
+  transition: opacity 0.2s;
+}
+
+.logoLink:hover {
+  opacity: 0.8;
+}
+
+.backLink {
+  font-size: 0.875rem;
+  text-decoration: none;
+  transition: color 0.2s;
+  color: var(--text-secondary);
+}
+
+.backLink:hover {
+  color: var(--text-primary);
+}
+
+/* Main Content */
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  grid-row-start: 2;
+  align-items: center;
+  position: relative;
+  z-index: 10;
+}
+
+@media (min-width: 640px) {
+  .main {
+    align-items: flex-start;
+  }
+}
+
+.headerText {
+  text-align: center;
+}
+
+@media (min-width: 640px) {
+  .headerText {
+    text-align: left;
+  }
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  transition: color 0.3s;
+  color: var(--text-primary);
+}
+
+.subtitle {
+  transition: color 0.3s;
+  color: var(--text-secondary);
+}
+
+/* Enhanced Form */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  border-radius: 1rem;
+  background: var(--glass-bg);
+  box-shadow: var(--shadow-card);
+}
+
+.form::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 0.25rem;
+  background: linear-gradient(90deg, var(--primary-color) 0%, var(--accent-color) 100%);
+}
+
+.label {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.875rem;
+  font-weight: 500;
+  gap: 0.5rem;
+  transition: color 0.2s;
+  color: var(--text-secondary);
+}
+
+.input {
+  width: 280px;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  transition: all 0.2s;
+  outline: none;
+  background-color: var(--input-bg);
+  color: var(--text-primary);
+}
+
+.input:hover {
+  border-color: var(--border-hover);
+}
+
+.input:focus {
+  border-color: var(--primary-color);
+  box-shadow: var(--input-focus-ring);
+  transform: translateY(-2px);
+}
+
+.input::placeholder {
+  color: var(--text-muted);
+}
+
+/* Error Message */
+.error {
+  background-color: var(--error-light);
+  border: 1px solid var(--error-color);
+  color: var(--error-color);
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+}
+
+/* Enhanced Submit Button */
+.submitButton {
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  font-size: 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  color: white;
+  border: 2px solid var(--primary-color);
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--btn-shadow-primary);
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+}
+
+.submitButton::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transform: translate(-50%, -50%);
+  transition: all 0.5s;
+}
+
+.submitButton:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.submitButton:hover {
+  transform: var(--btn-transform-hover);
+  box-shadow: var(--btn-shadow-primary-hover);
+}
+
+.submitButton:active {
+  transform: var(--btn-transform-active);
+}
+
+.submitButton:disabled {
+  background: var(--text-muted);
+  border-color: var(--text-muted);
+  cursor: not-allowed;
+  box-shadow: none;
+  opacity: 0.5;
+}
+
+.submitButton:disabled:hover {
+  transform: none;
+}
+
+/* Links */
+.links {
+  margin-top: 1.5rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.link {
+  font-size: 0.875rem;
+  text-decoration: none;
+  color: var(--primary-color);
+  transition: color 0.2s;
+  font-weight: 500;
+}
+
+.link:hover {
+  color: var(--primary-hover);
+}
+
+.linkSecondary {
+  font-size: 0.875rem;
+  text-decoration: none;
+  color: var(--text-secondary);
+  transition: color 0.2s;
+}
+
+.linkSecondary:hover {
+  color: var(--text-primary);
+}
+
+/* Demo Credentials */
+.demo {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background-color: var(--info-light);
+  border-radius: 0.5rem;
+  border: 1px solid var(--info-color);
+}
+
+.demoTitle {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--info-color);
+  margin-bottom: 0.5rem;
+}
+
+.demoText {
+  font-size: 0.75rem;
+  color: var(--info-color);
+  margin-bottom: 0.5rem;
+}
+
+.demoCredentials {
+  font-size: 0.75rem;
+  font-family: 'Courier New', monospace;
+  color: var(--info-color);
+}
+
+/* Footer */
+.footer {
+  grid-row-start: 3;
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 10;
+}
+
+.footerLink {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  color: var(--text-secondary);
+  transition: all 0.2s;
+  position: relative;
+}
+
+.footerLink::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background-color: var(--primary-color);
+  transition: all 0.2s;
+}
+
+.footerLink:hover {
+  color: var(--primary-color);
+}
+
+.footerLink:hover::after {
+  width: 100%;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}

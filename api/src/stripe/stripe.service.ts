@@ -185,7 +185,7 @@ export class StripeService {
       case 'customer.subscription.created':
       case 'customer.subscription.updated':
       case 'customer.subscription.deleted':
-        const subscription = event.data.object as Stripe.Subscription;
+        const subscription = event.data.object;
         this.logger.log(
           `Subscription ${subscription.id} status: ${subscription.status}`,
         );
@@ -193,13 +193,13 @@ export class StripeService {
         break;
 
       case 'invoice.payment_succeeded':
-        const invoice = event.data.object as Stripe.Invoice;
+        const invoice = event.data.object;
         this.logger.log(`Payment succeeded for invoice ${invoice.id}`);
         // TODO: Update database payment status
         break;
 
       case 'invoice.payment_failed':
-        const failedInvoice = event.data.object as Stripe.Invoice;
+        const failedInvoice = event.data.object;
         this.logger.log(`Payment failed for invoice ${failedInvoice.id}`);
         // TODO: Handle payment failure
         break;

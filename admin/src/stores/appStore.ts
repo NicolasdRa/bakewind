@@ -97,13 +97,15 @@ export const appActions = {
 // Export the store state (read-only)
 export { appState }
 
-// Set up theme reactive effect (SPA only, no SSR check needed)
-createEffect(() => {
-  document.documentElement.setAttribute('data-theme', appState.theme)
-})
-
 // Export a composable for easy component integration
-export const useAppStore = () => ({
-  state: appState,
-  actions: appActions
-})
+export const useAppStore = () => {
+  // Set up theme reactive effect inside the hook (avoids createRoot warning)
+  createEffect(() => {
+    document.documentElement.setAttribute('data-theme', appState.theme)
+  })
+
+  return {
+    state: appState,
+    actions: appActions
+  }
+}

@@ -1,21 +1,6 @@
 version: '3.8'
 
 services:
-  nginx:
-    image: nginx:alpine
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./nginx/ssl:/etc/nginx/ssl
-    depends_on:
-      - bakewind-api
-      - bakewind-customer
-      - bakewind-admin
-    networks:
-      - bakewind-network
-
   postgres:
     image: postgres:16-alpine
     environment:
@@ -39,9 +24,9 @@ services:
     networks:
       - bakewind-network
 
-  bakewind-api:
+  api:
     build:
-      context: ./bakewind-api
+      context: ./api
       dockerfile: Dockerfile
     environment:
       NODE_ENV: production
@@ -49,37 +34,41 @@ services:
       JWT_SECRET: ${JWT_SECRET:-your-jwt-secret-here}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-your-jwt-refresh-secret-here}
       REDIS_URL: redis://redis:6379
-      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,http://localhost:3001}
+      CORS_ORIGIN: http://localhost:3000,http://localhost:3001
     ports:
-      - "3010:3000"
+      - "5000:5000"
     depends_on:
       - postgres
       - redis
     networks:
       - bakewind-network
 
-  bakewind-customer:
+  website:
     build:
-      context: ./bakewind-customer
+      context: ./website
       dockerfile: Dockerfile
     environment:
       NODE_ENV: production
-      API_BASE_URL: http://bakewind-api:3000
+      VITE_API_URL: http://localhost:5000/api/v1
+      VITE_ADMIN_APP_URL: http://localhost:3001
     ports:
       - "3000:3000"
     depends_on:
-      - bakewind-api
+      - api
     networks:
       - bakewind-network
 
-  bakewind-admin:
+  admin:
     build:
-      context: ./bakewind-admin
+      context: ./admin
       dockerfile: Dockerfile
+    environment:
+      VITE_API_URL: http://localhost:5000/api/v1
+      VITE_CUSTOMER_APP_URL: http://localhost:3000
     ports:
       - "3001:80"
     depends_on:
-      - bakewind-api
+      - api
     networks:
       - bakewind-network
 

@@ -11,7 +11,7 @@ export default defineConfig({
   },
   server: {
     port: 3001,
-    strictPort: false,
+    strictPort: true, // Fail if port 3001 is taken instead of using another port
     cors: true,
   },
   base: '/',

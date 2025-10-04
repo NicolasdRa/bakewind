@@ -15,7 +15,7 @@ const ProtectedRoute: ParentComponent = (props) => {
   const handleLoginRedirect = () => {
 console.log('[ProtectedRoute] Redirecting to login page');
 
-    const customerAppUrl = import.meta.env.VITE_CUSTOMER_APP_URL || 'http://localhost:3000';
+    const customerAppUrl = import.meta.env.VITE_CUSTOMER_APP_URL || 'http://localhost:3001';
     window.location.href = `${customerAppUrl}/login`;
   };
 

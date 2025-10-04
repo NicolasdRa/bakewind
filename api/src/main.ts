@@ -109,16 +109,11 @@ async function bootstrap() {
   });
 
   // Enable CORS with environment-specific origins for SaaS applications
-  const corsOrigins = process.env.CORS_ORIGINS?.split(',') || [
-    'http://localhost:8080', // Reverse proxy (development)
-    'http://localhost:3000', // Direct customer app (development)
-    'http://localhost:3001', // Direct admin app (development)
-    'http://localhost:3002', // SaaS customer portal (development)
-    'https://customer.bakewind.com', // Customer app (production)
+  const corsOrigins = process.env.CORS_ORIGIN?.split(',') || [
+    'http://localhost:3000', // Website (development)
+    'http://localhost:3001', // Admin app (development)
+    'https://www.bakewind.com', // Website (production)
     'https://admin.bakewind.com', // Admin app (production)
-    'https://portal.bakewind.com', // SaaS customer portal (production)
-    'https://www.bakewind.com', // Main website (production)
-    'https://bakewind.com', // Main website (production - apex domain)
   ];
 
   app.enableCors({

@@ -10,18 +10,14 @@ import {
   Res,
   UnauthorizedException,
 } from '@nestjs/common';
-import { FastifyReply } from 'fastify';
+import { FastifyReply, FastifyRequest } from 'fastify';
+import type { AuditContext } from './auth.service';
 
-interface RequestWithUser {
+interface RequestWithUser extends FastifyRequest {
   user: {
     id: string;
     email: string;
     role: string;
-  };
-  auditContext?: Record<string, any>;
-  cookies?: Record<string, string>;
-  headers: {
-    authorization?: string;
   };
 }
 
@@ -32,24 +28,13 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
-import { AuthService, type AuthResult } from './auth.service';
+import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 import { LoginUserDto } from '../users/dto/login-user.dto';
 import { userRegistrationSchema } from '../users/users.validation';
 import { Public } from './decorators/public.decorator';
 import { TrialSignupDto } from './trial-signup.validation';
-// DEPRECATED: Transfer session DTOs no longer needed with admin-centric auth
-// import {
-//   CreateTransferSessionDto,
-//   ExchangeTransferSessionDto,
-//   TransferSessionResponse,
-//   TransferSessionTokens,
-//   TransferSessionResponseDto,
-//   TransferSessionTokensDto,
-//   CreateCookieSessionDto,
-//   CreateCookieSessionResponseDto,
-// } from './dto/auth-transfer.dto';
 import {
   RegisterUserDto,
   RegisterResponseDto,
@@ -66,6 +51,22 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   /**
+   * Extract audit context from request
+   */
+  private getAuditContext(req: RequestWithUser): AuditContext {
+    const context: AuditContext = {};
+
+    if (req.ip) context.ipAddress = req.ip;
+    if (req.headers['user-agent'])
+      context.userAgent = req.headers['user-agent'];
+    if (req.headers['x-correlation-id']) {
+      context.correlationId = req.headers['x-correlation-id'] as string;
+    }
+
+    return context;
+  }
+
+  /**
    * Get cookie options for tokens
    * Must be consistent across all endpoints
    */
@@ -78,8 +79,6 @@ export class AuthController {
       sameSite: 'lax' as const, // Lax allows cookies on same-site navigation
       path: '/', // Cookies accessible from all paths
       // Domain not set - cookies scoped to serving domain
-      // Dev: Works with localhost:8080 proxy or direct localhost:3001
-      // Prod: Works with same domain (admin.bakewind.com)
     };
   }
 
@@ -112,25 +111,8 @@ export class AuthController {
     @Request() req: RequestWithUser,
     @Res({ passthrough: true }) res: FastifyReply,
   ) {
-    console.log('🚀 Auth Controller login method called with:', loginDto);
-    const auditContext = req.auditContext;
-
-    // Try SaaS login first, fall back to regular login
-    let result: AuthResult | null = null;
-    try {
-      result = await this.authService.saasLogin(
-        loginDto.email,
-        loginDto.password,
-        auditContext,
-      );
-    } catch {
-      // If SaaS login fails, try regular user login
-      result = await this.authService.login(loginDto, auditContext);
-    }
-
-    if (!result) {
-      throw new UnauthorizedException('Login failed');
-    }
+    const auditContext = this.getAuditContext(req);
+    const result = await this.authService.login(loginDto, auditContext);
 
     // Set httpOnly cookies for tokens
     const cookieOptions = this.getCookieOptions();
@@ -186,10 +168,50 @@ export class AuthController {
     @Request() req: RequestWithUser,
     @Res({ passthrough: true }) res: FastifyReply,
   ) {
-    const auditContext = req.auditContext || {};
-    const result = await this.authService.trialSignup(
-      trialSignupDto,
+    const {
+      businessName,
+      fullName,
+      email,
+      phone,
+      password,
+      locations,
+      agreeToTerms,
+    } = trialSignupDto;
+
+    if (!agreeToTerms) {
+      throw new UnauthorizedException('You must agree to the terms of service');
+    }
+
+    // Parse full name into firstName and lastName
+    const nameParts = fullName.trim().split(' ');
+    const firstName = nameParts[0] || email.split('@')[0] || 'User';
+    const lastName = nameParts.slice(1).join(' ') || '';
+
+    // Calculate trial end date (14 days from now)
+    const trialEndsAt = new Date();
+    trialEndsAt.setDate(trialEndsAt.getDate() + 14);
+
+    const auditContext = this.getAuditContext(req);
+
+    // Map to standard register DTO and call register with metadata
+    const result = await this.authService.register(
+      {
+        email,
+        password,
+        firstName,
+        lastName,
+        businessName,
+        ...(phone && { phoneNumber: phone }),
+        role: 'TRIAL_USER',
+        subscriptionStatus: 'trial' as const,
+        trialEndsAt,
+      },
       auditContext,
+      {
+        businessSize: locations,
+        fullName,
+        businessName,
+      },
     );
 
     // Set httpOnly cookies for tokens
@@ -245,8 +267,10 @@ export class AuthController {
   async register(
     @Body(new ZodValidationPipe(userRegistrationSchema))
     registerDto: RegisterUserDto,
+    @Request() req: RequestWithUser,
   ) {
-    return this.authService.register(registerDto);
+    const auditContext = this.getAuditContext(req);
+    return this.authService.register(registerDto, auditContext);
   }
 
   @Post('refresh')
@@ -359,110 +383,4 @@ export class AuthController {
       locationId: locationIds,
     };
   }
-
-  // DEPRECATED: Transfer session endpoints no longer needed with admin-centric auth
-  // Keeping commented for rollback if needed during migration
-  /*
-  @Public()
-  @Post('create-transfer-session')
-  @HttpCode(HttpStatus.CREATED)
-  @Throttle({ default: { limit: 10, ttl: 60000 } }) // 10 per minute
-  @ApiOperation({
-    summary:
-      'Create a secure auth transfer session for cross-domain authentication',
-    description:
-      'Creates a one-time, short-lived (30s) session for securely transferring tokens between domains. ' +
-      'This is used when redirecting from the customer website to the admin dashboard.',
-  })
-  @ApiResponse({
-    status: 201,
-    description: 'Transfer session created successfully',
-    type: TransferSessionResponseDto,
-  })
-  @ApiResponse({
-    status: 429,
-    description: 'Too many requests',
-  })
-  async createTransferSession(
-    @Body() dto: CreateTransferSessionDto,
-  ): Promise<TransferSessionResponse> {
-    return this.authService.createAuthTransferSession(
-      dto.accessToken,
-      dto.refreshToken,
-      dto.userId,
-    );
-  }
-  */
-
-  // DEPRECATED: No longer needed - cookies set directly in login/trial-signup
-  /*
-  @Public()
-  @Post('create-cookie-session')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({
-    summary: 'Create cookie session from tokens',
-    description:
-      'Internal endpoint used by admin dashboard to set httpOnly cookies ' +
-      'after receiving tokens from transfer session exchange.',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Cookies set successfully',
-    type: CreateCookieSessionResponseDto,
-  })
-  createCookieSession(
-    @Body() body: CreateCookieSessionDto,
-    @Res({ passthrough: true }) res: FastifyReply,
-  ) {
-    const { accessToken, refreshToken } = body;
-
-    // Set httpOnly cookies
-    const cookieOptions = this.getCookieOptions();
-
-    res.setCookie('accessToken', accessToken, {
-      ...cookieOptions,
-      maxAge: 15 * 60 * 1000, // 15 minutes
-    });
-
-    res.setCookie('refreshToken', refreshToken, {
-      ...cookieOptions,
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
-
-    return { message: 'Session created successfully' };
-  }
-  */
-
-  // DEPRECATED: Transfer session exchange no longer needed
-  /*
-  @Public()
-  @Post('exchange-transfer-session')
-  @HttpCode(HttpStatus.OK)
-  @Throttle({ default: { limit: 10, ttl: 60000 } }) // 10 per minute
-  @ApiOperation({
-    summary: 'Exchange a transfer session ID for authentication tokens',
-    description:
-      'Exchanges a one-time session ID for the stored access and refresh tokens. ' +
-      'The session is deleted after exchange and cannot be reused.',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Tokens retrieved successfully',
-    type: TransferSessionTokensDto,
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Invalid or expired session ID',
-    type: ErrorResponseDto,
-  })
-  @ApiResponse({
-    status: 429,
-    description: 'Too many requests',
-  })
-  async exchangeTransferSession(
-    @Body() dto: ExchangeTransferSessionDto,
-  ): Promise<TransferSessionTokens> {
-    return this.authService.exchangeAuthTransferSession(dto.sessionId);
-  }
-  */
 }

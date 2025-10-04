@@ -1,7 +1,7 @@
 import { Component, createSignal, Show } from 'solid-js';
-import { useNavigate } from '@solidjs/router';
+import { useNavigate, A } from '@solidjs/router';
 import { useAuth } from '../../stores/authStore';
-import AuthLayout from '../../components/auth/AuthLayout';
+import styles from './Login.module.css';
 
 const Login: Component = () => {
   const [email, setEmail] = createSignal('');
@@ -51,82 +51,104 @@ const Login: Component = () => {
     }
   };
 
+  const customerAppUrl = import.meta.env.VITE_CUSTOMER_APP_URL || 'http://localhost:3000';
+
   return (
-    <AuthLayout title="Sign In to BakeWind" subtitle="Access your bakery dashboard">
-      <form onSubmit={handleSubmit} class="space-y-6">
-        {/* Email input */}
-        <div>
-          <label for="email" class="block text-sm font-medium text-gray-700 mb-1">
-            Email Address
-          </label>
-          <input
-            type="email"
-            id="email"
-            value={email()}
-            onInput={(e) => setEmail(e.currentTarget.value)}
-            required
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="your.email@example.com"
-          />
+    <div class={styles.container}>
+      {/* Header */}
+      <header class={styles.header}>
+        <a href={customerAppUrl} class={styles.logoLink}>
+          <svg width="32" height="32" viewBox="0 0 100 100" fill="none">
+            <path d="M50 10 L90 90 L10 90 Z" fill="#f59e0b" />
+          </svg>
+        </a>
+        <div class={styles.headerControls}>
+          <a href={customerAppUrl} class={styles.backLink}>
+            ← Back to Home
+          </a>
+        </div>
+      </header>
+
+      <main class={styles.main}>
+        <div class={styles.headerText}>
+          <h2 class={styles.title}>Welcome back</h2>
+          <p class={styles.subtitle}>Sign in to access your bakery dashboard</p>
         </div>
 
-        {/* Password input */}
-        <div>
-          <label for="password" class="block text-sm font-medium text-gray-700 mb-1">
+        <form onSubmit={handleSubmit} class={styles.form}>
+          <label class={styles.label}>
+            Email
+            <input
+              type="email"
+              value={email()}
+              onInput={(e) => setEmail(e.currentTarget.value)}
+              required
+              autocomplete="email"
+              placeholder="Enter your email"
+              class={styles.input}
+            />
+          </label>
+
+          <label class={styles.label}>
             Password
+            <input
+              type="password"
+              value={password()}
+              onInput={(e) => setPassword(e.currentTarget.value)}
+              required
+              autocomplete="current-password"
+              placeholder="Enter your password"
+              class={styles.input}
+            />
           </label>
-          <input
-            type="password"
-            id="password"
-            value={password()}
-            onInput={(e) => setPassword(e.currentTarget.value)}
-            required
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="••••••••"
-          />
-        </div>
 
-        {/* Error message */}
-        <Show when={error()}>
-          <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-            {error()}
+          <Show when={error()}>
+            <div class={styles.error}>
+              {error()}
+            </div>
+          </Show>
+
+          <button
+            type="submit"
+            disabled={isLoading() || !email() || !password()}
+            class={styles.submitButton}
+          >
+            {isLoading() ? 'Signing In...' : 'Sign In'}
+          </button>
+
+          <div class={styles.links}>
+            <div>
+              <A href="/trial-signup" class={styles.link}>
+                Don't have an account? Start free trial
+              </A>
+            </div>
+            <div>
+              <A href="/forgot-password" class={styles.linkSecondary}>
+                Forgot your password?
+              </A>
+            </div>
           </div>
-        </Show>
 
-        {/* Submit button */}
-        <button
-          type="submit"
-          disabled={isLoading() || !email() || !password()}
-          class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed font-medium"
-        >
-          {isLoading() ? 'Signing In...' : 'Sign In'}
-        </button>
-      </form>
+          <div class={styles.demo}>
+            <h3 class={styles.demoTitle}>Demo Account</h3>
+            <p class={styles.demoText}>Test the application with:</p>
+            <div class={styles.demoCredentials}>
+              <div>Email: admin@bakewind.com</div>
+              <div>Password: password123</div>
+            </div>
+          </div>
+        </form>
+      </main>
 
-      {/* Links */}
-      <div class="mt-6 text-center space-y-2">
-        <div>
-          <a href="/trial-signup" class="text-blue-600 hover:text-blue-700 text-sm font-medium">
-            Don't have an account? Start free trial
-          </a>
-        </div>
-        <div>
-          <a href="/forgot-password" class="text-gray-600 hover:text-gray-700 text-sm">
-            Forgot your password?
-          </a>
-        </div>
-      </div>
-
-      {/* Demo credentials */}
-      <div class="mt-6 p-4 bg-blue-50 rounded-lg">
-        <h3 class="text-sm font-semibold text-blue-800 mb-2">Demo Account</h3>
-        <p class="text-xs text-blue-700 mb-2">Test the application with:</p>
-        <div class="text-xs font-mono text-blue-600">
-          <div>Email: admin@bakewind.com</div>
-          <div>Password: password123</div>
-        </div>
-      </div>
-    </AuthLayout>
+      <footer class={styles.footer}>
+        <a href="#" class={styles.footerLink}>
+          About Us
+        </a>
+        <a href="#" class={styles.footerLink}>
+          Privacy Policy & Terms →
+        </a>
+      </footer>
+    </div>
   );
 };
 

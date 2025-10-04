@@ -168,12 +168,12 @@ export default function PricingPage() {
           <div class={styles.navContent}>
             <A href="/" class={styles.logoLink}>
               <Logo size="medium" />
-            </a>
+            </A>
 
             {/* Desktop Navigation */}
             <div class={styles.navActions}>
-              <A href="/" class={styles.navLink}>Home</a>
-              <A href="/pricing" class={styles.navLink} classList={{ [styles.navLinkActive]: true }}>Pricing</a>
+              <A href="/" class={styles.navLink}>Home</A>
+              <A href="/pricing" class={styles.navLink} classList={{ [styles.navLinkActive]: true }}>Pricing</A>
               <ThemeToggle theme={theme()} onToggle={toggleTheme} />
 
               <Show
@@ -184,7 +184,7 @@ export default function PricingPage() {
                   </a>
                 }
               >
-                <A href="/dashboard" class={styles.dashboardButton}>
+                <a href={APP_URLS.dashboard} class={styles.dashboardButton}>
                   Dashboard
                 </a>
               </Show>
@@ -216,10 +216,10 @@ export default function PricingPage() {
               <div class={styles.mobileMenuContent}>
                 <A href="/" class={styles.mobileNavLink} onClick={() => setMobileMenuOpen(false)}>
                   Home
-                </a>
+                </A>
                 <A href="/pricing" class={styles.mobileNavLink} classList={{ [styles.mobileNavLinkActive]: true }} onClick={() => setMobileMenuOpen(false)}>
                   Pricing
-                </a>
+                </A>
 
                 <div class={styles.mobileThemeToggle}>
                   <ThemeToggle theme={theme()} onToggle={toggleTheme} />
@@ -233,7 +233,7 @@ export default function PricingPage() {
                     </a>
                   }
                 >
-                  <A href="/dashboard" class={styles.mobileDashboardButton} onClick={() => setMobileMenuOpen(false)}>
+                  <a href={APP_URLS.dashboard} class={styles.mobileDashboardButton} onClick={() => setMobileMenuOpen(false)}>
                     Dashboard
                   </a>
                 </Show>

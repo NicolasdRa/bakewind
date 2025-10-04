@@ -86,21 +86,22 @@ npm run preview         # Preview production build
 ### Customer Landing App (website/) - Port 3000
 - **Framework**: SolidStart with SSR for SEO optimization
 - **Styling**: Tailwind CSS v4
-- **Purpose**: Public landing pages, pricing, trial signups, authentication
+- **Purpose**: Public landing pages, pricing, marketing content (NO authentication)
 - **Key directories**:
-  - `routes/` - SSR routes for landing, pricing, features, login
+  - `routes/` - SSR routes for landing, pricing, features
   - `components/` - Marketing UI components (NO dashboard components)
-  - `stores/` - Authentication state management
+  - `lib/app-urls.ts` - Centralized URLs for linking to admin app
 
 ### Admin Dashboard App (admin/) - Port 3001
 - **Framework**: Solid.js client-side SPA
 - **Router**: @solidjs/router for client-side routing
-- **Purpose**: Authenticated bakery management features
-- **Features**: Orders, inventory, production, recipes, analytics
+- **Purpose**: ALL authentication + bakery management features
+- **Features**: Login, signup, orders, inventory, production, recipes, analytics
 - **Key directories**:
+  - `pages/auth/` - Authentication pages (Login, Trial Signup, Register, Forgot Password)
   - `pages/` - Dashboard page components
-  - `components/` - Reusable UI components
-  - `stores/` - Auth store and state management
+  - `components/auth/` - Auth UI components (AuthLayout)
+  - `stores/authStore.tsx` - Cookie-based auth state management
   - `api/` - API client for backend communication
   - `layouts/` - Layout components
 
@@ -136,9 +137,9 @@ VITE_CUSTOMER_APP_URL=http://localhost:3000
 ## Important Notes
 
 ### Application Routing Pattern
-- **website/**: SSR routes for public pages (landing, pricing, features, login)
-- **admin/**: Client-side routing for authenticated management features
-- Authentication in website redirects to admin after successful login
+- **website/**: SSR routes for public pages (landing, pricing, features)
+- **admin/**: Client-side routing for ALL authentication + management features
+- No reverse proxy needed - apps run on separate ports in development
 
 ### Database Operations
 - Backend API uses PostgreSQL with connection string from `DATABASE_URL`
@@ -146,18 +147,25 @@ VITE_CUSTOMER_APP_URL=http://localhost:3000
 - Admin: No local database, uses localStorage for tokens
 - Backend uses Drizzle ORM for all database operations
 
-### Authentication Flow
-1. User logs in via website (SSR app at localhost:3000)
-2. Backend API validates and returns JWT tokens (access + refresh)
-3. Website redirects to admin (SPA at localhost:3001) with tokens in URL params
-4. Admin extracts tokens, stores in localStorage, cleans URL
-5. Admin uses JWT for authenticated API requests
-6. No dashboard routes in website - clean separation
+### Authentication Flow (Admin-Centric)
+1. User visits marketing website (SSR app at localhost:3000) - NO auth state
+2. User clicks "Sign In" or "Start Trial" → Redirects to admin app auth pages
+3. User logs in on admin app (localhost:3001/login)
+4. Backend API validates and sets httpOnly cookies (access + refresh tokens)
+5. Admin app redirects to /dashboard/overview
+6. All authenticated requests use httpOnly cookies automatically
+7. Website remains completely stateless - pure marketing content
 
-### Port Configuration
+**Important**: All authentication (login, signup, password reset) happens in the admin app.
+The marketing website has NO auth pages - it only links to admin auth routes.
+
+### Port Configuration (Development)
 - **api**: localhost:5000
 - **website**: localhost:3000
 - **admin**: localhost:3001
+
+**No reverse proxy required** - Each app runs independently on its own port.
+User navigates between apps via direct links (e.g., website links to `http://localhost:3001/login`).
 
 ### Testing
 - Backend: Jest for unit/e2e tests

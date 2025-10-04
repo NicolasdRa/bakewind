@@ -192,7 +192,7 @@ export const authApi = {
     } finally {
       apiClient.clearTokens();
       // Redirect to customer app login
-      window.location.href = import.meta.env.VITE_CUSTOMER_APP_URL || 'http://localhost:3000/login';
+      window.location.href = '/login'; // Redirect to admin login, not customer app
     }
   },
 

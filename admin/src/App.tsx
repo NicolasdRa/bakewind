@@ -17,8 +17,6 @@ const AnalyticsPage = lazy(() => import("./pages/analytics/AnalyticsPage"));
 const ProductsPage = lazy(() => import("./pages/Products"));
 const ProfilePage = lazy(() => import("./pages/Profile"));
 const SettingsPage = lazy(() => import("./pages/Settings"));
-const AuthCallback = lazy(() => import("./pages/AuthCallback"));
-const DevLogin = lazy(() => import("./pages/DevLogin"));
 
 // Auth pages (public routes)
 const Login = lazy(() => import("./pages/auth/Login"));
@@ -29,23 +27,13 @@ const ForgotPassword = lazy(() => import("./pages/auth/ForgotPassword"));
 const App: Component = () => {
   console.log('[App] Rendering App component');
 
-  // Get base path from environment (for proxy setup) or use root
-  const basePath = import.meta.env.VITE_BASE_PATH || '';
-  console.log('[App] Base path:', basePath);
-
   return (
-    <Router base={basePath} root={RootLayout}>
+    <Router root={RootLayout}>
       {/* PUBLIC AUTH ROUTES - No protection needed */}
       <Route path="/login" component={Login} />
       <Route path="/trial-signup" component={TrialSignup} />
       <Route path="/register" component={Register} />
       <Route path="/forgot-password" component={ForgotPassword} />
-
-      {/* Auth callback route - public, no protection */}
-      <Route path="/auth/callback" component={AuthCallback} />
-
-      {/* Development-only direct login (bypasses cookie issues on localhost) */}
-      <Route path="/dev-login" component={DevLogin} />
 
       {/* Redirect root to dashboard */}
       <Route path="/" component={() => <Navigate href="/dashboard/overview" />} />

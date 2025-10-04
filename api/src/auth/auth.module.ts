@@ -3,7 +3,6 @@ import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { UsersModule } from '../users/users.module';
-import { SaasUsersModule } from '../saas-users/saas-users.module';
 import { TrialsModule } from '../trials/trials.module';
 import { UserSessionsModule } from '../user-sessions/user-sessions.module';
 import { StripeModule } from '../stripe/stripe.module';
@@ -15,7 +14,6 @@ import { LocalStrategy } from './strategies/local.strategy';
 @Module({
   imports: [
     UsersModule,
-    SaasUsersModule,
     TrialsModule,
     UserSessionsModule,
     StripeModule,

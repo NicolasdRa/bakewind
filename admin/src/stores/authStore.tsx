@@ -129,7 +129,7 @@ export const authStore = {
       this.clearAuth();
       window.location.href = import.meta.env.VITE_CUSTOMER_APP_URL
         ? `${import.meta.env.VITE_CUSTOMER_APP_URL}/login`
-        : 'http://localhost:3000/login';
+        : 'http://localhost:3001/login';
     }
   },
 

@@ -3,25 +3,22 @@ import {
   UnauthorizedException,
   ConflictException,
   Logger,
-  BadRequestException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
-import { randomBytes } from 'crypto';
 import { UsersService } from '../users/users.service';
-import { SaasUsersService } from '../saas-users/saas-users.service';
 import { TrialAccountsService } from '../trials/trial-accounts.service';
 import { UserSessionsService } from '../user-sessions/user-sessions.service';
 import { StripeService } from '../stripe/stripe.service';
 import { RedisService } from '../redis/redis.service';
-import type { UsersData, UserLogin } from '../users/users.validation';
-import type { AppConfig } from '../config/configuration';
-import type { TrialSignupDto } from './trial-signup.validation';
 import type {
-  TransferSessionResponse,
-  TransferSessionTokens,
-} from './dto/auth-transfer.dto';
+  UsersData,
+  UserLogin,
+  UserRegistration,
+} from '../users/users.validation';
+import type { AppConfig } from '../config/configuration';
+import type { SubscriptionStatus } from '../common/constants/subscription-status.constants';
 
 export interface JwtPayload {
   sub: string;
@@ -41,13 +38,24 @@ export interface AuthResult {
   expiresIn: string;
 }
 
+export interface AuditContext {
+  ipAddress?: string;
+  userAgent?: string;
+  correlationId?: string;
+}
+
+export interface RegisterDto extends Omit<UserRegistration, 'confirmPassword'> {
+  businessName?: string;
+  subscriptionStatus?: SubscriptionStatus;
+  trialEndsAt?: Date;
+}
+
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
 
   constructor(
     private usersService: UsersService,
-    private saasUsersService: SaasUsersService,
     private trialAccountsService: TrialAccountsService,
     private userSessionsService: UserSessionsService,
     private stripeService: StripeService,
@@ -84,12 +92,19 @@ export class AuthService {
 
     this.logger.debug(`Password validation successful for user: ${email}`);
 
-    const { password: _, refreshToken: __, ...result } = user;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password: _pwd, refreshToken: _token, ...result } = user;
     return result;
   }
 
-  async login(loginDto: UserLogin, auditContext?: any): Promise<AuthResult> {
-    this.logger.log('🔐 Login endpoint hit with:', { email: loginDto.email });
+  async login(
+    loginDto: UserLogin,
+    auditContext?: AuditContext,
+  ): Promise<AuthResult> {
+    this.logger.log('🔐 Login endpoint hit with:', {
+      email: loginDto.email,
+      ipAddress: auditContext?.ipAddress,
+    });
 
     const user = await this.validateUser(loginDto.email, loginDto.password);
 
@@ -109,7 +124,11 @@ export class AuthService {
     // Get user locations
     const locationIds = await this.usersService.getUserLocationIds(user.id);
 
-    this.logger.log(`✅ User ${user.email} logged in successfully`);
+    this.logger.log(`✅ User ${user.email} logged in successfully`, {
+      userId: user.id,
+      ipAddress: auditContext?.ipAddress,
+      correlationId: auditContext?.correlationId,
+    });
 
     const appConfig = this.configService.get<AppConfig>('app')!;
 
@@ -129,7 +148,8 @@ export class AuthService {
   ): Promise<{ accessToken: string; refreshToken: string }> {
     try {
       const appConfig = this.configService.get<AppConfig>('app')!;
-      const payload = this.jwtService.verify(refreshToken, {
+
+      const payload = this.jwtService.verify<JwtPayload>(refreshToken, {
         secret: appConfig.jwt.refreshSecret,
       });
 
@@ -157,7 +177,8 @@ export class AuthService {
       }
 
       // Generate NEW tokens (rotation)
-      const { password: _, refreshToken: __, ...userForTokens } = user;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { password: _pwd, refreshToken: _token, ...userForTokens } = user;
       const newTokens = await this.generateTokens(userForTokens);
 
       // CRITICAL: Immediately invalidate old refresh token and store new one
@@ -188,7 +209,7 @@ export class AuthService {
     // Blacklist the access token if provided
     if (accessToken) {
       try {
-        const decoded = this.jwtService.decode(accessToken) as JwtPayload;
+        const decoded = this.jwtService.decode<JwtPayload>(accessToken);
         if (decoded && decoded.exp) {
           const ttl = decoded.exp - Math.floor(Date.now() / 1000);
 
@@ -223,18 +244,26 @@ export class AuthService {
     return isBlacklisted;
   }
 
-  async register(registerDto: {
-    email: string;
-    password: string;
-    firstName: string;
-    lastName: string;
-    role?: string;
-  }): Promise<AuthResult> {
+  async register(
+    registerDto: RegisterDto,
+    auditContext?: AuditContext,
+    metadata?: {
+      businessSize?: '1' | '2-3' | '4-10' | '10+';
+      fullName?: string;
+      businessName?: string;
+    },
+  ): Promise<AuthResult> {
     // Check if user already exists
     const existingUser = await this.usersService.findByEmail(registerDto.email);
     if (existingUser) {
       throw new ConflictException('User with this email already exists');
     }
+
+    this.logger.log('🔐 User registration attempt:', {
+      email: registerDto.email,
+      role: registerDto.role || 'VIEWER',
+      ipAddress: auditContext?.ipAddress,
+    });
 
     // Hash password
     const hashedPassword = await bcrypt.hash(registerDto.password, 12);
@@ -244,19 +273,28 @@ export class AuthService {
       ...registerDto,
       password: hashedPassword,
       confirmPassword: hashedPassword, // Add confirmPassword for validation
-      role: (registerDto.role as any) || 'viewer',
+      role: registerDto.role || 'VIEWER',
+      isActive: true,
     };
 
     const user = await this.usersService.create(userData);
+
+    // Apply role-based post-registration hooks (Stripe, trial tracking, etc.)
+    await this.applyPostRegistrationHooks(user, metadata);
 
     // Generate tokens
     const tokens = await this.generateTokens(user);
     await this.usersService.updateRefreshToken(user.id, tokens.refreshToken);
 
-    this.logger.log(`New user registered: ${user.email}`);
-
     // Get user locations
     const locationIds = await this.usersService.getUserLocationIds(user.id);
+
+    this.logger.log(`✅ User registered: ${user.email}`, {
+      userId: user.id,
+      role: user.role,
+      ipAddress: auditContext?.ipAddress,
+      correlationId: auditContext?.correlationId,
+    });
 
     const appConfig = this.configService.get<AppConfig>('app')!;
 
@@ -322,237 +360,56 @@ export class AuthService {
     return this.usersService.getUserLocationIds(userId);
   }
 
-  async saasLogin(
-    email: string,
-    password: string,
-    auditContext?: any,
-  ): Promise<AuthResult> {
-    // Validate credentials
-    const isValid = await this.saasUsersService.verifyPassword(email, password);
-    if (!isValid) {
-      throw new UnauthorizedException('Invalid credentials');
+  /**
+   * Apply role-based post-registration hooks
+   * Extensible for future roles (ENTERPRISE, PARTNER, etc.)
+   */
+  private async applyPostRegistrationHooks(
+    user: Omit<UsersData, 'password' | 'refreshToken'>,
+    metadata?: {
+      businessSize?: '1' | '2-3' | '4-10' | '10+';
+      fullName?: string;
+      businessName?: string;
+    },
+  ): Promise<void> {
+    // Trial user-specific setup
+    if (user.role === 'TRIAL_USER') {
+      await this.handleTrialRegistration(user, metadata);
     }
 
-    const saasUser = await this.saasUsersService.findByEmail(email);
-    if (!saasUser) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
-
-    // Update last login
-    await this.saasUsersService.updateLastLogin(saasUser.id);
-
-    // Generate tokens
-    const tokens = await this.generateTokens({
-      id: saasUser.id,
-      email: saasUser.email,
-      role: saasUser.role,
-      firstName: saasUser.companyName.split(' ')[0],
-      lastName: saasUser.companyName.split(' ').slice(1).join(' '),
-      isActive: true,
-      createdAt: saasUser.createdAt,
-      updatedAt: saasUser.updatedAt,
-    } as any);
-
-    // Get trial info if exists
-    const trial = await this.trialAccountsService.getTrialByUserId(saasUser.id);
-
-    const userProfile = {
-      id: saasUser.id,
-      email: saasUser.email,
-      firstName: saasUser.companyName.split(' ')[0],
-      lastName: saasUser.companyName.split(' ').slice(1).join(' '),
-      businessName: saasUser.companyName,
-      role: trial ? 'trial_user' : 'subscriber',
-      subscriptionStatus: trial && !trial.convertedAt ? 'trial' : 'active',
-      trialEndsAt: trial
-        ? this.trialAccountsService.calculateTrialEndDate(trial).toISOString()
-        : null,
-      isEmailVerified: saasUser.emailVerified,
-      createdAt: saasUser.createdAt,
-      locationId: [],
-    };
-
-    this.logger.log(`SaaS user ${email} logged in successfully`);
-
-    return {
-      user: userProfile as any,
-      accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken,
-      expiresIn: this.configService.get('JWT_EXPIRES_IN', '15m'),
-    };
+    // Future: Add more role-based hooks here
+    // if (user.role === 'ENTERPRISE') { await this.handleEnterpriseRegistration(...) }
   }
 
-  async trialSignup(
-    trialSignupDto: TrialSignupDto,
-    auditContext: any,
-  ): Promise<AuthResult> {
-    const {
-      businessName,
-      fullName,
-      email,
-      phone,
-      password,
-      locations,
-      agreeToTerms,
-    } = trialSignupDto;
-
-    if (!agreeToTerms) {
-      throw new BadRequestException('You must agree to the terms of service');
-    }
-
-    // Check if user already exists
-    const existingSaasUser = await this.saasUsersService.findByEmail(email);
-    if (existingSaasUser) {
-      throw new ConflictException('Email already exists');
-    }
-
-    try {
-      // Create Stripe customer
-      const stripeCustomer = await this.stripeService.createCustomer(
-        email,
-        fullName,
-        businessName,
+  /**
+   * Handle trial-specific registration tasks
+   * - Creates Stripe customer for future billing
+   * - Creates trial tracking record for analytics
+   */
+  private async handleTrialRegistration(
+    user: Omit<UsersData, 'password' | 'refreshToken'>,
+    metadata?: {
+      businessSize?: '1' | '2-3' | '4-10' | '10+';
+      fullName?: string;
+      businessName?: string;
+    },
+  ): Promise<void> {
+    // Create Stripe customer for future billing
+    if (metadata?.fullName && metadata?.businessName) {
+      await this.stripeService.createCustomer(
+        user.email,
+        metadata.fullName,
+        metadata.businessName,
       );
+    }
 
-      // Parse full name
-      const nameParts = fullName.trim().split(' ');
-      const firstName = nameParts[0];
-      const lastName = nameParts.slice(1).join(' ') || '';
-
-      // Create SaaS user
-      const createUserDto: any = {
-        email,
-        password,
-        companyName: businessName,
-        role: 'owner',
-        stripeCustomerId: stripeCustomer.id,
-      };
-      if (phone) {
-        createUserDto.companyPhone = phone;
-      }
-      const saasUser = await this.saasUsersService.create(createUserDto);
-
-      // Create trial account
-      const trial = await this.trialAccountsService.create({
-        userId: saasUser.id,
+    // Create trial tracking record (for analytics/marketing)
+    if (metadata?.businessSize) {
+      await this.trialAccountsService.create({
+        userId: user.id,
         signupSource: 'landing_page',
-        businessSize: locations,
+        businessSize: metadata.businessSize,
       });
-
-      // Generate tokens
-      const payload = { sub: saasUser.id, email: saasUser.email, role: saasUser.role };
-      const tokens = await this.generateTokens({
-        id: saasUser.id,
-        email: saasUser.email,
-        role: saasUser.role,
-        firstName,
-        lastName,
-        isActive: true,
-        createdAt: saasUser.createdAt,
-        updatedAt: saasUser.updatedAt,
-      } as any);
-
-      const userProfile = {
-        id: saasUser.id,
-        email: saasUser.email,
-        firstName,
-        lastName,
-        businessName: saasUser.companyName,
-        role: 'trial_user',
-        subscriptionStatus: 'trial',
-        trialEndsAt: this.trialAccountsService
-          .calculateTrialEndDate(trial)
-          .toISOString(),
-        isEmailVerified: saasUser.emailVerified,
-        createdAt: saasUser.createdAt,
-        locationId: [],
-      };
-
-      this.logger.log(`Trial user created: ${email}`);
-
-      return {
-        user: userProfile as any,
-        accessToken: tokens.accessToken,
-        refreshToken: tokens.refreshToken,
-        expiresIn: this.configService.get('JWT_EXPIRES_IN', '15m'),
-      };
-    } catch (error) {
-      if (error instanceof ConflictException) {
-        throw error;
-      }
-      if (error instanceof Error && error.message.includes('already exists')) {
-        throw new ConflictException('Email already exists');
-      }
-      throw error;
     }
-  }
-
-  /**
-   * Create a secure auth transfer session for cross-domain token transfer
-   * This session is stored in Redis with a short TTL (30 seconds)
-   */
-  async createAuthTransferSession(
-    accessToken: string,
-    refreshToken: string,
-    userId: string,
-  ): Promise<TransferSessionResponse> {
-    // Generate a cryptographically secure random session ID
-    const sessionId = randomBytes(32).toString('hex');
-    const ttl = 30; // 30 seconds TTL
-
-    // Store session data in Redis
-    const sessionData = JSON.stringify({
-      accessToken,
-      refreshToken,
-      userId,
-      createdAt: Date.now(),
-    });
-
-    await this.redisService.setex(
-      `auth:transfer:${sessionId}`,
-      ttl,
-      sessionData,
-    );
-
-    this.logger.log(
-      `Auth transfer session created for user ${userId}: ${sessionId}`,
-    );
-
-    return {
-      sessionId,
-      expiresIn: ttl,
-    };
-  }
-
-  /**
-   * Exchange a transfer session ID for the stored tokens
-   * This can only be done once - the session is deleted after exchange
-   */
-  async exchangeAuthTransferSession(
-    sessionId: string,
-  ): Promise<TransferSessionTokens> {
-    const sessionKey = `auth:transfer:${sessionId}`;
-
-    // Get session data from Redis
-    const sessionData = await this.redisService.get(sessionKey);
-
-    if (!sessionData) {
-      this.logger.warn(`Invalid or expired transfer session: ${sessionId}`);
-      throw new UnauthorizedException('Invalid or expired transfer session');
-    }
-
-    // Delete the session immediately (one-time use)
-    await this.redisService.del(sessionKey);
-
-    // Parse and return the tokens
-    const { accessToken, refreshToken, userId } = JSON.parse(sessionData);
-
-    this.logger.log(`Auth transfer session exchanged for user ${userId}`);
-
-    return {
-      accessToken,
-      refreshToken,
-      userId,
-    };
   }
 }

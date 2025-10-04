@@ -30,9 +30,7 @@ export default function Sidebar(props: SidebarProps) {
       setIsLoggingOut(true)
       setShowUserDropdown(false) // Close dropdown
       // Navigate to logout - will be handled by logout logic
-      window.location.href = import.meta.env.VITE_CUSTOMER_APP_URL
-        ? `${import.meta.env.VITE_CUSTOMER_APP_URL}/login`
-        : 'http://localhost:3000/login'
+      window.location.href = '/login' // Redirect to admin login
     } catch (error) {
       console.error('Logout failed:', error)
       setIsLoggingOut(false)
