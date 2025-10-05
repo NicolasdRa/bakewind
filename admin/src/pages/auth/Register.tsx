@@ -1,7 +1,7 @@
 import { Component, createSignal, Show } from 'solid-js';
 import { useNavigate } from '@solidjs/router';
 import { useAuth } from '../../stores/authStore';
-import AuthLayout from '../../components/auth/AuthLayout';
+import AuthLayout from '../../layouts/AuthLayout';
 
 const Register: Component = () => {
   const [email, setEmail] = createSignal('');

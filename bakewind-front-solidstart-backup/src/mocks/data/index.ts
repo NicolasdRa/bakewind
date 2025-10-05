@@ -1,8 +1,0 @@
-export { mockOrders } from './orders'
-export { mockInventory } from './inventory'
-export { mockProducts } from './products'
-export { mockRecipes } from './recipes'
-export { mockCustomers } from './customers'
-export { mockInternalOrders } from './internalOrders'
-export { mockProductionItems, mockProductionSchedules } from './production'
-export { mockMetrics, mockAlerts } from './metrics'

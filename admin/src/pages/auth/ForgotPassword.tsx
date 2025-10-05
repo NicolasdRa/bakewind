@@ -1,5 +1,5 @@
 import { Component, createSignal, Show } from 'solid-js';
-import AuthLayout from '../../components/auth/AuthLayout';
+import AuthLayout from '../../layouts/AuthLayout';
 
 const ForgotPassword: Component = () => {
   const [email, setEmail] = createSignal('');

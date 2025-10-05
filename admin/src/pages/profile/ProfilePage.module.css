@@ -1,0 +1,720 @@
+/* ProfilePage CSS Module - Matching Dashboard Pattern */
+@reference "tailwindcss";
+
+/* Container and Header - Matching Overview Page */
+.container {
+  @apply p-8 max-w-7xl mx-auto;
+}
+
+.header {
+  @apply flex justify-between items-start mb-8;
+}
+
+.headerContent {
+  @apply flex-1;
+}
+
+.title {
+  @apply text-3xl font-bold m-0 mb-2;
+  color: var(--text-primary);
+}
+
+.subtitle {
+  @apply text-base m-0;
+  color: var(--text-secondary);
+}
+
+.editingSubtitle {
+  @apply text-base m-0 font-medium;
+  color: var(--primary-color);
+}
+
+.headerActions {
+  @apply flex flex-wrap items-center gap-3;
+}
+
+/* Loading State */
+.loadingContainer {
+  @apply flex flex-col items-center justify-center p-16 min-h-96;
+}
+
+.loadingText {
+  @apply mt-4 text-sm;
+  color: var(--text-secondary);
+}
+
+/* Edit Button - Primary Action */
+.editButton {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--btn-padding-md);
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+  color: white;
+  border: 2px solid transparent;
+  border-radius: var(--btn-radius);
+  font-weight: var(--btn-font-weight);
+  font-size: var(--font-size-base);
+  box-shadow: var(--btn-shadow-primary);
+  transition: all var(--duration-base) var(--easing-default);
+  cursor: pointer;
+}
+
+.editButton:hover {
+  transform: var(--btn-transform-hover);
+  box-shadow: var(--btn-shadow-primary-hover);
+}
+
+.editIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.editActions {
+  @apply flex gap-3 items-center;
+}
+
+/* Success Message */
+.successMessage {
+  padding: var(--spacing-3) var(--spacing-4);
+  background: var(--success-light);
+  color: var(--success-color);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  animation: var(--animate-slide-in);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.successMessage::before {
+  content: '✓';
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  background: var(--success-color);
+  color: white;
+  border-radius: 50%;
+  font-size: var(--font-size-xs);
+}
+
+/* Enhanced Sections */
+.section {
+  padding: var(--spacing-8);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.section:last-child {
+  border-bottom: none;
+}
+
+.sectionTitle {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-6);
+  margin-top: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+}
+
+.sectionIcon {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: var(--primary-color);
+}
+
+.sectionGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-6);
+}
+
+@media (min-width: 768px) {
+  .sectionGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Enhanced Form Fields */
+.fieldContainer {
+  display: block;
+}
+
+.fieldContainerFull {
+  grid-column: 1 / -1;
+}
+
+.label {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-2);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Field Value Display (View Mode) */
+.fieldValue {
+  padding: var(--spacing-3) var(--spacing-4);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  color: var(--text-primary);
+  font-size: var(--font-size-base);
+  min-height: 2.75rem;
+  display: flex;
+  align-items: center;
+  transition: all var(--duration-fast) var(--easing-default);
+}
+
+.fieldValueLocked {
+  padding: var(--spacing-3) var(--spacing-4);
+  background: var(--bg-tertiary);
+  border: 1px dashed var(--border-color);
+  border-radius: var(--radius-lg);
+  color: var(--text-muted);
+  font-size: var(--font-size-base);
+  min-height: 2.75rem;
+  display: flex;
+  align-items: center;
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+.lockedBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  padding: 0 var(--spacing-2);
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  font-weight: var(--font-weight-normal);
+  text-transform: none;
+  letter-spacing: normal;
+  margin-left: var(--spacing-2);
+}
+
+.lockIconSmall {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+/* Input Fields (Edit Mode) */
+.input {
+  width: 100%;
+  padding: var(--input-padding);
+  background: var(--input-bg);
+  border: 2px solid var(--primary-light);
+  border-radius: var(--input-radius);
+  color: var(--text-primary);
+  font-size: var(--font-size-base);
+  transition: all var(--duration-fast) var(--easing-default);
+  animation: var(--animate-fade-in);
+  box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.input:hover {
+  border-color: var(--primary-color);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: var(--input-focus-ring);
+}
+
+.input::placeholder {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.inputError {
+  border-color: var(--error-color);
+  box-shadow: 0 0 0 3px var(--error-light);
+}
+
+.select {
+  width: 100%;
+  padding: var(--input-padding);
+  background: var(--input-bg);
+  border: 2px solid var(--primary-light);
+  border-radius: var(--input-radius);
+  color: var(--text-primary);
+  font-size: var(--font-size-base);
+  transition: all var(--duration-fast) var(--easing-default);
+  cursor: pointer;
+  box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.select:hover {
+  border-color: var(--primary-color);
+}
+
+.select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: var(--input-focus-ring);
+}
+
+.textarea {
+  width: 100%;
+  padding: var(--input-padding);
+  background: var(--input-bg);
+  border: 2px solid var(--primary-light);
+  border-radius: var(--input-radius);
+  color: var(--text-primary);
+  font-size: var(--font-size-base);
+  resize: vertical;
+  min-height: 100px;
+  transition: all var(--duration-fast) var(--easing-default);
+  box-shadow: 0 0 0 3px var(--primary-light);
+  font-family: inherit;
+}
+
+.textarea:hover {
+  border-color: var(--primary-color);
+}
+
+.textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: var(--input-focus-ring);
+}
+
+.textarea::placeholder {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* Character Counter */
+.charCounter {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  margin-top: var(--spacing-1);
+  text-align: right;
+}
+
+/* Role and Status Cards */
+.infoCard {
+  background: var(--bg-secondary);
+  padding: var(--spacing-4);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-light);
+  margin-bottom: var(--spacing-4);
+}
+
+.roleContainer {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+  margin-top: var(--spacing-2);
+}
+
+/* Role Badges with Enhanced Design */
+.roleBadgeRed {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--spacing-2) var(--spacing-4);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  background: linear-gradient(135deg, #fee2e2, #fecaca);
+  color: #dc2626;
+  box-shadow: 0 2px 4px rgba(220, 38, 38, 0.1);
+}
+
+[data-theme="dark"] .roleBadgeRed {
+  background: linear-gradient(135deg, #7f1d1d, #991b1b);
+  color: #fca5a5;
+}
+
+.roleBadgeBlue {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--spacing-2) var(--spacing-4);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+  color: #2563eb;
+  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.1);
+}
+
+[data-theme="dark"] .roleBadgeBlue {
+  background: linear-gradient(135deg, #1e3a8a, #1e40af);
+  color: #93c5fd;
+}
+
+.roleBadgeGreen {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--spacing-2) var(--spacing-4);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  background: linear-gradient(135deg, var(--success-light), #bbf7d0);
+  color: var(--success-color);
+  box-shadow: 0 2px 4px rgba(5, 150, 105, 0.1);
+}
+
+.roleBadgeYellow {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--spacing-2) var(--spacing-4);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  background: linear-gradient(135deg, var(--warning-light), #fde68a);
+  color: var(--warning-color);
+  box-shadow: 0 2px 4px rgba(245, 158, 11, 0.1);
+}
+
+.roleBadgeOrange {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--spacing-2) var(--spacing-4);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  background: linear-gradient(135deg, #fed7aa, #fdba74);
+  color: #ea580c;
+  box-shadow: 0 2px 4px rgba(234, 88, 12, 0.1);
+}
+
+[data-theme="dark"] .roleBadgeOrange {
+  background: linear-gradient(135deg, #9a3412, #c2410c);
+  color: #fdba74;
+}
+
+.roleBadgeGray {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--spacing-2) var(--spacing-4);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-secondary));
+  color: var(--text-secondary);
+  box-shadow: 0 2px 4px var(--shadow-subtle);
+}
+
+.roleDescription {
+  font-size: var(--font-size-sm);
+  color: var(--text-tertiary);
+  line-height: var(--line-height-relaxed);
+  flex: 1;
+}
+
+/* Status Badges with Icons */
+.statusContainer {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+  margin-top: var(--spacing-2);
+  flex-wrap: wrap;
+}
+
+.statusBadgeActive,
+.statusBadgeInactive {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-3);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  transition: all var(--duration-fast) var(--easing-default);
+}
+
+.statusBadgeActive {
+  background: var(--success-light);
+  color: var(--success-color);
+  border: 1px solid var(--success-color);
+}
+
+.statusBadgeInactive {
+  background: var(--error-light);
+  color: var(--error-color);
+  border: 1px solid var(--error-color);
+}
+
+.statusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: var(--animate-pulse);
+}
+
+.statusBadgeVerified,
+.statusBadgeUnverified {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-3);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  transition: all var(--duration-fast) var(--easing-default);
+}
+
+.statusBadgeVerified {
+  background: var(--success-light);
+  color: var(--success-color);
+  border: 1px solid var(--success-color);
+}
+
+.statusBadgeUnverified {
+  background: var(--warning-light);
+  color: var(--warning-color);
+  border: 1px solid var(--warning-color);
+}
+
+.statusIcon {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Security Card */
+.securityCard {
+  background: var(--bg-secondary);
+  padding: var(--spacing-6);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-light);
+}
+
+/* Change Password Button */
+.changePasswordButton {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  width: 100%;
+  padding: var(--spacing-4);
+  background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-secondary));
+  border: 2px dashed var(--border-color);
+  border-radius: var(--radius-lg);
+  color: var(--text-secondary);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  transition: all var(--duration-base) var(--easing-default);
+  cursor: pointer;
+}
+
+.changePasswordButton:hover {
+  background: linear-gradient(135deg, var(--warning-light), transparent);
+  border-color: var(--warning-color);
+  color: var(--warning-color);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.buttonIcon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+/* Password Form */
+.passwordForm {
+  animation: var(--animate-slide-up);
+}
+
+.passwordFormTitle {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-6) 0;
+}
+
+.passwordField {
+  margin-bottom: var(--spacing-4);
+}
+
+.passwordFormActions {
+  display: flex;
+  gap: var(--spacing-3);
+  align-items: center;
+  margin-top: var(--spacing-6);
+}
+
+/* Button Styles */
+.cancelButton {
+  @apply px-6 py-3 bg-transparent font-semibold text-base rounded-lg cursor-pointer whitespace-nowrap;
+  color: var(--text-secondary);
+  border: 2px solid var(--border-color);
+  transition: all var(--duration-base) var(--easing-default);
+}
+
+.cancelButton:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-hover);
+  color: var(--text-primary);
+}
+
+.saveButton {
+  @apply px-6 py-3 text-white font-semibold text-base rounded-lg cursor-pointer whitespace-nowrap;
+  background: linear-gradient(135deg, var(--success-color), #047857);
+  border: 2px solid transparent;
+  box-shadow: 0 2px 8px -2px rgba(5, 150, 105, 0.3);
+  transition: all var(--duration-base) var(--easing-default);
+}
+
+.saveButton:hover {
+  transform: var(--btn-transform-hover);
+  box-shadow: 0 4px 12px -2px rgba(5, 150, 105, 0.4);
+}
+
+.saveButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.dangerButton {
+  padding: var(--btn-padding-md);
+  background: linear-gradient(135deg, var(--error-color), #b91c1c);
+  color: white;
+  border: 2px solid transparent;
+  border-radius: var(--btn-radius);
+  font-weight: var(--btn-font-weight);
+  font-size: var(--font-size-base);
+  box-shadow: 0 2px 8px -2px rgba(220, 38, 38, 0.3);
+  transition: all var(--duration-base) var(--easing-default);
+  cursor: pointer;
+  flex: 1;
+}
+
+.dangerButton:hover {
+  transform: var(--btn-transform-hover);
+  box-shadow: 0 4px 12px -2px rgba(220, 38, 38, 0.4);
+}
+
+.dangerButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* Error Messages */
+.errorMessage {
+  margin-top: var(--spacing-4);
+  padding: var(--spacing-4);
+  background: var(--error-light);
+  color: var(--error-color);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-sm);
+  border: 1px solid var(--error-color);
+  animation: var(--animate-shake);
+}
+
+.validationError {
+  color: var(--error-color);
+  font-size: var(--font-size-sm);
+  margin-top: var(--spacing-2);
+  font-weight: var(--font-weight-medium);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+}
+
+.validationError::before {
+  content: '!';
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  background: var(--error-color);
+  color: white;
+  border-radius: 50%;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+}
+
+/* Shake Animation for Errors */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+  20%, 40%, 60%, 80% { transform: translateX(2px); }
+}
+
+/* Dark Theme Adjustments */
+[data-theme="dark"] .container {
+  background: var(--card-bg);
+  box-shadow: var(--shadow-lg);
+}
+
+[data-theme="dark"] .fieldValue {
+  background: var(--bg-tertiary);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .input,
+[data-theme="dark"] .select,
+[data-theme="dark"] .textarea {
+  background: var(--bg-primary);
+  border-color: var(--primary-light);
+}
+
+[data-theme="dark"] .infoCard,
+[data-theme="dark"] .securityCard {
+  background: var(--bg-tertiary);
+  border-color: var(--border-color);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    gap: var(--spacing-4);
+  }
+
+  .headerActions {
+    width: 100%;
+  }
+
+  .editButton {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .editActions {
+    width: 100%;
+  }
+
+  .editActions button {
+    flex: 1;
+  }
+
+  .passwordFormActions {
+    flex-direction: column;
+  }
+
+  .passwordFormActions button {
+    width: 100%;
+  }
+}
+
+/* Animation Classes */
+.animate-shake {
+  animation: shake 0.5s;
+}
+
+/* Focus Visible for Accessibility */
+.editButton:focus-visible,
+.cancelButton:focus-visible,
+.saveButton:focus-visible,
+.dangerButton:focus-visible,
+.changePasswordButton:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}

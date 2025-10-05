@@ -77,13 +77,13 @@ export default function DashboardHeader() {
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
-
+          
           <div class={styles.titleSection}>
             <h1 class={styles.title}>{currentRoute().title}</h1>
             <p class={styles.subtitle}>{currentRoute().subtitle}</p>
           </div>
         </div>
-
+        
         <Show when={currentRoute().showControls}>
           <div class={styles.controls}>
             {/* Layout Controls */}
@@ -135,12 +135,12 @@ export default function DashboardHeader() {
                 <span class={styles.addButtonIcon}>+</span>
                 <span class={styles.addButtonText}>Add Widget</span>
               </button>
-
+              
               <div class={styles.dropdownContainer}>
                 <button class={styles.dropdownTrigger}>
                   <span class={styles.dropdownIcon}>⋮</span>
                 </button>
-
+                
                 {/* Dropdown Menu - No Portal needed */}
                 <div class={styles.dropdownMenu}>
                   <button

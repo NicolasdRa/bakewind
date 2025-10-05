@@ -1,5 +1,5 @@
 {
-  "name": "bakewind-customer",
+  "name": "bakewind-website",
   "type": "module",
   "scripts": {
     "dev": "vinxi dev",

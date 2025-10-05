@@ -1,0 +1,29 @@
+@reference 'tailwindcss';
+
+.loadingScreen {
+  @apply min-h-screen flex flex-col items-center justify-center bg-gray-50;
+}
+
+.loadingSpinner {
+  @apply w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin;
+}
+
+.loadingScreen p {
+  @apply mt-4 text-gray-600 text-lg;
+}
+
+.authRedirect {
+  @apply min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4;
+}
+
+.authRedirect h2 {
+  @apply text-3xl font-bold text-gray-900 mb-4;
+}
+
+.authRedirect p {
+  @apply text-gray-600 text-lg mb-6;
+}
+
+.loginRedirectBtn {
+  @apply px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors;
+}

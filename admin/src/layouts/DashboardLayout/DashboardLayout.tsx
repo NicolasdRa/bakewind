@@ -1,13 +1,10 @@
-import { JSX, createSignal, onMount } from 'solid-js'
-import Sidebar from '~/components/layout/Sidebar'
+import { createSignal, onMount } from 'solid-js'
+import { RouteSectionProps } from '@solidjs/router'
+import Sidebar from '~/components/Sidebar/Sidebar'
 import { useAppStore } from '~/stores/appStore'
 import styles from './DashboardLayout.module.css'
 
-interface DashboardLayoutProps {
-  children: JSX.Element
-}
-
-export default function DashboardLayout(props: DashboardLayoutProps) {
+export default function DashboardLayout(props: RouteSectionProps) {
   const { state, actions } = useAppStore()
   const [mounted, setMounted] = createSignal(false)
 

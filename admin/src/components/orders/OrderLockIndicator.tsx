@@ -1,6 +1,6 @@
 import { Component, Show, onMount, onCleanup } from 'solid-js';
 import { OrderLock } from '../../api/order-locks';
-import { LockClosedIcon } from '../icons';
+import { LockClosedIcon } from '../Icons/icons';
 
 interface OrderLockIndicatorProps {
   lock: OrderLock | null;

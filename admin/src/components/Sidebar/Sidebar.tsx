@@ -66,17 +66,17 @@ export default function Sidebar(props: SidebarProps) {
   })
 
   const menuItems = [
-    { id: 'dashboard', label: 'Overview', icon: '🏪', path: '/' },
-    { id: 'orders', label: 'Orders', icon: '📋', path: '/orders' },
-    { id: 'internal-orders', label: 'Internal Orders', icon: '🏢', path: '/internal-orders' },
-    { id: 'inventory', label: 'Inventory', icon: '📦', path: '/inventory' },
-    { id: 'recipes', label: 'Recipes', icon: '📖', path: '/recipes' },
-    { id: 'products', label: 'Products', icon: '🥐', path: '/products' },
-    { id: 'production', label: 'Production', icon: '🥖', path: '/production' },
-    { id: 'customers', label: 'Customers', icon: '👥', path: '/customers' },
-    { id: 'analytics', label: 'Analytics', icon: '📊', path: '/analytics' },
-    { id: 'profile', label: 'Profile', icon: '👤', path: '/profile' },
-    { id: 'settings', label: 'Settings', icon: '⚙️', path: '/settings' },
+    { id: 'dashboard', label: 'Overview', icon: '🏪', path: '/dashboard/overview' },
+    { id: 'orders', label: 'Orders', icon: '📋', path: '/dashboard/orders' },
+    { id: 'internal-orders', label: 'Internal Orders', icon: '🏢', path: '/dashboard/internal-orders' },
+    { id: 'inventory', label: 'Inventory', icon: '📦', path: '/dashboard/inventory' },
+    { id: 'recipes', label: 'Recipes', icon: '📖', path: '/dashboard/recipes' },
+    { id: 'products', label: 'Products', icon: '🥐', path: '/dashboard/products' },
+    { id: 'production', label: 'Production', icon: '🥖', path: '/dashboard/production' },
+    { id: 'customers', label: 'Customers', icon: '👥', path: '/dashboard/customers' },
+    { id: 'analytics', label: 'Analytics', icon: '📊', path: '/dashboard/analytics' },
+    { id: 'profile', label: 'Profile', icon: '👤', path: '/dashboard/profile' },
+    { id: 'settings', label: 'Settings', icon: '⚙️', path: '/dashboard/settings' },
   ]
 
   // Defensive class calculation to prevent style loss during navigation
@@ -169,7 +169,7 @@ export default function Sidebar(props: SidebarProps) {
                   }}
                   activeClass={styles.navButtonActive}
                   inactiveClass={styles.navButtonInactive}
-                  end={item.path === '/'}
+                  end={item.path === '/dashboard/overview'}
                 >
                   <span class={styles.navIcon}>{item.icon}</span>
                   <Show when={props.mobileOpen || !props.collapsed}>

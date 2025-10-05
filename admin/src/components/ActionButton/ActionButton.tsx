@@ -21,7 +21,7 @@ interface ActionButtonProps {
 export default function ActionButton(props: ActionButtonProps) {
   const variant = () => props.variant || 'primary'
   const size = () => props.size || 'md'
-
+  
   return (
     <button
       type={props.type || 'button'}
@@ -38,8 +38,8 @@ export default function ActionButton(props: ActionButtonProps) {
           {props.icon}
         </span>
       )}
-
-      <span
+      
+      <span 
         class={styles.text}
         classList={{
           [styles.textHiddenMobile]: props.hideTextOnMobile
@@ -47,7 +47,7 @@ export default function ActionButton(props: ActionButtonProps) {
       >
         {props.children}
       </span>
-
+      
       {props.icon && props.iconPosition === 'right' && (
         <span class={`${styles.icon} ${styles.iconRight}`}>
           {props.icon}

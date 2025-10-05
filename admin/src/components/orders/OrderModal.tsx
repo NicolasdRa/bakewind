@@ -1,7 +1,7 @@
 import { Component, Show, createSignal, onMount, onCleanup, createEffect } from 'solid-js';
 import { orderLocksStore } from '../../stores/order-locks';
 import OrderLockIndicator from './OrderLockIndicator';
-import { XMarkIcon } from '../icons';
+import { XMarkIcon } from '../Icons/icons';
 
 interface Order {
   id: string;

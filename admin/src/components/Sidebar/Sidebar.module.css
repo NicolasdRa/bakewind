@@ -1,12 +1,6 @@
 /* Sidebar Component - Tailwind CSS Module */
 @reference "tailwindcss";
 
-/* CSS Custom Properties for Layout Stability */
-:root {
-  --sidebar-width-expanded: 288px; /* w-72 = 18rem = 288px */
-  --sidebar-width-collapsed: 64px;  /* w-16 = 4rem = 64px */
-}
-
 /* Main Container */
 .sidebar {
   @apply shadow-lg z-40 flex flex-col;

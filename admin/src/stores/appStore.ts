@@ -14,7 +14,7 @@ interface AppState {
 const [appState, setAppState] = createStore<AppState>({
   sidebarCollapsed: false,
   sidebarOpen: false,
-  theme: 'light',
+  theme: 'dark',
   showWidgetModal: false,
   dashboardLayout: 'grid'
 })
@@ -81,7 +81,7 @@ export const appActions = {
   initializeClientState: () => {
     // Load saved states from localStorage
     const savedSidebarState = localStorage.getItem('sidebarCollapsed')
-    const savedTheme = localStorage.getItem('dashboardTheme') || 'light'
+    const savedTheme = localStorage.getItem('dashboardTheme') || 'dark'
     const savedLayout = localStorage.getItem('dashboardLayout') || 'grid'
 
     setAppState({
