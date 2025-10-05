@@ -1,231 +1,187 @@
 import { createSignal, Show } from 'solid-js'
-import { useCurrentUser } from '~/hooks/useCurrentUser'
-import { useProfileMutations } from '~/hooks/useProfileMutations'
+import { useAuth } from '~/stores/authStore'
+import BaseWidget from '~/components/BaseWidget/BaseWidget'
 import styles from './ProfileInfoWidget.module.css'
 
-export default function ProfileInfoWidget() {
-  const { user, loading } = useCurrentUser()
-  const { updateProfile, isUpdating, updateError, clearError } = useProfileMutations()
-  const [isEditing, setIsEditing] = createSignal(false)
+interface ProfileInfoWidgetProps {
+  widgetId: string
+  title: string
+  size: 'small' | 'medium' | 'large'
+  onClose: () => void
+}
 
+export default function ProfileInfoWidget(props: ProfileInfoWidgetProps) {
+  const auth = useAuth()
+  const user = () => auth.user
+
+  const [isEditing, setIsEditing] = createSignal(false)
+  const [isUpdating, setIsUpdating] = createSignal(false)
+  const [updateError, setUpdateError] = createSignal<string | null>(null)
+
+  interface FormData {
+    firstName: string
+    lastName: string
+    phoneNumber: string
+    bio: string
+    city: string
+    country: string
+  }
+
+  const [formData, setFormData] = createSignal<FormData>({
+    firstName: '',
+    lastName: '',
+    phoneNumber: '',
+    bio: '',
+    city: '',
+    country: ''
+  })
 
   const handleEdit = () => {
-    clearError()
+    const currentUser = user()
+    if (currentUser) {
+      setFormData({
+        firstName: currentUser.firstName || '',
+        lastName: currentUser.lastName || '',
+        phoneNumber: '',
+        bio: '',
+        city: '',
+        country: ''
+      })
+    }
+    setUpdateError(null)
     setIsEditing(true)
   }
 
   const handleCancel = () => {
-    clearError()
+    setUpdateError(null)
     setIsEditing(false)
   }
 
   const handleSubmit = async (event: Event) => {
     event.preventDefault()
-
-    const form = event.target as HTMLFormElement
-    const formData = new FormData(form)
+    setIsUpdating(true)
+    setUpdateError(null)
 
     try {
-      await updateProfile({
-        firstName: formData.get('firstName') as string || undefined,
-        lastName: formData.get('lastName') as string || undefined,
-        phoneNumber: formData.get('phoneNumber') as string || undefined,
-        bio: formData.get('bio') as string || undefined,
-        city: formData.get('city') as string || undefined,
-        country: formData.get('country') as string || undefined
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1'
+      const response = await fetch(`${apiUrl}/users/profile`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(formData())
       })
+
+      if (!response.ok) throw new Error('Failed to update profile')
 
       setIsEditing(false)
     } catch (error) {
-      // Error is handled by the hook
-      console.error('Profile update failed:', error)
+      setUpdateError(error instanceof Error ? error.message : 'Update failed')
+    } finally {
+      setIsUpdating(false)
     }
   }
 
+  const updateField = (field: keyof FormData, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }))
+  }
+
   return (
-    <div class={styles.container}>
-      <div class={styles.header}>
-        <h3 class={styles.title}>Profile Information</h3>
-        {!isEditing() ? (
-          <button
-            onClick={handleEdit}
-            class={styles.editButton}
-          >
-            Edit Profile
-          </button>
-        ) : (
-          <div class={styles.actionButtons}>
-            <button
-              onClick={handleCancel}
-              class={styles.cancelButton}
-              disabled={isUpdating}
-            >
-              Cancel
+    <BaseWidget {...props}>
+      <div class={styles.container}>
+        <div class={styles.header}>
+          {!isEditing() ? (
+            <button onClick={handleEdit} class={styles.editButton}>
+              Edit Profile
             </button>
-            <button
-              type="submit"
-              form="profile-form"
-              class={styles.saveButton}
-              disabled={isUpdating}
-            >
-              {isUpdating ? 'Saving...' : 'Save Changes'}
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* Error Message */}
-      <Show when={updateError}>
-        <div class={styles.errorMessage}>
-          {updateError}
-        </div>
-      </Show>
-
-      <div class={styles.profileContent}>
-        {/* Profile Avatar */}
-        <div class={styles.avatarSection}>
-          <div class={styles.avatar}>
-            {(() => {
-              const displayName = `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || user?.email || '??'
-              return displayName.substring(0, 2).toUpperCase()
-            })()
-          </div>
-          {isEditing() && (
-            <button class={styles.avatarButton}>
-              Change Avatar
-            </button>
+          ) : (
+            <div class={styles.actionButtons}>
+              <button
+                onClick={handleCancel}
+                class={styles.cancelButton}
+                disabled={isUpdating()}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                form="profile-widget-form"
+                class={styles.saveButton}
+                disabled={isUpdating()}
+              >
+                {isUpdating() ? 'Saving...' : 'Save'}
+              </button>
+            </div>
           )}
         </div>
 
-        {/* Profile Details */}
-        <Show 
-          when={isEditing()}
-          fallback={
-            <div class={styles.profileDetails}>
-              <div class={styles.fieldGrid}>
-                <div class={styles.fieldGroup}>
-                  <label class={styles.fieldLabel}>First Name</label>
-                  <p class={styles.fieldValue}>
-                    {user?.firstName || <span class={styles.placeholder}>No first name provided</span>}
-                  </p>
-                </div>
-                <div class={styles.fieldGroup}>
-                  <label class={styles.fieldLabel}>Last Name</label>
-                  <p class={styles.fieldValue}>
-                    {user?.lastName || <span class={styles.placeholder}>No last name provided</span>}
-                  </p>
-                </div>
-              </div>
+        <Show when={updateError()}>
+          <div class={styles.errorMessage}>{updateError()}</div>
+        </Show>
 
-              <div class={styles.fieldGroup}>
-                <label class={styles.fieldLabel}>Email</label>
-                <p class={styles.fieldValue}>
-                  {user?.email || <span class={styles.placeholder}>No email provided</span>}
-                </p>
-              </div>
-
-              <div class={styles.fieldGroup}>
-                <label class={styles.fieldLabel}>Phone Number</label>
-                <p class={styles.fieldValue}>
-                  {user?.phoneNumber || <span class={styles.placeholder}>No phone number provided</span>}
-                </p>
-              </div>
-
-              <div class={styles.fieldGroup}>
-                <label class={styles.fieldLabel}>Bio</label>
-                <p class={styles.fieldValue}>
-                  {user?.bio || <span class={styles.placeholder}>No bio provided</span>}
-                </p>
-              </div>
-
-              <div class={styles.fieldGrid}>
-                <div class={styles.fieldGroup}>
-                  <label class={styles.fieldLabel}>City</label>
-                  <p class={styles.fieldValue}>
-                    {user?.city || <span class={styles.placeholder}>No city provided</span>}
-                  </p>
-                </div>
-                <div class={styles.fieldGroup}>
-                  <label class={styles.fieldLabel}>Country</label>
-                  <p class={styles.fieldValue}>
-                    {user?.country || <span class={styles.placeholder}>No country provided</span>}
-                  </p>
-                </div>
-              </div>
+        <div class={styles.profileContent}>
+          <div class={styles.avatarSection}>
+            <div class={styles.avatar}>
+              {(() => {
+                const currentUser = user()
+                const displayName = `${currentUser?.firstName || ''} ${currentUser?.lastName || ''}`.trim() || currentUser?.email || '??'
+                return displayName.substring(0, 2).toUpperCase()
+              })()}
             </div>
-          }
-        >
-          <form id="profile-form" onSubmit={handleSubmit} class={styles.profileDetails}>
-            <div class={styles.fieldGrid}>
+          </div>
+
+          <Show
+            when={isEditing()}
+            fallback={
+              <div class={styles.profileDetails}>
+                <div class={styles.fieldGroup}>
+                  <label class={styles.fieldLabel}>Name</label>
+                  <p class={styles.fieldValue}>
+                    {`${user()?.firstName || ''} ${user()?.lastName || ''}`.trim() || <span class={styles.placeholder}>No name provided</span>}
+                  </p>
+                </div>
+
+                <div class={styles.fieldGroup}>
+                  <label class={styles.fieldLabel}>Email</label>
+                  <p class={styles.fieldValue}>
+                    {user()?.email || <span class={styles.placeholder}>No email</span>}
+                  </p>
+                </div>
+
+                <div class={styles.fieldGroup}>
+                  <label class={styles.fieldLabel}>Role</label>
+                  <p class={styles.fieldValue}>
+                    {user()?.role?.replace('_', ' ').toLowerCase().replace(/\b\w/g, (l: string) => l.toUpperCase()) || 'No role'}
+                  </p>
+                </div>
+              </div>
+            }
+          >
+            <form id="profile-widget-form" onSubmit={handleSubmit} class={styles.profileDetails}>
               <div class={styles.fieldGroup}>
                 <label class={styles.fieldLabel}>First Name</label>
                 <input
-                  name="firstName"
                   type="text"
-                  value={user?.firstName || ''}
-                  placeholder="Enter your first name"
+                  value={formData().firstName}
+                  onInput={(e) => updateField('firstName', e.currentTarget.value)}
+                  placeholder="Enter first name"
                   class={styles.fieldInput}
                 />
               </div>
+
               <div class={styles.fieldGroup}>
                 <label class={styles.fieldLabel}>Last Name</label>
                 <input
-                  name="lastName"
                   type="text"
-                  value={user?.lastName || ''}
-                  placeholder="Enter your last name"
+                  value={formData().lastName}
+                  onInput={(e) => updateField('lastName', e.currentTarget.value)}
+                  placeholder="Enter last name"
                   class={styles.fieldInput}
                 />
               </div>
-            </div>
-
-            <div class={styles.fieldGroup}>
-              <label class={styles.fieldLabel}>Phone Number</label>
-              <input
-                name="phoneNumber"
-                type="tel"
-                value={user?.phoneNumber || ''}
-                placeholder="Enter your phone number"
-                class={styles.fieldInput}
-              />
-            </div>
-
-            <div class={styles.fieldGroup}>
-              <label class={styles.fieldLabel}>Bio</label>
-              <textarea
-                name="bio"
-                value={user?.bio || ''}
-                placeholder="Tell us about yourself..."
-                rows={3}
-                class={styles.fieldTextarea}
-              />
-            </div>
-
-            <div class={styles.fieldGrid}>
-              <div class={styles.fieldGroup}>
-                <label class={styles.fieldLabel}>City</label>
-                <input
-                  name="city"
-                  type="text"
-                  value={user?.city || ''}
-                  placeholder="Your city"
-                  class={styles.fieldInput}
-                />
-              </div>
-              <div class={styles.fieldGroup}>
-                <label class={styles.fieldLabel}>Country</label>
-                <input
-                  name="country"
-                  type="text"
-                  value={user?.country || ''}
-                  placeholder="Your country"
-                  class={styles.fieldInput}
-                />
-              </div>
-            </div>
-          </form>
-        </Show>
+            </form>
+          </Show>
+        </div>
       </div>
-    </div>
+    </BaseWidget>
   )
 }
