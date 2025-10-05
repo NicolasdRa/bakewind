@@ -1,4 +1,5 @@
 import { Component, createSignal, Show } from 'solid-js';
+import { API_BASE_URL } from '../../config/constants';
 import AuthLayout from '../../layouts/AuthLayout';
 
 const ForgotPassword: Component = () => {
@@ -14,11 +15,9 @@ const ForgotPassword: Component = () => {
     setIsLoading(true);
 
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
-
       console.log('[ForgotPassword] Requesting password reset for:', email());
 
-      const response = await fetch(`${apiUrl}/auth/forgot-password`, {
+      const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email() }),

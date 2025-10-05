@@ -1,4 +1,5 @@
 import { io, Socket } from 'socket.io-client';
+import { API_URL } from '../config/constants';
 
 // Event payload types
 export interface DashboardMetrics {
@@ -75,8 +76,7 @@ class RealtimeClient {
       return;
     }
 
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-    const wsUrl = apiUrl.replace('/api/v1', '').replace('http', 'ws');
+    const wsUrl = API_URL.replace('http', 'ws');
 
     console.log('[Realtime] Connecting to:', wsUrl);
 

@@ -1,5 +1,6 @@
 import { Component, createSignal, createEffect, createMemo, Show } from "solid-js"
 import { useAuth } from "~/stores/authStore"
+import { API_BASE_URL } from "~/config/constants"
 import LoadingSpinner from "~/components/LoadingSpinner/LoadingSpinner"
 import styles from './ProfilePage.module.css'
 
@@ -40,8 +41,7 @@ const useUpdateProfile = () => {
     setIsLoading(true)
     setError(null)
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1'
-      const response = await fetch(`${apiUrl}/users/profile`, {
+      const response = await fetch(`${API_BASE_URL}/users/profile`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -68,8 +68,7 @@ const useChangePassword = () => {
     setIsLoading(true)
     setError(null)
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1'
-      const response = await fetch(`${apiUrl}/users/${userId}/password`, {
+      const response = await fetch(`${API_BASE_URL}/users/${userId}/password`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

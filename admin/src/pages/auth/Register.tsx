@@ -1,6 +1,7 @@
 import { Component, createSignal, Show } from 'solid-js';
 import { useNavigate } from '@solidjs/router';
 import { useAuth } from '../../stores/authStore';
+import { API_BASE_URL } from '../../config/constants';
 import AuthLayout from '../../layouts/AuthLayout';
 
 const Register: Component = () => {
@@ -26,11 +27,9 @@ const Register: Component = () => {
     setIsLoading(true);
 
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
-
       console.log('[Register] Attempting registration for:', email());
 
-      const response = await fetch(`${apiUrl}/auth/register`, {
+      const response = await fetch(`${API_BASE_URL}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

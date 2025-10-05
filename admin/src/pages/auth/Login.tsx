@@ -1,6 +1,7 @@
 import { Component, createSignal, Show } from 'solid-js';
 import { useNavigate, A } from '@solidjs/router';
 import { useAuth } from '../../stores/authStore';
+import { API_BASE_URL } from '../../config/constants';
 import styles from './Login.module.css';
 
 const Login: Component = () => {
@@ -17,11 +18,9 @@ const Login: Component = () => {
     setIsLoading(true);
 
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
-
       console.log('[Login] Attempting login for:', email());
 
-      const response = await fetch(`${apiUrl}/auth/login`, {
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include', // Important for cookies

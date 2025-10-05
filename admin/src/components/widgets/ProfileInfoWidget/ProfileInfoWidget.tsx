@@ -1,5 +1,6 @@
 import { createSignal, Show } from 'solid-js'
 import { useAuth } from '~/stores/authStore'
+import { API_BASE_URL } from '~/config/constants'
 import BaseWidget from '~/components/BaseWidget/BaseWidget'
 import styles from './ProfileInfoWidget.module.css'
 
@@ -63,8 +64,7 @@ export default function ProfileInfoWidget(props: ProfileInfoWidgetProps) {
     setUpdateError(null)
 
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1'
-      const response = await fetch(`${apiUrl}/users/profile`, {
+      const response = await fetch(`${API_BASE_URL}/users/profile`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

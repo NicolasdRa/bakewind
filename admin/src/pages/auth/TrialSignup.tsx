@@ -1,6 +1,7 @@
 import { Component, createSignal, Show } from 'solid-js';
 import { useNavigate } from '@solidjs/router';
 import { useAuth } from '../../stores/authStore';
+import { API_BASE_URL } from '../../config/constants';
 import AuthLayout from '../../layouts/AuthLayout';
 
 const TrialSignup: Component = () => {
@@ -28,11 +29,9 @@ const TrialSignup: Component = () => {
     setIsLoading(true);
 
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
-
       console.log('[TrialSignup] Attempting trial signup for:', email());
 
-      const response = await fetch(`${apiUrl}/auth/trial-signup`, {
+      const response = await fetch(`${API_BASE_URL}/auth/trial-signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include', // Important for cookies
