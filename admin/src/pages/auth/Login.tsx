@@ -2,6 +2,7 @@ import { Component, createSignal, Show } from 'solid-js';
 import { useNavigate, A } from '@solidjs/router';
 import { useAuth } from '../../stores/authStore';
 import { API_BASE_URL } from '../../config/constants';
+import { logger } from '../../utils/logger';
 import styles from './Login.module.css';
 
 const Login: Component = () => {
@@ -18,7 +19,7 @@ const Login: Component = () => {
     setIsLoading(true);
 
     try {
-      console.log('[Login] Attempting login for:', email());
+      logger.auth(`Attempting login for: ${email()}`);
 
       const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
@@ -33,17 +34,17 @@ const Login: Component = () => {
       }
 
       const data = await response.json();
-      console.log('[Login] Login successful:', data.user.email);
+      logger.auth(`Login successful: ${data.user.email}`);
 
       // Update auth store
       auth.login(data.user);
 
-      console.log('[Login] Redirecting to dashboard...');
+      logger.auth('Redirecting to dashboard...');
 
       // Navigate to dashboard
       navigate('/dashboard/overview', { replace: true });
     } catch (err) {
-      console.error('[Login] Login failed:', err);
+      logger.error('Login failed', err);
       setError(err instanceof Error ? err.message : 'Login failed. Please try again.');
     } finally {
       setIsLoading(false);

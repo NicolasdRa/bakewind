@@ -2,6 +2,7 @@ import { Component, createSignal, Show } from 'solid-js';
 import { useNavigate } from '@solidjs/router';
 import { useAuth } from '../../stores/authStore';
 import { API_BASE_URL } from '../../config/constants';
+import { logger } from '../../utils/logger';
 import AuthLayout from '../../layouts/AuthLayout';
 
 const Register: Component = () => {
@@ -27,7 +28,7 @@ const Register: Component = () => {
     setIsLoading(true);
 
     try {
-      console.log('[Register] Attempting registration for:', email());
+      logger.auth(`Attempting registration for: ${email()}`);
 
       const response = await fetch(`${API_BASE_URL}/auth/register`, {
         method: 'POST',
@@ -47,17 +48,17 @@ const Register: Component = () => {
       }
 
       const data = await response.json();
-      console.log('[Register] Registration successful:', data.user.email);
+      logger.auth(`Registration successful: ${data.user.email}`);
 
       // Update auth store
       auth.login(data.user);
 
-      console.log('[Register] Redirecting to dashboard...');
+      logger.auth('Redirecting to dashboard...');
 
       // Navigate to dashboard
       navigate('/dashboard/overview', { replace: true });
     } catch (err) {
-      console.error('[Register] Registration failed:', err);
+      logger.error('Registration failed', err);
       setError(err instanceof Error ? err.message : 'Registration failed. Please try again.');
     } finally {
       setIsLoading(false);

@@ -6,6 +6,7 @@
  */
 
 import { API_BASE_URL } from '../config/constants';
+import { logger } from '../utils/logger';
 
 export interface ApiConfig {
   baseUrl: string;
@@ -27,7 +28,7 @@ export function initApiClient(customConfig?: Partial<ApiConfig>): void {
 
 // Handle unauthorized responses
 function handleUnauthorized(): void {
-  console.log('[ApiClient] Unauthorized - redirecting to login');
+  logger.api('Unauthorized - redirecting to login');
   // Only redirect if not already on an auth page
   const authPages = ['/login', '/register', '/trial-signup', '/forgot-password'];
   const currentPath = window.location.pathname;
@@ -45,14 +46,14 @@ async function refreshAccessToken(): Promise<boolean> {
     });
 
     if (response.ok) {
-      console.log('[ApiClient] Access token refreshed successfully');
+      logger.api('Access token refreshed successfully');
       return true;
     }
 
-    console.warn('[ApiClient] Token refresh failed');
+    logger.warn('Token refresh failed');
     return false;
   } catch (error) {
-    console.error('[ApiClient] Token refresh error:', error);
+    logger.error('Token refresh error', error);
     return false;
   }
 }
@@ -124,7 +125,7 @@ export async function request<T = any>(
 
     return handleResponse<T>(response);
   } catch (error) {
-    console.error('API request failed:', error);
+    logger.error('API request failed', error);
     throw error;
   }
 }

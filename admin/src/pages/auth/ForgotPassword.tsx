@@ -1,5 +1,6 @@
 import { Component, createSignal, Show } from 'solid-js';
 import { API_BASE_URL } from '../../config/constants';
+import { logger } from '../../utils/logger';
 import AuthLayout from '../../layouts/AuthLayout';
 
 const ForgotPassword: Component = () => {
@@ -15,7 +16,7 @@ const ForgotPassword: Component = () => {
     setIsLoading(true);
 
     try {
-      console.log('[ForgotPassword] Requesting password reset for:', email());
+      logger.auth(`Requesting password reset for: ${email()}`);
 
       const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
         method: 'POST',
@@ -28,11 +29,11 @@ const ForgotPassword: Component = () => {
         throw new Error(data.message || 'Request failed');
       }
 
-      console.log('[ForgotPassword] Password reset email sent');
+      logger.auth('Password reset email sent');
       setSuccess(true);
       setEmail('');
     } catch (err) {
-      console.error('[ForgotPassword] Request failed:', err);
+      logger.error('Password reset request failed', err);
       setError(err instanceof Error ? err.message : 'Request failed. Please try again.');
     } finally {
       setIsLoading(false);

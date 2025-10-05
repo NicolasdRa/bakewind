@@ -2,6 +2,7 @@ import { Component, createSignal, Show } from 'solid-js';
 import { useNavigate } from '@solidjs/router';
 import { useAuth } from '../../stores/authStore';
 import { API_BASE_URL } from '../../config/constants';
+import { logger } from '../../utils/logger';
 import AuthLayout from '../../layouts/AuthLayout';
 
 const TrialSignup: Component = () => {
@@ -29,7 +30,7 @@ const TrialSignup: Component = () => {
     setIsLoading(true);
 
     try {
-      console.log('[TrialSignup] Attempting trial signup for:', email());
+      logger.auth(`Attempting trial signup for: ${email()}`);
 
       const response = await fetch(`${API_BASE_URL}/auth/trial-signup`, {
         method: 'POST',
@@ -52,17 +53,17 @@ const TrialSignup: Component = () => {
       }
 
       const data = await response.json();
-      console.log('[TrialSignup] Signup successful:', data.user.email);
+      logger.auth(`Signup successful: ${data.user.email}`);
 
       // Update auth store
       auth.login(data.user);
 
-      console.log('[TrialSignup] Redirecting to dashboard...');
+      logger.auth('Redirecting to dashboard...');
 
       // Navigate to dashboard
       navigate('/dashboard/overview', { replace: true });
     } catch (err) {
-      console.error('[TrialSignup] Signup failed:', err);
+      logger.error('Signup failed', err);
       setError(err instanceof Error ? err.message : 'Signup failed. Please try again.');
     } finally {
       setIsLoading(false);

@@ -4,6 +4,11 @@ import { Component, lazy } from "solid-js";
 import RootLayout from "./layouts/RootLayout";
 import ProtectedLayout from "./layouts/ProtectedLayout/ProtectedLayout";
 import NotFound from "./pages/not-found/NotFoundPage";
+import { configureLogging } from "./utils/loggerConfig";
+import { logger } from "./utils/logger";
+
+// Configure logging based on environment
+configureLogging();
 
 // Lazy load pages for better performance
 const Dashboard = lazy(() => import("./pages/overview/OverviewPage"));
@@ -24,7 +29,7 @@ const Register = lazy(() => import("./pages/auth/Register"));
 const ForgotPassword = lazy(() => import("./pages/auth/ForgotPassword"));
 
 const App: Component = () => {
-  console.log('[App] Rendering App component');
+  logger.ui('Rendering App component');
 
   return (
     <Router root={RootLayout}>

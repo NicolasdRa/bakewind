@@ -5,6 +5,7 @@
  */
 
 import { API_BASE_URL } from '../config/constants';
+import { logger } from '../utils/logger';
 
 export interface ApiConfig {
   baseUrl: string;
@@ -108,7 +109,7 @@ async function refreshAccessToken(): Promise<boolean> {
       return true;
     }
   } catch (error) {
-    console.error('Token refresh failed:', error);
+    logger.error('Token refresh failed', error);
   }
 
   clearTokens();
@@ -159,7 +160,7 @@ export async function request<T = any>(
 
     return handleResponse<T>(response);
   } catch (error) {
-    console.error('API Request failed:', error);
+    logger.error('API Request failed', error);
     throw error;
   }
 }

@@ -2,6 +2,7 @@ import { Show } from "solid-js";
 import { RouteSectionProps } from "@solidjs/router";
 import { useAuth } from "../../stores/authStore";
 import DashboardLayout from "../DashboardLayout/DashboardLayout";
+import { logger } from "../../utils/logger";
 import styles from "./ProtectedLayout.module.css";
 
 /**
@@ -11,7 +12,7 @@ import styles from "./ProtectedLayout.module.css";
 export default function ProtectedLayout(props: RouteSectionProps) {
   const auth = useAuth();
 
-  console.log('[ProtectedLayout] Auth state:', {
+  logger.auth('Auth state check', {
     isInitialized: auth.isInitialized,
     isLoading: auth.isLoading,
     isAuthenticated: auth.isAuthenticated,
@@ -19,7 +20,7 @@ export default function ProtectedLayout(props: RouteSectionProps) {
   });
 
   const handleLoginRedirect = () => {
-    console.log('[ProtectedLayout] Redirecting to login page');
+    logger.auth('Redirecting to login page');
     window.location.href = '/login';
   };
 
