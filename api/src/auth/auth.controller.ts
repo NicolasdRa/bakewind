@@ -75,22 +75,22 @@ export class AuthController {
     const isDevelopment = process.env.NODE_ENV !== 'production';
 
     if (isDevelopment) {
-      // Development: Allow cross-port cookies on localhost
-      // Use sameSite=lax for localhost (works with secure=false)
+      // Development: Maximum CSRF protection with strict cookies
+      // Works with fetch/AJAX requests (credentials: 'include')
       return {
         httpOnly: true,
         secure: false,
-        sameSite: 'lax' as const, // 'lax' works with secure=false on localhost
+        sameSite: 'strict' as const, // Upgraded from 'lax' for better CSRF protection
         path: '/',
         domain: 'localhost',
       };
     }
 
-    // Production: Secure cookies with CSRF protection
+    // Production: Secure cookies with maximum CSRF protection
     return {
       httpOnly: true,
       secure: true,
-      sameSite: 'lax' as const,
+      sameSite: 'strict' as const, // Upgraded from 'lax' for better CSRF protection
       path: '/',
     };
   }

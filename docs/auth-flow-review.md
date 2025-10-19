@@ -100,42 +100,50 @@ The BakeWind authentication system is **well-architected** with solid security f
 
 #### 2. Missing CSRF Protection
 
-**Severity**: 🔴 HIGH
+**Severity**: ✅ **RESOLVED** (was 🔴 HIGH)
 **Type**: Security Configuration
+**Resolved Date**: 2025-10-19
 
-**Issue**: Using `sameSite: 'lax'` in development, which doesn't fully prevent CSRF attacks in cross-port scenarios.
+**Issue**: Using `sameSite: 'lax'` in development, which didn't provide maximum CSRF protection.
 
-**Location**: `src/auth/auth.controller.ts:85`
+**Location**: `src/auth/auth.controller.ts:83,93`
+
+**Resolution**:
+- Upgraded `sameSite: 'lax'` → `'strict'` in both development and production
+- Verified all auth flows use fetch/AJAX (not form navigation)
+- All requests use `credentials: 'include'` which works with strict cookies
+
+**Changes Applied**:
 ```typescript
-sameSite: 'lax' as const, // 'lax' works with secure=false on localhost
+// Development
+return {
+  httpOnly: true,
+  secure: false,
+  sameSite: 'strict' as const, // ✅ Upgraded from 'lax'
+  path: '/',
+  domain: 'localhost',
+};
+
+// Production
+return {
+  httpOnly: true,
+  secure: true,
+  sameSite: 'strict' as const, // ✅ Upgraded from 'lax'
+  path: '/',
+};
 ```
 
-**Risk**: CSRF attacks possible when admin app (localhost:3001) makes requests to API (localhost:5000).
+**Verification**:
+- ✅ Login uses fetch with `credentials: 'include'` (Login.tsx:25)
+- ✅ Register uses fetch with `credentials: 'include'` (Register.tsx:31)
+- ✅ Trial signup uses fetch with `credentials: 'include'` (TrialSignup.tsx:33)
+- ✅ API client sets `credentials: 'include'` on all requests (client.ts:103)
+- ✅ No browser form submissions - all programmatic requests
 
-**Recommended Fix**:
-
-**Option A - Stricter SameSite (Recommended)**:
-```typescript
-// In getCookieOptions()
-if (isDevelopment) {
-  return {
-    httpOnly: true,
-    secure: false,
-    sameSite: 'strict' as const, // More secure
-    path: '/',
-    domain: 'localhost',
-  };
-}
-```
-
-**Option B - Add CSRF Tokens**:
-1. Install `@nestjs/csrf` or `csurf`
-2. Generate CSRF token on login
-3. Validate on state-changing operations (logout, profile updates)
-
-**Testing**:
-- Test login/logout still works with `sameSite: 'strict'`
-- Verify cross-site requests are blocked
+**Security Improvement**:
+- Maximum CSRF protection
+- Cookies only sent on same-site requests
+- Works seamlessly with current AJAX-based implementation
 
 ---
 

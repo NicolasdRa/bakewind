@@ -284,11 +284,11 @@ bakewind/
 - **Fix Applied**: Changed default from `'24h'` to `'15m'`
 - **Status**: Cookie expiry and JWT expiry now fully aligned at 15 minutes
 
-**2. Missing CSRF Protection**
-- **Issue**: Using `sameSite: 'lax'` doesn't fully prevent CSRF in cross-port dev scenario
-- **Location**: `api/src/auth/auth.controller.ts:85`
-- **Risk**: CSRF attacks possible between localhost:3001 (admin) and localhost:5000 (API)
-- **Fix**: Upgrade to `sameSite: 'strict'` or implement CSRF tokens
+**2. Missing CSRF Protection** ✅ **RESOLVED (2025-10-19)**
+- **Issue**: Using `sameSite: 'lax'` didn't provide maximum CSRF protection
+- **Location**: `api/src/auth/auth.controller.ts:83,93`
+- **Fix Applied**: Upgraded to `sameSite: 'strict'` in both development and production
+- **Status**: Maximum CSRF protection now enabled, verified with all fetch-based auth flows
 
 **3. Login Page Bypasses API Client**
 - **Issue**: Login page uses direct `fetch()` instead of centralized `apiClient`
