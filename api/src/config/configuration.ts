@@ -15,7 +15,7 @@ const configSchema = z.object({
   }),
   jwt: z.object({
     secret: z.string(),
-    expiresIn: z.string().default('24h'),
+    expiresIn: z.string().default('15m'),
     refreshSecret: z.string(),
     refreshExpiresIn: z.string().default('7d'),
   }),

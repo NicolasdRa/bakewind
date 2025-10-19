@@ -64,34 +64,36 @@ The BakeWind authentication system is **well-architected** with solid security f
 
 #### 1. Token Expiry Mismatch
 
-**Severity**: 🔴 CRITICAL
+**Severity**: ✅ **RESOLVED** (was 🔴 CRITICAL)
 **Type**: Security Configuration
+**Resolved Date**: 2025-10-19
 
-**Issue**: Access token cookie expires in 15 minutes, but JWT token itself might be valid for 24 hours.
+**Issue**: Access token cookie expires in 15 minutes, but JWT token default fallback was set to 24 hours.
 
 **Locations**:
-- Cookie expiry: `src/auth/auth.controller.ts:135-137`
+- Cookie expiry: `src/auth/auth.controller.ts:135-137` ✅
   ```typescript
   maxAge: 15 * 60 * 1000, // 15 minutes
   ```
-- JWT config: `src/config/configuration.ts:18`
+- JWT config: `src/config/configuration.ts:18` ✅ **FIXED**
   ```typescript
-  expiresIn: z.string().default('24h'),
+  expiresIn: z.string().default('15m'), // Changed from '24h'
+  ```
+- .env file: ✅ **Already correct**
+  ```bash
+  JWT_EXPIRES_IN=15m
   ```
 
-**Risk**: If an attacker steals the JWT token (e.g., through network interception), they can use it for up to 24 hours even though the cookie expires in 15 minutes.
-
-**Fix**:
-```bash
-# In .env file
-JWT_EXPIRES_IN=15m
-JWT_REFRESH_EXPIRES_IN=7d
-```
+**Resolution**:
+- Updated default fallback in configuration.ts from `'24h'` to `'15m'`
+- .env file was already correctly configured
+- All JWT signing locations use proper 15m fallback
+- Cookie expiry and JWT expiry now fully aligned
 
 **Verification**:
 ```bash
-# Check the JWT payload after fix
-# The 'exp' claim should be ~15 minutes from 'iat'
+# Check the JWT payload - 'exp' claim should be ~15 minutes from 'iat'
+# All configurations now consistent at 15 minutes
 ```
 
 ---
