@@ -1,15 +1,23 @@
 import { Show } from "solid-js";
 import { RouteSectionProps } from "@solidjs/router";
-import { useAuth } from "../../stores/authStore";
+import { AuthProvider, useAuth } from "../../context/AuthContext";
 import DashboardLayout from "../DashboardLayout/DashboardLayout";
 import { logger } from "../../utils/logger";
 import styles from "./ProtectedLayout.module.css";
 
 /**
  * ProtectedLayout - Wraps routes that require authentication
- * Combines auth guard logic with DashboardLayout
+ * Provides AuthProvider and auth guard logic with DashboardLayout
  */
 export default function ProtectedLayout(props: RouteSectionProps) {
+  return (
+    <AuthProvider>
+      <ProtectedContent {...props} />
+    </AuthProvider>
+  );
+}
+
+function ProtectedContent(props: RouteSectionProps) {
   const auth = useAuth();
 
   logger.auth('Auth state check', {
@@ -51,3 +59,4 @@ export default function ProtectedLayout(props: RouteSectionProps) {
     </Show>
   );
 }
+

@@ -1,12 +1,12 @@
 import { RouteSectionProps } from "@solidjs/router";
 import { Component, onMount } from "solid-js";
-import { AuthProvider } from "../stores/authStore";
 import { appActions } from "../stores/appStore";
 import { logger } from "../utils/logger";
 
 /**
  * RootLayout - Top-level layout wrapper for the entire app
- * Provides global context (AuthProvider) and initializes app state
+ * Initializes app-wide state (theme, etc.)
+ * Note: AuthProvider is only in ProtectedLayout, not here
  */
 const RootLayout: Component<RouteSectionProps> = (props) => {
   logger.ui('Rendering RootLayout');
@@ -16,11 +16,7 @@ const RootLayout: Component<RouteSectionProps> = (props) => {
     appActions.initializeClientState();
   });
 
-  return (
-    <AuthProvider>
-      {props.children}
-    </AuthProvider>
-  );
+  return <>{props.children}</>;
 };
 
 export default RootLayout;

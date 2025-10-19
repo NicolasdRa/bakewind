@@ -1,5 +1,5 @@
 import { Component, createSignal, createEffect, createMemo, Show } from "solid-js"
-import { useAuth } from "~/stores/authStore"
+import { useAuth } from "~/context/AuthContext"
 import { API_BASE_URL } from "~/config/constants"
 import LoadingSpinner from "~/components/LoadingSpinner/LoadingSpinner"
 import styles from './ProfilePage.module.css'

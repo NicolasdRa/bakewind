@@ -1,6 +1,5 @@
 import { Component, createSignal, Show } from 'solid-js';
 import { useNavigate } from '@solidjs/router';
-import { useAuth } from '../../stores/authStore';
 import { API_BASE_URL } from '../../config/constants';
 import { logger } from '../../utils/logger';
 import AuthLayout from '../../layouts/AuthLayout';
@@ -16,7 +15,6 @@ const TrialSignup: Component = () => {
   const [error, setError] = createSignal('');
   const [isLoading, setIsLoading] = createSignal(false);
   const navigate = useNavigate();
-  const auth = useAuth();
 
   const handleSubmit = async (e: Event) => {
     e.preventDefault();
@@ -55,12 +53,9 @@ const TrialSignup: Component = () => {
       const data = await response.json();
       logger.auth(`Signup successful: ${data.user.email}`);
 
-      // Update auth store
-      auth.login(data.user);
+      logger.auth('Redirecting to dashboard - auth will be initialized there...');
 
-      logger.auth('Redirecting to dashboard...');
-
-      // Navigate to dashboard
+      // Navigate to dashboard - ProtectedLayout will initialize auth
       navigate('/dashboard/overview', { replace: true });
     } catch (err) {
       logger.error('Signup failed', err);

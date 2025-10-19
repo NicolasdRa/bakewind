@@ -1,5 +1,5 @@
 import { createSignal, Show } from 'solid-js'
-import { useAuth } from '~/stores/authStore'
+import { useAuth } from '~/context/AuthContext'
 import { API_BASE_URL } from '~/config/constants'
 import BaseWidget from '~/components/BaseWidget/BaseWidget'
 import styles from './ProfileInfoWidget.module.css'

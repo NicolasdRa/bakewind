@@ -1,6 +1,6 @@
 import { Component, createSignal, Show, For } from 'solid-js';
 import { A, useLocation } from '@solidjs/router';
-import { useAuth } from '../stores/authStore';
+import { useAuth } from '../context/AuthContext';
 
 interface NavigationItem {
   path: string;

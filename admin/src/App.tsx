@@ -23,7 +23,7 @@ const ProfilePage = lazy(() => import("./pages/profile/ProfilePage"));
 const SettingsPage = lazy(() => import("./pages/settings/SettingsPage"));
 
 // Auth pages (public routes)
-const Login = lazy(() => import("./pages/auth/Login"));
+const Login = lazy(() => import("./pages/auth/Login/Login"));
 const TrialSignup = lazy(() => import("./pages/auth/TrialSignup"));
 const Register = lazy(() => import("./pages/auth/Register"));
 const ForgotPassword = lazy(() => import("./pages/auth/ForgotPassword"));

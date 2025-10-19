@@ -2,7 +2,7 @@ import { Show, For, createSignal, onMount, onCleanup } from 'solid-js'
 import { Portal } from 'solid-js/web'
 import { A, useNavigate } from '@solidjs/router'
 import { useAppStore } from '~/stores/appStore'
-import { useAuthUser } from '~/hooks/useAuthUser'
+import { useAuth } from '~/context/AuthContext'
 import Logo from '~/components/Logo/Logo'
 import styles from './Sidebar.module.css'
 
@@ -15,7 +15,7 @@ interface SidebarProps {
 
 export default function Sidebar(props: SidebarProps) {
   const { state, actions } = useAppStore()
-  const user = useAuthUser()
+  const auth = useAuth()
   const navigate = useNavigate()
   const [showUserDropdown, setShowUserDropdown] = createSignal(false)
   const [isLoggingOut, setIsLoggingOut] = createSignal(false)
@@ -28,9 +28,8 @@ export default function Sidebar(props: SidebarProps) {
   const handleLogout = async () => {
     try {
       setIsLoggingOut(true)
-      setShowUserDropdown(false) // Close dropdown
-      // Navigate to logout - will be handled by logout logic
-      window.location.href = '/login' // Redirect to admin login
+      setShowUserDropdown(false)
+      await auth.logout(navigate) // Calls API logout and navigates via router
     } catch (error) {
       console.error('Logout failed:', error)
       setIsLoggingOut(false)
@@ -219,7 +218,7 @@ export default function Sidebar(props: SidebarProps) {
         </button>
 
         {/* User Profile with Dropdown */}
-        <Show when={user()}>
+        <Show when={auth.user}>
           <div class={styles.userContainer}>
             <button
               onClick={toggleUserDropdown}
@@ -231,7 +230,7 @@ export default function Sidebar(props: SidebarProps) {
                 [styles.userProfileActive]: showUserDropdown()
               }}
               title={props.collapsed && !props.mobileOpen ? (() => {
-                const u = user();
+                const u = auth.user;
                 if (!u) return undefined;
                 return `${u.firstName || ''} ${u.lastName || ''}`.trim() || u.email;
               })() : undefined}
@@ -244,7 +243,7 @@ export default function Sidebar(props: SidebarProps) {
                 }}
               >
                 {(() => {
-                  const u = user();
+                  const u = auth.user;
                   if (!u) return '';
                   const displayName = `${u.firstName || ''} ${u.lastName || ''}`.trim() || u.email;
                   return displayName.substring(0, 2).toUpperCase();
@@ -253,11 +252,11 @@ export default function Sidebar(props: SidebarProps) {
               <Show when={props.mobileOpen || !props.collapsed}>
                 <div class={styles.userInfo}>
                   <p class={styles.userName}>{(() => {
-                    const u = user();
+                    const u = auth.user;
                     if (!u) return 'No name';
                     return `${u.firstName || ''} ${u.lastName || ''}`.trim() || 'No name';
                   })()}</p>
-                  <p class={styles.userEmail}>{user()?.email || 'No email provided'}</p>
+                  <p class={styles.userEmail}>{auth.user?.email || 'No email provided'}</p>
                 </div>
                 <div class={styles.userChevron}>
                   <svg
@@ -287,11 +286,11 @@ export default function Sidebar(props: SidebarProps) {
                   <div class={styles.dropdownHeader}>
                     <div class={styles.dropdownUserInfo}>
                       <p class={styles.dropdownUserName}>{(() => {
-                        const u = user();
+                        const u = auth.user;
                         if (!u) return 'No name';
                         return `${u.firstName || ''} ${u.lastName || ''}`.trim() || 'No name';
                       })()}</p>
-                      <p class={styles.dropdownUserId}>{user()?.email || 'No email provided'}</p>
+                      <p class={styles.dropdownUserId}>{auth.user?.email || 'No email provided'}</p>
                     </div>
                   </div>
                   <div class={styles.dropdownDivider}></div>
@@ -324,7 +323,7 @@ export default function Sidebar(props: SidebarProps) {
               <Portal>
                 <div class={styles.tooltip}>
                   {(() => {
-                    const u = user();
+                    const u = auth.user;
                     if (!u) return '';
                     return `${u.firstName || ''} ${u.lastName || ''}`.trim() || u.email;
                   })()}

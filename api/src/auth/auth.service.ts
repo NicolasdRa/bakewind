@@ -9,7 +9,6 @@ import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
 import { UsersService } from '../users/users.service';
 import { TrialAccountsService } from '../trials/trial-accounts.service';
-import { UserSessionsService } from '../user-sessions/user-sessions.service';
 import { StripeService } from '../stripe/stripe.service';
 import { RedisService } from '../redis/redis.service';
 import type {
@@ -57,7 +56,6 @@ export class AuthService {
   constructor(
     private usersService: UsersService,
     private trialAccountsService: TrialAccountsService,
-    private userSessionsService: UserSessionsService,
     private stripeService: StripeService,
     private jwtService: JwtService,
     private configService: ConfigService,
@@ -203,6 +201,8 @@ export class AuthService {
   }
 
   async logout(userId: string, accessToken?: string): Promise<void> {
+    this.logger.log(`🔐 Logout service called for user: ${userId}`);
+
     // Clear refresh token from database
     await this.usersService.updateRefreshToken(userId, null);
 

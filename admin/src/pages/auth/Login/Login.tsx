@@ -1,9 +1,10 @@
 import { Component, createSignal, Show } from 'solid-js';
 import { useNavigate, A } from '@solidjs/router';
-import { useAuth } from '../../stores/authStore';
-import { API_BASE_URL } from '../../config/constants';
-import { logger } from '../../utils/logger';
+
 import styles from './Login.module.css';
+import { logger } from '~/utils/logger';
+import { API_BASE_URL } from '~/config/constants';
+
 
 const Login: Component = () => {
   const [email, setEmail] = createSignal('');
@@ -11,7 +12,6 @@ const Login: Component = () => {
   const [error, setError] = createSignal('');
   const [isLoading, setIsLoading] = createSignal(false);
   const navigate = useNavigate();
-  const auth = useAuth();
 
   const handleSubmit = async (e: Event) => {
     e.preventDefault();
@@ -21,6 +21,7 @@ const Login: Component = () => {
     try {
       logger.auth(`Attempting login for: ${email()}`);
 
+      // TODO: this needs to be replaced with authStore login method
       const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -36,12 +37,9 @@ const Login: Component = () => {
       const data = await response.json();
       logger.auth(`Login successful: ${data.user.email}`);
 
-      // Update auth store
-      auth.login(data.user);
+      logger.auth('Redirecting to dashboard - auth will be initialized there...');
 
-      logger.auth('Redirecting to dashboard...');
-
-      // Navigate to dashboard
+      // Navigate to dashboard - ProtectedLayout will initialize auth
       navigate('/dashboard/overview', { replace: true });
     } catch (err) {
       logger.error('Login failed', err);

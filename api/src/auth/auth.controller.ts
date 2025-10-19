@@ -3,12 +3,12 @@ import {
   Post,
   Get,
   Body,
-  UseGuards,
   Request,
   HttpCode,
   HttpStatus,
   Res,
   UnauthorizedException,
+  Logger,
 } from '@nestjs/common';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import type { AuditContext } from './auth.service';
@@ -29,7 +29,6 @@ import {
 } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 import { LoginUserDto } from '../users/dto/login-user.dto';
 import { userRegistrationSchema } from '../users/users.validation';
@@ -48,6 +47,8 @@ import {
 @ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
+  private readonly logger = new Logger(AuthController.name);
+
   constructor(private authService: AuthService) {}
 
   /**
@@ -73,12 +74,24 @@ export class AuthController {
   private getCookieOptions() {
     const isDevelopment = process.env.NODE_ENV !== 'production';
 
+    if (isDevelopment) {
+      // Development: Allow cross-port cookies on localhost
+      // Use sameSite=lax for localhost (works with secure=false)
+      return {
+        httpOnly: true,
+        secure: false,
+        sameSite: 'lax' as const, // 'lax' works with secure=false on localhost
+        path: '/',
+        domain: 'localhost',
+      };
+    }
+
+    // Production: Secure cookies with CSRF protection
     return {
       httpOnly: true,
-      secure: !isDevelopment, // true in production (HTTPS), false in dev (HTTP)
-      sameSite: 'lax' as const, // Lax allows cookies on same-site navigation
-      path: '/', // Cookies accessible from all paths
-      // Domain not set - cookies scoped to serving domain
+      secure: true,
+      sameSite: 'lax' as const,
+      path: '/',
     };
   }
 
@@ -323,7 +336,6 @@ export class AuthController {
   }
 
   @Post('logout')
-  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({
@@ -346,23 +358,35 @@ export class AuthController {
     @Request() req: RequestWithUser,
     @Res({ passthrough: true }) res: FastifyReply,
   ) {
+    this.logger.log('🔴 LOGOUT ENDPOINT HIT!');
+    this.logger.log(
+      `Logout endpoint reached for user: ${req.user?.id || 'unknown'}`,
+    );
+    this.logger.log(`Request user object:`, req.user);
+
     // Extract access token from cookie or Authorization header
     const accessToken =
       req.cookies?.accessToken ||
       req.headers.authorization?.replace('Bearer ', '');
 
+    this.logger.log(
+      `Access token present: ${!!accessToken}, Cookies: ${!!req.cookies?.accessToken}`,
+    );
+
     // Logout and blacklist token
     await this.authService.logout(req.user.id, accessToken);
 
-    // Clear httpOnly cookies
-    res.clearCookie('accessToken', { path: '/' });
-    res.clearCookie('refreshToken', { path: '/' });
+    // Clear httpOnly cookies by setting them to expire immediately
+    const cookieOptions = this.getCookieOptions();
+    res.setCookie('accessToken', '', { ...cookieOptions, maxAge: 0 });
+    res.setCookie('refreshToken', '', { ...cookieOptions, maxAge: 0 });
+
+    this.logger.log('Logout complete, cookies cleared');
 
     return { message: 'Successfully logged out' };
   }
 
   @Get('me')
-  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Get current user information' })
   @ApiResponse({

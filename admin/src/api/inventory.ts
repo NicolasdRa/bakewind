@@ -1,4 +1,5 @@
-import { apiClient } from './client';
+import apiClient from "./client";
+
 
 // Types matching backend contract
 export interface ConsumptionTrackingSummary {
