@@ -1,6 +1,6 @@
 import { Component, createSignal, Show } from 'solid-js';
 import { useNavigate } from '@solidjs/router';
-import { API_BASE_URL } from '../../config/constants';
+import * as authApi from '~/api/auth';
 import { logger } from '../../utils/logger';
 import AuthLayout from '../../layouts/AuthLayout';
 
@@ -30,29 +30,18 @@ const TrialSignup: Component = () => {
     try {
       logger.auth(`Attempting trial signup for: ${email()}`);
 
-      const response = await fetch(`${API_BASE_URL}/auth/trial-signup`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include', // Important for cookies
-        body: JSON.stringify({
-          businessName: businessName(),
-          fullName: fullName(),
-          email: email(),
-          phone: phone(),
-          password: password(),
-          locations: locations(),
-          agreeToTerms: agreeToTerms(),
-        }),
+      // Use centralized authApi for consistent error handling, logging, and token refresh
+      const result = await authApi.trialSignup({
+        businessName: businessName(),
+        fullName: fullName(),
+        email: email(),
+        phone: phone(),
+        password: password(),
+        locations: locations(),
+        agreeToTerms: agreeToTerms(),
       });
 
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        throw new Error(data.message || 'Trial signup failed');
-      }
-
-      const data = await response.json();
-      logger.auth(`Signup successful: ${data.user.email}`);
-
+      logger.auth(`Signup successful: ${result.user.email}`);
       logger.auth('Redirecting to dashboard - auth will be initialized there...');
 
       // Navigate to dashboard - ProtectedLayout will initialize auth

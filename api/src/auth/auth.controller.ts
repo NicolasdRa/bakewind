@@ -316,8 +316,14 @@ export class AuthController {
       throw new UnauthorizedException('No refresh token provided');
     }
 
+    // Get audit context for correlation tracking
+    const auditContext = this.getAuditContext(req);
+
     // Refresh tokens (with rotation)
-    const tokens = await this.authService.refreshTokens(refreshToken);
+    const tokens = await this.authService.refreshTokens(
+      refreshToken,
+      auditContext,
+    );
 
     // Set new httpOnly cookies
     const cookieOptions = this.getCookieOptions();
@@ -373,8 +379,11 @@ export class AuthController {
       `Access token present: ${!!accessToken}, Cookies: ${!!req.cookies?.accessToken}`,
     );
 
+    // Get audit context for correlation tracking
+    const auditContext = this.getAuditContext(req);
+
     // Logout and blacklist token
-    await this.authService.logout(req.user.id, accessToken);
+    await this.authService.logout(req.user.id, accessToken, auditContext);
 
     // Clear httpOnly cookies by setting them to expire immediately
     const cookieOptions = this.getCookieOptions();

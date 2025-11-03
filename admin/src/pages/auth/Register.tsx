@@ -1,6 +1,6 @@
 import { Component, createSignal, Show } from 'solid-js';
 import { useNavigate } from '@solidjs/router';
-import { API_BASE_URL } from '../../config/constants';
+import * as authApi from '~/api/auth';
 import { logger } from '../../utils/logger';
 import AuthLayout from '../../layouts/AuthLayout';
 
@@ -28,26 +28,15 @@ const Register: Component = () => {
     try {
       logger.auth(`Attempting registration for: ${email()}`);
 
-      const response = await fetch(`${API_BASE_URL}/auth/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          email: email(),
-          password: password(),
-          firstName: firstName(),
-          lastName: lastName(),
-        }),
+      // Use centralized authApi for consistent error handling, logging, and token refresh
+      const result = await authApi.register({
+        email: email(),
+        password: password(),
+        firstName: firstName(),
+        lastName: lastName(),
       });
 
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        throw new Error(data.message || 'Registration failed');
-      }
-
-      const data = await response.json();
-      logger.auth(`Registration successful: ${data.user.email}`);
-
+      logger.auth(`Registration successful: ${result.user.email}`);
       logger.auth('Redirecting to dashboard - auth will be initialized there...');
 
       // Navigate to dashboard - ProtectedLayout will initialize auth

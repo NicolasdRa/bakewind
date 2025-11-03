@@ -1,6 +1,6 @@
 import { Component, createSignal, createEffect, createMemo, Show } from "solid-js"
 import { useAuth } from "~/context/AuthContext"
-import { API_BASE_URL } from "~/config/constants"
+import * as usersApi from '~/api/users'
 import LoadingSpinner from "~/components/LoadingSpinner/LoadingSpinner"
 import styles from './ProfilePage.module.css'
 
@@ -41,14 +41,9 @@ const useUpdateProfile = () => {
     setIsLoading(true)
     setError(null)
     try {
-      const response = await fetch(`${API_BASE_URL}/users/profile`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(data)
-      })
-      if (!response.ok) throw new Error('Failed to update profile')
-      return await response.json()
+      // Use centralized usersApi for consistent error handling and token refresh
+      await usersApi.updateProfile(data)
+      return { success: true }
     } catch (err) {
       setError(err as Error)
       throw err
@@ -68,17 +63,12 @@ const useChangePassword = () => {
     setIsLoading(true)
     setError(null)
     try {
-      const response = await fetch(`${API_BASE_URL}/users/${userId}/password`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          currentPassword: data.currentPassword,
-          newPassword: data.newPassword
-        })
+      // Use centralized usersApi for consistent error handling and token refresh
+      await usersApi.changePassword(userId, {
+        currentPassword: data.currentPassword,
+        newPassword: data.newPassword
       })
-      if (!response.ok) throw new Error('Failed to change password')
-      return await response.json()
+      return { success: true }
     } catch (err) {
       setError(err as Error)
       throw err

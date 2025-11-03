@@ -143,6 +143,7 @@ export class AuthService {
 
   async refreshTokens(
     refreshToken: string,
+    auditContext?: AuditContext,
   ): Promise<{ accessToken: string; refreshToken: string }> {
     try {
       const appConfig = this.configService.get<AppConfig>('app')!;
@@ -153,6 +154,10 @@ export class AuthService {
 
       const user = await this.usersService.findByEmail(payload.email);
       if (!user || !user.isActive || !user.refreshToken) {
+        this.logger.warn('Invalid refresh token attempt', {
+          email: payload.email,
+          correlationId: auditContext?.correlationId,
+        });
         throw new UnauthorizedException('Invalid refresh token');
       }
 
@@ -167,6 +172,11 @@ export class AuthService {
         // Invalidate all sessions for this user
         this.logger.warn(
           `Refresh token reuse detected for user ${user.id}. Invalidating all sessions.`,
+          {
+            userId: user.id,
+            email: user.email,
+            correlationId: auditContext?.correlationId,
+          },
         );
         await this.usersService.updateRefreshToken(user.id, null);
         throw new UnauthorizedException(
@@ -188,6 +198,11 @@ export class AuthService {
 
       this.logger.log(
         `Refresh token rotated for user ${user.id}. Old token invalidated.`,
+        {
+          userId: user.id,
+          email: user.email,
+          correlationId: auditContext?.correlationId,
+        },
       );
 
       return newTokens;
@@ -200,8 +215,15 @@ export class AuthService {
     }
   }
 
-  async logout(userId: string, accessToken?: string): Promise<void> {
-    this.logger.log(`🔐 Logout service called for user: ${userId}`);
+  async logout(
+    userId: string,
+    accessToken?: string,
+    auditContext?: AuditContext,
+  ): Promise<void> {
+    this.logger.log(`🔐 Logout service called for user: ${userId}`, {
+      userId,
+      correlationId: auditContext?.correlationId,
+    });
 
     // Clear refresh token from database
     await this.usersService.updateRefreshToken(userId, null);
@@ -222,6 +244,11 @@ export class AuthService {
             );
             this.logger.log(
               `Access token blacklisted for user ${userId} (TTL: ${ttl}s)`,
+              {
+                userId,
+                ttl,
+                correlationId: auditContext?.correlationId,
+              },
             );
           }
         }
@@ -231,7 +258,10 @@ export class AuthService {
       }
     }
 
-    this.logger.log(`User ${userId} logged out`);
+    this.logger.log(`User ${userId} logged out`, {
+      userId,
+      correlationId: auditContext?.correlationId,
+    });
   }
 
   /**

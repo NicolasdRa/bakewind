@@ -3,7 +3,7 @@ import { useNavigate, A } from '@solidjs/router';
 
 import styles from './Login.module.css';
 import { logger } from '~/utils/logger';
-import { API_BASE_URL } from '~/config/constants';
+import * as authApi from '~/api/auth';
 
 
 const Login: Component = () => {
@@ -21,22 +21,13 @@ const Login: Component = () => {
     try {
       logger.auth(`Attempting login for: ${email()}`);
 
-      // TODO: this needs to be replaced with authStore login method
-      const response = await fetch(`${API_BASE_URL}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include', // Important for cookies
-        body: JSON.stringify({ email: email(), password: password() }),
+      // Use centralized authApi for consistent error handling, logging, and token refresh
+      const result = await authApi.login({
+        email: email(),
+        password: password(),
       });
 
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        throw new Error(data.message || 'Login failed');
-      }
-
-      const data = await response.json();
-      logger.auth(`Login successful: ${data.user.email}`);
-
+      logger.auth(`Login successful: ${result.user.email}`);
       logger.auth('Redirecting to dashboard - auth will be initialized there...');
 
       // Navigate to dashboard - ProtectedLayout will initialize auth
