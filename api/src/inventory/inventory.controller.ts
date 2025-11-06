@@ -25,6 +25,12 @@ import {
   setCustomThresholdSchema,
   SetCustomThresholdDto,
 } from './dto/consumption-tracking.dto';
+import {
+  createInventoryItemSchema,
+  updateInventoryItemSchema,
+  CreateInventoryItemDto,
+  UpdateInventoryItemDto,
+} from './dto/inventory-item.dto';
 
 @ApiTags('inventory')
 @Controller('api/v1/inventory')
@@ -33,6 +39,7 @@ import {
 export class InventoryController {
   constructor(private readonly inventoryService: InventoryService) {}
 
+  // List all inventory items
   @Get()
   @ApiOperation({ summary: 'List inventory with low-stock indicators' })
   @ApiQuery({ name: 'low_stock_only', required: false, type: Boolean })
@@ -46,6 +53,19 @@ export class InventoryController {
     return this.inventoryService.getInventory(lowStockFilter, category);
   }
 
+  // Create new inventory item
+  @Post()
+  @ApiOperation({ summary: 'Create new inventory item' })
+  @ApiResponse({ status: 201, description: 'Inventory item created' })
+  @ApiResponse({ status: 400, description: 'Validation error' })
+  async createInventoryItem(
+    @Body(new ZodValidationPipe(createInventoryItemSchema))
+    dto: CreateInventoryItemDto,
+  ) {
+    return this.inventoryService.createInventoryItem(dto);
+  }
+
+  // Consumption tracking endpoints (more specific routes first)
   @Get(':itemId/consumption')
   @ApiOperation({ summary: 'Get consumption tracking data for item' })
   @ApiResponse({ status: 200, description: 'Consumption data retrieved' })
@@ -84,5 +104,36 @@ export class InventoryController {
   @ApiResponse({ status: 404, description: 'Item not found' })
   async recalculate(@Param('itemId') itemId: string) {
     return this.inventoryService.recalculate(itemId);
+  }
+
+  // CRUD endpoints for individual items (generic routes last)
+  @Get(':itemId')
+  @ApiOperation({ summary: 'Get inventory item details' })
+  @ApiResponse({ status: 200, description: 'Inventory item retrieved' })
+  @ApiResponse({ status: 404, description: 'Item not found' })
+  async getInventoryItem(@Param('itemId') itemId: string) {
+    return this.inventoryService.getInventoryItem(itemId);
+  }
+
+  @Put(':itemId')
+  @ApiOperation({ summary: 'Update inventory item' })
+  @ApiResponse({ status: 200, description: 'Inventory item updated' })
+  @ApiResponse({ status: 400, description: 'Validation error' })
+  @ApiResponse({ status: 404, description: 'Item not found' })
+  async updateInventoryItem(
+    @Param('itemId') itemId: string,
+    @Body(new ZodValidationPipe(updateInventoryItemSchema))
+    dto: UpdateInventoryItemDto,
+  ) {
+    return this.inventoryService.updateInventoryItem(itemId, dto);
+  }
+
+  @Delete(':itemId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Delete inventory item' })
+  @ApiResponse({ status: 204, description: 'Inventory item deleted' })
+  @ApiResponse({ status: 404, description: 'Item not found' })
+  async deleteInventoryItem(@Param('itemId') itemId: string) {
+    await this.inventoryService.deleteInventoryItem(itemId);
   }
 }

@@ -12,6 +12,11 @@ import {
   SetCustomThresholdDto,
   InventoryItemWithTrackingDto,
 } from './dto/consumption-tracking.dto';
+import {
+  CreateInventoryItemDto,
+  UpdateInventoryItemDto,
+  InventoryItemDto,
+} from './dto/inventory-item.dto';
 
 @Injectable()
 export class InventoryService {
@@ -391,6 +396,141 @@ export class InventoryService {
         currentStock,
         avgDailyConsumption,
       ),
+    };
+  }
+
+  // CRUD operations for inventory items
+
+  async getInventoryItem(itemId: string): Promise<InventoryItemDto> {
+    const [item] = await this.databaseService.database
+      .select()
+      .from(inventoryItems)
+      .where(eq(inventoryItems.id, itemId))
+      .limit(1);
+
+    if (!item) {
+      throw new NotFoundException('Inventory item not found');
+    }
+
+    return this.mapToInventoryItemDto(item);
+  }
+
+  async createInventoryItem(
+    dto: CreateInventoryItemDto,
+  ): Promise<InventoryItemDto> {
+    const [created] = await this.databaseService.database
+      .insert(inventoryItems)
+      .values({
+        name: dto.name,
+        category: dto.category,
+        unit: dto.unit,
+        currentStock: dto.currentStock.toString(),
+        minimumStock: dto.minimumStock.toString(),
+        reorderPoint: dto.reorderPoint.toString(),
+        reorderQuantity: dto.reorderQuantity.toString(),
+        costPerUnit: dto.costPerUnit.toString(),
+        supplier: dto.supplier || null,
+        location: dto.location || null,
+        notes: dto.notes || null,
+      })
+      .returning();
+
+    if (!created) {
+      throw new Error('Failed to create inventory item');
+    }
+
+    return this.mapToInventoryItemDto(created);
+  }
+
+  async updateInventoryItem(
+    itemId: string,
+    dto: UpdateInventoryItemDto,
+  ): Promise<InventoryItemDto> {
+    const [existing] = await this.databaseService.database
+      .select()
+      .from(inventoryItems)
+      .where(eq(inventoryItems.id, itemId))
+      .limit(1);
+
+    if (!existing) {
+      throw new NotFoundException('Inventory item not found');
+    }
+
+    const updateData: any = {};
+    if (dto.name !== undefined) updateData.name = dto.name;
+    if (dto.category !== undefined) updateData.category = dto.category;
+    if (dto.unit !== undefined) updateData.unit = dto.unit;
+    if (dto.currentStock !== undefined)
+      updateData.currentStock = dto.currentStock.toString();
+    if (dto.minimumStock !== undefined)
+      updateData.minimumStock = dto.minimumStock.toString();
+    if (dto.reorderPoint !== undefined)
+      updateData.reorderPoint = dto.reorderPoint.toString();
+    if (dto.reorderQuantity !== undefined)
+      updateData.reorderQuantity = dto.reorderQuantity.toString();
+    if (dto.costPerUnit !== undefined)
+      updateData.costPerUnit = dto.costPerUnit.toString();
+    if (dto.supplier !== undefined) updateData.supplier = dto.supplier;
+    if (dto.location !== undefined) updateData.location = dto.location;
+    if (dto.notes !== undefined) updateData.notes = dto.notes;
+
+    updateData.updatedAt = new Date();
+
+    const [updated] = await this.databaseService.database
+      .update(inventoryItems)
+      .set(updateData)
+      .where(eq(inventoryItems.id, itemId))
+      .returning();
+
+    if (!updated) {
+      throw new Error('Failed to update inventory item');
+    }
+
+    return this.mapToInventoryItemDto(updated);
+  }
+
+  async deleteInventoryItem(itemId: string): Promise<void> {
+    const [existing] = await this.databaseService.database
+      .select()
+      .from(inventoryItems)
+      .where(eq(inventoryItems.id, itemId))
+      .limit(1);
+
+    if (!existing) {
+      throw new NotFoundException('Inventory item not found');
+    }
+
+    // Delete associated consumption tracking first
+    await this.databaseService.database
+      .delete(inventoryConsumptionTracking)
+      .where(eq(inventoryConsumptionTracking.inventoryItemId, itemId));
+
+    // Delete the inventory item
+    await this.databaseService.database
+      .delete(inventoryItems)
+      .where(eq(inventoryItems.id, itemId));
+  }
+
+  private mapToInventoryItemDto(
+    item: typeof inventoryItems.$inferSelect,
+  ): InventoryItemDto {
+    return {
+      id: item.id,
+      name: item.name,
+      category: item.category,
+      unit: item.unit,
+      currentStock: parseFloat(item.currentStock),
+      minimumStock: parseFloat(item.minimumStock),
+      reorderPoint: parseFloat(item.reorderPoint),
+      reorderQuantity: parseFloat(item.reorderQuantity),
+      costPerUnit: parseFloat(item.costPerUnit),
+      supplier: item.supplier,
+      location: item.location,
+      notes: item.notes,
+      expirationDate: item.expirationDate || null,
+      lastRestocked: item.lastRestocked ? item.lastRestocked.toISOString() : null,
+      createdAt: item.createdAt.toISOString(),
+      updatedAt: item.updatedAt.toISOString(),
     };
   }
 }

@@ -38,6 +38,53 @@ export interface SetThresholdRequest {
   custom_lead_time_days?: number;
 }
 
+export interface InventoryItem {
+  id: string;
+  name: string;
+  category: 'ingredient' | 'packaging' | 'supplies';
+  unit: 'kg' | 'g' | 'l' | 'ml' | 'unit' | 'dozen';
+  currentStock: number;
+  minimumStock: number;
+  reorderPoint: number;
+  reorderQuantity: number;
+  costPerUnit: number;
+  supplier: string | null;
+  location: string | null;
+  notes: string | null;
+  expirationDate: string | null;
+  lastRestocked: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateInventoryItemRequest {
+  name: string;
+  category: 'ingredient' | 'packaging' | 'supplies';
+  unit: 'kg' | 'g' | 'l' | 'ml' | 'unit' | 'dozen';
+  currentStock: number;
+  minimumStock: number;
+  reorderPoint: number;
+  reorderQuantity: number;
+  costPerUnit: number;
+  supplier?: string;
+  location?: string;
+  notes?: string;
+}
+
+export interface UpdateInventoryItemRequest {
+  name?: string;
+  category?: 'ingredient' | 'packaging' | 'supplies';
+  unit?: 'kg' | 'g' | 'l' | 'ml' | 'unit' | 'dozen';
+  currentStock?: number;
+  minimumStock?: number;
+  reorderPoint?: number;
+  reorderQuantity?: number;
+  costPerUnit?: number;
+  supplier?: string;
+  location?: string;
+  notes?: string;
+}
+
 // Inventory API
 export const inventoryApi = {
   /**
@@ -83,5 +130,33 @@ export const inventoryApi = {
    */
   async recalculate(itemId: string): Promise<ConsumptionTracking> {
     return apiClient.post<ConsumptionTracking>(`/inventory/${itemId}/consumption/recalculate`, {});
+  },
+
+  /**
+   * Get inventory item details
+   */
+  async getInventoryItem(itemId: string): Promise<InventoryItem> {
+    return apiClient.get<InventoryItem>(`/inventory/${itemId}`);
+  },
+
+  /**
+   * Create new inventory item
+   */
+  async createInventoryItem(data: CreateInventoryItemRequest): Promise<InventoryItem> {
+    return apiClient.post<InventoryItem>('/inventory', data);
+  },
+
+  /**
+   * Update inventory item
+   */
+  async updateInventoryItem(itemId: string, data: UpdateInventoryItemRequest): Promise<InventoryItem> {
+    return apiClient.put<InventoryItem>(`/inventory/${itemId}`, data);
+  },
+
+  /**
+   * Delete inventory item
+   */
+  async deleteInventoryItem(itemId: string): Promise<void> {
+    await apiClient.delete(`/inventory/${itemId}`);
   },
 };
