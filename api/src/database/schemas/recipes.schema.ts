@@ -22,7 +22,7 @@ export const recipes = pgTable('recipes', {
   yieldUnit: varchar('yield_unit', { length: 50 }).notNull(),
   costPerUnit: decimal('cost_per_unit', { precision: 10, scale: 4 }),
   sellingPrice: decimal('selling_price', { precision: 10, scale: 2 }),
-  margin: decimal('margin', { precision: 5, scale: 2 }),
+  // margin is calculated dynamically: (sellingPrice - costPerUnit) / sellingPrice * 100
   productId: uuid('product_id'), // Link to product this recipe produces
   productName: varchar('product_name', { length: 255 }),
   instructions: json('instructions').$type<string[]>().notNull(),

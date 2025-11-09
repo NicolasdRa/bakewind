@@ -21,6 +21,8 @@ import { StripeModule } from './stripe/stripe.module';
 import { WidgetsModule } from './widgets/widgets.module';
 import { OrderLocksModule } from './order-locks/order-locks.module';
 import { InventoryModule } from './inventory/inventory.module';
+import { ProductsModule } from './products/products.module';
+import { RecipesModule } from './recipes/recipes.module';
 import { RealtimeModule } from './realtime/realtime.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
@@ -76,6 +78,8 @@ import configuration, { AppConfig } from './config/configuration';
     WidgetsModule,
     OrderLocksModule,
     InventoryModule,
+    ProductsModule,
+    RecipesModule,
     RealtimeModule,
     HealthModule,
     CommonModule,

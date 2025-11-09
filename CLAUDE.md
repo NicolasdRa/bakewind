@@ -177,12 +177,35 @@ User navigates between apps via direct links (e.g., website links to `http://loc
 - No local database for website/admin apps (API only)
 - Separate build processes for each application
 
+## API Testing
+
+### Postman Collection
+A complete Postman collection is available for testing all API endpoints:
+- **Location**: `api/postman/bakewind-api.postman_collection.json`
+- **Documentation**: `docs/postman-collection.md`
+- **Import**: Open Postman → Import → Select the collection file
+
+The collection includes all endpoints organized by module:
+- Authentication (Login, Signup, Refresh, Logout)
+- Inventory (CRUD + Consumption Tracking)
+- Users, Locations, Customers
+- Trials, Subscriptions
+- Health Checks
+
+**Important**: When updating or adding API endpoints, remember to update the Postman collection and documentation.
+
+See `docs/postman-collection.md` for detailed usage instructions.
+
 ## Folder Structure
 ```
 bakewind/
 ├── api/           # Backend NestJS API (port 5000)
+│   ├── postman/   # Postman collection for API testing
+│   └── src/       # API source code
 ├── website/       # Customer landing SolidStart app (port 3000)
 ├── admin/         # Admin dashboard Solid.js SPA (port 3001)
+├── docs/          # Project documentation
+│   └── postman-collection.md  # Postman collection guide
 ├── specs/         # Feature specifications
 └── CLAUDE.md      # This file
 ```

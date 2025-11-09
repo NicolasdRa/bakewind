@@ -3,13 +3,24 @@ import { inventoryApi, InventoryItemWithTracking } from "~/api/inventory";
 import AddInventoryItemModal from "~/components/inventory/AddInventoryItemModal";
 import InventoryDetailsModal from "~/components/inventory/InventoryDetailsModal";
 import EditInventoryItemModal from "~/components/inventory/EditInventoryItemModal";
+import StatsCard from "~/components/common/StatsCard";
+import SearchInput from "~/components/common/SearchInput";
+import FilterSelect from "~/components/common/FilterSelect";
+
+type SortField = 'name' | 'current_stock' | 'avg_daily_consumption' | 'days_of_supply_remaining';
+type SortDirection = 'asc' | 'desc';
 
 const InventoryPage: Component = () => {
   const [selectedCategory, setSelectedCategory] = createSignal<string>('all');
   const [showLowStock, setShowLowStock] = createSignal(false);
+  const [searchQuery, setSearchQuery] = createSignal('');
   const [isAddModalOpen, setIsAddModalOpen] = createSignal(false);
   const [selectedItemId, setSelectedItemId] = createSignal<string | null>(null);
   const [editItemId, setEditItemId] = createSignal<string | null>(null);
+
+  // Sorting state
+  const [sortField, setSortField] = createSignal<SortField>('name');
+  const [sortDirection, setSortDirection] = createSignal<SortDirection>('asc');
 
   // Fetch inventory with real-time filtering
   const [inventory, { refetch }] = createResource(
@@ -32,41 +43,136 @@ const InventoryPage: Component = () => {
     return (inventory() || []).filter(item => item.low_stock).length;
   };
 
+  // Handle column header click for sorting
+  const handleSort = (field: SortField) => {
+    if (sortField() === field) {
+      // Toggle direction if same field
+      setSortDirection(sortDirection() === 'asc' ? 'desc' : 'asc');
+    } else {
+      // Set new field with ascending order
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  // Get filtered and sorted inventory
+  const sortedInventory = () => {
+    let inventoryList = inventory() || [];
+
+    // Apply search filter
+    const search = searchQuery().toLowerCase().trim();
+    if (search) {
+      inventoryList = inventoryList.filter(item =>
+        item.name.toLowerCase().includes(search) ||
+        item.category.toLowerCase().includes(search)
+      );
+    }
+
+    const field = sortField();
+    const direction = sortDirection();
+
+    return [...inventoryList].sort((a, b) => {
+      let aValue: number | string = 0;
+      let bValue: number | string = 0;
+
+      switch (field) {
+        case 'name':
+          aValue = a.name.toLowerCase();
+          bValue = b.name.toLowerCase();
+          break;
+        case 'current_stock':
+          aValue = a.current_stock;
+          bValue = b.current_stock;
+          break;
+        case 'avg_daily_consumption':
+          aValue = a.consumption_tracking?.avg_daily_consumption ?? 0;
+          bValue = b.consumption_tracking?.avg_daily_consumption ?? 0;
+          break;
+        case 'days_of_supply_remaining':
+          aValue = a.consumption_tracking?.days_of_supply_remaining ?? 0;
+          bValue = b.consumption_tracking?.days_of_supply_remaining ?? 0;
+          break;
+      }
+
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        return direction === 'asc'
+          ? aValue.localeCompare(bValue)
+          : bValue.localeCompare(aValue);
+      } else {
+        return direction === 'asc'
+          ? (aValue as number) - (bValue as number)
+          : (bValue as number) - (aValue as number);
+      }
+    });
+  };
+
+  // Render sort indicator - always show for sortable columns
+  const SortIndicator = (field: SortField) => {
+    const isActive = sortField() === field;
+    return (
+      <span class="ml-1 inline-flex flex-col" style={{ "line-height": "0.5" }}>
+        <span
+          class="text-[10px] transition-colors"
+          style={{
+            color: isActive && sortDirection() === 'asc'
+              ? 'var(--primary-color)'
+              : 'var(--text-tertiary)',
+            opacity: isActive && sortDirection() === 'asc' ? '1' : '0.4'
+          }}
+        >
+          ▲
+        </span>
+        <span
+          class="text-[10px] transition-colors"
+          style={{
+            color: isActive && sortDirection() === 'desc'
+              ? 'var(--primary-color)'
+              : 'var(--text-tertiary)',
+            opacity: isActive && sortDirection() === 'desc' ? '1' : '0.4'
+          }}
+        >
+          ▼
+        </span>
+      </span>
+    );
+  };
+
   return (
     <div class="p-6 md:p-8">
-      <div class="mb-8">
-        <h1 class="text-3xl font-bold mb-2" style="color: var(--text-primary)">Inventory Management</h1>
-        <p class="text-base" style="color: var(--text-secondary)">Track ingredients, packaging, and supplies</p>
+      <div class="mb-8 flex justify-between items-start">
+        <div>
+          <h1 class="text-3xl font-bold mb-2" style="color: var(--text-primary)">Inventory Management</h1>
+          <p class="text-base" style="color: var(--text-secondary)">Track ingredients, packaging, and supplies</p>
+        </div>
+        <button
+          onClick={() => setIsAddModalOpen(true)}
+          class="px-6 py-3 rounded-lg font-medium transition-all hover:opacity-90"
+          style={{
+            "background-color": "var(--primary-color)",
+            "color": "white"
+          }}
+        >
+          + Add Item
+        </button>
       </div>
 
       {/* Stats Cards */}
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div class="rounded-xl p-6 border transition-all hover:shadow-md" style={{
-          "background-color": "var(--bg-primary)",
-          "border-color": "var(--border-color)",
-          "box-shadow": "var(--shadow-card)"
-        }}>
-          <h3 class="text-lg font-semibold mb-2" style="color: var(--text-secondary)">Total Items</h3>
-          <p class="text-4xl font-bold" style="color: var(--primary-color)">{inventory()?.length || 0}</p>
-        </div>
-        <div class="rounded-xl p-6 border transition-all hover:shadow-md" style={{
-          "background-color": "var(--bg-primary)",
-          "border-color": "var(--border-color)",
-          "box-shadow": "var(--shadow-card)"
-        }}>
-          <h3 class="text-lg font-semibold mb-2" style="color: var(--text-secondary)">Low Stock Alerts</h3>
-          <p class="text-4xl font-bold" style="color: var(--warning-color)">{getLowStockCount()}</p>
-        </div>
-        <div class="rounded-xl p-6 border transition-all hover:shadow-md" style={{
-          "background-color": "var(--bg-primary)",
-          "border-color": "var(--border-color)",
-          "box-shadow": "var(--shadow-card)"
-        }}>
-          <h3 class="text-lg font-semibold mb-2" style="color: var(--text-secondary)">Items w/ Tracking</h3>
-          <p class="text-4xl font-bold" style="color: var(--success-color)">
-            {(inventory() || []).filter(item => item.consumption_tracking !== null).length}
-          </p>
-        </div>
+        <StatsCard
+          title="Total Items"
+          value={inventory()?.length || 0}
+          valueColor="var(--primary-color)"
+        />
+        <StatsCard
+          title="Low Stock Alerts"
+          value={getLowStockCount()}
+          valueColor="var(--warning-color)"
+        />
+        <StatsCard
+          title="Items w/ Tracking"
+          value={(inventory() || []).filter(item => item.consumption_tracking !== null).length}
+          valueColor="var(--success-color)"
+        />
       </div>
 
       {/* Filter Controls */}
@@ -75,30 +181,30 @@ const InventoryPage: Component = () => {
         "border-color": "var(--border-color)",
         "box-shadow": "var(--shadow-card)"
       }}>
-        <div class="flex flex-wrap gap-4">
-          <div class="flex-1 min-w-64">
-            <label class="block text-sm font-medium mb-2" style="color: var(--text-secondary)">
-              Filter by Category
+        <div class="flex flex-wrap gap-4 items-end">
+          <SearchInput
+            value={searchQuery()}
+            onInput={setSearchQuery}
+            placeholder="Search by name or category..."
+            label="Search Inventory"
+          />
+          <FilterSelect
+            value={selectedCategory()}
+            onChange={setSelectedCategory}
+            label="Category"
+            options={[
+              { value: 'all', label: 'All Categories' },
+              { value: 'ingredient', label: 'Ingredients' },
+              { value: 'packaging', label: 'Packaging' },
+              { value: 'supplies', label: 'Supplies' }
+            ]}
+          />
+          <div class="flex-shrink-0 flex flex-col">
+            <label class="block text-sm font-medium mb-2 opacity-0 pointer-events-none select-none" aria-hidden="true">
+              &nbsp;
             </label>
-            <select
-              value={selectedCategory()}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              class="w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2"
-              style={{
-                "background-color": "var(--bg-primary)",
-                "border-color": "var(--border-color)",
-                "color": "var(--text-primary)",
-                "--tw-ring-color": "var(--primary-color)"
-              }}
-            >
-              <option value="all">All Categories</option>
-              <option value="ingredient">Ingredients</option>
-              <option value="packaging">Packaging</option>
-              <option value="supplies">Supplies</option>
-            </select>
-          </div>
-          <div class="flex items-center space-x-4">
-            <label class="flex items-center gap-3 cursor-pointer px-4 py-2.5 rounded-lg transition-all hover:shadow-sm" style={{
+            <label class="flex items-center gap-3 cursor-pointer px-4 rounded-lg transition-all hover:shadow-sm border" style={{
+              "height": "42px",
               "background-color": showLowStock() ? "var(--primary-light)" : "transparent",
               "border": "1px solid",
               "border-color": showLowStock() ? "var(--primary-color)" : "var(--border-color)"
@@ -122,25 +228,12 @@ const InventoryPage: Component = () => {
                   }}
                 />
               </div>
-              <span class="text-sm font-medium select-none" style={{
+              <span class="text-sm font-medium select-none whitespace-nowrap" style={{
                 "color": showLowStock() ? "var(--primary-color)" : "var(--text-secondary)"
               }}>
-                Show Low Stock Only
+                Low Stock Only
               </span>
             </label>
-            <button
-              onClick={() => setIsAddModalOpen(true)}
-              class="px-5 py-2.5 rounded-lg font-medium transition-all hover:shadow-md focus:outline-none focus:ring-2"
-              style={{
-                "background-color": "var(--primary-color)",
-                "color": "white",
-                "--tw-ring-color": "var(--primary-color)"
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "var(--primary-hover)"}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "var(--primary-color)"}
-            >
-              Add Item
-            </button>
           </div>
         </div>
       </div>
@@ -179,52 +272,88 @@ const InventoryPage: Component = () => {
               }}>
                 <thead style="background-color: var(--bg-tertiary)">
                   <tr>
-                    <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider border-b" style={{
-                      "color": "var(--text-secondary)",
-                      "border-color": "var(--border-color)"
-                    }}>
-                      Item Name
+                    <th
+                      class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider border-b cursor-pointer select-none transition-all group"
+                      style={{
+                        "color": "var(--text-secondary)",
+                        "border-color": "var(--border-color)"
+                      }}
+                      onClick={() => handleSort('name')}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "var(--bg-hover)"}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+                    >
+                      <div class="flex items-center justify-between w-full min-w-[140px]">
+                        <span>Item Name</span>
+                        {SortIndicator('name')}
+                      </div>
                     </th>
                     <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider border-b" style={{
                       "color": "var(--text-secondary)",
                       "border-color": "var(--border-color)"
                     }}>
-                      Category
+                      <div class="min-w-[90px]">Category</div>
+                    </th>
+                    <th
+                      class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider border-b cursor-pointer select-none transition-all group"
+                      style={{
+                        "color": "var(--text-secondary)",
+                        "border-color": "var(--border-color)"
+                      }}
+                      onClick={() => handleSort('current_stock')}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "var(--bg-hover)"}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+                    >
+                      <div class="flex items-center justify-between w-full min-w-[120px]">
+                        <span>Current Stock</span>
+                        {SortIndicator('current_stock')}
+                      </div>
+                    </th>
+                    <th
+                      class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider border-b cursor-pointer select-none transition-all group"
+                      style={{
+                        "color": "var(--text-secondary)",
+                        "border-color": "var(--border-color)"
+                      }}
+                      onClick={() => handleSort('avg_daily_consumption')}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "var(--bg-hover)"}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+                    >
+                      <div class="flex items-center justify-between w-full min-w-[110px]">
+                        <span>Consumption</span>
+                        {SortIndicator('avg_daily_consumption')}
+                      </div>
+                    </th>
+                    <th
+                      class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider border-b cursor-pointer select-none transition-all group"
+                      style={{
+                        "color": "var(--text-secondary)",
+                        "border-color": "var(--border-color)"
+                      }}
+                      onClick={() => handleSort('days_of_supply_remaining')}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "var(--bg-hover)"}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+                    >
+                      <div class="flex items-center justify-between w-full min-w-[130px]">
+                        <span>Days Remaining</span>
+                        {SortIndicator('days_of_supply_remaining')}
+                      </div>
                     </th>
                     <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider border-b" style={{
                       "color": "var(--text-secondary)",
                       "border-color": "var(--border-color)"
                     }}>
-                      Current Stock
+                      <div class="min-w-[100px]">Status</div>
                     </th>
                     <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider border-b" style={{
                       "color": "var(--text-secondary)",
                       "border-color": "var(--border-color)"
                     }}>
-                      Consumption
-                    </th>
-                    <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider border-b" style={{
-                      "color": "var(--text-secondary)",
-                      "border-color": "var(--border-color)"
-                    }}>
-                      Days Remaining
-                    </th>
-                    <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider border-b" style={{
-                      "color": "var(--text-secondary)",
-                      "border-color": "var(--border-color)"
-                    }}>
-                      Status
-                    </th>
-                    <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider border-b" style={{
-                      "color": "var(--text-secondary)",
-                      "border-color": "var(--border-color)"
-                    }}>
-                      Actions
+                      <div class="min-w-[100px]">Actions</div>
                     </th>
                   </tr>
                 </thead>
                 <tbody>
-                  <For each={inventory() || []}>
+                  <For each={sortedInventory()}>
                     {(item) => {
                       const stockStatus = getStockStatus(item);
                       return (

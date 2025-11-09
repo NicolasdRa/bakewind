@@ -37,7 +37,7 @@ export const products = pgTable('products', {
   status: productStatusEnum('status').default('active').notNull(),
   basePrice: decimal('base_price', { precision: 10, scale: 2 }).notNull(),
   costOfGoods: decimal('cost_of_goods', { precision: 10, scale: 2 }),
-  margin: decimal('margin', { precision: 5, scale: 2 }),
+  // margin is calculated dynamically, not stored
   recipeId: uuid('recipe_id'),
   recipeName: varchar('recipe_name', { length: 255 }),
   estimatedPrepTime: integer('estimated_prep_time'), // in minutes

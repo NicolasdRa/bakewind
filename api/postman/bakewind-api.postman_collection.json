@@ -1,0 +1,1318 @@
+{
+  "info": {
+    "name": "BakeWind API - Complete Collection",
+    "description": "Complete API collection for BakeWind bakery management system. Includes authentication, inventory, users, locations, customers, trials, subscriptions, and health check endpoints.",
+    "version": "1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "apiVersion",
+      "value": "v1",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "itemId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "customerId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "locationId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "trialId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Note: Tokens are set in httpOnly cookies, not in response body"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@bakewind.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "auth", "login"]
+            },
+            "description": "Authenticate user and receive httpOnly cookies with access and refresh tokens"
+          }
+        },
+        {
+          "name": "Trial Signup",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"trial@example.com\",\n  \"password\": \"Trial123!\",\n  \"businessName\": \"My Bakery\",\n  \"fullName\": \"John Doe\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/auth/trial-signup",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "auth", "trial-signup"]
+            },
+            "description": "Create a new trial account with 14-day free trial"
+          }
+        },
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"Password123!\",\n  \"fullName\": \"Jane Smith\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "auth", "register"]
+            },
+            "description": "Register a new user account"
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/auth/refresh",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "auth", "refresh"]
+            },
+            "description": "Refresh access token using refresh token cookie"
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "auth", "logout"]
+            },
+            "description": "Logout and invalidate tokens"
+          }
+        },
+        {
+          "name": "Get Current User",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "auth", "me"]
+            },
+            "description": "Get currently authenticated user information"
+          }
+        }
+      ],
+      "description": "Authentication endpoints for login, registration, and token management"
+    },
+    {
+      "name": "Inventory",
+      "item": [
+        {
+          "name": "List All Inventory Items",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/inventory",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "inventory"]
+            },
+            "description": "Get all inventory items with consumption tracking"
+          }
+        },
+        {
+          "name": "List Low Stock Items",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/inventory?low_stock_only=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "inventory"],
+              "query": [
+                {
+                  "key": "low_stock_only",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Get only items with low stock levels"
+          }
+        },
+        {
+          "name": "Filter by Category",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/inventory?category=ingredient",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "inventory"],
+              "query": [
+                {
+                  "key": "category",
+                  "value": "ingredient",
+                  "description": "Values: ingredient, packaging, supplies"
+                }
+              ]
+            },
+            "description": "Filter inventory by category"
+          }
+        },
+        {
+          "name": "Get Inventory Item",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/inventory/{{itemId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "inventory", "{{itemId}}"]
+            },
+            "description": "Get detailed information for a specific inventory item"
+          }
+        },
+        {
+          "name": "Create Inventory Item",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Organic Whole Wheat Flour\",\n  \"category\": \"ingredient\",\n  \"unit\": \"kg\",\n  \"currentStock\": 200,\n  \"minimumStock\": 50,\n  \"reorderPoint\": 75,\n  \"reorderQuantity\": 150,\n  \"costPerUnit\": 2.50,\n  \"supplier\": \"Organic Grains Co.\",\n  \"location\": \"Storage Room B\",\n  \"notes\": \"Premium organic flour\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/inventory",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "inventory"]
+            },
+            "description": "Create a new inventory item"
+          }
+        },
+        {
+          "name": "Update Inventory Item",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentStock\": 175.5,\n  \"costPerUnit\": 1.35,\n  \"notes\": \"Updated stock level\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/inventory/{{itemId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "inventory", "{{itemId}}"]
+            },
+            "description": "Update an existing inventory item (partial update)"
+          }
+        },
+        {
+          "name": "Delete Inventory Item",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/inventory/{{itemId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "inventory", "{{itemId}}"]
+            },
+            "description": "Delete an inventory item and its consumption tracking"
+          }
+        },
+        {
+          "name": "Get Consumption Tracking",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/inventory/{{itemId}}/consumption",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "api",
+                "{{apiVersion}}",
+                "inventory",
+                "{{itemId}}",
+                "consumption"
+              ]
+            },
+            "description": "Get consumption tracking data for an item"
+          }
+        },
+        {
+          "name": "Set Custom Threshold",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"custom_reorder_threshold\": 100,\n  \"custom_lead_time_days\": 5\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/inventory/{{itemId}}/consumption/threshold",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "api",
+                "{{apiVersion}}",
+                "inventory",
+                "{{itemId}}",
+                "consumption",
+                "threshold"
+              ]
+            },
+            "description": "Set custom reorder threshold (overrides predictive calculation)"
+          }
+        },
+        {
+          "name": "Remove Custom Threshold",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/inventory/{{itemId}}/consumption/threshold",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "api",
+                "{{apiVersion}}",
+                "inventory",
+                "{{itemId}}",
+                "consumption",
+                "threshold"
+              ]
+            },
+            "description": "Remove custom threshold and revert to predictive calculation"
+          }
+        },
+        {
+          "name": "Recalculate Consumption",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/inventory/{{itemId}}/consumption/recalculate",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "api",
+                "{{apiVersion}}",
+                "inventory",
+                "{{itemId}}",
+                "consumption",
+                "recalculate"
+              ]
+            },
+            "description": "Trigger on-demand recalculation based on order history"
+          }
+        }
+      ],
+      "description": "Inventory management with consumption tracking and predictive restocking"
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "List All Users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "users"]
+            },
+            "description": "Get all users in the system"
+          }
+        },
+        {
+          "name": "Get Current User Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/users/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "users", "me"]
+            },
+            "description": "Get current authenticated user's profile"
+          }
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "users", "{{userId}}"]
+            },
+            "description": "Get user details by ID"
+          }
+        },
+        {
+          "name": "Update Current User",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Updated Name\",\n  \"phone\": \"+1234567890\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/users/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "users", "me"]
+            },
+            "description": "Update current user's profile"
+          }
+        },
+        {
+          "name": "Update User by ID",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Updated Name\",\n  \"role\": \"manager\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "users", "{{userId}}"]
+            },
+            "description": "Update user by ID (admin only)"
+          }
+        },
+        {
+          "name": "Toggle User Status",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/users/{{userId}}/toggle-status",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "api",
+                "{{apiVersion}}",
+                "users",
+                "{{userId}}",
+                "toggle-status"
+              ]
+            },
+            "description": "Toggle user active/inactive status"
+          }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"newPassword\": \"NewPassword123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/users/{{userId}}/change-password",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "api",
+                "{{apiVersion}}",
+                "users",
+                "{{userId}}",
+                "change-password"
+              ]
+            },
+            "description": "Change user password"
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "users", "{{userId}}"]
+            },
+            "description": "Delete a user account"
+          }
+        }
+      ],
+      "description": "User management endpoints"
+    },
+    {
+      "name": "Locations",
+      "item": [
+        {
+          "name": "Create Location",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Main Bakery\",\n  \"address\": \"123 Main St\",\n  \"city\": \"New York\",\n  \"state\": \"NY\",\n  \"zipCode\": \"10001\",\n  \"phone\": \"+12125551234\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/locations",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "locations"]
+            },
+            "description": "Create a new location"
+          }
+        },
+        {
+          "name": "List All Locations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/locations",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "locations"]
+            },
+            "description": "Get all locations"
+          }
+        },
+        {
+          "name": "List Active Locations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/locations/active",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "locations", "active"]
+            },
+            "description": "Get only active locations"
+          }
+        },
+        {
+          "name": "Get My Locations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/locations/my-locations",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "locations", "my-locations"]
+            },
+            "description": "Get locations assigned to current user"
+          }
+        },
+        {
+          "name": "Get My Default Location",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/locations/my-default-location",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "api",
+                "{{apiVersion}}",
+                "locations",
+                "my-default-location"
+              ]
+            },
+            "description": "Get current user's default location"
+          }
+        },
+        {
+          "name": "Get Location by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/locations/{{locationId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "locations", "{{locationId}}"]
+            },
+            "description": "Get location details by ID"
+          }
+        },
+        {
+          "name": "Update Location",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Bakery Name\",\n  \"phone\": \"+12125559999\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/locations/{{locationId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "locations", "{{locationId}}"]
+            },
+            "description": "Update location details"
+          }
+        },
+        {
+          "name": "Delete Location",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/locations/{{locationId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "locations", "{{locationId}}"]
+            },
+            "description": "Delete a location"
+          }
+        },
+        {
+          "name": "Assign User to Location",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"isPrimary\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/locations/{{locationId}}/assign-user",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "api",
+                "{{apiVersion}}",
+                "locations",
+                "{{locationId}}",
+                "assign-user"
+              ]
+            },
+            "description": "Assign a user to a location"
+          }
+        },
+        {
+          "name": "Remove User from Location",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/locations/{{locationId}}/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "api",
+                "{{apiVersion}}",
+                "locations",
+                "{{locationId}}",
+                "users",
+                "{{userId}}"
+              ]
+            },
+            "description": "Remove user from location"
+          }
+        },
+        {
+          "name": "Get Location Users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/locations/{{locationId}}/users",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "api",
+                "{{apiVersion}}",
+                "locations",
+                "{{locationId}}",
+                "users"
+              ]
+            },
+            "description": "Get all users assigned to a location"
+          }
+        }
+      ],
+      "description": "Location management endpoints"
+    },
+    {
+      "name": "Customers",
+      "item": [
+        {
+          "name": "List All Customers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/customers",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "customers"]
+            },
+            "description": "Get all customers"
+          }
+        },
+        {
+          "name": "Get Customer by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/customers/{{customerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "customers", "{{customerId}}"]
+            },
+            "description": "Get customer details by ID"
+          }
+        },
+        {
+          "name": "Create Customer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Acme Corporation\",\n  \"email\": \"contact@acme.com\",\n  \"phone\": \"+15555551234\",\n  \"address\": \"456 Business Ave\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/customers",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "customers"]
+            },
+            "description": "Create a new customer"
+          }
+        },
+        {
+          "name": "Update Customer",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Company Name\",\n  \"phone\": \"+15555559999\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/customers/{{customerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "customers", "{{customerId}}"]
+            },
+            "description": "Update customer information"
+          }
+        },
+        {
+          "name": "Delete Customer",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/customers/{{customerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "customers", "{{customerId}}"]
+            },
+            "description": "Delete a customer"
+          }
+        },
+        {
+          "name": "Get Customer Orders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/customers/{{customerId}}/orders",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "api",
+                "{{apiVersion}}",
+                "customers",
+                "{{customerId}}",
+                "orders"
+              ]
+            },
+            "description": "Get all orders for a customer"
+          }
+        },
+        {
+          "name": "Get Customer Analytics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/customers/{{customerId}}/analytics",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "api",
+                "{{apiVersion}}",
+                "customers",
+                "{{customerId}}",
+                "analytics"
+              ]
+            },
+            "description": "Get customer analytics and purchase history"
+          }
+        },
+        {
+          "name": "Import Customers",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customers\": [\n    {\n      \"name\": \"Customer 1\",\n      \"email\": \"customer1@example.com\"\n    },\n    {\n      \"name\": \"Customer 2\",\n      \"email\": \"customer2@example.com\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/customers/import",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "customers", "import"]
+            },
+            "description": "Bulk import customers"
+          }
+        },
+        {
+          "name": "Export Customers to CSV",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/customers/export/csv",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "customers", "export", "csv"]
+            },
+            "description": "Export all customers to CSV format"
+          }
+        }
+      ],
+      "description": "Customer management endpoints"
+    },
+    {
+      "name": "Trials",
+      "item": [
+        {
+          "name": "Update Trial Onboarding",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"onboardingStep\": \"profile_complete\",\n  \"onboardingData\": {\n    \"businessType\": \"bakery\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/trials/{{trialId}}/onboarding",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "api",
+                "{{apiVersion}}",
+                "trials",
+                "{{trialId}}",
+                "onboarding"
+              ]
+            },
+            "description": "Update trial onboarding progress"
+          }
+        },
+        {
+          "name": "Get Trial by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/trials/{{trialId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "trials", "{{trialId}}"]
+            },
+            "description": "Get trial details by ID"
+          }
+        },
+        {
+          "name": "Get Trial by User ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/trials/user/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "trials", "user", "{{userId}}"]
+            },
+            "description": "Get trial for a specific user"
+          }
+        },
+        {
+          "name": "Convert Trial to Subscription",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"planId\": \"plan_123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/trials/{{trialId}}/convert",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "api",
+                "{{apiVersion}}",
+                "trials",
+                "{{trialId}}",
+                "convert"
+              ]
+            },
+            "description": "Convert trial to paid subscription"
+          }
+        },
+        {
+          "name": "List All Trials",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/trials",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "trials"]
+            },
+            "description": "Get all trials (admin only)"
+          }
+        },
+        {
+          "name": "Get Trial Analytics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/trials/analytics",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "trials", "analytics"]
+            },
+            "description": "Get trial analytics and conversion metrics"
+          }
+        },
+        {
+          "name": "Get Onboarding Progress",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/trials/onboarding/progress",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "api",
+                "{{apiVersion}}",
+                "trials",
+                "onboarding",
+                "progress"
+              ]
+            },
+            "description": "Get onboarding progress for current user"
+          }
+        },
+        {
+          "name": "Bulk Update Trials",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"trialIds\": [\"trial1\", \"trial2\"],\n  \"status\": \"expired\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/trials/bulk-update",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "trials", "bulk-update"]
+            },
+            "description": "Bulk update trial statuses"
+          }
+        }
+      ],
+      "description": "Trial account management endpoints"
+    },
+    {
+      "name": "Subscriptions",
+      "item": [
+        {
+          "name": "Get All Plans",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/subscriptions/plans",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "subscriptions", "plans"]
+            },
+            "description": "Get all subscription plans"
+          }
+        },
+        {
+          "name": "Get Popular Plans",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/subscriptions/plans/popular",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "api",
+                "{{apiVersion}}",
+                "subscriptions",
+                "plans",
+                "popular"
+              ]
+            },
+            "description": "Get popular subscription plans"
+          }
+        },
+        {
+          "name": "Compare Plans",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/subscriptions/plans/compare",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "api",
+                "{{apiVersion}}",
+                "subscriptions",
+                "plans",
+                "compare"
+              ]
+            },
+            "description": "Get plan comparison data"
+          }
+        },
+        {
+          "name": "Get Plan by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/subscriptions/plans/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "subscriptions", "plans", ":id"]
+            },
+            "description": "Get specific plan details"
+          }
+        },
+        {
+          "name": "Create Plan",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Professional\",\n  \"description\": \"For growing bakeries\",\n  \"price\": 99.99,\n  \"interval\": \"month\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/subscriptions/plans",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "subscriptions", "plans"]
+            },
+            "description": "Create a new subscription plan"
+          }
+        },
+        {
+          "name": "Update Plan",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"price\": 89.99,\n  \"description\": \"Updated description\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/subscriptions/plans/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "subscriptions", "plans", ":id"]
+            },
+            "description": "Update a subscription plan"
+          }
+        },
+        {
+          "name": "Activate Plan",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/subscriptions/plans/:id/activate",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "api",
+                "{{apiVersion}}",
+                "subscriptions",
+                "plans",
+                ":id",
+                "activate"
+              ]
+            },
+            "description": "Activate a subscription plan"
+          }
+        },
+        {
+          "name": "Deactivate Plan",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/subscriptions/plans/:id/deactivate",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "api",
+                "{{apiVersion}}",
+                "subscriptions",
+                "plans",
+                ":id",
+                "deactivate"
+              ]
+            },
+            "description": "Deactivate a subscription plan"
+          }
+        },
+        {
+          "name": "Mark Plan as Popular",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/subscriptions/plans/:id/popular",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "api",
+                "{{apiVersion}}",
+                "subscriptions",
+                "plans",
+                ":id",
+                "popular"
+              ]
+            },
+            "description": "Mark a plan as popular"
+          }
+        },
+        {
+          "name": "Reorder Plans",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"planOrder\": [\"plan1\", \"plan2\", \"plan3\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/subscriptions/plans/reorder",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "api",
+                "{{apiVersion}}",
+                "subscriptions",
+                "plans",
+                "reorder"
+              ]
+            },
+            "description": "Reorder subscription plans display"
+          }
+        }
+      ],
+      "description": "Subscription plan management endpoints"
+    },
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            },
+            "description": "Check API health status"
+          }
+        },
+        {
+          "name": "WebSocket Health Check",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health/websocket",
+              "host": ["{{baseUrl}}"],
+              "path": ["health", "websocket"]
+            },
+            "description": "Check WebSocket server health"
+          }
+        }
+      ],
+      "description": "Health check endpoints"
+    }
+  ]
+}

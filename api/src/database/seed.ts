@@ -5,6 +5,8 @@ import * as schema from './schemas';
 import { seedUsers } from './seeds/users.seed';
 import { seedLocations } from './seeds/locations.seed';
 import { seedInventory } from './seeds/inventory.seed';
+import { seedProducts } from './seeds/products.seed';
+import { seedRecipes } from './seeds/recipes.seed';
 
 // Load environment variables
 dotenv.config();
@@ -29,6 +31,8 @@ async function main() {
     await seedUsers(db);
     await seedLocations(db);
     await seedInventory(db);
+    await seedRecipes(db);
+    await seedProducts(db);
 
     console.log('✅ Database seeding completed!');
   } catch (error) {
