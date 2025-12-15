@@ -1,16 +1,19 @@
-import { pgTable, uuid, varchar, timestamp } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, varchar, timestamp, pgEnum } from 'drizzle-orm/pg-core';
 import { relations, sql } from 'drizzle-orm';
 import { usersTable } from './users.schema';
-import { orders } from './orders.schema';
+import { internalOrders } from './internal-orders.schema';
+import { customerOrders } from './orders.schema';
+
+export const orderTypeEnum = pgEnum('order_lock_type', ['customer', 'internal']);
 
 export const orderLocks = pgTable('order_locks', {
   id: uuid('id')
     .primaryKey()
     .default(sql`gen_random_uuid()`),
+  orderType: orderTypeEnum('order_type').notNull(), // 'customer' or 'internal'
   orderId: uuid('order_id')
     .notNull()
-    .references(() => orders.id, { onDelete: 'cascade' })
-    .unique(), // Only one lock per order
+    .unique(), // Only one lock per order (regardless of type)
   lockedByUserId: uuid('locked_by_user_id')
     .notNull()
     .references(() => usersTable.id, { onDelete: 'cascade' }),
@@ -22,9 +25,14 @@ export const orderLocks = pgTable('order_locks', {
 
 // Relations
 export const orderLocksRelations = relations(orderLocks, ({ one }) => ({
-  order: one(orders, {
+  // Note: Relations don't enforce the orderType, that's done at application level
+  internalOrder: one(internalOrders, {
     fields: [orderLocks.orderId],
-    references: [orders.id],
+    references: [internalOrders.id],
+  }),
+  customerOrder: one(customerOrders, {
+    fields: [orderLocks.orderId],
+    references: [customerOrders.id],
   }),
   lockedByUser: one(usersTable, {
     fields: [orderLocks.lockedByUserId],

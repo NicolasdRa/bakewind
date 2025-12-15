@@ -4,6 +4,8 @@ import ProductFormModal from "~/components/products/ProductFormModal";
 import StatsCard from "~/components/common/StatsCard";
 import SearchInput from "~/components/common/SearchInput";
 import FilterSelect from "~/components/common/FilterSelect";
+import Badge from "~/components/common/Badge";
+import { getCategoryBadgeColor, getProductStatusVariant } from "~/components/common/Badge.config";
 
 type SortField = 'name' | 'basePrice' | 'costOfGoods' | 'margin' | 'popularityScore';
 type SortDirection = 'asc' | 'desc';
@@ -86,28 +88,12 @@ const ProductsPage: Component = () => {
     await refetch();
   };
 
-  const getCategoryBadgeColor = (category: ProductCategory) => {
-    const colors: Record<ProductCategory, string> = {
-      bread: 'bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-200',
-      pastry: 'bg-pink-100 dark:bg-pink-900 text-pink-800 dark:text-pink-200',
-      cake: 'bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200',
-      cookie: 'bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200',
-      sandwich: 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200',
-      beverage: 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200',
-      seasonal: 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200',
-      custom: 'bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200',
-    };
-    return colors[category] || colors.custom;
+  const formatCategoryName = (category: ProductCategory) => {
+    return category.charAt(0).toUpperCase() + category.slice(1);
   };
 
-  const getStatusBadgeColor = (status: ProductStatus) => {
-    const colors: Record<ProductStatus, string> = {
-      active: 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200',
-      inactive: 'bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200',
-      seasonal: 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200',
-      discontinued: 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200',
-    };
-    return colors[status] || colors.inactive;
+  const formatStatusName = (status: ProductStatus) => {
+    return status.charAt(0).toUpperCase() + status.slice(1);
   };
 
   const formatPrice = (price: number) => {
@@ -444,9 +430,9 @@ const ProductsPage: Component = () => {
                           </div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                          <span class={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${getCategoryBadgeColor(product.category)}`}>
-                            {product.category.charAt(0).toUpperCase() + product.category.slice(1)}
-                          </span>
+                          <Badge color={getCategoryBadgeColor(product.category)}>
+                            {formatCategoryName(product.category)}
+                          </Badge>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium" style="color: var(--text-primary)">
                           {formatPrice(product.basePrice)}
@@ -483,9 +469,9 @@ const ProductsPage: Component = () => {
                           </Show>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                          <span class={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${getStatusBadgeColor(product.status)}`}>
-                            {product.status.charAt(0).toUpperCase() + product.status.slice(1)}
-                          </span>
+                          <Badge variant={getProductStatusVariant(product.status)}>
+                            {formatStatusName(product.status)}
+                          </Badge>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm" style="color: var(--text-tertiary)">
                           <div class="flex items-center gap-1">
@@ -540,7 +526,7 @@ const ProductsPage: Component = () => {
 
       {/* Delete Confirmation Dialog */}
       <Show when={showDeleteConfirm()}>
-        <div class="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ "background-color": "rgba(0, 0, 0, 0.5)" }}>
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ "background-color": "var(--overlay-bg)" }}>
           <div
             class="w-full max-w-md rounded-xl border p-6"
             style={{

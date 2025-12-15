@@ -335,8 +335,9 @@ const Navigation: Component = () => {
         }
 
         .nav-badge {
-          background: rgba(255, 255, 255, 0.25);
+          background: transparent;
           color: white;
+          border: 1.5px solid white;
           padding: 0.125rem 0.5rem;
           border-radius: 9999px;
           font-size: 0.75rem;

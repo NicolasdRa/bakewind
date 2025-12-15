@@ -1,6 +1,6 @@
 import { relations } from 'drizzle-orm';
 import { customers } from './customers.schema';
-import { orders, orderItems } from './orders.schema';
+import { customerOrders, customerOrderItems } from './orders.schema';
 import { internalOrders, internalOrderItems } from './internal-orders.schema';
 import { products } from './products.schema';
 import { recipes, recipeIngredients } from './recipes.schema';
@@ -15,25 +15,25 @@ import { userSessionsTable } from './user-sessions.schema';
 
 // Customer relations
 export const customersRelations = relations(customers, ({ many }) => ({
-  orders: many(orders),
+  orders: many(customerOrders),
 }));
 
-// Order relations
-export const ordersRelations = relations(orders, ({ one, many }) => ({
+// Customer Order relations
+export const customerOrdersRelations = relations(customerOrders, ({ one, many }) => ({
   customer: one(customers, {
-    fields: [orders.customerId],
+    fields: [customerOrders.customerId],
     references: [customers.id],
   }),
-  items: many(orderItems),
+  items: many(customerOrderItems),
 }));
 
-export const orderItemsRelations = relations(orderItems, ({ one }) => ({
-  order: one(orders, {
-    fields: [orderItems.orderId],
-    references: [orders.id],
+export const customerOrderItemsRelations = relations(customerOrderItems, ({ one }) => ({
+  order: one(customerOrders, {
+    fields: [customerOrderItems.orderId],
+    references: [customerOrders.id],
   }),
   product: one(products, {
-    fields: [orderItems.productId],
+    fields: [customerOrderItems.productId],
     references: [products.id],
   }),
 }));
@@ -43,6 +43,7 @@ export const internalOrdersRelations = relations(
   internalOrders,
   ({ many }) => ({
     items: many(internalOrderItems),
+    productionItems: many(productionItems),
   }),
 );
 
@@ -66,7 +67,7 @@ export const productsRelations = relations(products, ({ one, many }) => ({
     fields: [products.recipeId],
     references: [recipes.id],
   }),
-  orderItems: many(orderItems),
+  customerOrderItems: many(customerOrderItems),
   internalOrderItems: many(internalOrderItems),
 }));
 
@@ -116,6 +117,10 @@ export const productionItemsRelations = relations(
     schedule: one(productionSchedules, {
       fields: [productionItems.scheduleId],
       references: [productionSchedules.id],
+    }),
+    internalOrder: one(internalOrders, {
+      fields: [productionItems.internalOrderId],
+      references: [internalOrders.id],
     }),
     recipe: one(recipes, {
       fields: [productionItems.recipeId],

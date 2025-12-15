@@ -12,7 +12,8 @@ configureLogging();
 
 // Lazy load pages for better performance
 const Dashboard = lazy(() => import("./pages/overview/OverviewPage"));
-const OrdersPage = lazy(() => import("./pages/orders/OrdersPage"));
+const CustomerOrdersPage = lazy(() => import("./pages/orders/CustomerOrdersPage"));
+const InternalOrdersPage = lazy(() => import("./pages/orders/InternalOrdersPage"));
 const InventoryPage = lazy(() => import("./pages/inventory/InventoryPage"));
 const ProductionPage = lazy(() => import("./pages/production/ProductionPage"));
 const RecipesPage = lazy(() => import("./pages/recipes/RecipesPage"));
@@ -45,8 +46,8 @@ const App: Component = () => {
       {/* Protected dashboard routes - nested under ProtectedLayout (includes auth guard + DashboardLayout) */}
       <Route path="/dashboard" component={ProtectedLayout}>
         <Route path="/overview" component={Dashboard} />
-        <Route path="/orders" component={OrdersPage} />
-        <Route path="/internal-orders" component={OrdersPage} />
+        <Route path="/orders/customer" component={CustomerOrdersPage} />
+        <Route path="/orders/internal" component={InternalOrdersPage} />
         <Route path="/inventory" component={InventoryPage} />
         <Route path="/production" component={ProductionPage} />
         <Route path="/recipes" component={RecipesPage} />

@@ -5,6 +5,9 @@ import FilterSelect from "~/components/common/FilterSelect";
 import RecipeDetailsModal from "~/components/recipes/RecipeDetailsModal";
 import RecipeFormModal from "~/components/recipes/RecipeFormModal";
 import { recipesApi, Recipe, RecipeCategory, CreateRecipeRequest, UpdateRecipeRequest } from "~/api/recipes";
+import Badge from "~/components/common/Badge";
+import { getRecipeCategoryColor } from "~/components/common/Badge.config";
+import { useInfoModal } from "~/stores/infoModalStore";
 
 type SortField = 'name' | 'prepTime' | 'totalTime';
 type SortDirection = 'asc' | 'desc';
@@ -21,6 +24,7 @@ interface UIRecipe extends Omit<Recipe, 'ingredients' | 'yield' | 'yieldUnit'> {
 }
 
 const RecipesPage: Component = () => {
+  const { showError } = useInfoModal();
   const [recipes, setRecipes] = createSignal<UIRecipe[]>([]);
   const [loading, setLoading] = createSignal(true);
   const [error, setError] = createSignal<string | null>(null);
@@ -37,6 +41,10 @@ const RecipesPage: Component = () => {
   const [isFormModalOpen, setIsFormModalOpen] = createSignal(false);
   const [formMode, setFormMode] = createSignal<'create' | 'edit'>('create');
   const [recipeToEdit, setRecipeToEdit] = createSignal<UIRecipe | null>(null);
+
+  // Delete modal state
+  const [recipeToDelete, setRecipeToDelete] = createSignal<UIRecipe | undefined>();
+  const [showDeleteConfirm, setShowDeleteConfirm] = createSignal(false);
 
   // Convert API Recipe to UI Recipe format
   const convertToUIRecipe = (recipe: Recipe): UIRecipe => ({
@@ -158,6 +166,37 @@ const RecipesPage: Component = () => {
     }
   };
 
+  // Delete handlers
+  const handleDeleteClick = (recipe: UIRecipe) => {
+    setRecipeToDelete(recipe);
+    setShowDeleteConfirm(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    const recipe = recipeToDelete();
+    if (!recipe) return;
+
+    try {
+      setLoading(true);
+      await recipesApi.deleteRecipe(recipe.id);
+      setShowDeleteConfirm(false);
+      setRecipeToDelete(undefined);
+      await fetchRecipes();
+    } catch (err: any) {
+      console.error('Error deleting recipe:', err);
+      const message = err.message || 'Failed to delete recipe';
+      setShowDeleteConfirm(false);
+      setRecipeToDelete(undefined);
+      showError('Cannot Delete Recipe', message);
+      setLoading(false);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteConfirm(false);
+    setRecipeToDelete(undefined);
+  };
+
   const sortedAndFilteredRecipes = () => {
     let filtered = recipes();
 
@@ -210,20 +249,8 @@ const RecipesPage: Component = () => {
     });
   };
 
-  const getCategoryColor = (category: RecipeCategory) => {
-    const colors: Record<RecipeCategory, string> = {
-      bread: 'bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-200',
-      pastry: 'bg-pink-100 dark:bg-pink-900 text-pink-800 dark:text-pink-200',
-      cake: 'bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200',
-      cookie: 'bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200',
-      sandwich: 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200',
-      beverage: 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200',
-      sauce: 'bg-rose-100 dark:bg-rose-900 text-rose-800 dark:text-rose-200',
-      filling: 'bg-violet-100 dark:bg-violet-900 text-violet-800 dark:text-violet-200',
-      topping: 'bg-cyan-100 dark:bg-cyan-900 text-cyan-800 dark:text-cyan-200',
-      other: 'bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200',
-    };
-    return colors[category] || colors.other;
+  const formatCategoryName = (category: RecipeCategory) => {
+    return category ? category.charAt(0).toUpperCase() + category.slice(1) : 'N/A';
   };
 
   const formatTime = (minutes: number) => {
@@ -453,18 +480,18 @@ const RecipesPage: Component = () => {
                           <div class="flex flex-wrap gap-1">
                             <For each={recipe.tags.slice(0, 3)}>
                               {(tag) => (
-                                <span class="inline-flex px-2 py-0.5 text-xs bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded">
+                                <Badge size="sm" variant="neutral" rounded="md">
                                   {tag}
-                                </span>
+                                </Badge>
                               )}
                             </For>
                           </div>
                         </div>
                       </td>
                       <td class="px-6 py-4 whitespace-nowrap">
-                        <span class={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${getCategoryColor(recipe.category)}`}>
-                          {recipe.category ? recipe.category.charAt(0).toUpperCase() + recipe.category.slice(1) : 'N/A'}
-                        </span>
+                        <Badge color={getRecipeCategoryColor(recipe.category)}>
+                          {formatCategoryName(recipe.category)}
+                        </Badge>
                       </td>
                       <td class="px-6 py-4 whitespace-nowrap text-sm" style="color: var(--text-tertiary)">
                         {formatTime(recipe.prepTime)}
@@ -499,6 +526,17 @@ const RecipesPage: Component = () => {
                           >
                             Edit
                           </button>
+                          <button
+                            onClick={() => handleDeleteClick(recipe)}
+                            class="font-medium transition-colors"
+                            style={{
+                              "color": "var(--error-color)"
+                            }}
+                            onMouseEnter={(e) => e.currentTarget.style.color = "var(--error-hover)"}
+                            onMouseLeave={(e) => e.currentTarget.style.color = "var(--error-color)"}
+                          >
+                            Delete
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -529,6 +567,75 @@ const RecipesPage: Component = () => {
         onClose={() => setIsFormModalOpen(false)}
         onSubmit={handleFormSubmit}
       />
+
+      {/* Delete Confirmation Dialog */}
+      <Show when={showDeleteConfirm()}>
+        <div
+          style={{
+            "position": "fixed",
+            "top": "0",
+            "left": "0",
+            "right": "0",
+            "bottom": "0",
+            "z-index": "9999",
+            "display": "flex",
+            "align-items": "center",
+            "justify-content": "center",
+            "padding": "1rem",
+            "background-color": "var(--overlay-bg)",
+            "overflow-y": "auto"
+          }}
+          onClick={handleCancelDelete}
+        >
+          <div
+            style={{
+              "background-color": "var(--bg-primary)",
+              "border": "1px solid var(--border-color)",
+              "border-radius": "0.5rem",
+              "box-shadow": "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+              "width": "100%",
+              "max-width": "28rem",
+              "padding": "1.5rem",
+              "margin": "auto"
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 class="text-lg font-semibold mb-4" style="color: var(--text-primary)">
+              Delete Recipe
+            </h3>
+            <p class="mb-6" style="color: var(--text-secondary)">
+              Are you sure you want to delete "{recipeToDelete()?.name}"? This action cannot be undone.
+            </p>
+            <div class="flex justify-end space-x-3">
+              <button
+                onClick={handleCancelDelete}
+                class="px-4 py-2 rounded-md font-medium transition-colors"
+                style={{
+                  "background-color": "transparent",
+                  "border": "1px solid var(--border-color)",
+                  "color": "var(--text-primary)"
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.opacity = "0.8"}
+                onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmDelete}
+                class="px-4 py-2 rounded-md font-medium transition-colors"
+                style={{
+                  "background-color": "var(--error-color)",
+                  "color": "white"
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "var(--error-hover)"}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "var(--error-color)"}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      </Show>
     </div>
   );
 };

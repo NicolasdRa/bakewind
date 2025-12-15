@@ -96,7 +96,7 @@
 
 /* Scrollable Inner Content */
 .innerContent {
-  @apply flex-1 px-6 pb-6 overflow-y-auto;
+  @apply flex-1 px-2 pb-2 overflow-y-auto;
   /* Prevent content jumping during layout changes */
   contain: layout style;
   /* Ensure content can expand to full width */

@@ -21,12 +21,16 @@ export const internalOrderSourceEnum = pgEnum('internal_order_source', [
 ]);
 
 export const internalOrderStatusEnum = pgEnum('internal_order_status', [
+  'draft',
   'requested',
   'approved',
-  'in_preparation',
+  'scheduled',
+  'in_production',
+  'quality_check',
   'ready',
+  'completed',
   'delivered',
-  'rejected',
+  'cancelled',
 ]);
 
 export const internalOrderPriorityEnum = pgEnum('internal_order_priority', [
@@ -60,6 +64,17 @@ export const internalOrders = pgTable('internal_orders', {
   deliveredAt: timestamp('delivered_at'),
   specialInstructions: text('special_instructions'),
   notes: text('notes'),
+
+  // Production-specific fields
+  productionDate: timestamp('production_date'),
+  productionShift: varchar('production_shift', { length: 50 }),
+  batchNumber: varchar('batch_number', { length: 100 }),
+  assignedStaff: varchar('assigned_staff', { length: 255 }),
+  workstation: varchar('workstation', { length: 100 }),
+  targetQuantity: integer('target_quantity'),
+  actualQuantity: integer('actual_quantity'),
+  wasteQuantity: integer('waste_quantity'),
+  qualityNotes: text('quality_notes'),
 
   // Recurring order fields
   isRecurring: boolean('is_recurring').default(false),

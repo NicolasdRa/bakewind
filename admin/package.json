@@ -9,7 +9,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@date-fns/tz": "^1.4.1",
+    "@date-fns/utc": "^2.1.1",
     "@solidjs/router": "^0.15.3",
+    "date-fns": "^4.1.0",
     "socket.io-client": "^4.8.1",
     "solid-js": "^1.9.9"
   },

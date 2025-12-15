@@ -3,7 +3,7 @@
 
 /* Container and Header */
 .container {
-  padding: 2rem;
+  padding: 0.5rem;
   max-width: 1400px;
   margin: 0 auto;
 }
@@ -116,11 +116,11 @@
 }
 
 .dropdownItemDanger {
-  color: #dc2626;
+  color: var(--error-color);
 }
 
 .dropdownItemDanger:hover {
-  background-color: #fef2f2;
+  background-color: var(--error-lighter);
 }
 
 /* Error State */
@@ -134,7 +134,7 @@
 
 .errorTitle {
   @apply text-2xl font-bold mb-4;
-  color: #dc2626; /* red-600 */
+  color: var(--error-color);
 }
 
 .errorMessage {
@@ -148,12 +148,12 @@
 
 .errorButton {
   @apply px-6 py-3 rounded-lg font-medium transition-colors duration-200;
-  background-color: #dc2626; /* red-600 */
+  background-color: var(--error-color);
   color: white;
 }
 
 .errorButton:hover {
-  background-color: #b91c1c; /* red-700 */
+  background-color: var(--error-hover);
 }
 
 .errorText {

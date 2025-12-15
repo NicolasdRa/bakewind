@@ -11,16 +11,23 @@ import {
 } from 'drizzle-orm/pg-core';
 import { customers } from './customers.schema';
 
-export const orderStatusEnum = pgEnum('order_status', [
+export const customerOrderStatusEnum = pgEnum('customer_order_status', [
+  'draft',
   'pending',
   'confirmed',
-  'in_production',
   'ready',
   'delivered',
   'cancelled',
 ]);
 
-export const orderSourceEnum = pgEnum('order_source', [
+export const orderPriorityEnum = pgEnum('order_priority', [
+  'low',
+  'normal',
+  'high',
+  'rush',
+]);
+
+export const customerOrderSourceEnum = pgEnum('customer_order_source', [
   'online',
   'phone',
   'walk_in',
@@ -34,36 +41,50 @@ export const paymentStatusEnum = pgEnum('payment_status', [
   'refunded',
 ]);
 
-export const orders = pgTable('orders', {
+export const customerOrders = pgTable('customer_orders', {
   id: uuid('id').primaryKey().defaultRandom(),
   orderNumber: varchar('order_number', { length: 50 }).unique().notNull(),
+
+  // Customer information
   customerId: uuid('customer_id').references(() => customers.id, {
     onDelete: 'set null',
   }),
   customerName: varchar('customer_name', { length: 255 }).notNull(),
   customerPhone: varchar('customer_phone', { length: 50 }),
   customerEmail: varchar('customer_email', { length: 255 }),
-  source: orderSourceEnum('source').notNull(),
-  status: orderStatusEnum('status').default('pending').notNull(),
+
+  // Order details
+  source: customerOrderSourceEnum('source').notNull(),
+  status: customerOrderStatusEnum('status').default('pending').notNull(),
+  priority: orderPriorityEnum('priority').default('normal').notNull(),
   paymentStatus: paymentStatusEnum('payment_status')
     .default('pending')
     .notNull(),
+
+  // Pricing
   subtotal: decimal('subtotal', { precision: 10, scale: 2 }).notNull(),
   tax: decimal('tax', { precision: 10, scale: 2 }).notNull(),
   discount: decimal('discount', { precision: 10, scale: 2 }).default('0'),
   total: decimal('total', { precision: 10, scale: 2 }).notNull(),
+
+  // Timing
   pickupTime: timestamp('pickup_time'),
   deliveryTime: timestamp('delivery_time'),
+
+  // General notes
   specialRequests: text('special_requests'),
   notes: text('notes'),
+
+  // Timestamps
+  completedAt: timestamp('completed_at'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
-export const orderItems = pgTable('order_items', {
+export const customerOrderItems = pgTable('customer_order_items', {
   id: uuid('id').primaryKey().defaultRandom(),
   orderId: uuid('order_id')
-    .references(() => orders.id, { onDelete: 'cascade' })
+    .references(() => customerOrders.id, { onDelete: 'cascade' })
     .notNull(),
   productId: uuid('product_id').notNull(),
   productName: varchar('product_name', { length: 255 }).notNull(),

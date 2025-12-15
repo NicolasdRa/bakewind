@@ -12,6 +12,11 @@ import { seedRecipes } from './seeds/recipes.seed';
 dotenv.config();
 
 async function main() {
+  // Parse command line arguments for partial seeding
+  const args = process.argv.slice(2);
+  const seedOnly = args.find(arg => arg.startsWith('--only='))?.split('=')[1];
+  const seedables = ['users', 'locations', 'inventory', 'recipes', 'products'];
+
   // Use the same environment variables as the main app
   const client = new Client({
     host: process.env.DATABASE_HOST || 'localhost',
@@ -25,14 +30,32 @@ async function main() {
     await client.connect();
     const db = drizzle(client, { schema });
 
-    console.log('🚀 Starting database seeding...');
+    if (seedOnly) {
+      console.log(`🚀 Starting partial database seeding (${seedOnly} only)...`);
+    } else {
+      console.log('🚀 Starting full database seeding...');
+    }
 
-    // Run seed functions
-    await seedUsers(db);
-    await seedLocations(db);
-    await seedInventory(db);
-    await seedRecipes(db);
-    await seedProducts(db);
+    // Run seed functions based on arguments
+    if (!seedOnly || seedOnly === 'users') {
+      await seedUsers(db);
+    }
+
+    if (!seedOnly || seedOnly === 'locations') {
+      await seedLocations(db);
+    }
+
+    if (!seedOnly || seedOnly === 'inventory') {
+      await seedInventory(db);
+    }
+
+    if (!seedOnly || seedOnly === 'recipes') {
+      await seedRecipes(db);
+    }
+
+    if (!seedOnly || seedOnly === 'products') {
+      await seedProducts(db);
+    }
 
     console.log('✅ Database seeding completed!');
   } catch (error) {

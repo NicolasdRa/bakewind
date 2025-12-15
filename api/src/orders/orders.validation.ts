@@ -1,6 +1,9 @@
 import { InferSelectModel } from 'drizzle-orm';
-import { orders, orderItems } from '../database/schemas/orders.schema';
+import { customerOrders, customerOrderItems } from '../database/schemas/orders.schema';
 import { z } from 'zod';
+
+// Order type values for validation
+export const orderTypeValues = ['customer', 'internal'] as const;
 
 // Order status and source values for validation
 export const orderStatusValues = [
@@ -44,6 +47,7 @@ const orderItemSchema = z.object({
 export const orderResponseDataSchema = z.object({
   id: z.string().uuid(),
   orderNumber: z.string(),
+  orderType: z.enum(orderTypeValues),
   customerId: z.string().uuid().nullable(),
   customerName: z.string(),
   customerPhone: z.string().nullable(),
@@ -83,6 +87,7 @@ export const orderItemResponseDataSchema = z.object({
 // Order creation schema
 export const orderCreationSchema = z.object({
   orderNumber: z.string().min(1).max(50),
+  orderType: z.enum(orderTypeValues).default('customer'),
   customerId: z.string().uuid().optional(),
   customerName: z.string().min(1).max(255),
   customerPhone: z.string().max(50).optional(),
@@ -128,8 +133,8 @@ export const orderUpdateSchema = orderCreationSchema.partial().omit({
 });
 
 // Export types
-export type OrdersData = InferSelectModel<typeof orders>;
-export type OrderItemsData = InferSelectModel<typeof orderItems>;
+export type OrdersData = InferSelectModel<typeof customerOrders>;
+export type OrderItemsData = InferSelectModel<typeof customerOrderItems>;
 export type OrderCreation = z.infer<typeof orderCreationSchema>;
 export type OrderItemCreation = z.infer<typeof orderItemCreationSchema>;
 export type CreateOrderWithItems = z.infer<typeof createOrderWithItemsSchema>;

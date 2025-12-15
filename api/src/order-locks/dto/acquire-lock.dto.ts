@@ -5,6 +5,7 @@ import { ApiProperty } from '@nestjs/swagger';
 // Zod validation schemas
 export const acquireLockSchema = z.object({
   order_id: z.string().uuid('Order ID must be a valid UUID'),
+  order_type: z.enum(['customer', 'internal']),
   session_id: z.string().min(1, 'Session ID is required'),
 });
 

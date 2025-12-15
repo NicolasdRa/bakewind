@@ -26,8 +26,9 @@
 
 .alertCount {
   font-size: 0.875rem;
-  color: #dc2626;
-  background: #fee2e2;
+  color: var(--error-color);
+  background: transparent;
+  border: 1.5px solid var(--error-color);
   padding: 0.25rem 0.75rem;
   border-radius: 1rem;
   font-weight: 500;
@@ -85,21 +86,23 @@
   font-size: 0.75rem;
   font-weight: 500;
   text-transform: uppercase;
+  background: transparent;
+  border: 1.5px solid currentColor;
 }
 
 .levelCritical {
-  background: #fee2e2;
-  color: #991b1b;
+  color: var(--error-color);
+  border-color: var(--error-color);
 }
 
 .levelLow {
-  background: #fef3c7;
-  color: #92400e;
+  color: var(--warning-color);
+  border-color: var(--warning-color);
 }
 
 .levelGood {
-  background: #d1fae5;
-  color: #065f46;
+  color: var(--success-color);
+  border-color: var(--success-color);
 }
 
 .stockInfo {
@@ -197,22 +200,6 @@
 /* Dark mode support */
 [data-theme="dark"] .itemCard {
   background: rgba(255, 255, 255, 0.05);
-}
-
-[data-theme="dark"] .alertCount {
-  background: rgba(254, 226, 226, 0.2);
-}
-
-[data-theme="dark"] .levelCritical {
-  background: rgba(254, 226, 226, 0.2);
-}
-
-[data-theme="dark"] .levelLow {
-  background: rgba(254, 243, 199, 0.2);
-}
-
-[data-theme="dark"] .levelGood {
-  background: rgba(209, 250, 229, 0.2);
 }
 
 [data-theme="dark"] .checkIcon {

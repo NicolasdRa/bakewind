@@ -64,6 +64,20 @@
       "when": 1762682257075,
       "tag": "0008_open_dormammu",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1762715697541,
+      "tag": "0009_same_newton_destine",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1762815506159,
+      "tag": "0010_slim_wild_pack",
+      "breakpoints": true
     }
   ]
 }

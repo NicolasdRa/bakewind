@@ -1,5 +1,5 @@
 import { Component, createSignal, createResource, For, Show } from "solid-js";
-import { customersApi } from "../../api/client";
+import { customersApi } from "../../api/customers";
 
 interface Customer {
   id: string;

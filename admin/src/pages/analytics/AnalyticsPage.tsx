@@ -1,5 +1,5 @@
 import { Component, createSignal, createResource, For, Show } from "solid-js";
-import { analyticsApi } from "../../api/client";
+import { analyticsApi } from "../../api/analytics";
 
 interface DashboardStats {
   revenue: {

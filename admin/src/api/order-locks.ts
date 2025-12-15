@@ -19,6 +19,7 @@ export interface UnlockedStatus {
 
 export interface AcquireLockRequest {
   order_id: string;
+  order_type: 'customer' | 'internal';
   session_id: string;
 }
 
@@ -33,9 +34,10 @@ export const orderLocksApi = {
   /**
    * Acquire lock on an order
    */
-  async acquireLock(orderId: string, sessionId: string): Promise<OrderLock> {
+  async acquireLock(orderId: string, orderType: 'customer' | 'internal', sessionId: string): Promise<OrderLock> {
     return apiClient.post<OrderLock>('/order-locks/acquire', {
       order_id: orderId,
+      order_type: orderType,
       session_id: sessionId,
     });
   },

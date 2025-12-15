@@ -1,6 +1,7 @@
 import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { ScheduleModule } from '@nestjs/schedule';
 
 import { APP_GUARD } from '@nestjs/core';
 import { CommonModule } from './common/common.module';
@@ -23,7 +24,10 @@ import { OrderLocksModule } from './order-locks/order-locks.module';
 import { InventoryModule } from './inventory/inventory.module';
 import { ProductsModule } from './products/products.module';
 import { RecipesModule } from './recipes/recipes.module';
+import { OrdersModule } from './orders/orders.module';
+import { InternalOrdersModule } from './internal-orders/internal-orders.module';
 import { RealtimeModule } from './realtime/realtime.module';
+import { ProductionModule } from './production/production.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
 import { CorrelationIdMiddleware } from './common/middleware/correlation-id.middleware';
@@ -63,6 +67,9 @@ import configuration, { AppConfig } from './config/configuration';
       },
     }),
 
+    // Task scheduling
+    ScheduleModule.forRoot(),
+
     // Feature modules
     DatabaseModule,
     AuthModule,
@@ -80,7 +87,10 @@ import configuration, { AppConfig } from './config/configuration';
     InventoryModule,
     ProductsModule,
     RecipesModule,
+    OrdersModule,
+    InternalOrdersModule,
     RealtimeModule,
+    ProductionModule,
     HealthModule,
     CommonModule,
   ],

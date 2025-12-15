@@ -537,7 +537,7 @@
 }
 
 [data-theme="dark"] .dropdownLogoutButton:hover:not(:disabled) {
-  background-color: #7f1d1d;
+  background-color: var(--error-light);
 }
 
 .dropdownLogoutIcon {

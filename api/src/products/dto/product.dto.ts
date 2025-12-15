@@ -52,7 +52,7 @@ export const createProductSchema = z.object({
   basePrice: z.number().positive(),
   costOfGoods: z.number().nonnegative().optional(),
   // margin is calculated dynamically, not input
-  recipeId: z.string().uuid().optional(),
+  recipeId: z.string().uuid({ message: 'Recipe is required for all products' }),
   recipeName: z.string().max(255).optional(),
   estimatedPrepTime: z.number().int().nonnegative().optional(),
   allergens: z.array(z.string()).optional(),

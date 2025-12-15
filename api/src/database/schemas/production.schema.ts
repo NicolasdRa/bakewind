@@ -10,6 +10,7 @@ import {
   date,
 } from 'drizzle-orm/pg-core';
 import { recipes } from './recipes.schema';
+import { internalOrders } from './internal-orders.schema';
 
 export const productionStatusEnum = pgEnum('production_status', [
   'scheduled',
@@ -34,6 +35,8 @@ export const productionItems = pgTable('production_items', {
   scheduleId: uuid('schedule_id')
     .references(() => productionSchedules.id, { onDelete: 'cascade' })
     .notNull(),
+  internalOrderId: uuid('internal_order_id').references(() => internalOrders.id, { onDelete: 'set null' }),
+  customerOrderId: uuid('customer_order_id'),
   recipeId: uuid('recipe_id')
     .references(() => recipes.id, { onDelete: 'restrict' })
     .notNull(),

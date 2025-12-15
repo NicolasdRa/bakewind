@@ -6,17 +6,23 @@ import EditInventoryItemModal from "~/components/inventory/EditInventoryItemModa
 import StatsCard from "~/components/common/StatsCard";
 import SearchInput from "~/components/common/SearchInput";
 import FilterSelect from "~/components/common/FilterSelect";
+import Badge from "~/components/common/Badge";
+import { getStockStatusVariant } from "~/components/common/Badge.config";
+import { useInfoModal } from "~/stores/infoModalStore";
 
 type SortField = 'name' | 'current_stock' | 'avg_daily_consumption' | 'days_of_supply_remaining';
 type SortDirection = 'asc' | 'desc';
 
 const InventoryPage: Component = () => {
+  const { showError } = useInfoModal();
   const [selectedCategory, setSelectedCategory] = createSignal<string>('all');
   const [showLowStock, setShowLowStock] = createSignal(false);
   const [searchQuery, setSearchQuery] = createSignal('');
   const [isAddModalOpen, setIsAddModalOpen] = createSignal(false);
   const [selectedItemId, setSelectedItemId] = createSignal<string | null>(null);
   const [editItemId, setEditItemId] = createSignal<string | null>(null);
+  const [itemToDelete, setItemToDelete] = createSignal<InventoryItemWithTracking | undefined>();
+  const [showDeleteConfirm, setShowDeleteConfirm] = createSignal(false);
 
   // Sorting state
   const [sortField, setSortField] = createSignal<SortField>('name');
@@ -34,13 +40,48 @@ const InventoryPage: Component = () => {
   );
 
   const getStockStatus = (item: InventoryItemWithTracking) => {
-    if (item.current_stock === 0) return { status: 'out', color: 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200' };
-    if (item.low_stock) return { status: 'low', color: 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200' };
-    return { status: 'good', color: 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200' };
+    if (item.current_stock === 0) return 'out';
+    if (item.low_stock) return 'low';
+    return 'good';
+  };
+
+  const getStockStatusLabel = (status: string) => {
+    if (status === 'out') return 'Out of Stock';
+    if (status === 'low') return 'Low Stock';
+    return 'In Stock';
   };
 
   const getLowStockCount = () => {
     return (inventory() || []).filter(item => item.low_stock).length;
+  };
+
+  // Handle delete
+  const handleDeleteClick = (item: InventoryItemWithTracking) => {
+    setItemToDelete(item);
+    setShowDeleteConfirm(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    const item = itemToDelete();
+    if (!item) return;
+
+    try {
+      await inventoryApi.deleteInventoryItem(item.id);
+      setShowDeleteConfirm(false);
+      setItemToDelete(undefined);
+      await refetch();
+    } catch (error: any) {
+      console.error('Failed to delete inventory item:', error);
+      const message = error?.message || 'Failed to delete inventory item. Please try again.';
+      setShowDeleteConfirm(false);
+      setItemToDelete(undefined);
+      showError('Cannot Delete Item', message);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteConfirm(false);
+    setItemToDelete(undefined);
   };
 
   // Handle column header click for sorting
@@ -388,10 +429,9 @@ const InventoryPage: Component = () => {
                             </Show>
                           </td>
                           <td class="px-6 py-4 whitespace-nowrap">
-                            <span class={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${stockStatus.color}`}>
-                              {stockStatus.status === 'out' ? 'Out of Stock' :
-                               stockStatus.status === 'low' ? 'Low Stock' : 'In Stock'}
-                            </span>
+                            <Badge variant={getStockStatusVariant(stockStatus)}>
+                              {getStockStatusLabel(stockStatus)}
+                            </Badge>
                           </td>
                           <td class="px-6 py-4 whitespace-nowrap text-sm">
                             <div class="flex space-x-3">
@@ -413,6 +453,15 @@ const InventoryPage: Component = () => {
                                 onMouseEnter={(e) => e.currentTarget.style.color = "var(--primary-hover)"}
                                 onMouseLeave={(e) => e.currentTarget.style.color = "var(--primary-color)"}
                               >Edit</button>
+                              <button
+                                onClick={() => handleDeleteClick(item)}
+                                class="font-medium transition-colors"
+                                style={{
+                                  "color": "var(--error-color)"
+                                }}
+                                onMouseEnter={(e) => e.currentTarget.style.color = "var(--error-hover)"}
+                                onMouseLeave={(e) => e.currentTarget.style.color = "var(--error-color)"}
+                              >Delete</button>
                             </div>
                           </td>
                         </tr>
@@ -447,6 +496,56 @@ const InventoryPage: Component = () => {
         onClose={() => setEditItemId(null)}
         onSuccess={() => refetch()}
       />
+
+      {/* Delete Confirmation Dialog */}
+      <Show when={showDeleteConfirm()}>
+        <div
+          class="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ "background-color": "var(--overlay-bg)" }}
+          onClick={handleCancelDelete}
+        >
+          <div
+            class="rounded-lg shadow-xl max-w-md w-full p-6"
+            style={{
+              "background-color": "var(--bg-primary)",
+              "border": "1px solid var(--border-color)"
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 class="text-lg font-semibold mb-4" style="color: var(--text-primary)">
+              Delete Inventory Item
+            </h3>
+            <p class="mb-6" style="color: var(--text-secondary)">
+              Are you sure you want to delete "{itemToDelete()?.name}"? This action cannot be undone.
+            </p>
+            <div class="flex justify-end space-x-3">
+              <button
+                onClick={handleCancelDelete}
+                class="px-4 py-2 rounded-md font-medium transition-colors"
+                style={{
+                  "background-color": "transparent",
+                  "border": "1px solid var(--border-color)",
+                  "color": "var(--text-primary)"
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmDelete}
+                class="px-4 py-2 rounded-md font-medium transition-colors"
+                style={{
+                  "background-color": "var(--error-color)",
+                  "color": "white"
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "var(--error-hover)"}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "var(--error-color)"}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      </Show>
     </div>
   );
 };

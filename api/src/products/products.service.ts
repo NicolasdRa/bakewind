@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { eq, and, ilike, or, sql, SQL } from 'drizzle-orm';
 import { DatabaseService } from '../database/database.service';
 import { products } from '../database/schemas/products.schema';
-import { orderItems } from '../database/schemas/orders.schema';
+import { customerOrderItems } from '../database/schemas/orders.schema';
 import { internalOrderItems } from '../database/schemas/internal-orders.schema';
 import { recipes } from '../database/schemas/recipes.schema';
 import {
@@ -232,8 +232,8 @@ export class ProductsService {
     // Count customer orders containing this product
     const customerOrderCount = await this.databaseService.database
       .select({ count: sql<number>`count(*)::int` })
-      .from(orderItems)
-      .where(eq(orderItems.productId, productId));
+      .from(customerOrderItems)
+      .where(eq(customerOrderItems.productId, productId));
 
     // Count internal orders containing this product
     const internalOrderCount = await this.databaseService.database

@@ -45,8 +45,8 @@ const Login: Component = () => {
       {/* Header */}
       <header class={styles.header}>
         <div class={styles.logoLink}>
-          <svg width="32" height="32" viewBox="0 0 100 100" fill="none">
-            <path d="M50 10 L90 90 L10 90 Z" fill="#f59e0b" />
+          <svg width="32" height="32" viewBox="0 0 100 100" fill="none" style="color: var(--primary-color)">
+            <path d="M50 10 L90 90 L10 90 Z" fill="currentColor" />
           </svg>
         </div>
       </header>

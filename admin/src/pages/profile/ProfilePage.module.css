@@ -193,8 +193,9 @@
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-1);
-  padding: 0 var(--spacing-2);
-  background: var(--bg-tertiary);
+  padding: 0.125rem var(--spacing-2);
+  background: transparent;
+  border: 1.5px solid var(--text-muted);
   border-radius: var(--radius-full);
   font-size: var(--font-size-xs);
   color: var(--text-muted);
@@ -320,7 +321,7 @@
   margin-top: var(--spacing-2);
 }
 
-/* Role Badges with Enhanced Design */
+/* Role Badges - Outlined Design */
 .roleBadgeRed {
   display: inline-flex;
   align-items: center;
@@ -328,14 +329,9 @@
   border-radius: var(--radius-full);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
-  background: linear-gradient(135deg, #fee2e2, #fecaca);
-  color: #dc2626;
-  box-shadow: 0 2px 4px rgba(220, 38, 38, 0.1);
-}
-
-[data-theme="dark"] .roleBadgeRed {
-  background: linear-gradient(135deg, #7f1d1d, #991b1b);
-  color: #fca5a5;
+  background: transparent;
+  color: var(--error-color);
+  border: 1.5px solid var(--error-color);
 }
 
 .roleBadgeBlue {
@@ -345,14 +341,9 @@
   border-radius: var(--radius-full);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
-  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
-  color: #2563eb;
-  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.1);
-}
-
-[data-theme="dark"] .roleBadgeBlue {
-  background: linear-gradient(135deg, #1e3a8a, #1e40af);
-  color: #93c5fd;
+  background: transparent;
+  color: var(--info-color);
+  border: 1.5px solid var(--info-color);
 }
 
 .roleBadgeGreen {
@@ -362,9 +353,9 @@
   border-radius: var(--radius-full);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
-  background: linear-gradient(135deg, var(--success-light), #bbf7d0);
+  background: transparent;
   color: var(--success-color);
-  box-shadow: 0 2px 4px rgba(5, 150, 105, 0.1);
+  border: 1.5px solid var(--success-color);
 }
 
 .roleBadgeYellow {
@@ -374,9 +365,9 @@
   border-radius: var(--radius-full);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
-  background: linear-gradient(135deg, var(--warning-light), #fde68a);
+  background: transparent;
   color: var(--warning-color);
-  box-shadow: 0 2px 4px rgba(245, 158, 11, 0.1);
+  border: 1.5px solid var(--warning-color);
 }
 
 .roleBadgeOrange {
@@ -386,14 +377,9 @@
   border-radius: var(--radius-full);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
-  background: linear-gradient(135deg, #fed7aa, #fdba74);
-  color: #ea580c;
-  box-shadow: 0 2px 4px rgba(234, 88, 12, 0.1);
-}
-
-[data-theme="dark"] .roleBadgeOrange {
-  background: linear-gradient(135deg, #9a3412, #c2410c);
-  color: #fdba74;
+  background: transparent;
+  color: var(--primary-color);
+  border: 1.5px solid var(--primary-color);
 }
 
 .roleBadgeGray {
@@ -403,9 +389,9 @@
   border-radius: var(--radius-full);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
-  background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-secondary));
+  background: transparent;
   color: var(--text-secondary);
-  box-shadow: 0 2px 4px var(--shadow-subtle);
+  border: 1.5px solid var(--text-secondary);
 }
 
 .roleDescription {
@@ -437,15 +423,15 @@
 }
 
 .statusBadgeActive {
-  background: var(--success-light);
+  background: transparent;
   color: var(--success-color);
-  border: 1px solid var(--success-color);
+  border: 1.5px solid var(--success-color);
 }
 
 .statusBadgeInactive {
-  background: var(--error-light);
+  background: transparent;
   color: var(--error-color);
-  border: 1px solid var(--error-color);
+  border: 1.5px solid var(--error-color);
 }
 
 .statusDot {
@@ -469,15 +455,15 @@
 }
 
 .statusBadgeVerified {
-  background: var(--success-light);
+  background: transparent;
   color: var(--success-color);
-  border: 1px solid var(--success-color);
+  border: 1.5px solid var(--success-color);
 }
 
 .statusBadgeUnverified {
-  background: var(--warning-light);
+  background: transparent;
   color: var(--warning-color);
-  border: 1px solid var(--warning-color);
+  border: 1.5px solid var(--warning-color);
 }
 
 .statusIcon {

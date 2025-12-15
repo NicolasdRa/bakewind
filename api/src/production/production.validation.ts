@@ -16,7 +16,7 @@ export const productionStatusValues = [
 // Production schedule response schema for API output
 export const productionScheduleResponseDataSchema = z.object({
   id: z.string().uuid(),
-  date: z.date().transform((date) => date.toISOString().split('T')[0]),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), // Already in YYYY-MM-DD format from database
   totalItems: z.number(),
   completedItems: z.number(),
   notes: z.string().nullable(),

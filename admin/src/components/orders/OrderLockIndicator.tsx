@@ -31,7 +31,7 @@ const OrderLockIndicator: Component<OrderLockIndicatorProps> = (props) => {
 
   return (
     <Show when={props.lock}>
-      <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-400 text-sm font-medium">
+      <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-transparent border-[1.5px] border-red-600 dark:border-red-400 text-red-600 dark:text-red-400 text-sm font-medium">
         <LockClosedIcon class="w-4 h-4" />
         <span>
           Locked by <strong>{props.lock!.locked_by_user_name}</strong>

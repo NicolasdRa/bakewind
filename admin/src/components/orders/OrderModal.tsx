@@ -17,6 +17,7 @@ interface Order {
 
 interface OrderModalProps {
   order: Order | null;
+  orderType: 'customer' | 'internal';
   isOpen: boolean;
   onClose: () => void;
 }
@@ -51,7 +52,7 @@ const OrderModal: Component<OrderModalProps> = (props) => {
     setLockError(null);
 
     try {
-      await orderLocksStore.acquireLock(props.order.id);
+      await orderLocksStore.acquireLock(props.order.id, props.orderType);
       startLockRenewal();
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Failed to acquire lock';

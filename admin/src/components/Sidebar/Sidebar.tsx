@@ -66,8 +66,8 @@ export default function Sidebar(props: SidebarProps) {
 
   const menuItems = [
     { id: 'dashboard', label: 'Overview', icon: '🏪', path: '/dashboard/overview' },
-    { id: 'orders', label: 'Orders', icon: '📋', path: '/dashboard/orders' },
-    { id: 'internal-orders', label: 'Internal Orders', icon: '🏢', path: '/dashboard/internal-orders' },
+    { id: 'customer-orders', label: 'Customer Orders', icon: '📋', path: '/dashboard/orders/customer' },
+    { id: 'internal-orders', label: 'Internal Orders', icon: '🏢', path: '/dashboard/orders/internal' },
     { id: 'inventory', label: 'Inventory', icon: '📦', path: '/dashboard/inventory' },
     { id: 'recipes', label: 'Recipes', icon: '📖', path: '/dashboard/recipes' },
     { id: 'products', label: 'Products', icon: '🥐', path: '/dashboard/products' },

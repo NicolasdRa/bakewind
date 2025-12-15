@@ -7,7 +7,12 @@ import {
 } from '@nestjs/common';
 import { eq, and, lt } from 'drizzle-orm';
 import { DatabaseService } from '../database/database.service';
-import { orderLocks, usersTable, orders } from '../database/schemas';
+import {
+  orderLocks,
+  usersTable,
+  customerOrders,
+  internalOrders,
+} from '../database/schemas';
 import { RedisConfigService } from '../config/redis.config';
 import {
   AcquireLockDto,
@@ -33,16 +38,20 @@ export class OrderLocksService {
     dto: AcquireLockDto,
   ): Promise<OrderLockResponseDto> {
     const redis = this.redisConfig.getClient();
-    const lockKey = `order_lock:${dto.order_id}`;
+    const lockKey = `order_lock:${dto.order_type}:${dto.order_id}`;
 
-    // Check if order exists
+    // Check if order exists in the appropriate table
+    const orderTable =
+      dto.order_type === 'customer' ? customerOrders : internalOrders;
     const [order] = await this.databaseService.database
       .select()
-      .from(orders)
-      .where(eq(orders.id, dto.order_id))
+      .from(orderTable)
+      .where(eq(orderTable.id, dto.order_id))
       .limit(1);
     if (!order) {
-      throw new NotFoundException('Order not found');
+      throw new NotFoundException(
+        `${dto.order_type === 'customer' ? 'Customer' : 'Internal'} order not found`,
+      );
     }
 
     // Try to acquire Redis lock first (fast check)
@@ -84,6 +93,7 @@ export class OrderLocksService {
         const [updatedLock] = await this.databaseService.database
           .update(orderLocks)
           .set({
+            orderType: dto.order_type,
             lockedByUserId: userId,
             lockedBySessionId: dto.session_id,
             lockedAt: new Date(),
@@ -103,6 +113,7 @@ export class OrderLocksService {
         const [newLock] = await this.databaseService.database
           .insert(orderLocks)
           .values({
+            orderType: dto.order_type,
             orderId: dto.order_id,
             lockedByUserId: userId,
             lockedBySessionId: dto.session_id,
@@ -137,7 +148,6 @@ export class OrderLocksService {
 
   async releaseLock(userId: string, orderId: string): Promise<void> {
     const redis = this.redisConfig.getClient();
-    const lockKey = `order_lock:${orderId}`;
 
     // Find lock in DB
     const [lock] = await this.databaseService.database
@@ -154,6 +164,9 @@ export class OrderLocksService {
     if (!lock) {
       throw new NotFoundException('No lock found or not owned by current user');
     }
+
+    // Build Redis lock key with order type
+    const lockKey = `order_lock:${lock.orderType}:${orderId}`;
 
     // Delete from DB
     await this.databaseService.database
@@ -172,7 +185,6 @@ export class OrderLocksService {
     orderId: string,
   ): Promise<OrderLockResponseDto> {
     const redis = this.redisConfig.getClient();
-    const lockKey = `order_lock:${orderId}`;
 
     // Find lock owned by user
     const [lock] = await this.databaseService.database
@@ -189,6 +201,9 @@ export class OrderLocksService {
     if (!lock) {
       throw new NotFoundException('Lock not found or expired');
     }
+
+    // Build Redis lock key with order type
+    const lockKey = `order_lock:${lock.orderType}:${orderId}`;
 
     // Extend TTL in Redis
     await redis.expire(lockKey, this.LOCK_TTL_SECONDS);
@@ -214,13 +229,20 @@ export class OrderLocksService {
   async getLockStatus(
     orderId: string,
   ): Promise<OrderLockResponseDto | UnlockedStatusDto> {
-    // Check if order exists
-    const [order] = await this.databaseService.database
+    // Check if order exists in either table
+    const [customerOrder] = await this.databaseService.database
       .select()
-      .from(orders)
-      .where(eq(orders.id, orderId))
+      .from(customerOrders)
+      .where(eq(customerOrders.id, orderId))
       .limit(1);
-    if (!order) {
+
+    const [internalOrder] = await this.databaseService.database
+      .select()
+      .from(internalOrders)
+      .where(eq(internalOrders.id, orderId))
+      .limit(1);
+
+    if (!customerOrder && !internalOrder) {
       throw new NotFoundException('Order not found');
     }
 

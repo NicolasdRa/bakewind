@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException } from '@nestjs/common';
+import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { InventoryService } from './inventory.service';
 import { DatabaseService } from '../database/database.service';
 
@@ -12,6 +12,7 @@ describe('InventoryService', () => {
       select: jest.fn(),
       insert: jest.fn(),
       update: jest.fn(),
+      delete: jest.fn(),
     },
   };
 
@@ -520,17 +521,37 @@ describe('InventoryService', () => {
   });
 
   describe('recalculate', () => {
+    // Helper to create a chainable mock for the consumption data query with multiple joins
+    const createConsumptionQueryMock = (resolvedData: any[]) => ({
+      from: jest.fn().mockReturnValue({
+        innerJoin: jest.fn().mockReturnValue({
+          innerJoin: jest.fn().mockReturnValue({
+            innerJoin: jest.fn().mockReturnValue({
+              innerJoin: jest.fn().mockReturnValue({
+                where: jest.fn().mockReturnValue({
+                  orderBy: jest.fn().mockResolvedValue(resolvedData),
+                }),
+              }),
+            }),
+          }),
+        }),
+      }),
+    });
+
     it('should calculate consumption from recent orders', async () => {
       const mockItem = {
         id: 'item-1',
         currentStock: '100',
       };
 
-      const mockOrders = [
-        { quantity: 10, orderDate: new Date() },
-        { quantity: 15, orderDate: new Date() },
-        { quantity: 20, orderDate: new Date() },
+      // Mock consumption data: each row represents an order of a product that uses this ingredient
+      // Consumption = orderQuantity * ingredientQuantity / recipeYield
+      const mockConsumptionData = [
+        { orderQuantity: 2, ingredientQuantity: '0.5', recipeYield: 1, orderDate: new Date() }, // 2 * 0.5 / 1 = 1.0
+        { orderQuantity: 3, ingredientQuantity: '0.5', recipeYield: 1, orderDate: new Date() }, // 3 * 0.5 / 1 = 1.5
+        { orderQuantity: 4, ingredientQuantity: '0.5', recipeYield: 1, orderDate: new Date() }, // 4 * 0.5 / 1 = 2.0
       ];
+      // Total = 4.5, avg daily = 4.5 / 7 = 0.642857...
 
       const mockExisting = {
         id: 'tracking-1',
@@ -539,11 +560,13 @@ describe('InventoryService', () => {
 
       const mockUpdated = {
         ...mockExisting,
-        avgDailyConsumption: '6.428571428571429', // (10+15+20)/7
+        avgDailyConsumption: '0.642857142857143',
         calculationPeriodDays: 7,
         lastCalculatedAt: new Date(),
         calculationMethod: 'historical_orders',
         sampleSize: 3,
+        customReorderThreshold: null,
+        customLeadTimeDays: null,
       };
 
       mockDatabaseService.database.select
@@ -554,15 +577,7 @@ describe('InventoryService', () => {
             }),
           }),
         })
-        .mockReturnValueOnce({
-          from: jest.fn().mockReturnValue({
-            innerJoin: jest.fn().mockReturnValue({
-              where: jest.fn().mockReturnValue({
-                orderBy: jest.fn().mockResolvedValue(mockOrders),
-              }),
-            }),
-          }),
-        })
+        .mockReturnValueOnce(createConsumptionQueryMock(mockConsumptionData))
         .mockReturnValueOnce({
           from: jest.fn().mockReturnValue({
             where: jest.fn().mockReturnValue({
@@ -583,7 +598,7 @@ describe('InventoryService', () => {
 
       expect(result.calculation_method).toBe('historical_orders');
       expect(result.sample_size).toBe(3);
-      expect(result.avg_daily_consumption).toBeCloseTo(6.43, 2);
+      expect(result.avg_daily_consumption).toBeCloseTo(0.64, 2);
     });
 
     it('should create tracking record if none exists', async () => {
@@ -592,16 +607,21 @@ describe('InventoryService', () => {
         currentStock: '100',
       };
 
-      const mockOrders = [{ quantity: 35, orderDate: new Date() }];
+      // One order: 5 units of product, recipe uses 0.2kg flour per unit
+      const mockConsumptionData = [
+        { orderQuantity: 5, ingredientQuantity: '0.2', recipeYield: 1, orderDate: new Date() }, // 5 * 0.2 / 1 = 1.0
+      ];
 
       const mockCreated = {
         id: 'tracking-1',
         inventoryItemId: 'item-1',
-        avgDailyConsumption: '5',
+        avgDailyConsumption: '0.142857142857143', // 1.0 / 7
         calculationPeriodDays: 7,
         lastCalculatedAt: new Date(),
         calculationMethod: 'historical_orders',
         sampleSize: 1,
+        customReorderThreshold: null,
+        customLeadTimeDays: null,
       };
 
       mockDatabaseService.database.select
@@ -612,15 +632,7 @@ describe('InventoryService', () => {
             }),
           }),
         })
-        .mockReturnValueOnce({
-          from: jest.fn().mockReturnValue({
-            innerJoin: jest.fn().mockReturnValue({
-              where: jest.fn().mockReturnValue({
-                orderBy: jest.fn().mockResolvedValue(mockOrders),
-              }),
-            }),
-          }),
-        })
+        .mockReturnValueOnce(createConsumptionQueryMock(mockConsumptionData))
         .mockReturnValueOnce({
           from: jest.fn().mockReturnValue({
             where: jest.fn().mockReturnValue({
@@ -639,7 +651,7 @@ describe('InventoryService', () => {
 
       expect(result.calculation_method).toBe('historical_orders');
       expect(result.sample_size).toBe(1);
-      expect(result.avg_daily_consumption).toBe(5);
+      expect(result.avg_daily_consumption).toBeCloseTo(0.14, 2);
     });
 
     it('should throw NotFoundException if item does not exist', async () => {
@@ -686,15 +698,7 @@ describe('InventoryService', () => {
             }),
           }),
         })
-        .mockReturnValueOnce({
-          from: jest.fn().mockReturnValue({
-            innerJoin: jest.fn().mockReturnValue({
-              where: jest.fn().mockReturnValue({
-                orderBy: jest.fn().mockResolvedValue([]),
-              }),
-            }),
-          }),
-        })
+        .mockReturnValueOnce(createConsumptionQueryMock([]))
         .mockReturnValueOnce({
           from: jest.fn().mockReturnValue({
             where: jest.fn().mockReturnValue({
@@ -944,6 +948,400 @@ describe('InventoryService', () => {
 
         expect(result.predicted_stockout_date).toBeNull();
       });
+    });
+  });
+
+  describe('getInventoryItem', () => {
+    it('should return an inventory item by id', async () => {
+      const mockItem = {
+        id: 'item-1',
+        name: 'Flour',
+        category: 'ingredient',
+        unit: 'kg',
+        currentStock: '100',
+        minimumStock: '20',
+        reorderPoint: '30',
+        reorderQuantity: '50',
+        costPerUnit: '2.50',
+        supplier: 'Mill Co',
+        location: 'Storage A',
+        notes: 'High quality wheat flour',
+        expirationDate: null,
+        lastRestocked: new Date('2025-01-01'),
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2025-01-01'),
+      };
+
+      mockDatabaseService.database.select.mockReturnValueOnce({
+        from: jest.fn().mockReturnValue({
+          where: jest.fn().mockReturnValue({
+            limit: jest.fn().mockResolvedValue([mockItem]),
+          }),
+        }),
+      });
+
+      const result = await service.getInventoryItem('item-1');
+
+      expect(result.id).toBe('item-1');
+      expect(result.name).toBe('Flour');
+      expect(result.currentStock).toBe(100);
+      expect(result.minimumStock).toBe(20);
+      expect(result.costPerUnit).toBe(2.5);
+    });
+
+    it('should throw NotFoundException if item does not exist', async () => {
+      mockDatabaseService.database.select.mockReturnValueOnce({
+        from: jest.fn().mockReturnValue({
+          where: jest.fn().mockReturnValue({
+            limit: jest.fn().mockResolvedValue([]),
+          }),
+        }),
+      });
+
+      await expect(service.getInventoryItem('invalid-id')).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+  });
+
+  describe('createInventoryItem', () => {
+    it('should create a new inventory item', async () => {
+      const createDto = {
+        name: 'Sugar',
+        category: 'ingredient' as const,
+        unit: 'kg' as const,
+        currentStock: 50,
+        minimumStock: 10,
+        reorderPoint: 15,
+        reorderQuantity: 30,
+        costPerUnit: 1.5,
+        supplier: 'Sugar Co',
+        location: 'Storage B',
+        notes: 'White sugar',
+      };
+
+      const mockCreated = {
+        id: 'item-new',
+        name: 'Sugar',
+        category: 'ingredient',
+        unit: 'kg',
+        currentStock: '50',
+        minimumStock: '10',
+        reorderPoint: '15',
+        reorderQuantity: '30',
+        costPerUnit: '1.50',
+        supplier: 'Sugar Co',
+        location: 'Storage B',
+        notes: 'White sugar',
+        expirationDate: null,
+        lastRestocked: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      mockDatabaseService.database.insert.mockReturnValue({
+        values: jest.fn().mockReturnValue({
+          returning: jest.fn().mockResolvedValue([mockCreated]),
+        }),
+      });
+
+      const result = await service.createInventoryItem(createDto);
+
+      expect(result.id).toBe('item-new');
+      expect(result.name).toBe('Sugar');
+      expect(result.currentStock).toBe(50);
+      expect(result.costPerUnit).toBe(1.5);
+    });
+
+    it('should throw error if creation fails', async () => {
+      const createDto = {
+        name: 'Sugar',
+        category: 'ingredient' as const,
+        unit: 'kg' as const,
+        currentStock: 50,
+        minimumStock: 10,
+        reorderPoint: 15,
+        reorderQuantity: 30,
+        costPerUnit: 1.5,
+      };
+
+      mockDatabaseService.database.insert.mockReturnValue({
+        values: jest.fn().mockReturnValue({
+          returning: jest.fn().mockResolvedValue([]),
+        }),
+      });
+
+      await expect(service.createInventoryItem(createDto)).rejects.toThrow(
+        'Failed to create inventory item',
+      );
+    });
+  });
+
+  describe('updateInventoryItem', () => {
+    it('should update an existing inventory item', async () => {
+      const mockExisting = {
+        id: 'item-1',
+        name: 'Flour',
+        currentStock: '100',
+      };
+
+      const updateDto = {
+        name: 'Organic Flour',
+        currentStock: 150,
+      };
+
+      const mockUpdated = {
+        id: 'item-1',
+        name: 'Organic Flour',
+        category: 'ingredient',
+        unit: 'kg',
+        currentStock: '150',
+        minimumStock: '20',
+        reorderPoint: '30',
+        reorderQuantity: '50',
+        costPerUnit: '3.00',
+        supplier: 'Organic Mill',
+        location: 'Storage A',
+        notes: null,
+        expirationDate: null,
+        lastRestocked: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      mockDatabaseService.database.select.mockReturnValueOnce({
+        from: jest.fn().mockReturnValue({
+          where: jest.fn().mockReturnValue({
+            limit: jest.fn().mockResolvedValue([mockExisting]),
+          }),
+        }),
+      });
+
+      mockDatabaseService.database.update.mockReturnValue({
+        set: jest.fn().mockReturnValue({
+          where: jest.fn().mockReturnValue({
+            returning: jest.fn().mockResolvedValue([mockUpdated]),
+          }),
+        }),
+      });
+
+      const result = await service.updateInventoryItem('item-1', updateDto);
+
+      expect(result.id).toBe('item-1');
+      expect(result.name).toBe('Organic Flour');
+      expect(result.currentStock).toBe(150);
+    });
+
+    it('should throw NotFoundException if item does not exist', async () => {
+      mockDatabaseService.database.select.mockReturnValueOnce({
+        from: jest.fn().mockReturnValue({
+          where: jest.fn().mockReturnValue({
+            limit: jest.fn().mockResolvedValue([]),
+          }),
+        }),
+      });
+
+      await expect(
+        service.updateInventoryItem('invalid-id', { name: 'New Name' }),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw error if update fails', async () => {
+      const mockExisting = {
+        id: 'item-1',
+        name: 'Flour',
+      };
+
+      mockDatabaseService.database.select.mockReturnValueOnce({
+        from: jest.fn().mockReturnValue({
+          where: jest.fn().mockReturnValue({
+            limit: jest.fn().mockResolvedValue([mockExisting]),
+          }),
+        }),
+      });
+
+      mockDatabaseService.database.update.mockReturnValue({
+        set: jest.fn().mockReturnValue({
+          where: jest.fn().mockReturnValue({
+            returning: jest.fn().mockResolvedValue([]),
+          }),
+        }),
+      });
+
+      await expect(
+        service.updateInventoryItem('item-1', { name: 'New Name' }),
+      ).rejects.toThrow('Failed to update inventory item');
+    });
+
+    it('should handle partial updates correctly', async () => {
+      const mockExisting = {
+        id: 'item-1',
+        name: 'Flour',
+      };
+
+      const mockUpdated = {
+        id: 'item-1',
+        name: 'Flour',
+        category: 'ingredient',
+        unit: 'kg',
+        currentStock: '200',
+        minimumStock: '20',
+        reorderPoint: '30',
+        reorderQuantity: '50',
+        costPerUnit: '2.50',
+        supplier: null,
+        location: null,
+        notes: null,
+        expirationDate: null,
+        lastRestocked: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      mockDatabaseService.database.select.mockReturnValueOnce({
+        from: jest.fn().mockReturnValue({
+          where: jest.fn().mockReturnValue({
+            limit: jest.fn().mockResolvedValue([mockExisting]),
+          }),
+        }),
+      });
+
+      mockDatabaseService.database.update.mockReturnValue({
+        set: jest.fn().mockReturnValue({
+          where: jest.fn().mockReturnValue({
+            returning: jest.fn().mockResolvedValue([mockUpdated]),
+          }),
+        }),
+      });
+
+      const result = await service.updateInventoryItem('item-1', {
+        currentStock: 200,
+      });
+
+      expect(result.name).toBe('Flour'); // Unchanged
+      expect(result.currentStock).toBe(200); // Updated
+    });
+  });
+
+  describe('deleteInventoryItem', () => {
+    it('should delete an inventory item successfully', async () => {
+      const mockExisting = {
+        id: 'item-1',
+        name: 'Flour',
+      };
+
+      mockDatabaseService.database.select
+        .mockReturnValueOnce({
+          from: jest.fn().mockReturnValue({
+            where: jest.fn().mockReturnValue({
+              limit: jest.fn().mockResolvedValue([mockExisting]),
+            }),
+          }),
+        })
+        .mockReturnValueOnce({
+          from: jest.fn().mockReturnValue({
+            where: jest.fn().mockReturnValue({
+              limit: jest.fn().mockResolvedValue([]), // Not used in any recipes
+            }),
+          }),
+        });
+
+      mockDatabaseService.database.delete
+        .mockReturnValueOnce({
+          where: jest.fn().mockResolvedValue(undefined), // Delete tracking
+        })
+        .mockReturnValueOnce({
+          where: jest.fn().mockResolvedValue(undefined), // Delete item
+        });
+
+      await expect(service.deleteInventoryItem('item-1')).resolves.not.toThrow();
+      expect(mockDatabaseService.database.delete).toHaveBeenCalledTimes(2);
+    });
+
+    it('should throw NotFoundException if item does not exist', async () => {
+      mockDatabaseService.database.select.mockReturnValueOnce({
+        from: jest.fn().mockReturnValue({
+          where: jest.fn().mockReturnValue({
+            limit: jest.fn().mockResolvedValue([]),
+          }),
+        }),
+      });
+
+      await expect(service.deleteInventoryItem('invalid-id')).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it('should throw BadRequestException if item is used in recipes', async () => {
+      const mockExisting = {
+        id: 'item-1',
+        name: 'Flour',
+      };
+
+      const mockRecipeIngredient = {
+        id: 'recipe-ing-1',
+        recipeId: 'recipe-1',
+        ingredientId: 'item-1',
+      };
+
+      mockDatabaseService.database.select
+        .mockReturnValueOnce({
+          from: jest.fn().mockReturnValue({
+            where: jest.fn().mockReturnValue({
+              limit: jest.fn().mockResolvedValue([mockExisting]),
+            }),
+          }),
+        })
+        .mockReturnValueOnce({
+          from: jest.fn().mockReturnValue({
+            where: jest.fn().mockReturnValue({
+              limit: jest.fn().mockResolvedValue([mockRecipeIngredient]), // Used in recipes
+            }),
+          }),
+        });
+
+      await expect(service.deleteInventoryItem('item-1')).rejects.toThrow(
+        /Cannot delete inventory item because it is used in one or more recipes/,
+      );
+    });
+
+    it('should delete associated consumption tracking before deleting item', async () => {
+      const mockExisting = {
+        id: 'item-1',
+        name: 'Flour',
+      };
+
+      mockDatabaseService.database.select
+        .mockReturnValueOnce({
+          from: jest.fn().mockReturnValue({
+            where: jest.fn().mockReturnValue({
+              limit: jest.fn().mockResolvedValue([mockExisting]),
+            }),
+          }),
+        })
+        .mockReturnValueOnce({
+          from: jest.fn().mockReturnValue({
+            where: jest.fn().mockReturnValue({
+              limit: jest.fn().mockResolvedValue([]), // Not used in recipes
+            }),
+          }),
+        });
+
+      const deleteTrackingMock = jest.fn().mockResolvedValue(undefined);
+      const deleteItemMock = jest.fn().mockResolvedValue(undefined);
+
+      mockDatabaseService.database.delete
+        .mockReturnValueOnce({
+          where: deleteTrackingMock,
+        })
+        .mockReturnValueOnce({
+          where: deleteItemMock,
+        });
+
+      await service.deleteInventoryItem('item-1');
+
+      // Verify delete was called twice (tracking first, then item)
+      expect(mockDatabaseService.database.delete).toHaveBeenCalledTimes(2);
     });
   });
 });

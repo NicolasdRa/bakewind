@@ -1,11 +1,14 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { eq, and, sql, gte, desc } from 'drizzle-orm';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { eq, and, gte, desc } from 'drizzle-orm';
 import { DatabaseService } from '../database/database.service';
 import {
   inventoryItems,
   inventoryConsumptionTracking,
-  orders,
-  orderItems,
+  customerOrders,
+  customerOrderItems,
+  recipeIngredients,
+  recipes,
+  products,
 } from '../database/schemas';
 import {
   ConsumptionTrackingDto,
@@ -242,29 +245,38 @@ export class InventoryService {
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - this.CALCULATION_PERIOD_DAYS);
 
-    // Get order items for this inventory item from recent orders
-    const recentOrders = await this.databaseService.database
+    // Calculate consumption by tracing: inventoryItem → recipeIngredients → recipes → products → orderItems → orders
+    // For each order of a product, we consume: (order_quantity * ingredient_quantity / recipe_yield)
+    const consumptionData = await this.databaseService.database
       .select({
-        quantity: orderItems.quantity,
-        orderDate: orders.createdAt,
+        orderQuantity: customerOrderItems.quantity,
+        ingredientQuantity: recipeIngredients.quantity,
+        recipeYield: recipes.yield,
+        orderDate: customerOrders.createdAt,
       })
-      .from(orderItems)
-      .innerJoin(orders, eq(orderItems.orderId, orders.id))
+      .from(recipeIngredients)
+      .innerJoin(recipes, eq(recipeIngredients.recipeId, recipes.id))
+      .innerJoin(products, eq(products.recipeId, recipes.id))
+      .innerJoin(customerOrderItems, eq(customerOrderItems.productId, products.id))
+      .innerJoin(customerOrders, eq(customerOrderItems.orderId, customerOrders.id))
       .where(
         and(
-          // Note: This assumes orderItems references inventory items somehow
-          // You may need to adjust based on actual schema relationships
-          gte(orders.createdAt, sevenDaysAgo),
+          eq(recipeIngredients.ingredientId, itemId),
+          gte(customerOrders.createdAt, sevenDaysAgo),
         ),
       )
-      .orderBy(desc(orders.createdAt));
+      .orderBy(desc(customerOrders.createdAt));
 
-    const totalQuantity = recentOrders.reduce(
-      (sum, order) => sum + parseFloat(order.quantity.toString()),
-      0,
-    );
+    // Calculate total consumption: sum of (order_quantity * ingredient_quantity / recipe_yield)
+    const totalQuantity = consumptionData.reduce((total, row) => {
+      const orderQty = row.orderQuantity;
+      const ingredientQty = parseFloat(row.ingredientQuantity);
+      const recipeYield = row.recipeYield;
+      // Consumption = orderQuantity * (ingredientQuantity / recipeYield)
+      return total + (orderQty * ingredientQty / recipeYield);
+    }, 0);
     const avgDailyConsumption = totalQuantity / this.CALCULATION_PERIOD_DAYS;
-    const sampleSize = recentOrders.length;
+    const sampleSize = consumptionData.length;
 
     // Update or create tracking record
     const [existing] = await this.databaseService.database
@@ -498,6 +510,19 @@ export class InventoryService {
 
     if (!existing) {
       throw new NotFoundException('Inventory item not found');
+    }
+
+    // Check if this inventory item is used in any recipes
+    const usedInRecipes = await this.databaseService.database
+      .select()
+      .from(recipeIngredients)
+      .where(eq(recipeIngredients.ingredientId, itemId))
+      .limit(1);
+
+    if (usedInRecipes.length > 0) {
+      throw new BadRequestException(
+        'Cannot delete inventory item because it is used in one or more recipes. Please remove it from all recipes first.',
+      );
     }
 
     // Delete associated consumption tracking first

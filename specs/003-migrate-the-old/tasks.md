@@ -328,17 +328,17 @@ This task list implements the dashboard migration feature with **85 tasks** acro
   - Endpoints: GET /inventory, GET /:itemId/consumption, PUT/DELETE /:itemId/consumption/threshold, POST /:itemId/consumption/recalculate
   - Response: Includes `low_stock` boolean in InventoryItem
 
-- [ ] **T049** Create background job for daily consumption calculation
-  - File: `api/src/inventory/jobs/calculate-consumption.job.ts`
-  - Schedule: Daily at 2 AM (cron)
-  - Logic: Recalculate all items with order history
+- [x] **T049** Create background job for daily consumption calculation ✓ **(2025-12-15)**
+  - File: `api/src/inventory/inventory-scheduler.service.ts`
+  - Schedule: Daily at 2 AM (cron) + Weekly cleanup Sundays 3 AM
+  - Logic: Recalculate all items with order history, cleanup orphaned records
   - Library: @nestjs/schedule
   - Dependency: T047
 
-- [ ] **T050** Unit tests for predictive calculation logic
-  - File: `api/test/inventory/inventory-predictive.spec.ts`
-  - Tests: 7-day average calculation, custom override, edge cases (no history)
-  - Mocks: Order data, consumption tracking
+- [x] **T050** Unit tests for predictive calculation logic ✓ **(2025-12-15)**
+  - File: `api/src/inventory/inventory.service.spec.ts`
+  - Tests: 37 tests covering CRUD, consumption tracking, thresholds, predictive calculations
+  - Coverage: getInventory, getConsumptionTracking, setCustomThreshold, deleteCustomThreshold, recalculate, createInventoryItem, updateInventoryItem, deleteInventoryItem
   - Dependency: T047
 
 ---
@@ -506,9 +506,11 @@ This task list implements the dashboard migration feature with **85 tasks** acro
   - File: `admin/src/pages/Products.tsx`
   - Placeholder page with structure ready for implementation
 
-- [x] **T074** Create Production page ✓
-  - File: `admin/src/pages/Production.tsx`
-  - Placeholder page with structure ready for implementation
+- [x] **T074** Create Production page ✓ **(FULLY IMPLEMENTED 2025-12-15)**
+  - File: `admin/src/pages/production/ProductionPage.tsx`
+  - **Full implementation** with schedule management, status workflow, quality checks
+  - Backend: `api/src/production/` - Service, Controller, DTOs, 13 unit tests
+  - API Client: `admin/src/api/production.ts`
 
 - [x] **T075** Create Customers page ✓
   - File: `admin/src/pages/Customers.tsx`
@@ -551,9 +553,9 @@ This task list implements the dashboard migration feature with **85 tasks** acro
   - Imports: WidgetsModule, OrderLocksModule, RealtimeModule
   - Config: WebSocket CORS, Redis connection
 
-- [ ] **T082** Create seed data for widget configurations and consumption tracking
-  - File: `api/src/database/seeds/dashboard-seed.ts`
-  - Data: Default widget layouts, sample consumption data
+- [x] **T082** Create seed data for widget configurations and consumption tracking ✓ **(2025-12-15)**
+  - File: `api/src/database/seeds/inventory.seed.ts`
+  - Data: 47 inventory items (31 ingredients, 8 packaging, 8 supplies), 12 consumption tracking records
   - Command: `npm run db:seed`
 
 - [x] **T083** Configure WebSocket CORS for frontend origin ✓
@@ -561,10 +563,10 @@ This task list implements the dashboard migration feature with **85 tasks** acro
   - CORS: Allow multiple origins (admin, customer app, dev server)
   - Production: Use environment variable for origin
 
-- [ ] **T084** Set up background job scheduler for consumption calculations
-  - File: `api/src/app.module.ts` (EXTEND)
-  - Import: @nestjs/schedule, register ScheduleModule
-  - Job: Run T049 daily at 2 AM
+- [x] **T084** Set up background job scheduler for consumption calculations ✓ **(2025-12-15)**
+  - File: `api/src/inventory/inventory.module.ts` (includes InventorySchedulerService)
+  - Import: @nestjs/schedule, ScheduleModule registered in AppModule
+  - Jobs: Daily consumption recalculation (2 AM) + Weekly cleanup (Sundays 3 AM)
 
 - [x] **T085** Create health check endpoint for WebSocket status ✓
   - File: `api/src/health/health.controller.ts` (EXTENDED)

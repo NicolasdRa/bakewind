@@ -68,12 +68,12 @@ export const orderLocksStore = {
   /**
    * Acquire lock on an order
    */
-  async acquireLock(orderId: string): Promise<boolean> {
+  async acquireLock(orderId: string, orderType: 'customer' | 'internal'): Promise<boolean> {
     setLoading((prev) => new Map(prev).set(orderId, true));
     setError(null);
 
     try {
-      const lock = await orderLocksApi.acquireLock(orderId, SESSION_ID);
+      const lock = await orderLocksApi.acquireLock(orderId, orderType, SESSION_ID);
 
       // Update state
       setLocks((prev) => new Map(prev).set(orderId, lock));

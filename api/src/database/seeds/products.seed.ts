@@ -1,9 +1,48 @@
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { eq } from 'drizzle-orm';
 import { products } from '../schemas/products.schema';
+import { recipes } from '../schemas/recipes.schema';
 import * as schema from '../schemas';
 
 export async function seedProducts(db: NodePgDatabase<typeof schema>) {
   console.log('🌱 Seeding products...');
+
+  // Fetch all recipes to link products
+  const allRecipes = await db.select().from(recipes);
+  console.log(`📖 Found ${allRecipes.length} recipes to link with products`);
+
+  // Helper function to find best recipe match for a product
+  const findRecipeForProduct = (productName: string): string | null => {
+    // Try exact match first
+    const exactMatch = allRecipes.find(r => r.name === productName);
+    if (exactMatch) return exactMatch.id;
+
+    // Try fuzzy matching based on key words
+    const productWords = productName.toLowerCase().split(' ');
+
+    // Find recipe that contains most matching words
+    let bestMatch: { recipe: typeof allRecipes[0], score: number } | null = null;
+
+    for (const recipe of allRecipes) {
+      const recipeWords = recipe.name.toLowerCase().split(' ');
+      let matchCount = 0;
+
+      for (const productWord of productWords) {
+        if (recipeWords.some(rw => rw.includes(productWord) || productWord.includes(rw))) {
+          matchCount++;
+        }
+      }
+
+      // Calculate match score (percentage of product words matched)
+      const score = matchCount / productWords.length;
+
+      if (score > 0.5 && (!bestMatch || score > bestMatch.score)) {
+        bestMatch = { recipe, score };
+      }
+    }
+
+    return bestMatch ? bestMatch.recipe.id : null;
+  };
 
   const sampleProducts = [
     // Breads
@@ -885,8 +924,38 @@ export async function seedProducts(db: NodePgDatabase<typeof schema>) {
   ];
 
   try {
-    await db.insert(products).values(sampleProducts);
-    console.log(`✅ Successfully seeded ${sampleProducts.length} products`);
+    // Link products to recipes and insert
+    const productsWithRecipes = sampleProducts.map(product => {
+      const recipeId = findRecipeForProduct(product.name);
+
+      if (!recipeId) {
+        console.warn(`⚠️  No recipe match found for product: ${product.name}`);
+      } else {
+        const matchedRecipe = allRecipes.find(r => r.id === recipeId);
+        console.log(`✓ Linked "${product.name}" → "${matchedRecipe?.name}"`);
+      }
+
+      return {
+        ...product,
+        recipeId: recipeId || null,
+        recipeName: recipeId ? product.name : null,
+      };
+    });
+
+    // Filter out products without recipes since recipeId is now required
+    const productsToInsert = productsWithRecipes.filter(p => p.recipeId !== null);
+    const skipped = productsWithRecipes.length - productsToInsert.length;
+
+    if (skipped > 0) {
+      console.warn(`⚠️  Skipping ${skipped} products without recipes`);
+    }
+
+    if (productsToInsert.length > 0) {
+      await db.insert(products).values(productsToInsert);
+      console.log(`✅ Successfully seeded ${productsToInsert.length} products`);
+    } else {
+      console.log('⚠️  No products to seed (all products require recipes)');
+    }
   } catch (error) {
     console.error('❌ Error seeding products:', error);
     throw error;
