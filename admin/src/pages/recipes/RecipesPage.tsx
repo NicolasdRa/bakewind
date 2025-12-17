@@ -14,8 +14,15 @@ type SortField = 'name' | 'prepTime' | 'totalTime';
 type SortDirection = 'asc' | 'desc';
 
 // Adapter type for the UI (simplified ingredient format)
-interface UIRecipe extends Omit<Recipe, 'ingredients' | 'yield' | 'yieldUnit'> {
+interface UIRecipe extends Omit<Recipe, 'ingredients' | 'yield' | 'yieldUnit' | 'tags' | 'nutritionalInfo'> {
   yield: string; // Combined yield + yieldUnit for display
+  tags: string[]; // Always an array (convert null to empty array)
+  nutritionalInfo?: {  // Convert null to undefined for modal compatibility
+    calories?: number;
+    fat?: number;
+    carbs?: number;
+    protein?: number;
+  };
   ingredients: Array<{
     name: string;
     amount: number;
@@ -51,6 +58,8 @@ const RecipesPage: Component = () => {
   const convertToUIRecipe = (recipe: Recipe): UIRecipe => ({
     ...recipe,
     yield: `${recipe.yield} ${recipe.yieldUnit}`,
+    tags: recipe.tags || [], // Convert null to empty array
+    nutritionalInfo: recipe.nutritionalInfo || undefined, // Convert null to undefined
     ingredients: recipe.ingredients.map(ing => ({
       name: ing.ingredientName,
       amount: ing.quantity,

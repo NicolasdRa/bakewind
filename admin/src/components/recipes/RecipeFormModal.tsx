@@ -21,10 +21,10 @@ interface Recipe {
   instructions: string[];
   tags: string[];
   nutritionalInfo?: {
-    calories: number;
-    fat: number;
-    carbs: number;
-    protein: number;
+    calories?: number;
+    fat?: number;
+    carbs?: number;
+    protein?: number;
   };
   createdAt: string;
   updatedAt: string;
