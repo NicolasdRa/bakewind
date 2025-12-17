@@ -40,8 +40,25 @@ export class ProductsController {
 
   @Get()
   @ApiOperation({ summary: 'List all products with optional filters' })
-  @ApiQuery({ name: 'category', required: false, enum: ['bread', 'pastry', 'cake', 'cookie', 'sandwich', 'beverage', 'seasonal', 'custom'] })
-  @ApiQuery({ name: 'status', required: false, enum: ['active', 'inactive', 'seasonal', 'discontinued'] })
+  @ApiQuery({
+    name: 'category',
+    required: false,
+    enum: [
+      'bread',
+      'pastry',
+      'cake',
+      'cookie',
+      'sandwich',
+      'beverage',
+      'seasonal',
+      'custom',
+    ],
+  })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    enum: ['active', 'inactive', 'seasonal', 'discontinued'],
+  })
   @ApiQuery({ name: 'search', required: false, type: String })
   @ApiResponse({ status: 200, description: 'Products retrieved successfully' })
   async getProducts(
@@ -110,9 +127,13 @@ export class ProductsController {
   @Post(':productId/calculate-popularity')
   @ApiOperation({
     summary: 'Calculate and update product popularity based on order counts',
-    description: 'Recalculates popularity score by counting customer orders and internal orders containing this product'
+    description:
+      'Recalculates popularity score by counting customer orders and internal orders containing this product',
   })
-  @ApiResponse({ status: 200, description: 'Popularity score calculated and updated' })
+  @ApiResponse({
+    status: 200,
+    description: 'Popularity score calculated and updated',
+  })
   @ApiResponse({ status: 404, description: 'Product not found' })
   async calculatePopularity(@Param('productId') productId: string) {
     return this.productsService.calculatePopularity(productId);
@@ -121,9 +142,13 @@ export class ProductsController {
   @Post('recalculate-all-popularity')
   @ApiOperation({
     summary: 'Recalculate popularity for all products',
-    description: 'Batch update all product popularity scores based on order counts. Useful for scheduled jobs or manual refresh.'
+    description:
+      'Batch update all product popularity scores based on order counts. Useful for scheduled jobs or manual refresh.',
   })
-  @ApiResponse({ status: 200, description: 'All product popularity scores recalculated' })
+  @ApiResponse({
+    status: 200,
+    description: 'All product popularity scores recalculated',
+  })
   async recalculateAllPopularity() {
     return this.productsService.recalculateAllPopularity();
   }
@@ -131,10 +156,17 @@ export class ProductsController {
   @Post(':productId/sync-from-recipe')
   @ApiOperation({
     summary: 'Sync product cost from linked recipe',
-    description: 'Updates costOfGoods from the linked recipe\'s costPerUnit. Implements Layer 2 of Dual-Layer Cost Calculation.'
+    description:
+      "Updates costOfGoods from the linked recipe's costPerUnit. Implements Layer 2 of Dual-Layer Cost Calculation.",
   })
-  @ApiResponse({ status: 200, description: 'Product cost synced from recipe successfully' })
-  @ApiResponse({ status: 404, description: 'Product not found or not linked to a recipe' })
+  @ApiResponse({
+    status: 200,
+    description: 'Product cost synced from recipe successfully',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Product not found or not linked to a recipe',
+  })
   async syncCostFromRecipe(@Param('productId') productId: string) {
     return this.productsService.syncCostFromRecipe(productId);
   }
@@ -142,9 +174,13 @@ export class ProductsController {
   @Post('sync-all-from-recipes')
   @ApiOperation({
     summary: 'Sync costs for all products linked to recipes',
-    description: 'Batch update all recipe-linked products with current recipe costs. Useful after ingredient prices change.'
+    description:
+      'Batch update all recipe-linked products with current recipe costs. Useful after ingredient prices change.',
   })
-  @ApiResponse({ status: 200, description: 'All recipe-linked product costs synced' })
+  @ApiResponse({
+    status: 200,
+    description: 'All recipe-linked product costs synced',
+  })
   async syncAllCostsFromRecipes() {
     return this.productsService.syncAllCostsFromRecipes();
   }

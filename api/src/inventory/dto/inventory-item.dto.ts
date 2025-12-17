@@ -2,8 +2,19 @@ import { z } from 'zod';
 import { createZodDto } from 'nestjs-zod';
 
 // Inventory category and unit enum values
-export const inventoryCategoryValues = ['ingredient', 'packaging', 'supplies'] as const;
-export const inventoryUnitValues = ['kg', 'g', 'l', 'ml', 'unit', 'dozen'] as const;
+export const inventoryCategoryValues = [
+  'ingredient',
+  'packaging',
+  'supplies',
+] as const;
+export const inventoryUnitValues = [
+  'kg',
+  'g',
+  'l',
+  'ml',
+  'unit',
+  'dozen',
+] as const;
 
 // Create inventory item schema
 export const createInventoryItemSchema = z.object({
@@ -24,8 +35,12 @@ export const createInventoryItemSchema = z.object({
 export const updateInventoryItemSchema = createInventoryItemSchema.partial();
 
 // DTOs
-export class CreateInventoryItemDto extends createZodDto(createInventoryItemSchema) {}
-export class UpdateInventoryItemDto extends createZodDto(updateInventoryItemSchema) {}
+export class CreateInventoryItemDto extends createZodDto(
+  createInventoryItemSchema,
+) {}
+export class UpdateInventoryItemDto extends createZodDto(
+  updateInventoryItemSchema,
+) {}
 
 // Response DTO
 export interface InventoryItemDto {

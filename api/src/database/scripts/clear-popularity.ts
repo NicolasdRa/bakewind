@@ -24,7 +24,9 @@ async function clearPopularity() {
       })
       .returning({ id: products.id });
 
-    console.log(`✅ Successfully cleared popularity for ${result.length} products`);
+    console.log(
+      `✅ Successfully cleared popularity for ${result.length} products`,
+    );
   } catch (error) {
     console.error('❌ Error clearing popularity:', error);
     throw error;

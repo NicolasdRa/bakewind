@@ -1,12 +1,10 @@
-import { Component, createSignal, Show, For, createEffect } from "solid-js";
+import { Component, createSignal, Show, createEffect } from "solid-js";
 import {
   Product,
   ProductCategory,
   ProductStatus,
   CreateProductRequest,
   UpdateProductRequest,
-  NutritionalInfo,
-  CustomizationOption,
 } from "~/api/products";
 
 interface ProductFormModalProps {

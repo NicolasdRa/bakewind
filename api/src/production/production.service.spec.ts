@@ -405,10 +405,14 @@ describe('ProductionService', () => {
         }),
       });
 
-      const result = await service.updateProductionItem('schedule-1', 'item-1', {
-        status: ProductionStatus.IN_PROGRESS,
-        startTime: new Date().toISOString(),
-      });
+      const result = await service.updateProductionItem(
+        'schedule-1',
+        'item-1',
+        {
+          status: ProductionStatus.IN_PROGRESS,
+          startTime: new Date().toISOString(),
+        },
+      );
 
       expect(result).toBeDefined();
       expect(result.status).toBe('in_progress');
@@ -513,10 +517,14 @@ describe('ProductionService', () => {
           }),
         });
 
-      const result = await service.updateProductionItem('schedule-1', 'item-1', {
-        status: ProductionStatus.COMPLETED,
-        completedTime: new Date().toISOString(),
-      });
+      const result = await service.updateProductionItem(
+        'schedule-1',
+        'item-1',
+        {
+          status: ProductionStatus.COMPLETED,
+          completedTime: new Date().toISOString(),
+        },
+      );
 
       expect(result).toBeDefined();
       expect(result.status).toBe('completed');
@@ -525,10 +533,14 @@ describe('ProductionService', () => {
 
     it('should throw NotFoundException if item not found', async () => {
       const selectFromWhereLimit = jest.fn().mockResolvedValue([]);
-      const selectFromWhere = jest.fn().mockReturnValue({ limit: selectFromWhereLimit });
+      const selectFromWhere = jest
+        .fn()
+        .mockReturnValue({ limit: selectFromWhereLimit });
       const selectFrom = jest.fn().mockReturnValue({ where: selectFromWhere });
 
-      mockDatabaseService.database.select.mockReturnValueOnce({ from: selectFrom });
+      mockDatabaseService.database.select.mockReturnValueOnce({
+        from: selectFrom,
+      });
 
       await expect(
         service.updateProductionItem('schedule-1', 'non-existent', {
@@ -567,14 +579,22 @@ describe('ProductionService', () => {
 
       // Create mock chain functions
       const selectFromWhereLimit = jest.fn().mockResolvedValue([existingItem]);
-      const selectFromWhere1 = jest.fn().mockReturnValue({ limit: selectFromWhereLimit });
-      const selectFrom1 = jest.fn().mockReturnValue({ where: selectFromWhere1 });
+      const selectFromWhere1 = jest
+        .fn()
+        .mockReturnValue({ limit: selectFromWhereLimit });
+      const selectFrom1 = jest
+        .fn()
+        .mockReturnValue({ where: selectFromWhere1 });
 
       const selectFromWhere2 = jest.fn().mockResolvedValue([startedItem]);
-      const selectFrom2 = jest.fn().mockReturnValue({ where: selectFromWhere2 });
+      const selectFrom2 = jest
+        .fn()
+        .mockReturnValue({ where: selectFromWhere2 });
 
       const updateReturning = jest.fn().mockResolvedValue([startedItem]);
-      const updateWhere1 = jest.fn().mockReturnValue({ returning: updateReturning });
+      const updateWhere1 = jest
+        .fn()
+        .mockReturnValue({ returning: updateReturning });
       const updateSet1 = jest.fn().mockReturnValue({ where: updateWhere1 });
 
       const updateWhere2 = jest.fn().mockResolvedValue(undefined);
@@ -634,20 +654,30 @@ describe('ProductionService', () => {
 
       // Mock 1: Find existing item (with limit)
       const selectFromWhereLimit = jest.fn().mockResolvedValue([existingItem]);
-      const selectFromWhere1 = jest.fn().mockReturnValue({ limit: selectFromWhereLimit });
-      const selectFrom1 = jest.fn().mockReturnValue({ where: selectFromWhere1 });
+      const selectFromWhere1 = jest
+        .fn()
+        .mockReturnValue({ limit: selectFromWhereLimit });
+      const selectFrom1 = jest
+        .fn()
+        .mockReturnValue({ where: selectFromWhere1 });
 
       // Mock 2: updateScheduleTotals - get schedule items (no limit)
       const selectFromWhere2 = jest.fn().mockResolvedValue([completedItem]);
-      const selectFrom2 = jest.fn().mockReturnValue({ where: selectFromWhere2 });
+      const selectFrom2 = jest
+        .fn()
+        .mockReturnValue({ where: selectFromWhere2 });
 
       // Mock 3: deductInventoryForRecipe - get recipe ingredients (no limit, returns empty)
       const selectFromWhere3 = jest.fn().mockResolvedValue([]); // No recipe ingredients
-      const selectFrom3 = jest.fn().mockReturnValue({ where: selectFromWhere3 });
+      const selectFrom3 = jest
+        .fn()
+        .mockReturnValue({ where: selectFromWhere3 });
 
       // Update Mock 1: update item with returning
       const updateReturning = jest.fn().mockResolvedValue([completedItem]);
-      const updateWhere1 = jest.fn().mockReturnValue({ returning: updateReturning });
+      const updateWhere1 = jest
+        .fn()
+        .mockReturnValue({ returning: updateReturning });
       const updateSet1 = jest.fn().mockReturnValue({ where: updateWhere1 });
 
       // Update Mock 2: updateScheduleTotals (no returning)
@@ -691,13 +721,19 @@ describe('ProductionService', () => {
       };
 
       const selectFromWhereLimit = jest.fn().mockResolvedValue([mockSchedule]);
-      const selectFromWhere = jest.fn().mockReturnValue({ limit: selectFromWhereLimit });
+      const selectFromWhere = jest
+        .fn()
+        .mockReturnValue({ limit: selectFromWhereLimit });
       const selectFrom = jest.fn().mockReturnValue({ where: selectFromWhere });
 
       const deleteWhere = jest.fn().mockResolvedValue(undefined);
 
-      mockDatabaseService.database.select.mockReturnValueOnce({ from: selectFrom });
-      mockDatabaseService.database.delete.mockReturnValueOnce({ where: deleteWhere });
+      mockDatabaseService.database.select.mockReturnValueOnce({
+        from: selectFrom,
+      });
+      mockDatabaseService.database.delete.mockReturnValueOnce({
+        where: deleteWhere,
+      });
 
       await service.deleteSchedule('schedule-1');
 
@@ -706,10 +742,14 @@ describe('ProductionService', () => {
 
     it('should throw NotFoundException when deleting non-existent schedule', async () => {
       const selectFromWhereLimit = jest.fn().mockResolvedValue([]);
-      const selectFromWhere = jest.fn().mockReturnValue({ limit: selectFromWhereLimit });
+      const selectFromWhere = jest
+        .fn()
+        .mockReturnValue({ limit: selectFromWhereLimit });
       const selectFrom = jest.fn().mockReturnValue({ where: selectFromWhere });
 
-      mockDatabaseService.database.select.mockReturnValueOnce({ from: selectFrom });
+      mockDatabaseService.database.select.mockReturnValueOnce({
+        from: selectFrom,
+      });
 
       await expect(service.deleteSchedule('non-existent')).rejects.toThrow(
         NotFoundException,

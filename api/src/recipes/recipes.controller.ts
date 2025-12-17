@@ -38,7 +38,14 @@ export class RecipesController {
    * GET /recipes?category=bread&search=sourdough&isActive=true
    */
   @Get()
-  @Roles('ADMIN', 'MANAGER', 'HEAD_BAKER', 'BAKER', 'HEAD_PASTRY_CHEF', 'PASTRY_CHEF')
+  @Roles(
+    'ADMIN',
+    'MANAGER',
+    'HEAD_BAKER',
+    'BAKER',
+    'HEAD_PASTRY_CHEF',
+    'PASTRY_CHEF',
+  )
   async getRecipes(
     @Query('category') category?: RecipeCategory,
     @Query('search') search?: string,
@@ -53,7 +60,14 @@ export class RecipesController {
    * GET /recipes/active
    */
   @Get('active')
-  @Roles('ADMIN', 'MANAGER', 'HEAD_BAKER', 'BAKER', 'HEAD_PASTRY_CHEF', 'PASTRY_CHEF')
+  @Roles(
+    'ADMIN',
+    'MANAGER',
+    'HEAD_BAKER',
+    'BAKER',
+    'HEAD_PASTRY_CHEF',
+    'PASTRY_CHEF',
+  )
   async getActiveRecipes(): Promise<RecipeDto[]> {
     return this.recipesService.getActiveRecipes();
   }
@@ -63,7 +77,14 @@ export class RecipesController {
    * GET /recipes/category/:category
    */
   @Get('category/:category')
-  @Roles('ADMIN', 'MANAGER', 'HEAD_BAKER', 'BAKER', 'HEAD_PASTRY_CHEF', 'PASTRY_CHEF')
+  @Roles(
+    'ADMIN',
+    'MANAGER',
+    'HEAD_BAKER',
+    'BAKER',
+    'HEAD_PASTRY_CHEF',
+    'PASTRY_CHEF',
+  )
   async getRecipesByCategory(
     @Param('category') category: RecipeCategory,
   ): Promise<RecipeDto[]> {
@@ -75,7 +96,14 @@ export class RecipesController {
    * GET /recipes/:recipeId
    */
   @Get(':recipeId')
-  @Roles('ADMIN', 'MANAGER', 'HEAD_BAKER', 'BAKER', 'HEAD_PASTRY_CHEF', 'PASTRY_CHEF')
+  @Roles(
+    'ADMIN',
+    'MANAGER',
+    'HEAD_BAKER',
+    'BAKER',
+    'HEAD_PASTRY_CHEF',
+    'PASTRY_CHEF',
+  )
   async getRecipe(
     @Param('recipeId', ParseUUIDPipe) recipeId: string,
   ): Promise<RecipeDto> {

@@ -1,5 +1,8 @@
 import { InferSelectModel } from 'drizzle-orm';
-import { customerOrders, customerOrderItems } from '../database/schemas/orders.schema';
+import {
+  customerOrders,
+  customerOrderItems,
+} from '../database/schemas/orders.schema';
 import { z } from 'zod';
 
 // Order type values for validation

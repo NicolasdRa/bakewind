@@ -123,7 +123,10 @@ export class UserSessionsService {
     };
 
     const jwtSecret = this.configService.get<string>('JWT_SECRET');
-    const jwtExpiresIn = this.configService.get<string>('JWT_EXPIRES_IN', '15m');
+    const jwtExpiresIn = this.configService.get<string>(
+      'JWT_EXPIRES_IN',
+      '15m',
+    );
     const refreshSecret = this.configService.get<string>('JWT_REFRESH_SECRET');
     const refreshExpiresIn = this.configService.get<string>(
       'JWT_REFRESH_EXPIRES_IN',
@@ -193,7 +196,8 @@ export class UserSessionsService {
   async refreshTokens(refreshToken: string): Promise<TokenPair> {
     try {
       // Verify refresh token
-      const refreshSecret = this.configService.get<string>('JWT_REFRESH_SECRET');
+      const refreshSecret =
+        this.configService.get<string>('JWT_REFRESH_SECRET');
       if (!refreshSecret) {
         throw new UnauthorizedException('JWT refresh secret not configured');
       }

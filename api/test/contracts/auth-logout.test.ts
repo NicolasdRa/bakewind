@@ -21,17 +21,15 @@ describe('POST /auth/logout (Contract Test)', () => {
       password: 'LogoutTestPass123!',
     };
 
-    await request(app.getHttpServer())
-      .post('/auth/trial-signup')
-      .send({
-        businessName: 'Logout Test Bakery',
-        fullName: 'Logout Tester',
-        email: testUserCredentials.email,
-        phone: '+1 555-111-2222',
-        password: testUserCredentials.password,
-        locations: '1',
-        agreeToTerms: true,
-      });
+    await request(app.getHttpServer()).post('/auth/trial-signup').send({
+      businessName: 'Logout Test Bakery',
+      fullName: 'Logout Tester',
+      email: testUserCredentials.email,
+      phone: '+1 555-111-2222',
+      password: testUserCredentials.password,
+      locations: '1',
+      agreeToTerms: true,
+    });
   });
 
   afterAll(async () => {
@@ -75,7 +73,7 @@ describe('POST /auth/logout (Contract Test)', () => {
 
       // Should set refresh token cookie with expired date or empty value
       const clearCookie = logoutResponse.headers['set-cookie']?.find(
-        (cookie: string) => cookie.startsWith('refreshToken=')
+        (cookie: string) => cookie.startsWith('refreshToken='),
       );
 
       if (clearCookie) {
@@ -111,8 +109,9 @@ describe('POST /auth/logout (Contract Test)', () => {
         .send(testUserCredentials);
 
       const accessToken = loginResponse.body.accessToken;
-      const refreshTokenCookie = loginResponse.headers['set-cookie']
-        .find((cookie: string) => cookie.startsWith('refreshToken='));
+      const refreshTokenCookie = loginResponse.headers['set-cookie'].find(
+        (cookie: string) => cookie.startsWith('refreshToken='),
+      );
 
       // Logout
       await request(app.getHttpServer())
@@ -243,14 +242,14 @@ describe('POST /auth/logout (Contract Test)', () => {
       const concurrentLogouts = Array.from({ length: 3 }, () =>
         request(app.getHttpServer())
           .post('/auth/logout')
-          .set('Authorization', `Bearer ${accessToken}`)
+          .set('Authorization', `Bearer ${accessToken}`),
       );
 
       const responses = await Promise.all(concurrentLogouts);
 
       // First should succeed, others should fail gracefully
-      const successCount = responses.filter(res => res.status === 204).length;
-      const errorCount = responses.filter(res => res.status === 401).length;
+      const successCount = responses.filter((res) => res.status === 204).length;
+      const errorCount = responses.filter((res) => res.status === 401).length;
 
       expect(successCount).toBe(1);
       expect(errorCount).toBe(2);
@@ -263,13 +262,15 @@ describe('POST /auth/logout (Contract Test)', () => {
       const requests = Array.from({ length: 15 }, () =>
         request(app.getHttpServer())
           .post('/auth/logout')
-          .set('Authorization', invalidToken)
+          .set('Authorization', invalidToken),
       );
 
       const responses = await Promise.all(requests);
 
       // Should eventually be rate limited
-      const rateLimitedResponses = responses.filter(res => res.status === 429);
+      const rateLimitedResponses = responses.filter(
+        (res) => res.status === 429,
+      );
       expect(rateLimitedResponses.length).toBeGreaterThanOrEqual(0);
     });
   });

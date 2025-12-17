@@ -155,11 +155,11 @@ async function bootstrap() {
     .setTitle('BakeWind API')
     .setDescription(
       'API documentation for the BakeWind Bakery Management System\n\n' +
-      'This API supports the three-application architecture:\n' +
-      '- Customer-facing website (public orders, product browsing)\n' +
-      '- Admin management system (staff operations, analytics)\n' +
-      '- Central API service (all business logic and data)\n\n' +
-      'All endpoints are prefixed with `/api/v1/` for versioning.',
+        'This API supports the three-application architecture:\n' +
+        '- Customer-facing website (public orders, product browsing)\n' +
+        '- Admin management system (staff operations, analytics)\n' +
+        '- Central API service (all business logic and data)\n\n' +
+        'All endpoints are prefixed with `/api/v1/` for versioning.',
     )
     .setVersion('1.0.0')
     .setTermsOfService('https://bakewind.com/terms')
@@ -205,13 +205,7 @@ async function bootstrap() {
 
   // Enable API versioning
   app.setGlobalPrefix('api/v1', {
-    exclude: [
-      'health',
-      'health/(.*)',
-      'api',
-      'api/(.*)',
-      'assets/(.*)',
-    ],
+    exclude: ['health', 'health/(.*)', 'api', 'api/(.*)', 'assets/(.*)'],
   });
 
   // Global validation pipe

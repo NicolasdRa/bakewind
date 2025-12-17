@@ -1,4 +1,9 @@
-import { Injectable, ExecutionContext, Logger, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  ExecutionContext,
+  Logger,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
@@ -16,7 +21,9 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
     const request = context.switchToHttp().getRequest();
-    this.logger.log(`🔒 JwtAuthGuard checking: ${request.method} ${request.url}`);
+    this.logger.log(
+      `🔒 JwtAuthGuard checking: ${request.method} ${request.url}`,
+    );
 
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
@@ -28,7 +35,9 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       return true;
     }
 
-    this.logger.log(`Cookies present: ${!!request.cookies}, accessToken: ${!!request.cookies?.accessToken}`);
+    this.logger.log(
+      `Cookies present: ${!!request.cookies}, accessToken: ${!!request.cookies?.accessToken}`,
+    );
 
     return super.canActivate(context);
   }
@@ -37,7 +46,9 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     const request = context.switchToHttp().getRequest();
 
     if (err || !user) {
-      this.logger.error(`🔒 JWT Auth failed for ${request.method} ${request.url}`);
+      this.logger.error(
+        `🔒 JWT Auth failed for ${request.method} ${request.url}`,
+      );
       this.logger.error(`Error: ${err?.message || 'No error'}`);
       this.logger.error(`Info: ${info?.message || 'No info'}`);
       this.logger.error(`User: ${user ? 'Found' : 'Not found'}`);

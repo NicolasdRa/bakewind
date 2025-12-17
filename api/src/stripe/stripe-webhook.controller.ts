@@ -106,35 +106,29 @@ export class StripeWebhookController {
     switch (event.type) {
       // Subscription lifecycle events
       case 'customer.subscription.created':
-        await this.handleSubscriptionCreated(
-          event.data.object as Stripe.Subscription,
-        );
+        await this.handleSubscriptionCreated(event.data.object);
         break;
 
       case 'customer.subscription.updated':
-        await this.handleSubscriptionUpdated(
-          event.data.object as Stripe.Subscription,
-        );
+        await this.handleSubscriptionUpdated(event.data.object);
         break;
 
       case 'customer.subscription.deleted':
-        await this.handleSubscriptionDeleted(
-          event.data.object as Stripe.Subscription,
-        );
+        await this.handleSubscriptionDeleted(event.data.object);
         break;
 
       // Trial events
       case 'customer.subscription.trial_will_end':
-        await this.handleTrialWillEnd(event.data.object as Stripe.Subscription);
+        await this.handleTrialWillEnd(event.data.object);
         break;
 
       // Payment events
       case 'invoice.payment_succeeded':
-        await this.handlePaymentSucceeded(event.data.object as Stripe.Invoice);
+        await this.handlePaymentSucceeded(event.data.object);
         break;
 
       case 'invoice.payment_failed':
-        await this.handlePaymentFailed(event.data.object as Stripe.Invoice);
+        await this.handlePaymentFailed(event.data.object);
         break;
 
       default:

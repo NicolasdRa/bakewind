@@ -2,7 +2,10 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InventoryService } from './inventory.service';
 import { DatabaseService } from '../database/database.service';
-import { inventoryItems, inventoryConsumptionTracking } from '../database/schemas';
+import {
+  inventoryItems,
+  inventoryConsumptionTracking,
+} from '../database/schemas';
 import { notInArray, lt } from 'drizzle-orm';
 
 @Injectable()
@@ -41,7 +44,9 @@ export class InventorySchedulerService {
         try {
           await this.inventoryService.recalculate(item.id);
           successCount++;
-          this.logger.debug(`Recalculated consumption for item: ${item.name} (${item.id})`);
+          this.logger.debug(
+            `Recalculated consumption for item: ${item.name} (${item.id})`,
+          );
         } catch (error) {
           failureCount++;
           this.logger.error(
@@ -55,7 +60,10 @@ export class InventorySchedulerService {
         `Daily consumption calculation completed. Success: ${successCount}, Failures: ${failureCount}`,
       );
     } catch (error) {
-      this.logger.error('Daily consumption calculation job failed', error.stack);
+      this.logger.error(
+        'Daily consumption calculation job failed',
+        error.stack,
+      );
     }
   }
 
@@ -85,12 +93,16 @@ export class InventorySchedulerService {
         // Delete tracking records where inventory item doesn't exist
         const deleted = await this.databaseService.database
           .delete(inventoryConsumptionTracking)
-          .where(notInArray(inventoryConsumptionTracking.inventoryItemId, validIds))
+          .where(
+            notInArray(inventoryConsumptionTracking.inventoryItemId, validIds),
+          )
           .returning({ id: inventoryConsumptionTracking.id });
 
         orphanedCount = deleted.length;
         if (orphanedCount > 0) {
-          this.logger.warn(`Removed ${orphanedCount} orphaned consumption tracking records`);
+          this.logger.warn(
+            `Removed ${orphanedCount} orphaned consumption tracking records`,
+          );
         }
       } else {
         // If no inventory items exist, clean up all tracking records
@@ -100,7 +112,9 @@ export class InventorySchedulerService {
 
         orphanedCount = deleted.length;
         if (orphanedCount > 0) {
-          this.logger.warn(`Removed ${orphanedCount} orphaned consumption tracking records (no inventory items exist)`);
+          this.logger.warn(
+            `Removed ${orphanedCount} orphaned consumption tracking records (no inventory items exist)`,
+          );
         }
       }
 
@@ -114,7 +128,9 @@ export class InventorySchedulerService {
           lastCalculatedAt: inventoryConsumptionTracking.lastCalculatedAt,
         })
         .from(inventoryConsumptionTracking)
-        .where(lt(inventoryConsumptionTracking.lastCalculatedAt, thirtyDaysAgo));
+        .where(
+          lt(inventoryConsumptionTracking.lastCalculatedAt, thirtyDaysAgo),
+        );
 
       if (staleRecords.length > 0) {
         this.logger.warn(

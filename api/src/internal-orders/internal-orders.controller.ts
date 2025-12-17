@@ -14,7 +14,13 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiQuery,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { InternalOrdersService } from './internal-orders.service';
 import {
   CreateInternalOrderDto,
@@ -36,7 +42,11 @@ export class InternalOrdersController {
   @ApiOperation({ summary: 'Get all internal orders' })
   @ApiQuery({ name: 'source', required: false, enum: InternalOrderSource })
   @ApiQuery({ name: 'status', required: false, enum: InternalOrderStatus })
-  @ApiQuery({ name: 'search', required: false, description: 'Search by order number, requested by, or department' })
+  @ApiQuery({
+    name: 'search',
+    required: false,
+    description: 'Search by order number, requested by, or department',
+  })
   @ApiResponse({
     status: 200,
     description: 'Internal orders retrieved successfully',
@@ -46,7 +56,11 @@ export class InternalOrdersController {
     @Query('status') status?: InternalOrderStatus,
     @Query('search') search?: string,
   ) {
-    const params: { source?: InternalOrderSource; status?: InternalOrderStatus; search?: string } = {};
+    const params: {
+      source?: InternalOrderSource;
+      status?: InternalOrderStatus;
+      search?: string;
+    } = {};
     if (source !== undefined) params.source = source;
     if (status !== undefined) params.status = status;
     if (search !== undefined) params.search = search;
@@ -157,7 +171,10 @@ export class InternalOrdersController {
     status: 403,
     description: 'Order is locked by another user',
   })
-  async deleteOrder(@Request() req: any, @Param('id') id: string): Promise<void> {
+  async deleteOrder(
+    @Request() req: any,
+    @Param('id') id: string,
+  ): Promise<void> {
     const userId = req.user.sub;
     await this.internalOrdersService.deleteOrder(id, userId);
   }

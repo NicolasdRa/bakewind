@@ -108,13 +108,15 @@ export interface ProductDto {
   storageInstructions: string | null;
   shelfLife: number | null;
   customizable: boolean;
-  customizationOptions: {
-    name: string;
-    type: 'text' | 'select' | 'checkbox';
-    options?: string[];
-    priceAdjustment?: number;
-    required?: boolean;
-  }[] | null;
+  customizationOptions:
+    | {
+        name: string;
+        type: 'text' | 'select' | 'checkbox';
+        options?: string[];
+        priceAdjustment?: number;
+        required?: boolean;
+      }[]
+    | null;
   popularityScore: number;
   createdAt: string;
   updatedAt: string;

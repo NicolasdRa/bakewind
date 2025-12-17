@@ -5,7 +5,7 @@ import {
   Inject,
   forwardRef,
 } from '@nestjs/common';
-import { eq, and, lt } from 'drizzle-orm';
+import { eq, and, lt, gt } from 'drizzle-orm';
 import { DatabaseService } from '../database/database.service';
 import {
   orderLocks,
@@ -246,14 +246,14 @@ export class OrderLocksService {
       throw new NotFoundException('Order not found');
     }
 
-    // Get lock from DB
+    // Get lock from DB (only valid locks where expiresAt > now)
     const [lock] = await this.databaseService.database
       .select()
       .from(orderLocks)
       .where(
         and(
           eq(orderLocks.orderId, orderId),
-          lt(orderLocks.expiresAt, new Date()),
+          gt(orderLocks.expiresAt, new Date()),
         ),
       )
       .limit(1);

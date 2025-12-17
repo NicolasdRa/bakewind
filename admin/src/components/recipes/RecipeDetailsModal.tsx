@@ -197,7 +197,7 @@ const RecipeDetailsModal: Component<RecipeDetailsModalProps> = (props) => {
             </div>
 
             {/* Nutrition Info */}
-            <Show when={props.recipe!.nutritionInfo}>
+            <Show when={props.recipe!.nutritionalInfo}>
               <div>
                 <h3 class="text-lg font-semibold mb-4" style={{ color: "var(--text-primary)" }}>
                   Nutritional Information (per serving)
@@ -206,25 +206,25 @@ const RecipeDetailsModal: Component<RecipeDetailsModalProps> = (props) => {
                   <div class="p-4 rounded-lg" style={{ "background-color": "var(--bg-secondary)" }}>
                     <p class="text-sm mb-1" style={{ color: "var(--text-secondary)" }}>Calories</p>
                     <p class="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
-                      {props.recipe!.nutritionInfo!.calories}
+                      {props.recipe!.nutritionalInfo!.calories}
                     </p>
                   </div>
                   <div class="p-4 rounded-lg" style={{ "background-color": "var(--bg-secondary)" }}>
                     <p class="text-sm mb-1" style={{ color: "var(--text-secondary)" }}>Fat</p>
                     <p class="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
-                      {props.recipe!.nutritionInfo!.fat}g
+                      {props.recipe!.nutritionalInfo!.fat}g
                     </p>
                   </div>
                   <div class="p-4 rounded-lg" style={{ "background-color": "var(--bg-secondary)" }}>
                     <p class="text-sm mb-1" style={{ color: "var(--text-secondary)" }}>Carbs</p>
                     <p class="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
-                      {props.recipe!.nutritionInfo!.carbs}g
+                      {props.recipe!.nutritionalInfo!.carbs}g
                     </p>
                   </div>
                   <div class="p-4 rounded-lg" style={{ "background-color": "var(--bg-secondary)" }}>
                     <p class="text-sm mb-1" style={{ color: "var(--text-secondary)" }}>Protein</p>
                     <p class="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
-                      {props.recipe!.nutritionInfo!.protein}g
+                      {props.recipe!.nutritionalInfo!.protein}g
                     </p>
                   </div>
                 </div>

@@ -14,21 +14,26 @@ export async function seedProducts(db: NodePgDatabase<typeof schema>) {
   // Helper function to find best recipe match for a product
   const findRecipeForProduct = (productName: string): string | null => {
     // Try exact match first
-    const exactMatch = allRecipes.find(r => r.name === productName);
+    const exactMatch = allRecipes.find((r) => r.name === productName);
     if (exactMatch) return exactMatch.id;
 
     // Try fuzzy matching based on key words
     const productWords = productName.toLowerCase().split(' ');
 
     // Find recipe that contains most matching words
-    let bestMatch: { recipe: typeof allRecipes[0], score: number } | null = null;
+    let bestMatch: { recipe: (typeof allRecipes)[0]; score: number } | null =
+      null;
 
     for (const recipe of allRecipes) {
       const recipeWords = recipe.name.toLowerCase().split(' ');
       let matchCount = 0;
 
       for (const productWord of productWords) {
-        if (recipeWords.some(rw => rw.includes(productWord) || productWord.includes(rw))) {
+        if (
+          recipeWords.some(
+            (rw) => rw.includes(productWord) || productWord.includes(rw),
+          )
+        ) {
           matchCount++;
         }
       }
@@ -119,7 +124,8 @@ export async function seedProducts(db: NodePgDatabase<typeof schema>) {
     },
     {
       name: 'Almond Croissant',
-      description: 'Croissant filled with almond cream and topped with sliced almonds',
+      description:
+        'Croissant filled with almond cream and topped with sliced almonds',
       category: 'pastry' as const,
       status: 'active' as const,
       basePrice: '4.75',
@@ -338,7 +344,8 @@ export async function seedProducts(db: NodePgDatabase<typeof schema>) {
     // Sandwiches
     {
       name: 'Turkey & Swiss Sandwich',
-      description: 'Sliced turkey, Swiss cheese, lettuce, tomato on fresh baguette',
+      description:
+        'Sliced turkey, Swiss cheese, lettuce, tomato on fresh baguette',
       category: 'sandwich' as const,
       status: 'active' as const,
       basePrice: '8.50',
@@ -925,13 +932,13 @@ export async function seedProducts(db: NodePgDatabase<typeof schema>) {
 
   try {
     // Link products to recipes and insert
-    const productsWithRecipes = sampleProducts.map(product => {
+    const productsWithRecipes = sampleProducts.map((product) => {
       const recipeId = findRecipeForProduct(product.name);
 
       if (!recipeId) {
         console.warn(`⚠️  No recipe match found for product: ${product.name}`);
       } else {
-        const matchedRecipe = allRecipes.find(r => r.id === recipeId);
+        const matchedRecipe = allRecipes.find((r) => r.id === recipeId);
         console.log(`✓ Linked "${product.name}" → "${matchedRecipe?.name}"`);
       }
 
@@ -943,7 +950,9 @@ export async function seedProducts(db: NodePgDatabase<typeof schema>) {
     });
 
     // Filter out products without recipes since recipeId is now required
-    const productsToInsert = productsWithRecipes.filter(p => p.recipeId !== null);
+    const productsToInsert = productsWithRecipes.filter(
+      (p) => p.recipeId !== null,
+    );
     const skipped = productsWithRecipes.length - productsToInsert.length;
 
     if (skipped > 0) {

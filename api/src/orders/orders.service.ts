@@ -1,12 +1,15 @@
-import { Injectable, NotFoundException, ConflictException, BadRequestException, Inject, forwardRef } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+  BadRequestException,
+  Inject,
+  forwardRef,
+} from '@nestjs/common';
 import { eq, and, or, desc, sql, ilike } from 'drizzle-orm';
 import { DatabaseService } from '../database/database.service';
 import { customerOrders, customerOrderItems } from '../database/schemas';
-import {
-  CreateOrderDto,
-  UpdateOrderDto,
-  OrderStatus,
-} from './dto';
+import { CreateOrderDto, UpdateOrderDto, OrderStatus } from './dto';
 import { RealtimeService } from '../realtime/realtime.service';
 
 export interface OrderWithItems {
@@ -321,15 +324,10 @@ export class OrdersService {
       throw new NotFoundException(`Order with ID ${orderId} not found`);
     }
 
-    this.validateStatusTransition(
-      existingOrder.status as OrderStatus,
-      status,
-    );
+    this.validateStatusTransition(existingOrder.status as OrderStatus, status);
 
     const completedAt =
-      status === 'delivered'
-        ? new Date()
-        : existingOrder.completedAt;
+      status === 'delivered' ? new Date() : existingOrder.completedAt;
 
     const [updatedOrder] = await this.databaseService.database
       .update(customerOrders)
@@ -406,6 +404,13 @@ export class OrdersService {
       })
       .from(customerOrders);
 
-    return stats || { totalOrders: 0, pendingOrders: 0, completedOrders: 0, totalRevenue: '0' };
+    return (
+      stats || {
+        totalOrders: 0,
+        pendingOrders: 0,
+        completedOrders: 0,
+        totalRevenue: '0',
+      }
+    );
   }
 }

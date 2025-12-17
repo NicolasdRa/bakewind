@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { eq, and, gte, desc } from 'drizzle-orm';
 import { DatabaseService } from '../database/database.service';
 import {
@@ -257,8 +261,14 @@ export class InventoryService {
       .from(recipeIngredients)
       .innerJoin(recipes, eq(recipeIngredients.recipeId, recipes.id))
       .innerJoin(products, eq(products.recipeId, recipes.id))
-      .innerJoin(customerOrderItems, eq(customerOrderItems.productId, products.id))
-      .innerJoin(customerOrders, eq(customerOrderItems.orderId, customerOrders.id))
+      .innerJoin(
+        customerOrderItems,
+        eq(customerOrderItems.productId, products.id),
+      )
+      .innerJoin(
+        customerOrders,
+        eq(customerOrderItems.orderId, customerOrders.id),
+      )
       .where(
         and(
           eq(recipeIngredients.ingredientId, itemId),
@@ -273,7 +283,7 @@ export class InventoryService {
       const ingredientQty = parseFloat(row.ingredientQuantity);
       const recipeYield = row.recipeYield;
       // Consumption = orderQuantity * (ingredientQuantity / recipeYield)
-      return total + (orderQty * ingredientQty / recipeYield);
+      return total + (orderQty * ingredientQty) / recipeYield;
     }, 0);
     const avgDailyConsumption = totalQuantity / this.CALCULATION_PERIOD_DAYS;
     const sampleSize = consumptionData.length;
@@ -553,7 +563,9 @@ export class InventoryService {
       location: item.location,
       notes: item.notes,
       expirationDate: item.expirationDate || null,
-      lastRestocked: item.lastRestocked ? item.lastRestocked.toISOString() : null,
+      lastRestocked: item.lastRestocked
+        ? item.lastRestocked.toISOString()
+        : null,
       createdAt: item.createdAt.toISOString(),
       updatedAt: item.updatedAt.toISOString(),
     };

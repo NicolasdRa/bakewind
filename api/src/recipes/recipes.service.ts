@@ -208,7 +208,8 @@ export class RecipesService {
         0,
       );
 
-      const yieldValue = dto.yield ?? (await this.getRecipeById(recipeId)).yield;
+      const yieldValue =
+        dto.yield ?? (await this.getRecipeById(recipeId)).yield;
       const costPerUnit =
         yieldValue > 0 ? totalIngredientCost / yieldValue : null;
       updateData.costPerUnit = costPerUnit ? costPerUnit.toFixed(4) : null;
@@ -273,9 +274,7 @@ export class RecipesService {
     const freshInventory = await this.databaseService.database
       .select()
       .from(inventoryItems)
-      .where(
-        sql`${inventoryItems.id} = ANY(${ingredientIds})`,
-      );
+      .where(sql`${inventoryItems.id} = ANY(${ingredientIds})`);
 
     const inventoryMap = new Map(
       freshInventory.map((item) => [
@@ -404,8 +403,7 @@ export class RecipesService {
       sellingPrice !== null
         ? this.calculateProfit(sellingPrice, costPerUnit)
         : null;
-    const marginWarning =
-      margin !== null && margin < this.MIN_MARGIN_THRESHOLD;
+    const marginWarning = margin !== null && margin < this.MIN_MARGIN_THRESHOLD;
 
     return {
       id: recipe.id,
@@ -428,7 +426,7 @@ export class RecipesService {
       // End calculated fields
       productId: recipe.productId,
       productName: recipe.productName,
-      instructions: recipe.instructions as string[],
+      instructions: recipe.instructions,
       ingredients: ingredientsWithDetails,
       nutritionalInfo: recipe.nutritionalInfo,
       allergens: recipe.allergens,

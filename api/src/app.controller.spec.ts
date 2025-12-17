@@ -15,8 +15,12 @@ describe('AppController', () => {
   });
 
   describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toBe('Hello World!');
+    it('should return welcome message object', () => {
+      const result = appController.getHello();
+      expect(result).toHaveProperty('message', 'Welcome to BakeWind API');
+      expect(result).toHaveProperty('version', '1.0.0');
+      expect(result).toHaveProperty('documentation', '/api/v1/docs');
+      expect(result).toHaveProperty('timestamp');
     });
   });
 });

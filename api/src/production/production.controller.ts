@@ -14,7 +14,13 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiQuery,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { ProductionService } from './production.service';
 import {
   CreateProductionScheduleDto,
@@ -35,8 +41,16 @@ export class ProductionController {
 
   @Get('schedules')
   @ApiOperation({ summary: 'Get all production schedules' })
-  @ApiQuery({ name: 'startDate', required: false, description: 'Start date filter (YYYY-MM-DD)' })
-  @ApiQuery({ name: 'endDate', required: false, description: 'End date filter (YYYY-MM-DD)' })
+  @ApiQuery({
+    name: 'startDate',
+    required: false,
+    description: 'Start date filter (YYYY-MM-DD)',
+  })
+  @ApiQuery({
+    name: 'endDate',
+    required: false,
+    description: 'End date filter (YYYY-MM-DD)',
+  })
   @ApiResponse({
     status: 200,
     description: 'Production schedules retrieved successfully',
@@ -60,7 +74,9 @@ export class ProductionController {
     status: 404,
     description: 'Production schedule not found',
   })
-  async getScheduleById(@Param('id') id: string): Promise<ProductionScheduleDto> {
+  async getScheduleById(
+    @Param('id') id: string,
+  ): Promise<ProductionScheduleDto> {
     return this.productionService.getScheduleById(id);
   }
 
@@ -84,7 +100,9 @@ export class ProductionController {
   }
 
   @Post('schedules/from-order/:orderId')
-  @ApiOperation({ summary: 'Create a production schedule from an internal order (legacy)' })
+  @ApiOperation({
+    summary: 'Create a production schedule from an internal order (legacy)',
+  })
   @ApiResponse({
     status: 201,
     description: 'Production schedule created from order successfully',
@@ -104,11 +122,17 @@ export class ProductionController {
     @Body('scheduledDate') scheduledDate: string,
   ): Promise<ProductionScheduleDto> {
     const userId = req.user.sub;
-    return this.productionService.createScheduleFromOrder(orderId, scheduledDate, userId);
+    return this.productionService.createScheduleFromOrder(
+      orderId,
+      scheduledDate,
+      userId,
+    );
   }
 
   @Post('schedules/from-internal-order/:orderId')
-  @ApiOperation({ summary: 'Create a production schedule from an internal order' })
+  @ApiOperation({
+    summary: 'Create a production schedule from an internal order',
+  })
   @ApiResponse({
     status: 201,
     description: 'Production schedule created from internal order successfully',
@@ -128,11 +152,17 @@ export class ProductionController {
     @Body('scheduledDate') scheduledDate: string,
   ): Promise<ProductionScheduleDto> {
     const userId = req.user.sub;
-    return this.productionService.createScheduleFromInternalOrder(orderId, scheduledDate, userId);
+    return this.productionService.createScheduleFromInternalOrder(
+      orderId,
+      scheduledDate,
+      userId,
+    );
   }
 
   @Post('schedules/from-customer-order/:orderId')
-  @ApiOperation({ summary: 'Create a production schedule from a customer order' })
+  @ApiOperation({
+    summary: 'Create a production schedule from a customer order',
+  })
   @ApiResponse({
     status: 201,
     description: 'Production schedule created from customer order successfully',
@@ -152,7 +182,11 @@ export class ProductionController {
     @Body('scheduledDate') scheduledDate: string,
   ): Promise<ProductionScheduleDto> {
     const userId = req.user.sub;
-    return this.productionService.createScheduleFromCustomerOrder(orderId, scheduledDate, userId);
+    return this.productionService.createScheduleFromCustomerOrder(
+      orderId,
+      scheduledDate,
+      userId,
+    );
   }
 
   @Put('schedules/:id')
@@ -204,7 +238,11 @@ export class ProductionController {
     @Param('itemId') itemId: string,
     @Body() updateDto: UpdateProductionItemDto,
   ): Promise<ProductionItemDto> {
-    return this.productionService.updateProductionItem(scheduleId, itemId, updateDto);
+    return this.productionService.updateProductionItem(
+      scheduleId,
+      itemId,
+      updateDto,
+    );
   }
 
   @Post('schedules/:scheduleId/items/:itemId/start')

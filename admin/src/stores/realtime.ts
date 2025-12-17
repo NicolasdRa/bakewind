@@ -2,7 +2,6 @@ import { createSignal, onCleanup, createEffect } from 'solid-js';
 import {
   realtimeClient,
   type DashboardMetrics,
-  type MetricsUpdateEvent,
   type OrderLockEvent,
   type OrderUnlockedEvent,
   type ConnectionStatus,

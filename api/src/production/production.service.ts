@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  Logger,
+} from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
 import {
   productionSchedules,
@@ -31,7 +36,10 @@ export class ProductionService {
   /**
    * Get all production schedules with optional date filtering
    */
-  async getAllSchedules(startDate?: string, endDate?: string): Promise<ProductionScheduleDto[]> {
+  async getAllSchedules(
+    startDate?: string,
+    endDate?: string,
+  ): Promise<ProductionScheduleDto[]> {
     const conditions: any[] = [];
 
     if (startDate) {
@@ -104,7 +112,9 @@ export class ProductionService {
     // Check if we have enough inventory for each recipe
     const inventoryWarnings = await this.checkInventoryAvailability(dto.items);
     if (inventoryWarnings.length > 0) {
-      this.logger.warn(`Inventory warnings for production schedule: ${JSON.stringify(inventoryWarnings)}`);
+      this.logger.warn(
+        `Inventory warnings for production schedule: ${JSON.stringify(inventoryWarnings)}`,
+      );
       // Continue anyway but log warnings
     }
 
@@ -139,7 +149,9 @@ export class ProductionService {
             status: item.status || ProductionStatus.SCHEDULED,
             scheduledTime: new Date(item.scheduledTime),
             startTime: item.startTime ? new Date(item.startTime) : null,
-            completedTime: item.completedTime ? new Date(item.completedTime) : null,
+            completedTime: item.completedTime
+              ? new Date(item.completedTime)
+              : null,
             assignedTo: item.assignedTo || null,
             notes: item.notes || null,
             batchNumber: item.batchNumber || null,
@@ -230,7 +242,9 @@ export class ProductionService {
     // Note: Order status will be updated by the caller (frontend)
     // We don't automatically change status here to allow proper workflow control
 
-    this.logger.log(`Created production schedule from internal order ${order.orderNumber}`);
+    this.logger.log(
+      `Created production schedule from internal order ${order.orderNumber}`,
+    );
 
     return productionSchedule;
   }
@@ -316,7 +330,9 @@ export class ProductionService {
       })
       .where(eq(customerOrders.id, orderId));
 
-    this.logger.log(`Created production schedule from customer order ${order.orderNumber}`);
+    this.logger.log(
+      `Created production schedule from customer order ${order.orderNumber}`,
+    );
 
     return productionSchedule;
   }
@@ -388,7 +404,9 @@ export class ProductionService {
               status: item.status || ProductionStatus.SCHEDULED,
               scheduledTime: new Date(item.scheduledTime),
               startTime: item.startTime ? new Date(item.startTime) : null,
-              completedTime: item.completedTime ? new Date(item.completedTime) : null,
+              completedTime: item.completedTime
+                ? new Date(item.completedTime)
+                : null,
               assignedTo: item.assignedTo || null,
               notes: item.notes || null,
               batchNumber: item.batchNumber || null,
@@ -406,7 +424,9 @@ export class ProductionService {
         .update(productionSchedules)
         .set({
           totalItems: newItems.length,
-          completedItems: newItems.filter((i) => i && i.status === ProductionStatus.COMPLETED).length,
+          completedItems: newItems.filter(
+            (i) => i && i.status === ProductionStatus.COMPLETED,
+          ).length,
         })
         .where(eq(productionSchedules.id, id));
 
@@ -452,7 +472,12 @@ export class ProductionService {
     const [existingItem] = await this.databaseService.database
       .select()
       .from(productionItems)
-      .where(and(eq(productionItems.id, itemId), eq(productionItems.scheduleId, scheduleId)))
+      .where(
+        and(
+          eq(productionItems.id, itemId),
+          eq(productionItems.scheduleId, scheduleId),
+        ),
+      )
       .limit(1);
 
     if (!existingItem) {
@@ -463,13 +488,29 @@ export class ProductionService {
       .update(productionItems)
       .set({
         status: dto.status || existingItem.status,
-        startTime: dto.startTime ? new Date(dto.startTime) : existingItem.startTime,
-        completedTime: dto.completedTime ? new Date(dto.completedTime) : existingItem.completedTime,
-        assignedTo: dto.assignedTo !== undefined ? dto.assignedTo : existingItem.assignedTo,
+        startTime: dto.startTime
+          ? new Date(dto.startTime)
+          : existingItem.startTime,
+        completedTime: dto.completedTime
+          ? new Date(dto.completedTime)
+          : existingItem.completedTime,
+        assignedTo:
+          dto.assignedTo !== undefined
+            ? dto.assignedTo
+            : existingItem.assignedTo,
         notes: dto.notes !== undefined ? dto.notes : existingItem.notes,
-        batchNumber: dto.batchNumber !== undefined ? dto.batchNumber : existingItem.batchNumber,
-        qualityCheck: dto.qualityCheck !== undefined ? dto.qualityCheck : existingItem.qualityCheck,
-        qualityNotes: dto.qualityNotes !== undefined ? dto.qualityNotes : existingItem.qualityNotes,
+        batchNumber:
+          dto.batchNumber !== undefined
+            ? dto.batchNumber
+            : existingItem.batchNumber,
+        qualityCheck:
+          dto.qualityCheck !== undefined
+            ? dto.qualityCheck
+            : existingItem.qualityCheck,
+        qualityNotes:
+          dto.qualityNotes !== undefined
+            ? dto.qualityNotes
+            : existingItem.qualityNotes,
       })
       .where(eq(productionItems.id, itemId))
       .returning();
@@ -482,14 +523,24 @@ export class ProductionService {
     await this.updateScheduleTotals(scheduleId);
 
     // If item is completed, deduct inventory
-    if (dto.status === ProductionStatus.COMPLETED && existingItem.status !== ProductionStatus.COMPLETED) {
-      await this.deductInventoryForRecipe(existingItem.recipeId, existingItem.quantity);
+    if (
+      dto.status === ProductionStatus.COMPLETED &&
+      existingItem.status !== ProductionStatus.COMPLETED
+    ) {
+      await this.deductInventoryForRecipe(
+        existingItem.recipeId,
+        existingItem.quantity,
+      );
 
       // If this item is linked to an order, check if all items from that order are completed
       if (updatedItem.internalOrderId) {
-        await this.checkAndUpdateInternalOrderStatus(updatedItem.internalOrderId);
+        await this.checkAndUpdateInternalOrderStatus(
+          updatedItem.internalOrderId,
+        );
       } else if (updatedItem.customerOrderId) {
-        await this.checkAndUpdateCustomerOrderStatus(updatedItem.customerOrderId);
+        await this.checkAndUpdateCustomerOrderStatus(
+          updatedItem.customerOrderId,
+        );
       }
     }
 
@@ -499,7 +550,10 @@ export class ProductionService {
   /**
    * Start production for an item
    */
-  async startProduction(scheduleId: string, itemId: string): Promise<ProductionItemDto> {
+  async startProduction(
+    scheduleId: string,
+    itemId: string,
+  ): Promise<ProductionItemDto> {
     return this.updateProductionItem(scheduleId, itemId, {
       status: ProductionStatus.IN_PROGRESS,
       startTime: new Date().toISOString(),
@@ -550,7 +604,8 @@ export class ProductionService {
           .limit(1);
 
         if (inventoryItem) {
-          const requiredQuantity = parseFloat(ingredient.quantity.toString()) * item.quantity;
+          const requiredQuantity =
+            parseFloat(ingredient.quantity.toString()) * item.quantity;
           const availableQuantity = parseFloat(inventoryItem.currentStock);
 
           if (requiredQuantity > availableQuantity) {
@@ -568,7 +623,10 @@ export class ProductionService {
   /**
    * Deduct inventory for a completed recipe
    */
-  private async deductInventoryForRecipe(recipeId: string, multiplier: number): Promise<void> {
+  private async deductInventoryForRecipe(
+    recipeId: string,
+    multiplier: number,
+  ): Promise<void> {
     const ingredients = await this.databaseService.database
       .select()
       .from(recipeIngredients)
@@ -582,8 +640,10 @@ export class ProductionService {
         .limit(1);
 
       if (inventoryItem) {
-        const deductionAmount = parseFloat(ingredient.quantity.toString()) * multiplier;
-        const newStock = parseFloat(inventoryItem.currentStock) - deductionAmount;
+        const deductionAmount =
+          parseFloat(ingredient.quantity.toString()) * multiplier;
+        const newStock =
+          parseFloat(inventoryItem.currentStock) - deductionAmount;
 
         await this.databaseService.database
           .update(inventoryItems)
@@ -609,7 +669,9 @@ export class ProductionService {
       .from(productionItems)
       .where(eq(productionItems.scheduleId, scheduleId));
 
-    const completedCount = items.filter((i) => i.status === ProductionStatus.COMPLETED).length;
+    const completedCount = items.filter(
+      (i) => i.status === ProductionStatus.COMPLETED,
+    ).length;
 
     await this.databaseService.database
       .update(productionSchedules)
@@ -623,7 +685,9 @@ export class ProductionService {
   /**
    * Check if all production items for an internal order are completed and update order status
    */
-  private async checkAndUpdateInternalOrderStatus(orderId: string): Promise<void> {
+  private async checkAndUpdateInternalOrderStatus(
+    orderId: string,
+  ): Promise<void> {
     // Get all production items linked to this internal order
     const orderProductionItems = await this.databaseService.database
       .select()
@@ -646,14 +710,18 @@ export class ProductionService {
         })
         .where(eq(internalOrders.id, orderId));
 
-      this.logger.log(`Internal order ${orderId} marked as completed - all production items finished`);
+      this.logger.log(
+        `Internal order ${orderId} marked as completed - all production items finished`,
+      );
     }
   }
 
   /**
    * Check if all production items for a customer order are completed and update order status
    */
-  private async checkAndUpdateCustomerOrderStatus(orderId: string): Promise<void> {
+  private async checkAndUpdateCustomerOrderStatus(
+    orderId: string,
+  ): Promise<void> {
     // Get all production items linked to this customer order
     const orderProductionItems = await this.databaseService.database
       .select()
@@ -675,7 +743,9 @@ export class ProductionService {
         })
         .where(eq(customerOrders.id, orderId));
 
-      this.logger.log(`Customer order ${orderId} marked as ready - all production items finished`);
+      this.logger.log(
+        `Customer order ${orderId} marked as ready - all production items finished`,
+      );
     }
   }
 
@@ -702,7 +772,9 @@ export class ProductionService {
   /**
    * Map production item to DTO
    */
-  private mapToItemDto(item: typeof productionItems.$inferSelect): ProductionItemDto {
+  private mapToItemDto(
+    item: typeof productionItems.$inferSelect,
+  ): ProductionItemDto {
     return {
       id: item.id,
       schedule_id: item.scheduleId,

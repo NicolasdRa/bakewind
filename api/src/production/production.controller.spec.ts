@@ -82,7 +82,10 @@ describe('ProductionController', () => {
 
       mockProductionService.getAllSchedules.mockResolvedValue(mockSchedules);
 
-      const result = await controller.getAllSchedules('2024-12-01', '2024-12-31');
+      const result = await controller.getAllSchedules(
+        '2024-12-01',
+        '2024-12-31',
+      );
 
       expect(result).toEqual(mockSchedules);
       expect(mockProductionService.getAllSchedules).toHaveBeenCalledWith(
@@ -128,7 +131,9 @@ describe('ProductionController', () => {
       const result = await controller.getScheduleById('schedule-1');
 
       expect(result).toEqual(mockSchedule);
-      expect(mockProductionService.getScheduleById).toHaveBeenCalledWith('schedule-1');
+      expect(mockProductionService.getScheduleById).toHaveBeenCalledWith(
+        'schedule-1',
+      );
     });
   });
 
@@ -216,7 +221,9 @@ describe('ProductionController', () => {
 
       await controller.deleteSchedule('schedule-1');
 
-      expect(mockProductionService.deleteSchedule).toHaveBeenCalledWith('schedule-1');
+      expect(mockProductionService.deleteSchedule).toHaveBeenCalledWith(
+        'schedule-1',
+      );
     });
   });
 

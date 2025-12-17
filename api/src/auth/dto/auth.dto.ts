@@ -6,7 +6,7 @@ import {
   userLoginSchema,
 } from '../../users/users.validation';
 import { trialSignupSchema } from '../trial-signup.validation';
-import { userRoleValues } from 'src/common/constants/roles.constants';
+import { userRoleValues } from '../../common/constants/roles.constants';
 
 export class CreateTrialSignupDto extends createZodDto(trialSignupSchema) {}
 

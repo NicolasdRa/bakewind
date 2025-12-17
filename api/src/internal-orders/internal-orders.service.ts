@@ -70,11 +70,26 @@ export interface InternalOrderWithItems {
 @Injectable()
 export class InternalOrdersService {
   // Define valid status transitions for internal orders
-  private readonly statusTransitions: Record<InternalOrderStatus, InternalOrderStatus[]> = {
-    [InternalOrderStatus.DRAFT]: [InternalOrderStatus.REQUESTED, InternalOrderStatus.CANCELLED],
-    [InternalOrderStatus.REQUESTED]: [InternalOrderStatus.APPROVED, InternalOrderStatus.CANCELLED],
-    [InternalOrderStatus.APPROVED]: [InternalOrderStatus.SCHEDULED, InternalOrderStatus.CANCELLED],
-    [InternalOrderStatus.SCHEDULED]: [InternalOrderStatus.IN_PRODUCTION, InternalOrderStatus.CANCELLED],
+  private readonly statusTransitions: Record<
+    InternalOrderStatus,
+    InternalOrderStatus[]
+  > = {
+    [InternalOrderStatus.DRAFT]: [
+      InternalOrderStatus.REQUESTED,
+      InternalOrderStatus.CANCELLED,
+    ],
+    [InternalOrderStatus.REQUESTED]: [
+      InternalOrderStatus.APPROVED,
+      InternalOrderStatus.CANCELLED,
+    ],
+    [InternalOrderStatus.APPROVED]: [
+      InternalOrderStatus.SCHEDULED,
+      InternalOrderStatus.CANCELLED,
+    ],
+    [InternalOrderStatus.SCHEDULED]: [
+      InternalOrderStatus.IN_PRODUCTION,
+      InternalOrderStatus.CANCELLED,
+    ],
     [InternalOrderStatus.IN_PRODUCTION]: [
       InternalOrderStatus.QUALITY_CHECK,
       InternalOrderStatus.CANCELLED,
@@ -84,7 +99,10 @@ export class InternalOrdersService {
       InternalOrderStatus.IN_PRODUCTION,
       InternalOrderStatus.CANCELLED,
     ],
-    [InternalOrderStatus.READY]: [InternalOrderStatus.COMPLETED, InternalOrderStatus.DELIVERED],
+    [InternalOrderStatus.READY]: [
+      InternalOrderStatus.COMPLETED,
+      InternalOrderStatus.DELIVERED,
+    ],
     [InternalOrderStatus.COMPLETED]: [InternalOrderStatus.DELIVERED],
     [InternalOrderStatus.DELIVERED]: [],
     [InternalOrderStatus.CANCELLED]: [],
@@ -114,7 +132,10 @@ export class InternalOrdersService {
     }
   }
 
-  private async validateOrderLock(orderId: string, userId: string): Promise<void> {
+  private async validateOrderLock(
+    orderId: string,
+    userId: string,
+  ): Promise<void> {
     try {
       const lockStatus = await this.orderLocksService.getLockStatus(orderId);
 
@@ -129,7 +150,10 @@ export class InternalOrdersService {
       if (error instanceof ForbiddenException) {
         throw error;
       }
-      console.warn(`Lock validation warning for order ${orderId}:`, error.message);
+      console.warn(
+        `Lock validation warning for order ${orderId}:`,
+        error.message,
+      );
     }
   }
 
@@ -189,7 +213,9 @@ export class InternalOrdersService {
       .limit(1);
 
     if (!order) {
-      throw new NotFoundException(`Internal order with ID ${orderId} not found`);
+      throw new NotFoundException(
+        `Internal order with ID ${orderId} not found`,
+      );
     }
 
     const items = await this.databaseService.database
@@ -225,7 +251,9 @@ export class InternalOrdersService {
     };
   }
 
-  async createOrder(createOrderDto: CreateInternalOrderDto): Promise<InternalOrderWithItems> {
+  async createOrder(
+    createOrderDto: CreateInternalOrderDto,
+  ): Promise<InternalOrderWithItems> {
     const [existingOrder] = await this.databaseService.database
       .select()
       .from(internalOrders)
@@ -252,7 +280,9 @@ export class InternalOrdersService {
         requestedDate: new Date(createOrderDto.requestedDate),
         neededByDate: new Date(createOrderDto.neededByDate),
         approvedBy: createOrderDto.approvedBy || null,
-        approvedAt: createOrderDto.approvedAt ? new Date(createOrderDto.approvedAt) : null,
+        approvedAt: createOrderDto.approvedAt
+          ? new Date(createOrderDto.approvedAt)
+          : null,
         specialInstructions: createOrderDto.specialInstructions || null,
         notes: createOrderDto.notes || null,
         // Production fields
@@ -326,7 +356,9 @@ export class InternalOrdersService {
       .limit(1);
 
     if (!existingOrder) {
-      throw new NotFoundException(`Internal order with ID ${orderId} not found`);
+      throw new NotFoundException(
+        `Internal order with ID ${orderId} not found`,
+      );
     }
 
     await this.validateOrderLock(orderId, userId);
@@ -339,12 +371,15 @@ export class InternalOrdersService {
     }
 
     const completedAt =
-      updateOrderDto.status === 'completed' || updateOrderDto.status === 'delivered'
+      updateOrderDto.status === 'completed' ||
+      updateOrderDto.status === 'delivered'
         ? new Date()
         : existingOrder.completedAt;
 
     const deliveredAt =
-      updateOrderDto.status === 'delivered' ? new Date() : existingOrder.deliveredAt;
+      updateOrderDto.status === 'delivered'
+        ? new Date()
+        : existingOrder.deliveredAt;
 
     const [updatedOrder] = await this.databaseService.database
       .update(internalOrders)
@@ -353,7 +388,9 @@ export class InternalOrdersService {
         neededByDate: updateOrderDto.neededByDate
           ? new Date(updateOrderDto.neededByDate)
           : undefined,
-        approvedAt: updateOrderDto.approvedAt ? new Date(updateOrderDto.approvedAt) : undefined,
+        approvedAt: updateOrderDto.approvedAt
+          ? new Date(updateOrderDto.approvedAt)
+          : undefined,
         productionDate: updateOrderDto.productionDate
           ? new Date(updateOrderDto.productionDate)
           : undefined,
@@ -405,15 +442,24 @@ export class InternalOrdersService {
       .limit(1);
 
     if (!existingOrder) {
-      throw new NotFoundException(`Internal order with ID ${orderId} not found`);
+      throw new NotFoundException(
+        `Internal order with ID ${orderId} not found`,
+      );
     }
 
     await this.validateOrderLock(orderId, userId);
 
-    this.validateStatusTransition(existingOrder.status as InternalOrderStatus, status);
+    this.validateStatusTransition(
+      existingOrder.status as InternalOrderStatus,
+      status,
+    );
 
-    const completedAt = status === 'completed' || status === 'delivered' ? new Date() : existingOrder.completedAt;
-    const deliveredAt = status === 'delivered' ? new Date() : existingOrder.deliveredAt;
+    const completedAt =
+      status === 'completed' || status === 'delivered'
+        ? new Date()
+        : existingOrder.completedAt;
+    const deliveredAt =
+      status === 'delivered' ? new Date() : existingOrder.deliveredAt;
 
     const [updatedOrder] = await this.databaseService.database
       .update(internalOrders)
@@ -458,7 +504,9 @@ export class InternalOrdersService {
       .limit(1);
 
     if (!existingOrder) {
-      throw new NotFoundException(`Internal order with ID ${orderId} not found`);
+      throw new NotFoundException(
+        `Internal order with ID ${orderId} not found`,
+      );
     }
 
     await this.validateOrderLock(orderId, userId);

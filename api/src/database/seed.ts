@@ -14,7 +14,7 @@ dotenv.config();
 async function main() {
   // Parse command line arguments for partial seeding
   const args = process.argv.slice(2);
-  const seedOnly = args.find(arg => arg.startsWith('--only='))?.split('=')[1];
+  const seedOnly = args.find((arg) => arg.startsWith('--only='))?.split('=')[1];
   const seedables = ['users', 'locations', 'inventory', 'recipes', 'products'];
 
   // Use the same environment variables as the main app

@@ -185,7 +185,9 @@ describe('InventoryService', () => {
 
       const result = await service.getInventory(false);
 
-      expect(result[0]!.consumption_tracking?.days_of_supply_remaining).toBe(10);
+      expect(result[0]!.consumption_tracking?.days_of_supply_remaining).toBe(
+        10,
+      );
     });
   });
 
@@ -241,9 +243,9 @@ describe('InventoryService', () => {
         }),
       });
 
-      await expect(service.getConsumptionTracking('invalid-id')).rejects.toThrow(
-        'Inventory item not found',
-      );
+      await expect(
+        service.getConsumptionTracking('invalid-id'),
+      ).rejects.toThrow('Inventory item not found');
     });
 
     it('should throw NotFoundException if no tracking data exists', async () => {
@@ -547,9 +549,24 @@ describe('InventoryService', () => {
       // Mock consumption data: each row represents an order of a product that uses this ingredient
       // Consumption = orderQuantity * ingredientQuantity / recipeYield
       const mockConsumptionData = [
-        { orderQuantity: 2, ingredientQuantity: '0.5', recipeYield: 1, orderDate: new Date() }, // 2 * 0.5 / 1 = 1.0
-        { orderQuantity: 3, ingredientQuantity: '0.5', recipeYield: 1, orderDate: new Date() }, // 3 * 0.5 / 1 = 1.5
-        { orderQuantity: 4, ingredientQuantity: '0.5', recipeYield: 1, orderDate: new Date() }, // 4 * 0.5 / 1 = 2.0
+        {
+          orderQuantity: 2,
+          ingredientQuantity: '0.5',
+          recipeYield: 1,
+          orderDate: new Date(),
+        }, // 2 * 0.5 / 1 = 1.0
+        {
+          orderQuantity: 3,
+          ingredientQuantity: '0.5',
+          recipeYield: 1,
+          orderDate: new Date(),
+        }, // 3 * 0.5 / 1 = 1.5
+        {
+          orderQuantity: 4,
+          ingredientQuantity: '0.5',
+          recipeYield: 1,
+          orderDate: new Date(),
+        }, // 4 * 0.5 / 1 = 2.0
       ];
       // Total = 4.5, avg daily = 4.5 / 7 = 0.642857...
 
@@ -609,7 +626,12 @@ describe('InventoryService', () => {
 
       // One order: 5 units of product, recipe uses 0.2kg flour per unit
       const mockConsumptionData = [
-        { orderQuantity: 5, ingredientQuantity: '0.2', recipeYield: 1, orderDate: new Date() }, // 5 * 0.2 / 1 = 1.0
+        {
+          orderQuantity: 5,
+          ingredientQuantity: '0.2',
+          recipeYield: 1,
+          orderDate: new Date(),
+        }, // 5 * 0.2 / 1 = 1.0
       ];
 
       const mockCreated = {
@@ -1254,7 +1276,9 @@ describe('InventoryService', () => {
           where: jest.fn().mockResolvedValue(undefined), // Delete item
         });
 
-      await expect(service.deleteInventoryItem('item-1')).resolves.not.toThrow();
+      await expect(
+        service.deleteInventoryItem('item-1'),
+      ).resolves.not.toThrow();
       expect(mockDatabaseService.database.delete).toHaveBeenCalledTimes(2);
     });
 

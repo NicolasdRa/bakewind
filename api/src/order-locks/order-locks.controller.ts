@@ -9,6 +9,8 @@ import {
   Request,
   HttpCode,
   HttpStatus,
+  ParseUUIDPipe,
+  BadRequestException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -51,20 +53,25 @@ export class OrderLocksController {
     status: 404,
     description: 'No lock found or not owned by current user',
   })
+  @ApiResponse({ status: 400, description: 'Invalid order ID format' })
   async releaseLock(
     @Request() req: { user: { userId: string } },
-    @Param('orderId') orderId: string,
+    @Param('orderId', new ParseUUIDPipe({ errorHttpStatusCode: 400 }))
+    orderId: string,
   ) {
     await this.orderLocksService.releaseLock(req.user.userId, orderId);
   }
 
   @Post('renew/:orderId')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Renew lock on an order' })
   @ApiResponse({ status: 200, description: 'Lock renewed' })
   @ApiResponse({ status: 404, description: 'Lock not found or expired' })
+  @ApiResponse({ status: 400, description: 'Invalid order ID format' })
   async renewLock(
     @Request() req: { user: { userId: string } },
-    @Param('orderId') orderId: string,
+    @Param('orderId', new ParseUUIDPipe({ errorHttpStatusCode: 400 }))
+    orderId: string,
   ) {
     return this.orderLocksService.renewLock(req.user.userId, orderId);
   }
@@ -73,7 +80,11 @@ export class OrderLocksController {
   @ApiOperation({ summary: 'Check lock status of an order' })
   @ApiResponse({ status: 200, description: 'Lock status retrieved' })
   @ApiResponse({ status: 404, description: 'Order not found' })
-  async getLockStatus(@Param('orderId') orderId: string) {
+  @ApiResponse({ status: 400, description: 'Invalid order ID format' })
+  async getLockStatus(
+    @Param('orderId', new ParseUUIDPipe({ errorHttpStatusCode: 400 }))
+    orderId: string,
+  ) {
     return this.orderLocksService.getLockStatus(orderId);
   }
 }

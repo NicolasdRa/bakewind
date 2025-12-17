@@ -163,7 +163,9 @@ export class CreateInternalOrderDto {
   @IsDateString()
   productionDate?: string;
 
-  @ApiPropertyOptional({ description: 'Production shift (morning, afternoon, night)' })
+  @ApiPropertyOptional({
+    description: 'Production shift (morning, afternoon, night)',
+  })
   @IsOptional()
   @IsString()
   productionShift?: string;
@@ -173,7 +175,9 @@ export class CreateInternalOrderDto {
   @IsString()
   batchNumber?: string;
 
-  @ApiPropertyOptional({ description: 'Staff member(s) assigned to production' })
+  @ApiPropertyOptional({
+    description: 'Staff member(s) assigned to production',
+  })
   @IsOptional()
   @IsString()
   assignedStaff?: string;
@@ -207,7 +211,10 @@ export class CreateInternalOrderDto {
   qualityNotes?: string;
 
   // Recurring order fields
-  @ApiPropertyOptional({ description: 'Is this a recurring order?', default: false })
+  @ApiPropertyOptional({
+    description: 'Is this a recurring order?',
+    default: false,
+  })
   @IsOptional()
   @IsBoolean()
   isRecurring?: boolean;
@@ -220,12 +227,16 @@ export class CreateInternalOrderDto {
   @IsEnum(InternalOrderFrequency)
   recurringFrequency?: InternalOrderFrequency;
 
-  @ApiPropertyOptional({ description: 'Next order date for recurring orders (ISO 8601)' })
+  @ApiPropertyOptional({
+    description: 'Next order date for recurring orders (ISO 8601)',
+  })
   @IsOptional()
   @IsDateString()
   nextOrderDate?: string;
 
-  @ApiPropertyOptional({ description: 'End date for recurring orders (ISO 8601)' })
+  @ApiPropertyOptional({
+    description: 'End date for recurring orders (ISO 8601)',
+  })
   @IsOptional()
   @IsDateString()
   recurringEndDate?: string;

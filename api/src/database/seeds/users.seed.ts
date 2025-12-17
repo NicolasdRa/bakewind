@@ -92,7 +92,15 @@ export async function seedUsers(db: NodePgDatabase<typeof schema>) {
     .returning();
 
   // Assign users to locations
-  if (users.length >= 4 && users[0] && users[1] && users[2] && users[3] && location1 && location2) {
+  if (
+    users.length >= 4 &&
+    users[0] &&
+    users[1] &&
+    users[2] &&
+    users[3] &&
+    location1 &&
+    location2
+  ) {
     await db
       .insert(userLocationsTable)
       .values([

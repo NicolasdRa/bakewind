@@ -3,6 +3,7 @@ import { HealthController } from './health.controller';
 import { HealthService } from './health.service';
 import { ResponseFormattingService } from '../common/services/response-formatting.service';
 import { HealthResponseDto } from './health-reponse.dto';
+import { RealtimeGateway } from '../realtime/realtime.gateway';
 
 describe('HealthController', () => {
   let controller: HealthController;
@@ -12,6 +13,14 @@ describe('HealthController', () => {
     createSuccessResponse: jest.fn(),
     formatSuccessResponse: jest.fn(),
     formatErrorResponse: jest.fn(),
+  };
+
+  const mockRealtimeGateway = {
+    server: {
+      sockets: {
+        fetchSockets: jest.fn().mockResolvedValue([]),
+      },
+    },
   };
 
   const mockHealthResponse: HealthResponseDto = {
@@ -38,6 +47,10 @@ describe('HealthController', () => {
         {
           provide: ResponseFormattingService,
           useValue: mockResponseFormattingService,
+        },
+        {
+          provide: RealtimeGateway,
+          useValue: mockRealtimeGateway,
         },
       ],
     }).compile();

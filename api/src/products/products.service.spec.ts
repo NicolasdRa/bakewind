@@ -78,7 +78,7 @@ describe('ProductsService', () => {
       expect(result).toHaveLength(1);
       expect(result[0]!.name).toBe('Sourdough Bread');
       expect(result[0]!.basePrice).toBe(5.99);
-      expect(result[0]!.costOfGoods).toBe(2.50);
+      expect(result[0]!.costOfGoods).toBe(2.5);
       // Calculated fields
       expect(result[0]!.margin).toBeCloseTo(58.26, 2); // (5.99 - 2.50) / 5.99 * 100
       expect(result[0]!.markup).toBeCloseTo(139.6, 1); // (5.99 - 2.50) / 2.50 * 100
@@ -185,6 +185,7 @@ describe('ProductsService', () => {
         status: 'active' as const,
         basePrice: 3.5,
         costOfGoods: 1.2,
+        recipeId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
         estimatedPrepTime: 60,
         allergens: ['gluten'],
         tags: ['french', 'classic'],
@@ -395,9 +396,7 @@ describe('ProductsService', () => {
         // Mock internal order count query
         .mockReturnValueOnce({
           from: jest.fn().mockReturnValue({
-            where: jest
-              .fn()
-              .mockResolvedValue([{ count: internalOrderCount }]),
+            where: jest.fn().mockResolvedValue([{ count: internalOrderCount }]),
           }),
         });
 

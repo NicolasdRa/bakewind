@@ -19,24 +19,30 @@ export const customersRelations = relations(customers, ({ many }) => ({
 }));
 
 // Customer Order relations
-export const customerOrdersRelations = relations(customerOrders, ({ one, many }) => ({
-  customer: one(customers, {
-    fields: [customerOrders.customerId],
-    references: [customers.id],
+export const customerOrdersRelations = relations(
+  customerOrders,
+  ({ one, many }) => ({
+    customer: one(customers, {
+      fields: [customerOrders.customerId],
+      references: [customers.id],
+    }),
+    items: many(customerOrderItems),
   }),
-  items: many(customerOrderItems),
-}));
+);
 
-export const customerOrderItemsRelations = relations(customerOrderItems, ({ one }) => ({
-  order: one(customerOrders, {
-    fields: [customerOrderItems.orderId],
-    references: [customerOrders.id],
+export const customerOrderItemsRelations = relations(
+  customerOrderItems,
+  ({ one }) => ({
+    order: one(customerOrders, {
+      fields: [customerOrderItems.orderId],
+      references: [customerOrders.id],
+    }),
+    product: one(products, {
+      fields: [customerOrderItems.productId],
+      references: [products.id],
+    }),
   }),
-  product: one(products, {
-    fields: [customerOrderItems.productId],
-    references: [products.id],
-  }),
-}));
+);
 
 // Internal Order relations
 export const internalOrdersRelations = relations(

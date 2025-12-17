@@ -10,11 +10,16 @@ export type BadgeVariant =
 
 export type BadgeSize = 'sm' | 'md' | 'lg';
 
-interface BadgeProps {
+export interface BadgeProps {
+  /**
+   * Text content to display in the badge (alternative to children)
+   */
+  label?: string;
+
   /**
    * Text content to display in the badge
    */
-  children: JSX.Element;
+  children?: JSX.Element;
 
   /**
    * Visual style variant - uses semantic color tokens
@@ -22,9 +27,9 @@ interface BadgeProps {
   variant?: BadgeVariant;
 
   /**
-   * Custom Tailwind color classes (border and text)
-   * Example: 'border-purple-600 text-purple-600 dark:border-purple-400 dark:text-purple-400'
-   * Overrides variant if provided
+   * Custom color string (for inline styles or simple color names)
+   * When a simple color name is passed (e.g., "green", "blue"),
+   * it generates appropriate Tailwind classes
    */
   color?: string;
 
@@ -70,9 +75,27 @@ const Badge: Component<BadgeProps> = (props) => {
   const size = () => props.size || 'md';
   const rounded = () => props.rounded || 'full';
 
+  // Map simple color names to Tailwind classes
+  const colorToTailwind: Record<string, string> = {
+    green: 'border-green-600 text-green-600 dark:border-green-400 dark:text-green-400',
+    blue: 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400',
+    red: 'border-red-600 text-red-600 dark:border-red-400 dark:text-red-400',
+    yellow: 'border-yellow-600 text-yellow-600 dark:border-yellow-400 dark:text-yellow-400',
+    orange: 'border-orange-600 text-orange-600 dark:border-orange-400 dark:text-orange-400',
+    purple: 'border-purple-600 text-purple-600 dark:border-purple-400 dark:text-purple-400',
+    gray: 'border-gray-600 text-gray-600 dark:border-gray-400 dark:text-gray-400',
+    amber: 'border-amber-600 text-amber-600 dark:border-amber-400 dark:text-amber-400',
+  };
+
   // Variant to color class mapping
   const getVariantClasses = (): string => {
-    if (props.color) return props.color;
+    if (props.color) {
+      // Check if it's a simple color name
+      const mapped = colorToTailwind[props.color.toLowerCase()];
+      if (mapped) return mapped;
+      // Otherwise treat as direct Tailwind classes
+      return props.color;
+    }
 
     const variants: Record<BadgeVariant, string> = {
       primary: 'border-amber-600 text-amber-600 dark:border-amber-400 dark:text-amber-400',
@@ -122,7 +145,7 @@ const Badge: Component<BadgeProps> = (props) => {
         ${props.class || ''}
       `.trim().replace(/\s+/g, ' ')}
     >
-      {props.children}
+      {props.label || props.children}
     </span>
   );
 };

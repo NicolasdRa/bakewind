@@ -103,7 +103,7 @@ describe('RecipesService', () => {
       expect(result[0]!.name).toBe('Sourdough Bread');
       expect(result[0]!.totalTime).toBe(165); // 120 + 45
       expect(result[0]!.ingredients).toHaveLength(2);
-      expect(result[0]!.totalIngredientCost).toBeCloseTo(1.60, 2);
+      expect(result[0]!.totalIngredientCost).toBeCloseTo(1.6, 2);
       expect(result[0]!.costPerUnit).toBe(1.5);
       expect(result[0]!.margin).toBeCloseTo(70, 1); // (5 - 1.5) / 5 * 100
     });

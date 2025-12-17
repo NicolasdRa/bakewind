@@ -1,4 +1,4 @@
-import { Component, createSignal, For, Show, onMount, createEffect } from "solid-js";
+import { Component, createSignal, For, Show, onMount } from "solid-js";
 import StatsCard from "~/components/common/StatsCard";
 import SearchInput from "~/components/common/SearchInput";
 import FilterSelect from "~/components/common/FilterSelect";

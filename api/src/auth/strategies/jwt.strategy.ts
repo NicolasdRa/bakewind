@@ -48,7 +48,9 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     const token =
       req.cookies?.accessToken || ExtractJwt.fromAuthHeaderAsBearerToken()(req);
 
-    this.logger.log(`Token extracted: ${!!token}, From cookie: ${!!req.cookies?.accessToken}`);
+    this.logger.log(
+      `Token extracted: ${!!token}, From cookie: ${!!req.cookies?.accessToken}`,
+    );
 
     // Check if token is blacklisted
     if (token) {
@@ -59,7 +61,9 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       }
     }
 
-    this.logger.log(`JWT validation successful for user: ${validatedPayload.email}`);
+    this.logger.log(
+      `JWT validation successful for user: ${validatedPayload.email}`,
+    );
 
     return {
       id: validatedPayload.sub, // Add id for consistency

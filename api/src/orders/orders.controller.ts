@@ -14,13 +14,15 @@ import {
   UseGuards,
   Request,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
-import { OrdersService } from './orders.service';
 import {
-  CreateOrderDto,
-  UpdateOrderDto,
-  OrderStatus,
-} from './dto';
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiQuery,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
+import { OrdersService } from './orders.service';
+import { CreateOrderDto, UpdateOrderDto, OrderStatus } from './dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('orders')

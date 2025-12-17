@@ -57,11 +57,15 @@ export class ProductsService {
             .select()
             .from(products)
             .where(and(...conditions))
-            .orderBy(sql`${products.popularityScore} DESC, ${products.name} ASC`)
+            .orderBy(
+              sql`${products.popularityScore} DESC, ${products.name} ASC`,
+            )
         : await this.databaseService.database
             .select()
             .from(products)
-            .orderBy(sql`${products.popularityScore} DESC, ${products.name} ASC`);
+            .orderBy(
+              sql`${products.popularityScore} DESC, ${products.name} ASC`,
+            );
 
     return items.map((item) => this.mapToProductDto(item));
   }
@@ -213,7 +217,9 @@ export class ProductsService {
   /**
    * Get products by category
    */
-  async getProductsByCategory(category: ProductCategory): Promise<ProductDto[]> {
+  async getProductsByCategory(
+    category: ProductCategory,
+  ): Promise<ProductDto[]> {
     return this.getProducts(category);
   }
 
@@ -333,9 +339,7 @@ export class ProductsService {
    * Get recipe cost per unit
    * Helper method for Layer 2 cost calculation
    */
-  private async getRecipeCostPerUnit(
-    recipeId: string,
-  ): Promise<number | null> {
+  private async getRecipeCostPerUnit(recipeId: string): Promise<number | null> {
     const [recipe] = await this.databaseService.database
       .select({ costPerUnit: recipes.costPerUnit })
       .from(recipes)
@@ -393,9 +397,7 @@ export class ProductsService {
   /**
    * Map database model to DTO
    */
-  private mapToProductDto(
-    product: typeof products.$inferSelect,
-  ): ProductDto {
+  private mapToProductDto(product: typeof products.$inferSelect): ProductDto {
     const basePrice = parseFloat(product.basePrice);
     const costOfGoods = product.costOfGoods
       ? parseFloat(product.costOfGoods)
@@ -405,8 +407,7 @@ export class ProductsService {
     const margin = this.calculateMargin(basePrice, costOfGoods);
     const markup = this.calculateMarkup(basePrice, costOfGoods);
     const profit = this.calculateProfit(basePrice, costOfGoods);
-    const marginWarning =
-      margin !== null && margin < this.MIN_MARGIN_THRESHOLD;
+    const marginWarning = margin !== null && margin < this.MIN_MARGIN_THRESHOLD;
 
     return {
       id: product.id,
