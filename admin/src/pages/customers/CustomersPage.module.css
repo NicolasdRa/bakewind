@@ -1,0 +1,510 @@
+/* CustomersPage - CSS Module */
+
+/* Page layout */
+.pageContainer {
+  padding: var(--spacing-6);
+}
+
+.pageHeader {
+  margin-bottom: var(--spacing-6);
+}
+
+.pageTitle {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--spacing-2);
+  color: var(--text-primary);
+}
+
+.pageSubtitle {
+  color: var(--text-secondary);
+}
+
+/* Stats grid */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: var(--spacing-6);
+  margin-bottom: var(--spacing-6);
+}
+
+@media (min-width: 768px) {
+  .statsGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.statCard {
+  background-color: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: var(--spacing-6);
+}
+
+.statTitle {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-2);
+}
+
+.statValue {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+}
+
+.statValuePrimary {
+  composes: statValue;
+  color: var(--primary-color);
+}
+
+.statValueSuccess {
+  composes: statValue;
+  color: var(--success-color);
+}
+
+.statValueInfo {
+  composes: statValue;
+  color: var(--info-color);
+}
+
+.statValueWarning {
+  composes: statValue;
+  color: var(--warning-color);
+}
+
+/* Filter section */
+.filterCard {
+  margin-bottom: var(--spacing-6);
+  background-color: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: var(--spacing-4);
+}
+
+.filterGrid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: var(--spacing-4);
+}
+
+@media (min-width: 768px) {
+  .filterGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.filterLabel {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  margin-bottom: var(--spacing-2);
+  color: var(--text-secondary);
+}
+
+.filterInput {
+  width: 100%;
+  padding: var(--spacing-2) var(--spacing-3);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.filterInput:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px var(--primary-light);
+}
+
+.filterButtonWrapper {
+  display: flex;
+  align-items: flex-end;
+}
+
+.addButton {
+  width: 100%;
+  padding: var(--spacing-2) var(--spacing-4);
+  background-color: var(--primary-color);
+  color: white;
+  border-radius: var(--radius-md);
+  font-weight: var(--font-weight-medium);
+  transition: background-color 0.2s;
+}
+
+.addButton:hover {
+  background-color: var(--primary-hover);
+}
+
+/* Main grid layout */
+.mainGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-6);
+}
+
+@media (min-width: 1024px) {
+  .mainGrid {
+    grid-template-columns: 2fr 1fr;
+  }
+}
+
+/* Customer list */
+.listCard {
+  background-color: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.listHeader {
+  padding: var(--spacing-4) var(--spacing-6);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.listTitle {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: var(--spacing-12) 0;
+}
+
+.spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 2px solid transparent;
+  border-bottom-color: var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.emptyState {
+  padding: var(--spacing-6);
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.customerList {
+  max-height: 24rem;
+  overflow-y: auto;
+}
+
+.customerItem {
+  padding: var(--spacing-6);
+  cursor: pointer;
+  transition: background-color 0.15s;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.customerItem:hover {
+  background-color: var(--bg-hover);
+}
+
+.customerItemContent {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.customerInfo {
+  flex: 1;
+}
+
+.customerNameRow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-2);
+}
+
+.customerName {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+}
+
+.statusBadge {
+  display: inline-flex;
+  padding: var(--spacing-1) var(--spacing-2);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  border-radius: 9999px;
+}
+
+.statusActive {
+  background-color: var(--success-light);
+  color: var(--success-color);
+}
+
+.statusInactive {
+  background-color: var(--bg-tertiary);
+  color: var(--text-tertiary);
+}
+
+.statusBanned {
+  background-color: var(--error-light);
+  color: var(--error-color);
+}
+
+.tierBadge {
+  composes: statusBadge;
+}
+
+.tierBronze {
+  background-color: #fed7aa;
+  color: #c2410c;
+}
+
+.tierSilver {
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+.tierGold {
+  background-color: #fef08a;
+  color: #a16207;
+}
+
+.tierPlatinum {
+  background-color: #e9d5ff;
+  color: #7e22ce;
+}
+
+.customerContact {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-2);
+}
+
+.customerStatsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-4);
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.statLabel {
+  font-weight: var(--font-weight-medium);
+}
+
+.customerActions {
+  display: flex;
+  gap: var(--spacing-2);
+  margin-left: var(--spacing-4);
+}
+
+.actionLink {
+  font-size: var(--font-size-sm);
+  color: var(--primary-color);
+  transition: color 0.15s;
+}
+
+.actionLink:hover {
+  color: var(--primary-hover);
+}
+
+.actionLinkSecondary {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  transition: color 0.15s;
+}
+
+.actionLinkSecondary:hover {
+  color: var(--text-primary);
+}
+
+/* Detail panel */
+.detailCard {
+  background-color: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.detailEmpty {
+  background-color: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: var(--spacing-6);
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.detailHeader {
+  padding: var(--spacing-4) var(--spacing-6);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.detailName {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+}
+
+.detailEmail {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.detailContent {
+  padding: var(--spacing-6);
+}
+
+.detailSection {
+  margin-bottom: var(--spacing-6);
+}
+
+.detailSection:last-child {
+  margin-bottom: 0;
+}
+
+.sectionTitle {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-3);
+}
+
+.detailRow {
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--spacing-2);
+}
+
+.detailLabel {
+  font-weight: var(--font-weight-medium);
+}
+
+.detailValue {
+  color: var(--text-secondary);
+}
+
+.addressBlock {
+  margin-left: var(--spacing-4);
+  color: var(--text-secondary);
+}
+
+.orderHistoryGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-3);
+  font-size: var(--font-size-sm);
+}
+
+.orderStatLabel {
+  font-weight: var(--font-weight-medium);
+}
+
+.orderStatValue {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+}
+
+.orderStatValuePrimary {
+  composes: orderStatValue;
+  color: var(--primary-color);
+}
+
+.orderStatValueSuccess {
+  composes: orderStatValue;
+  color: var(--success-color);
+}
+
+.orderStatValueInfo {
+  composes: orderStatValue;
+  color: var(--info-color);
+}
+
+.lastOrderValue {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.loyaltyRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-2);
+}
+
+.loyaltyLabel {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.loyaltyPoints {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--warning-color);
+}
+
+.tagList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-1);
+}
+
+.allergenTag {
+  display: inline-flex;
+  padding: var(--spacing-1) var(--spacing-2);
+  font-size: var(--font-size-xs);
+  background-color: var(--error-light);
+  color: var(--error-color);
+  border-radius: var(--radius-sm);
+}
+
+.preferenceTag {
+  display: inline-flex;
+  padding: var(--spacing-1) var(--spacing-2);
+  font-size: var(--font-size-xs);
+  background-color: var(--info-light);
+  color: var(--info-color);
+  border-radius: var(--radius-sm);
+}
+
+.notesText {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.detailActions {
+  display: flex;
+  gap: var(--spacing-2);
+}
+
+.viewOrdersButton {
+  flex: 1;
+  padding: var(--spacing-2) var(--spacing-3);
+  background-color: var(--primary-color);
+  color: white;
+  font-size: var(--font-size-sm);
+  border-radius: var(--radius-md);
+  transition: background-color 0.2s;
+}
+
+.viewOrdersButton:hover {
+  background-color: var(--primary-hover);
+}
+
+.editButton {
+  padding: var(--spacing-2) var(--spacing-3);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  border-radius: var(--radius-md);
+  transition: background-color 0.15s;
+}
+
+.editButton:hover {
+  background-color: var(--bg-hover);
+}

@@ -6,6 +6,7 @@ import SearchInput from "~/components/common/SearchInput";
 import FilterSelect from "~/components/common/FilterSelect";
 import Badge from "~/components/common/Badge";
 import { getCategoryBadgeColor, getProductStatusVariant } from "~/components/common/Badge.config";
+import styles from "./ProductsPage.module.css";
 
 type SortField = 'name' | 'basePrice' | 'costOfGoods' | 'margin' | 'popularityScore';
 type SortDirection = 'asc' | 'desc';
@@ -170,27 +171,23 @@ const ProductsPage: Component = () => {
 
   // Render sort indicator - always show for sortable columns
   const SortIndicator = (field: SortField) => {
-    const isActive = sortField() === field;
+    const isActive = () => sortField() === field;
     return (
-      <span class="ml-1 inline-flex flex-col" style={{ "line-height": "0.5" }}>
+      <span class={styles.sortIndicator}>
         <span
-          class="text-[10px] transition-colors"
-          style={{
-            color: isActive && sortDirection() === 'asc'
-              ? 'var(--primary-color)'
-              : 'var(--text-tertiary)',
-            opacity: isActive && sortDirection() === 'asc' ? '1' : '0.4'
+          class={styles.sortArrow}
+          classList={{
+            [styles.sortArrowActive]: isActive() && sortDirection() === 'asc',
+            [styles.sortArrowInactive]: !isActive() || sortDirection() !== 'asc'
           }}
         >
           ▲
         </span>
         <span
-          class="text-[10px] transition-colors"
-          style={{
-            color: isActive && sortDirection() === 'desc'
-              ? 'var(--primary-color)'
-              : 'var(--text-tertiary)',
-            opacity: isActive && sortDirection() === 'desc' ? '1' : '0.4'
+          class={styles.sortArrow}
+          classList={{
+            [styles.sortArrowActive]: isActive() && sortDirection() === 'desc',
+            [styles.sortArrowInactive]: !isActive() || sortDirection() !== 'desc'
           }}
         >
           ▼
@@ -200,26 +197,19 @@ const ProductsPage: Component = () => {
   };
 
   return (
-    <div class="p-6 md:p-8">
-      <div class="mb-8 flex justify-between items-start">
+    <div class={styles.pageContainer}>
+      <div class={styles.pageHeader}>
         <div>
-          <h1 class="text-3xl font-bold mb-2" style="color: var(--text-primary)">Products Management</h1>
-          <p class="text-base" style="color: var(--text-secondary)">Manage your bakery products and menu items</p>
+          <h1 class={styles.pageTitle}>Products Management</h1>
+          <p class={styles.pageSubtitle}>Manage your bakery products and menu items</p>
         </div>
-        <button
-          onClick={handleCreate}
-          class="px-6 py-3 rounded-lg font-medium transition-all hover:opacity-90"
-          style={{
-            "background-color": "var(--primary-color)",
-            "color": "white"
-          }}
-        >
+        <button onClick={handleCreate} class={styles.primaryButton}>
           + Create Product
         </button>
       </div>
 
       {/* Stats Cards */}
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div class={styles.statsGrid}>
         <StatsCard
           title="Total Products"
           value={products()?.length || 0}
@@ -238,12 +228,8 @@ const ProductsPage: Component = () => {
       </div>
 
       {/* Filter Controls */}
-      <div class="mb-8 rounded-xl p-5 border" style={{
-        "background-color": "var(--bg-primary)",
-        "border-color": "var(--border-color)",
-        "box-shadow": "var(--shadow-card)"
-      }}>
-        <div class="flex flex-wrap gap-4">
+      <div class={styles.filterCard}>
+        <div class={styles.filterRow}>
           <SearchInput
             value={searchQuery()}
             onInput={setSearchQuery}
@@ -285,222 +271,132 @@ const ProductsPage: Component = () => {
       <Show
         when={!products.loading}
         fallback={
-          <div class="flex justify-center items-center py-16 rounded-xl border" style={{
-            "background-color": "var(--bg-primary)",
-            "border-color": "var(--border-color)"
-          }}>
-            <div class="animate-spin rounded-full h-10 w-10 border-b-2" style={{
-              "border-color": "var(--primary-color)"
-            }}></div>
+          <div class={styles.loadingContainer}>
+            <div class={styles.spinner}></div>
           </div>
         }
       >
-        <div class="rounded-xl border overflow-hidden" style={{
-          "background-color": "var(--bg-primary)",
-          "border-color": "var(--border-color)",
-          "box-shadow": "var(--shadow-card)"
-        }}>
+        <div class={styles.tableContainer}>
           <Show
             when={(products() || []).length > 0}
             fallback={
-              <div class="p-12 text-center" style="color: var(--text-secondary)">
+              <div class={styles.emptyState}>
                 No products found for the selected criteria.
               </div>
             }
           >
-            <div class="overflow-x-auto">
-              <table class="min-w-full" style={{
-                "border-collapse": "separate",
-                "border-spacing": 0
-              }}>
-                <thead style="background-color: var(--bg-tertiary)">
+            <div class={styles.tableWrapper}>
+              <table class={styles.table}>
+                <thead class={styles.tableHead}>
                   <tr>
-                    <th
-                      class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider border-b cursor-pointer select-none transition-all group"
-                      style={{
-                        "color": "var(--text-secondary)",
-                        "border-color": "var(--border-color)"
-                      }}
-                      onClick={() => handleSort('name')}
-                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "var(--bg-hover)"}
-                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
-                    >
-                      <div class="flex items-center justify-between w-full min-w-[140px]">
+                    <th class={styles.tableHeaderCellSortable} onClick={() => handleSort('name')}>
+                      <div class={`${styles.headerContent} ${styles.minWidth140}`}>
                         <span>Product Name</span>
                         {SortIndicator('name')}
                       </div>
                     </th>
-                    <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider border-b" style={{
-                      "color": "var(--text-secondary)",
-                      "border-color": "var(--border-color)"
-                    }}>
-                      <div class="min-w-[80px]">Category</div>
+                    <th class={styles.tableHeaderCell}>
+                      <div class={styles.minWidth80}>Category</div>
                     </th>
-                    <th
-                      class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider border-b cursor-pointer select-none transition-all group"
-                      style={{
-                        "color": "var(--text-secondary)",
-                        "border-color": "var(--border-color)"
-                      }}
-                      onClick={() => handleSort('basePrice')}
-                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "var(--bg-hover)"}
-                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
-                    >
-                      <div class="flex items-center justify-between w-full min-w-[80px]">
+                    <th class={styles.tableHeaderCellSortable} onClick={() => handleSort('basePrice')}>
+                      <div class={`${styles.headerContent} ${styles.minWidth80}`}>
                         <span>Price</span>
                         {SortIndicator('basePrice')}
                       </div>
                     </th>
-                    <th
-                      class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider border-b cursor-pointer select-none transition-all group"
-                      style={{
-                        "color": "var(--text-secondary)",
-                        "border-color": "var(--border-color)"
-                      }}
-                      onClick={() => handleSort('costOfGoods')}
-                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "var(--bg-hover)"}
-                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
-                    >
-                      <div class="flex items-center justify-between w-full min-w-[70px]">
+                    <th class={styles.tableHeaderCellSortable} onClick={() => handleSort('costOfGoods')}>
+                      <div class={`${styles.headerContent} ${styles.minWidth70}`}>
                         <span>Cost</span>
                         {SortIndicator('costOfGoods')}
                       </div>
                     </th>
-                    <th
-                      class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider border-b cursor-pointer select-none transition-all group"
-                      style={{
-                        "color": "var(--text-secondary)",
-                        "border-color": "var(--border-color)"
-                      }}
-                      onClick={() => handleSort('margin')}
-                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "var(--bg-hover)"}
-                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
-                    >
-                      <div class="flex items-center justify-between w-full min-w-[80px]">
+                    <th class={styles.tableHeaderCellSortable} onClick={() => handleSort('margin')}>
+                      <div class={`${styles.headerContent} ${styles.minWidth80}`}>
                         <span>Margin</span>
                         {SortIndicator('margin')}
                       </div>
                     </th>
-                    <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider border-b" style={{
-                      "color": "var(--text-secondary)",
-                      "border-color": "var(--border-color)"
-                    }}>
-                      <div class="min-w-[80px]">Status</div>
+                    <th class={styles.tableHeaderCell}>
+                      <div class={styles.minWidth80}>Status</div>
                     </th>
-                    <th
-                      class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider border-b cursor-pointer select-none transition-all group"
-                      style={{
-                        "color": "var(--text-secondary)",
-                        "border-color": "var(--border-color)"
-                      }}
-                      onClick={() => handleSort('popularityScore')}
-                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "var(--bg-hover)"}
-                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
-                    >
-                      <div class="flex items-center justify-between w-full min-w-[100px]">
+                    <th class={styles.tableHeaderCellSortable} onClick={() => handleSort('popularityScore')}>
+                      <div class={`${styles.headerContent} ${styles.minWidth100}`}>
                         <span>Popularity</span>
                         {SortIndicator('popularityScore')}
                       </div>
                     </th>
-                    <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider border-b" style={{
-                      "color": "var(--text-secondary)",
-                      "border-color": "var(--border-color)"
-                    }}>
-                      <div class="min-w-[100px]">Actions</div>
+                    <th class={styles.tableHeaderCell}>
+                      <div class={styles.minWidth100}>Actions</div>
                     </th>
                   </tr>
                 </thead>
                 <tbody>
                   <For each={sortedProducts()}>
                     {(product) => (
-                      <tr class="transition-colors border-b" style={{
-                        "border-color": "var(--border-light)"
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "var(--bg-hover)"}
-                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
-                      >
-                        <td class="px-6 py-4">
+                      <tr class={styles.tableRow}>
+                        <td class={styles.tableCellWrap}>
                           <div>
-                            <div class="text-sm font-medium" style="color: var(--text-primary)">{product.name}</div>
+                            <div class={styles.productName}>{product.name}</div>
                             <Show when={product.description}>
-                              <div class="text-xs mt-0.5 line-clamp-1" style="color: var(--text-tertiary)">
+                              <div class={styles.productDescription}>
                                 {product.description}
                               </div>
                             </Show>
                           </div>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        <td class={styles.tableCell}>
                           <Badge color={getCategoryBadgeColor(product.category)}>
                             {formatCategoryName(product.category)}
                           </Badge>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium" style="color: var(--text-primary)">
-                          {formatPrice(product.basePrice)}
+                        <td class={styles.tableCell}>
+                          <span class={styles.priceText}>{formatPrice(product.basePrice)}</span>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm" style="color: var(--text-tertiary)">
-                          <Show when={product.costOfGoods} fallback="—">
-                            {formatPrice(product.costOfGoods!)}
-                          </Show>
+                        <td class={styles.tableCell}>
+                          <span class={styles.costText}>
+                            <Show when={product.costOfGoods} fallback="—">
+                              {formatPrice(product.costOfGoods!)}
+                            </Show>
+                          </span>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                        <td class={styles.tableCell}>
                           <Show when={product.margin !== null} fallback={
-                            <span style="color: var(--text-tertiary)">—</span>
+                            <span class={styles.marginText}>—</span>
                           }>
-                            <div class="flex items-center gap-2">
-                              <span style={{
-                                color: product.marginWarning ? "var(--error-color)" : "var(--text-tertiary)",
-                                "font-weight": product.marginWarning ? "600" : "normal"
-                              }}>
+                            <div class={styles.marginContainer}>
+                              <span
+                                classList={{
+                                  [styles.marginWarning]: product.marginWarning,
+                                  [styles.marginText]: !product.marginWarning
+                                }}
+                              >
                                 {product.margin!.toFixed(1)}%
                               </span>
                               <Show when={product.marginWarning}>
-                                <span
-                                  title="Low margin warning (below 20%)"
-                                  style={{
-                                    color: "var(--error-color)",
-                                    "font-size": "16px",
-                                    cursor: "help"
-                                  }}
-                                >
+                                <span class={styles.warningIcon} title="Low margin warning (below 20%)">
                                   ⚠️
                                 </span>
                               </Show>
                             </div>
                           </Show>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        <td class={styles.tableCell}>
                           <Badge variant={getProductStatusVariant(product.status)}>
                             {formatStatusName(product.status)}
                           </Badge>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm" style="color: var(--text-tertiary)">
-                          <div class="flex items-center gap-1">
+                        <td class={styles.tableCell}>
+                          <div class={styles.popularityContainer}>
                             <span>⭐</span>
                             <span>{product.popularityScore}</span>
                           </div>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm">
-                          <div class="flex space-x-3">
-                            <button
-                              onClick={() => handleEdit(product)}
-                              class="font-medium transition-colors"
-                              style={{
-                                "color": "var(--primary-color)"
-                              }}
-                              onMouseEnter={(e) => e.currentTarget.style.color = "var(--primary-hover)"}
-                              onMouseLeave={(e) => e.currentTarget.style.color = "var(--primary-color)"}
-                            >
+                        <td class={styles.tableCell}>
+                          <div class={styles.actionsRow}>
+                            <button onClick={() => handleEdit(product)} class={styles.actionLink}>
                               Edit
                             </button>
-                            <button
-                              onClick={() => handleDeleteClick(product)}
-                              class="font-medium transition-colors"
-                              style={{
-                                "color": "var(--error-color)"
-                              }}
-                              onMouseEnter={(e) => e.currentTarget.style.opacity = "0.8"}
-                              onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
-                            >
+                            <button onClick={() => handleDeleteClick(product)} class={styles.deleteLink}>
                               Delete
                             </button>
                           </div>
@@ -526,44 +422,23 @@ const ProductsPage: Component = () => {
 
       {/* Delete Confirmation Dialog */}
       <Show when={showDeleteConfirm()}>
-        <div class="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ "background-color": "var(--overlay-bg)" }}>
-          <div
-            class="w-full max-w-md rounded-xl border p-6"
-            style={{
-              "background-color": "var(--bg-primary)",
-              "border-color": "var(--border-color)",
-              "box-shadow": "var(--shadow-card)"
-            }}
-          >
-            <h3 class="text-xl font-bold mb-4" style="color: var(--text-primary)">
-              Delete Product
-            </h3>
-            <p class="mb-6" style="color: var(--text-secondary)">
+        <div class={styles.modalBackdrop}>
+          <div class={styles.modalContent}>
+            <h3 class={styles.modalTitle}>Delete Product</h3>
+            <p class={styles.modalText}>
               Are you sure you want to delete "{productToDelete()?.name}"? This action cannot be undone.
             </p>
-            <div class="flex justify-end gap-3">
+            <div class={styles.modalActions}>
               <button
                 onClick={() => {
                   setShowDeleteConfirm(false);
                   setProductToDelete(undefined);
                 }}
-                class="px-4 py-2 rounded-lg font-medium transition-all"
-                style={{
-                  "background-color": "var(--bg-secondary)",
-                  "color": "var(--text-primary)",
-                  "border": "1px solid var(--border-color)"
-                }}
+                class={styles.cancelButton}
               >
                 Cancel
               </button>
-              <button
-                onClick={handleDeleteConfirm}
-                class="px-4 py-2 rounded-lg font-medium transition-all hover:opacity-90"
-                style={{
-                  "background-color": "var(--error-color)",
-                  "color": "white"
-                }}
-              >
+              <button onClick={handleDeleteConfirm} class={styles.deleteButton}>
                 Delete
               </button>
             </div>

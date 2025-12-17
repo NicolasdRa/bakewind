@@ -628,7 +628,12 @@ const ProfilePage: Component = () => {
                     <span class={styles.statusDot}></span>
                     Active
                   </span>
-                  <span class={user()?.isEmailVerified ? styles.statusBadgeVerified : styles.statusBadgeUnverified}>
+                  <span
+                    classList={{
+                      [styles.statusBadgeVerified]: user()?.isEmailVerified,
+                      [styles.statusBadgeUnverified]: !user()?.isEmailVerified
+                    }}
+                  >
                     <svg class={styles.statusIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       {user()?.isEmailVerified ? (
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -696,7 +701,8 @@ const ProfilePage: Component = () => {
                         type="password"
                         value={passwordForm().confirmPassword}
                         onInput={(e) => updatePasswordField('confirmPassword', e.currentTarget.value)}
-                        class={`${styles.input} ${passwordForm().confirmPassword && !passwordsMatch() ? styles.inputError : ''}`}
+                        class={styles.input}
+                        classList={{ [styles.inputError]: passwordForm().confirmPassword !== '' && !passwordsMatch() }}
                         placeholder="Confirm your new password"
                       />
                       <Show when={passwordForm().confirmPassword && !passwordsMatch()}>

@@ -1,0 +1,200 @@
+/* ProductionPage - CSS Module */
+
+/* Page layout */
+.pageContainer {
+  padding: var(--spacing-6);
+}
+
+@media (min-width: 768px) {
+  .pageContainer {
+    padding: var(--spacing-8);
+  }
+}
+
+/* Header section */
+.pageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-8);
+}
+
+.pageTitle {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--spacing-2);
+  color: var(--text-primary);
+}
+
+.pageSubtitle {
+  font-size: var(--font-size-base);
+  color: var(--text-secondary);
+}
+
+/* Stats grid */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: var(--spacing-6);
+  margin-bottom: var(--spacing-8);
+}
+
+@media (min-width: 768px) {
+  .statsGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Filter card */
+.filterCard {
+  margin-bottom: var(--spacing-8);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-5);
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-primary);
+  box-shadow: var(--shadow-card);
+}
+
+.filterRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-4);
+  align-items: flex-end;
+}
+
+.filterItem {
+  flex: 1;
+  min-width: 16rem;
+}
+
+/* Schedule container */
+.scheduleContainer {
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  background-color: var(--bg-primary);
+  box-shadow: var(--shadow-card);
+}
+
+.scheduleHeader {
+  padding: var(--spacing-4) var(--spacing-6);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.scheduleTitle {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+}
+
+/* Loading and empty states */
+.loadingState {
+  padding: var(--spacing-6);
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.emptyState {
+  padding: var(--spacing-6);
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+/* Production item card */
+.itemList {
+  border-color: var(--border-color);
+}
+
+.productionItem {
+  padding: var(--spacing-6);
+  transition: background-color 0.15s;
+  background-color: var(--bg-primary);
+}
+
+.productionItem:hover {
+  background-color: var(--bg-secondary);
+}
+
+.itemContent {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.itemMain {
+  flex: 1;
+}
+
+.itemHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-2);
+  flex-wrap: wrap;
+}
+
+.recipeName {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+}
+
+/* Item details grid */
+.detailsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-4);
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+@media (min-width: 768px) {
+  .detailsGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.detailLabel {
+  font-weight: var(--font-weight-medium);
+}
+
+.extraDetail {
+  margin-top: var(--spacing-2);
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+/* Actions */
+.itemActions {
+  display: flex;
+  gap: var(--spacing-2);
+  margin-left: var(--spacing-4);
+}
+
+.startButton {
+  padding: var(--spacing-2) var(--spacing-4);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  background-color: var(--success-color);
+  color: white;
+  transition: opacity 0.2s;
+}
+
+.startButton:hover {
+  opacity: 0.9;
+}
+
+.completeButton {
+  padding: var(--spacing-2) var(--spacing-4);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  background-color: var(--primary-color);
+  color: white;
+  transition: opacity 0.2s;
+}
+
+.completeButton:hover {
+  opacity: 0.9;
+}

@@ -6,6 +6,7 @@ import SearchInput from "~/components/common/SearchInput";
 import FilterSelect from "~/components/common/FilterSelect";
 import Badge from "~/components/common/Badge";
 import { useInfoModal } from "~/stores/infoModalStore";
+import styles from "./CustomerOrdersPage.module.css";
 
 const CustomerOrdersPage: Component = () => {
   const { showError } = useInfoModal();
@@ -186,33 +187,15 @@ const CustomerOrdersPage: Component = () => {
   };
 
   return (
-    <div style={{ padding: "2rem" }}>
+    <div class={styles.pageContainer}>
       {/* Header */}
-      <div style={{ "margin-bottom": "2rem" }}>
-        <h1
-          style={{
-            "font-size": "2rem",
-            "font-weight": "600",
-            color: "var(--text-primary)",
-            "margin-bottom": "0.5rem",
-          }}
-        >
-          Customer Orders
-        </h1>
-        <p style={{ color: "var(--text-secondary)" }}>
-          Manage and track customer orders
-        </p>
+      <div class={styles.pageHeader}>
+        <h1 class={styles.pageTitle}>Customer Orders</h1>
+        <p class={styles.pageSubtitle}>Manage and track customer orders</p>
       </div>
 
       {/* Stats Cards */}
-      <div
-        style={{
-          display: "grid",
-          "grid-template-columns": "repeat(auto-fit, minmax(240px, 1fr))",
-          gap: "1.5rem",
-          "margin-bottom": "2rem",
-        }}
-      >
+      <div class={styles.statsGrid}>
         <StatsCard
           title="Total Orders"
           value={totalOrders().toString()}
@@ -236,15 +219,8 @@ const CustomerOrdersPage: Component = () => {
       </div>
 
       {/* Filters and Search */}
-      <div
-        style={{
-          display: "flex",
-          gap: "1rem",
-          "margin-bottom": "1.5rem",
-          "flex-wrap": "wrap",
-        }}
-      >
-        <div style={{ flex: "1", "min-width": "250px" }}>
+      <div class={styles.filterSection}>
+        <div class={styles.searchWrapper}>
           <SearchInput
             value={searchQuery()}
             onInput={handleSearch}
@@ -267,248 +243,89 @@ const CustomerOrdersPage: Component = () => {
       </div>
 
       {/* Orders Table */}
-      <div
-        style={{
-          "background-color": "var(--bg-secondary)",
-          "border-radius": "8px",
-          overflow: "hidden",
-          border: "1px solid var(--border-color)",
-        }}
-      >
+      <div class={styles.tableContainer}>
         <Show
           when={!loading()}
           fallback={
-            <div style={{ padding: "3rem", "text-align": "center" }}>
-              <p style={{ color: "var(--text-secondary)" }}>Loading orders...</p>
+            <div class={styles.loadingState}>
+              <p>Loading orders...</p>
             </div>
           }
         >
           <Show
             when={orders().length > 0}
             fallback={
-              <div style={{ padding: "3rem", "text-align": "center" }}>
-                <p style={{ color: "var(--text-secondary)" }}>
-                  No orders found. Create your first order!
-                </p>
+              <div class={styles.emptyState}>
+                <p>No orders found. Create your first order!</p>
               </div>
             }
           >
-            <table style={{ width: "100%", "border-collapse": "collapse" }}>
-              <thead>
-                <tr style={{ "background-color": "var(--bg-primary)" }}>
-                  <th
-                    style={{
-                      padding: "1rem",
-                      "text-align": "left",
-                      "font-weight": "600",
-                      color: "var(--text-primary)",
-                      "border-bottom": "1px solid var(--border-color)",
-                    }}
-                  >
-                    Order #
-                  </th>
-                  <th
-                    style={{
-                      padding: "1rem",
-                      "text-align": "left",
-                      "font-weight": "600",
-                      color: "var(--text-primary)",
-                      "border-bottom": "1px solid var(--border-color)",
-                    }}
-                  >
-                    Customer
-                  </th>
-                  <th
-                    style={{
-                      padding: "1rem",
-                      "text-align": "left",
-                      "font-weight": "600",
-                      color: "var(--text-primary)",
-                      "border-bottom": "1px solid var(--border-color)",
-                    }}
-                  >
-                    Source
-                  </th>
-                  <th
-                    style={{
-                      padding: "1rem",
-                      "text-align": "left",
-                      "font-weight": "600",
-                      color: "var(--text-primary)",
-                      "border-bottom": "1px solid var(--border-color)",
-                    }}
-                  >
-                    Items
-                  </th>
-                  <th
-                    style={{
-                      padding: "1rem",
-                      "text-align": "right",
-                      "font-weight": "600",
-                      color: "var(--text-primary)",
-                      "border-bottom": "1px solid var(--border-color)",
-                    }}
-                  >
-                    Total
-                  </th>
-                  <th
-                    style={{
-                      padding: "1rem",
-                      "text-align": "center",
-                      "font-weight": "600",
-                      color: "var(--text-primary)",
-                      "border-bottom": "1px solid var(--border-color)",
-                    }}
-                  >
-                    Status
-                  </th>
-                  <th
-                    style={{
-                      padding: "1rem",
-                      "text-align": "center",
-                      "font-weight": "600",
-                      color: "var(--text-primary)",
-                      "border-bottom": "1px solid var(--border-color)",
-                    }}
-                  >
-                    Payment
-                  </th>
-                  <th
-                    style={{
-                      padding: "1rem",
-                      "text-align": "left",
-                      "font-weight": "600",
-                      color: "var(--text-primary)",
-                      "border-bottom": "1px solid var(--border-color)",
-                    }}
-                  >
-                    Date
-                  </th>
-                  <th
-                    style={{
-                      padding: "1rem",
-                      "text-align": "center",
-                      "font-weight": "600",
-                      color: "var(--text-primary)",
-                      "border-bottom": "1px solid var(--border-color)",
-                    }}
-                  >
-                    Actions
-                  </th>
+            <table class={styles.table}>
+              <thead class={styles.tableHead}>
+                <tr>
+                  <th class={styles.tableHeaderCell}>Order #</th>
+                  <th class={styles.tableHeaderCell}>Customer</th>
+                  <th class={styles.tableHeaderCell}>Source</th>
+                  <th class={styles.tableHeaderCell}>Items</th>
+                  <th class={styles.tableHeaderCellRight}>Total</th>
+                  <th class={styles.tableHeaderCellCenter}>Status</th>
+                  <th class={styles.tableHeaderCellCenter}>Payment</th>
+                  <th class={styles.tableHeaderCell}>Date</th>
+                  <th class={styles.tableHeaderCellCenter}>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 <For each={orders()}>
                   {(order) => (
-                    <tr
-                      style={{
-                        "border-bottom": "1px solid var(--border-color)",
-                        transition: "background-color 0.2s",
-                      }}
-                      onMouseEnter={(e) =>
-                        (e.currentTarget.style.backgroundColor =
-                          "var(--bg-primary)")
-                      }
-                      onMouseLeave={(e) =>
-                        (e.currentTarget.style.backgroundColor = "transparent")
-                      }
-                    >
-                      <td
-                        style={{
-                          padding: "1rem",
-                          color: "var(--text-primary)",
-                          "font-weight": "500",
-                        }}
-                      >
-                        {order.orderNumber}
+                    <tr class={styles.tableRow}>
+                      <td class={styles.tableCell}>
+                        <span class={styles.orderNumber}>{order.orderNumber}</span>
                       </td>
-                      <td style={{ padding: "1rem" }}>
-                        <div style={{ color: "var(--text-primary)" }}>
-                          {order.customerName}
-                        </div>
+                      <td class={styles.tableCell}>
+                        <div class={styles.customerName}>{order.customerName}</div>
                         <Show when={order.customerEmail}>
-                          <div
-                            style={{
-                              color: "var(--text-secondary)",
-                              "font-size": "0.875rem",
-                            }}
-                          >
-                            {order.customerEmail}
-                          </div>
+                          <div class={styles.customerEmail}>{order.customerEmail}</div>
                         </Show>
                       </td>
-                      <td style={{ padding: "1rem", color: "var(--text-secondary)" }}>
-                        {order.source.replace('_', ' ').toUpperCase()}
+                      <td class={styles.tableCell}>
+                        <span class={styles.sourceText}>
+                          {order.source.replace('_', ' ').toUpperCase()}
+                        </span>
                       </td>
-                      <td style={{ padding: "1rem", color: "var(--text-secondary)" }}>
-                        {order.items.length} item{order.items.length !== 1 ? 's' : ''}
+                      <td class={styles.tableCell}>
+                        <span class={styles.itemCount}>
+                          {order.items.length} item{order.items.length !== 1 ? 's' : ''}
+                        </span>
                       </td>
-                      <td
-                        style={{
-                          padding: "1rem",
-                          "text-align": "right",
-                          color: "var(--text-primary)",
-                          "font-weight": "500",
-                        }}
-                      >
-                        {formatCurrency(order.total)}
+                      <td class={styles.tableCellRight}>
+                        <span class={styles.totalAmount}>{formatCurrency(order.total)}</span>
                       </td>
-                      <td style={{ padding: "1rem", "text-align": "center" }}>
+                      <td class={styles.tableCellCenter}>
                         <Badge
                           label={order.status.replace('_', ' ')}
                           color={getStatusColor(order.status)}
                         />
                       </td>
-                      <td style={{ padding: "1rem", "text-align": "center" }}>
+                      <td class={styles.tableCellCenter}>
                         <Badge
                           label={order.paymentStatus}
                           color={getPaymentStatusColor(order.paymentStatus)}
                         />
                       </td>
-                      <td style={{ padding: "1rem", color: "var(--text-secondary)" }}>
-                        {formatDate(order.createdAt)}
+                      <td class={styles.tableCell}>
+                        <span class={styles.dateText}>{formatDate(order.createdAt)}</span>
                       </td>
-                      <td style={{ padding: "1rem", "text-align": "center" }}>
-                        <div style={{ display: "flex", gap: "0.5rem", "justify-content": "center" }}>
+                      <td class={styles.tableCellCenter}>
+                        <div class={styles.actionsWrapper}>
                           <button
                             onClick={() => handleScheduleClick(order)}
-                            style={{
-                              padding: "0.5rem 1rem",
-                              "background-color": "var(--primary-color)",
-                              color: "white",
-                              border: "none",
-                              "border-radius": "4px",
-                              cursor: "pointer",
-                              "font-size": "0.875rem",
-                            }}
-                            onMouseEnter={(e) =>
-                              (e.currentTarget.style.opacity = "0.8")
-                            }
-                            onMouseLeave={(e) =>
-                              (e.currentTarget.style.opacity = "1")
-                            }
+                            class={styles.scheduleButton}
                           >
                             Schedule
                           </button>
                           <button
                             onClick={() => handleDeleteClick(order)}
-                            style={{
-                              padding: "0.5rem 1rem",
-                              "background-color": "var(--error-color)",
-                              color: "white",
-                              border: "none",
-                              "border-radius": "4px",
-                              cursor: "pointer",
-                              "font-size": "0.875rem",
-                            }}
-                            onMouseEnter={(e) =>
-                              (e.currentTarget.style.backgroundColor =
-                                "var(--error-hover)")
-                            }
-                            onMouseLeave={(e) =>
-                              (e.currentTarget.style.backgroundColor =
-                                "var(--error-color)")
-                            }
+                            class={styles.deleteButtonSmall}
                           >
                             Delete
                           </button>
@@ -525,84 +342,26 @@ const CustomerOrdersPage: Component = () => {
 
       {/* Schedule Production Modal */}
       <Show when={showScheduleModal()}>
-        <div
-          style={{
-            "position": "fixed",
-            "top": "0",
-            "left": "0",
-            "right": "0",
-            "bottom": "0",
-            "z-index": "9999",
-            "display": "flex",
-            "align-items": "center",
-            "justify-content": "center",
-            "padding": "1rem",
-            "background-color": "var(--overlay-bg)",
-            "overflow-y": "auto"
-          }}
-          onClick={handleCancelSchedule}
-        >
-          <div
-            style={{
-              "background-color": "var(--bg-primary)",
-              "border": "1px solid var(--border-color)",
-              "border-radius": "0.5rem",
-              "box-shadow": "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
-              "width": "100%",
-              "max-width": "28rem",
-              "padding": "1.5rem",
-              "margin": "auto"
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3 class="text-lg font-semibold mb-4" style="color: var(--text-primary)">
-              Schedule Production
-            </h3>
-            <p class="mb-4" style="color: var(--text-secondary)">
+        <div class={styles.modalBackdrop} onClick={handleCancelSchedule}>
+          <div class={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <h3 class={styles.modalTitle}>Schedule Production</h3>
+            <p class={styles.modalText}>
               Schedule production for order "{orderToSchedule()?.orderNumber}"
             </p>
-            <div class="mb-6">
-              <label class="block mb-2" style="color: var(--text-primary); font-weight: 500;">
-                Scheduled Date
-              </label>
+            <div class={styles.formGroup}>
+              <label class={styles.formLabel}>Scheduled Date</label>
               <input
                 type="date"
                 value={scheduledDate()}
                 onInput={(e) => setScheduledDate(e.currentTarget.value)}
-                style={{
-                  "width": "100%",
-                  "padding": "0.5rem",
-                  "border": "1px solid var(--border-color)",
-                  "border-radius": "4px",
-                  "background-color": "var(--bg-secondary)",
-                  "color": "var(--text-primary)"
-                }}
+                class={styles.formInput}
               />
             </div>
-            <div class="flex justify-end space-x-3">
-              <button
-                onClick={handleCancelSchedule}
-                class="px-4 py-2 rounded-md font-medium transition-colors"
-                style={{
-                  "background-color": "transparent",
-                  "border": "1px solid var(--border-color)",
-                  "color": "var(--text-primary)"
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.opacity = "0.8"}
-                onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
-              >
+            <div class={styles.modalActions}>
+              <button onClick={handleCancelSchedule} class={styles.cancelButton}>
                 Cancel
               </button>
-              <button
-                onClick={handleConfirmSchedule}
-                class="px-4 py-2 rounded-md font-medium transition-colors"
-                style={{
-                  "background-color": "var(--primary-color)",
-                  "color": "white"
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.opacity = "0.8"}
-                onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
-              >
+              <button onClick={handleConfirmSchedule} class={styles.submitButton}>
                 Schedule Production
               </button>
             </div>
@@ -612,66 +371,17 @@ const CustomerOrdersPage: Component = () => {
 
       {/* Delete Confirmation Modal */}
       <Show when={showDeleteConfirm()}>
-        <div
-          style={{
-            "position": "fixed",
-            "top": "0",
-            "left": "0",
-            "right": "0",
-            "bottom": "0",
-            "z-index": "9999",
-            "display": "flex",
-            "align-items": "center",
-            "justify-content": "center",
-            "padding": "1rem",
-            "background-color": "var(--overlay-bg)",
-            "overflow-y": "auto"
-          }}
-          onClick={handleCancelDelete}
-        >
-          <div
-            style={{
-              "background-color": "var(--bg-primary)",
-              "border": "1px solid var(--border-color)",
-              "border-radius": "0.5rem",
-              "box-shadow": "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
-              "width": "100%",
-              "max-width": "28rem",
-              "padding": "1.5rem",
-              "margin": "auto"
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3 class="text-lg font-semibold mb-4" style="color: var(--text-primary)">
-              Delete Order
-            </h3>
-            <p class="mb-6" style="color: var(--text-secondary)">
+        <div class={styles.modalBackdrop} onClick={handleCancelDelete}>
+          <div class={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <h3 class={styles.modalTitle}>Delete Order</h3>
+            <p class={styles.modalTextLarge}>
               Are you sure you want to delete order "{orderToDelete()?.orderNumber}"? This action cannot be undone.
             </p>
-            <div class="flex justify-end space-x-3">
-              <button
-                onClick={handleCancelDelete}
-                class="px-4 py-2 rounded-md font-medium transition-colors"
-                style={{
-                  "background-color": "transparent",
-                  "border": "1px solid var(--border-color)",
-                  "color": "var(--text-primary)"
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.opacity = "0.8"}
-                onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
-              >
+            <div class={styles.modalActions}>
+              <button onClick={handleCancelDelete} class={styles.cancelButton}>
                 Cancel
               </button>
-              <button
-                onClick={handleConfirmDelete}
-                class="px-4 py-2 rounded-md font-medium transition-colors"
-                style={{
-                  "background-color": "var(--error-color)",
-                  "color": "white"
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "var(--error-hover)"}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "var(--error-color)"}
-              >
+              <button onClick={handleConfirmDelete} class={styles.deleteButton}>
                 Delete
               </button>
             </div>

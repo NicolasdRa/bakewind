@@ -15,6 +15,7 @@ import { useInfoModal } from "~/stores/infoModalStore";
 import { orderLocksStore } from "~/stores/order-locks";
 import InternalOrderFormModal from "~/components/orders/InternalOrderFormModal";
 import InternalOrderDetailsModal from "~/components/orders/InternalOrderDetailsModal";
+import styles from "./InternalOrdersPage.module.css";
 
 const InternalOrdersPage: Component = () => {
   const { showError, showSuccess } = useInfoModal();
@@ -331,432 +332,211 @@ const InternalOrdersPage: Component = () => {
     });
   };
 
-  // Get available status actions based on current status
-  const getStatusActions = (status: InternalOrderStatus) => {
-    const actions: Array<{ label: string; status: InternalOrderStatus | 'schedule_production'; icon: string; color: string }> = [];
-
-    switch (status) {
-      case 'draft':
-        actions.push({ label: 'Request', status: 'requested', icon: '📝', color: '#3b82f6' });
-        break;
-      case 'requested':
-        actions.push({ label: 'Approve', status: 'approved', icon: '✅', color: '#10b981' });
-        break;
-      case 'approved':
-        // Special action that opens modal instead of direct status change
-        actions.push({ label: 'Schedule Production', status: 'schedule_production', icon: '📅', color: '#8b5cf6' });
-        break;
-      case 'scheduled':
-        actions.push({ label: 'Start Production', status: 'in_production', icon: '🏭', color: '#f59e0b' });
-        break;
-      case 'in_production':
-        actions.push({ label: 'Quality Check', status: 'quality_check', icon: '🔍', color: '#06b6d4' });
-        break;
-      case 'quality_check':
-        actions.push({ label: 'Mark Ready', status: 'ready', icon: '✨', color: '#10b981' });
-        actions.push({ label: 'Back to Production', status: 'in_production', icon: '↩️', color: '#f59e0b' });
-        break;
-      case 'ready':
-        actions.push({ label: 'Complete', status: 'completed', icon: '✔️', color: '#059669' });
-        actions.push({ label: 'Deliver', status: 'delivered', icon: '🚚', color: '#0891b2' });
-        break;
-      case 'completed':
-        actions.push({ label: 'Deliver', status: 'delivered', icon: '🚚', color: '#0891b2' });
-        break;
-    }
-
-    // All statuses (except delivered and cancelled) can be cancelled
-    if (status !== 'delivered' && status !== 'cancelled') {
-      actions.push({ label: 'Cancel', status: 'cancelled', icon: '❌', color: '#ef4444' });
-    }
-
-    return actions;
-  };
-
-  // Handle action button click - special handling for schedule production
-  const handleActionClick = (order: InternalOrder, actionStatus: InternalOrderStatus | 'schedule_production') => {
-    if (actionStatus === 'schedule_production') {
-      // Open schedule modal instead of changing status
-      handleScheduleProductionClick(order);
-    } else {
-      // Regular status change
-      handleStatusChange(order, actionStatus as InternalOrderStatus);
-    }
-  };
-
   return (
-    <div style={{ padding: "2rem" }}>
+    <div class={styles.pageContainer}>
       {/* Header */}
-      <div style={{ "margin-bottom": "2rem", display: 'flex', 'justify-content': 'space-between', 'align-items': 'flex-start' }}>
+      <div class={styles.pageHeader}>
         <div>
-          <h1
-            style={{
-              "font-size": "2rem",
-              "font-weight": "600",
-              color: "var(--text-primary)",
-              "margin-bottom": "0.5rem",
-            }}
-          >
-            Internal Production Orders
-          </h1>
-          <p style={{ color: "var(--text-secondary)" }}>
-            Track and manage internal production orders
-          </p>
+          <h1 class={styles.pageTitle}>Internal Production Orders</h1>
+          <p class={styles.pageSubtitle}>Track and manage internal production orders</p>
         </div>
-        <button
-          onClick={handleCreateNew}
-          style={{
-            padding: '0.75rem 1.5rem',
-            'background-color': 'var(--primary-color)',
-            color: 'white',
-            border: 'none',
-            'border-radius': '0.5rem',
-            'font-weight': '500',
-            cursor: 'pointer',
-            display: 'flex',
-            'align-items': 'center',
-            gap: '0.5rem',
-          }}
-        >
-          <span style={{ 'font-size': '1.25rem' }}>+</span>
-          Create Order
+        <button onClick={handleCreateNew} class={styles.primaryButton}>
+          + Create Order
         </button>
       </div>
 
       {/* Stats Cards */}
-      <div
-        style={{
-          display: "grid",
-          "grid-template-columns": "repeat(auto-fit, minmax(240px, 1fr))",
-          gap: "1.5rem",
-          "margin-bottom": "2rem",
-        }}
-      >
+      <div class={styles.statsGrid}>
         <StatsCard
           title="Total Orders"
-          value={totalOrders().toString()}
-          icon="🏭"
+          value={totalOrders()}
+          valueColor="var(--primary-color)"
         />
         <StatsCard
           title="In Production"
-          value={pendingOrders().toString()}
-          icon="⚙️"
+          value={pendingOrders()}
+          valueColor="var(--warning-color)"
         />
         <StatsCard
           title="Completed"
-          value={completedOrders().toString()}
-          icon="✅"
+          value={completedOrders()}
+          valueColor="var(--success-color)"
         />
       </div>
 
-      {/* Filters and Search */}
-      <div
-        style={{
-          display: "flex",
-          gap: "1rem",
-          "margin-bottom": "1.5rem",
-          "flex-wrap": "wrap",
-        }}
-      >
-        <div style={{ flex: "1", "min-width": "250px" }}>
+      {/* Filter Controls */}
+      <div class={styles.filterCard}>
+        <div class={styles.filterRow}>
           <SearchInput
             value={searchQuery()}
             onInput={handleSearch}
             placeholder="Search by order number, batch number..."
+            label="Search Orders"
+          />
+          <FilterSelect
+            value={statusFilter()}
+            onChange={handleFilterChange}
+            label="Status"
+            options={[
+              { value: "all", label: "All Status" },
+              { value: "draft", label: "Draft" },
+              { value: "requested", label: "Requested" },
+              { value: "approved", label: "Approved" },
+              { value: "scheduled", label: "Scheduled" },
+              { value: "in_production", label: "In Production" },
+              { value: "quality_check", label: "Quality Check" },
+              { value: "ready", label: "Ready" },
+              { value: "completed", label: "Completed" },
+              { value: "delivered", label: "Delivered" },
+              { value: "cancelled", label: "Cancelled" },
+            ]}
           />
         </div>
-        <FilterSelect
-          value={statusFilter()}
-          onChange={handleFilterChange}
-          options={[
-            { value: "all", label: "All Status" },
-            { value: "draft", label: "Draft" },
-            { value: "pending", label: "Pending" },
-            { value: "confirmed", label: "Confirmed" },
-            { value: "scheduled", label: "Scheduled" },
-            { value: "ready", label: "Ready" },
-            { value: "in_production", label: "In Production" },
-            { value: "quality_check", label: "Quality Check" },
-            { value: "completed", label: "Completed" },
-            { value: "delivered", label: "Delivered" },
-            { value: "cancelled", label: "Cancelled" },
-          ]}
-        />
       </div>
 
       {/* Orders Table */}
-      <div
-        style={{
-          "background-color": "var(--bg-secondary)",
-          "border-radius": "8px",
-          overflow: "hidden",
-          border: "1px solid var(--border-color)",
-        }}
+      <Show
+        when={!loading()}
+        fallback={
+          <div class={styles.loadingContainer}>
+            <div class={styles.spinner}></div>
+          </div>
+        }
       >
-        <Show
-          when={!loading()}
-          fallback={
-            <div style={{ padding: "3rem", "text-align": "center" }}>
-              <p style={{ color: "var(--text-secondary)" }}>Loading orders...</p>
-            </div>
-          }
-        >
+        <div class={styles.tableContainer}>
           <Show
             when={orders().length > 0}
             fallback={
-              <div style={{ padding: "3rem", "text-align": "center" }}>
-                <p style={{ color: "var(--text-secondary)" }}>
-                  No internal orders found. Create your first production order!
-                </p>
+              <div class={styles.emptyState}>
+                No internal orders found. Create your first production order!
               </div>
             }
           >
-            <table style={{ width: "100%", "border-collapse": "collapse" }}>
-              <thead>
-                <tr style={{ "background-color": "var(--bg-primary)" }}>
-                  <th
-                    style={{
-                      padding: "1rem",
-                      "text-align": "center",
-                      "font-weight": "600",
-                      color: "var(--text-primary)",
-                      "border-bottom": "1px solid var(--border-color)",
-                      width: "50px",
-                    }}
-                  >
-                    {/* Lock icon */}
-                  </th>
-                  <th
-                    style={{
-                      padding: "1rem",
-                      "text-align": "left",
-                      "font-weight": "600",
-                      color: "var(--text-primary)",
-                      "border-bottom": "1px solid var(--border-color)",
-                    }}
-                  >
-                    Order #
-                  </th>
-                  <th
-                    style={{
-                      padding: "1rem",
-                      "text-align": "left",
-                      "font-weight": "600",
-                      color: "var(--text-primary)",
-                      "border-bottom": "1px solid var(--border-color)",
-                    }}
-                  >
-                    Batch Number
-                  </th>
-                  <th
-                    style={{
-                      padding: "1rem",
-                      "text-align": "left",
-                      "font-weight": "600",
-                      color: "var(--text-primary)",
-                      "border-bottom": "1px solid var(--border-color)",
-                    }}
-                  >
-                    Items
-                  </th>
-                  <th
-                    style={{
-                      padding: "1rem",
-                      "text-align": "center",
-                      "font-weight": "600",
-                      color: "var(--text-primary)",
-                      "border-bottom": "1px solid var(--border-color)",
-                    }}
-                  >
-                    Priority
-                  </th>
-                  <th
-                    style={{
-                      padding: "1rem",
-                      "text-align": "center",
-                      "font-weight": "600",
-                      color: "var(--text-primary)",
-                      "border-bottom": "1px solid var(--border-color)",
-                    }}
-                  >
-                    Status
-                  </th>
-                  <th
-                    style={{
-                      padding: "1rem",
-                      "text-align": "left",
-                      "font-weight": "600",
-                      color: "var(--text-primary)",
-                      "border-bottom": "1px solid var(--border-color)",
-                    }}
-                  >
-                    Production Date
-                  </th>
-                  <th
-                    style={{
-                      padding: "1rem",
-                      "text-align": "center",
-                      "font-weight": "600",
-                      color: "var(--text-primary)",
-                      "border-bottom": "1px solid var(--border-color)",
-                    }}
-                  >
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <For each={orders()}>
-                  {(order) => (
-                    <tr
-                      style={{
-                        "border-bottom": "1px solid var(--border-color)",
-                        transition: "background-color 0.2s",
-                        cursor: 'pointer',
-                      }}
-                      onClick={() => handleViewDetails(order)}
-                      onMouseEnter={(e) =>
-                        (e.currentTarget.style.backgroundColor =
-                          "var(--bg-primary)")
-                      }
-                      onMouseLeave={(e) =>
-                        (e.currentTarget.style.backgroundColor = "transparent")
-                      }
-                    >
-                      <td style={{ padding: "0.5rem", "text-align": "center" }}>
-                        <Show when={orderLocksStore.isLocked(order.id)}>
-                          <span
-                            style={{
-                              "font-size": "1.25rem",
-                              cursor: 'help',
-                            }}
-                            title={
-                              orderLocksStore.isLockedByMe(order.id)
-                                ? 'Locked by you'
-                                : `Locked by ${orderLocksStore.getLock(order.id)?.locked_by_user_name}`
-                            }
-                          >
-                            {orderLocksStore.isLockedByMe(order.id) ? '🔓' : '🔒'}
-                          </span>
-                        </Show>
-                      </td>
-                      <td
-                        style={{
-                          padding: "1rem",
-                          color: "var(--text-primary)",
-                          "font-weight": "500",
-                        }}
+            <div class={styles.tableWrapper}>
+              <table class={styles.table}>
+                <thead class={styles.tableHead}>
+                  <tr>
+                    <th class={styles.tableHeaderCellNarrow}>
+                      {/* Lock icon */}
+                    </th>
+                    <th class={styles.tableHeaderCell}>
+                      <div class={styles.minWidth100}>Order #</div>
+                    </th>
+                    <th class={styles.tableHeaderCell}>
+                      <div class={styles.minWidth100}>Batch Number</div>
+                    </th>
+                    <th class={styles.tableHeaderCell}>
+                      <div class={styles.minWidth120}>Items</div>
+                    </th>
+                    <th class={styles.tableHeaderCellCenter}>
+                      <div class={styles.minWidth80}>Priority</div>
+                    </th>
+                    <th class={styles.tableHeaderCellCenter}>
+                      <div class={styles.minWidth100}>Status</div>
+                    </th>
+                    <th class={styles.tableHeaderCell}>
+                      <div class={styles.minWidth120}>Production Date</div>
+                    </th>
+                    <th class={styles.tableHeaderCell}>
+                      <div class={styles.minWidth100}>Actions</div>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <For each={orders()}>
+                    {(order) => (
+                      <tr
+                        class={styles.tableRow}
+                        onClick={() => handleViewDetails(order)}
                       >
-                        {order.orderNumber}
-                      </td>
-                      <td style={{ padding: "1rem" }}>
-                        <div style={{ color: "var(--text-primary)", 'font-family': 'monospace', 'font-size': '0.875rem' }}>
-                          {order.batchNumber || '-'}
-                        </div>
-                      </td>
-                      <td style={{ padding: "1rem" }}>
-                        <div style={{ color: "var(--text-secondary)" }}>
-                          {order.items.length} item{order.items.length !== 1 ? 's' : ''}
-                        </div>
-                        <Show when={order.items.length > 0}>
-                          <div
-                            style={{
-                              color: "var(--text-secondary)",
-                              "font-size": "0.875rem",
-                              "margin-top": "0.25rem",
-                            }}
-                          >
-                            {order.items.map(item => item.productName).join(', ')}
-                          </div>
-                        </Show>
-                      </td>
-                      <td style={{ padding: "1rem", "text-align": "center" }}>
-                        <Badge
-                          {...getPriorityVariant(order.priority)}
-                          size="sm"
-                        >
-                          {order.priority.charAt(0).toUpperCase() + order.priority.slice(1)}
-                        </Badge>
-                      </td>
-                      <td style={{ padding: "1rem", "text-align": "center" }}>
-                        <Badge
-                          {...getStatusVariant(order.status)}
-                          size="sm"
-                        >
-                          {order.status.replace('_', ' ').charAt(0).toUpperCase() + order.status.replace('_', ' ').slice(1)}
-                        </Badge>
-                      </td>
-                      <td style={{ padding: "1rem", color: "var(--text-secondary)" }}>
-                        {order.productionDate ? formatDate(order.productionDate) : '-'}
-                      </td>
-                      <td style={{ padding: "1rem", "text-align": "center" }}>
-                        <div
-                          style={{ display: "flex", gap: "0.5rem", "justify-content": "center", "flex-wrap": "wrap" }}
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          {/* Status transition actions */}
-                          <For each={getStatusActions(order.status)}>
-                            {(action) => (
-                              <button
-                                onClick={() => handleActionClick(order, action.status)}
-                                style={{
-                                  padding: "0.5rem 1rem",
-                                  "background-color": action.color,
-                                  color: "white",
-                                  border: "none",
-                                  "border-radius": "4px",
-                                  cursor: "pointer",
-                                  "font-size": "0.875rem",
-                                  "white-space": "nowrap",
-                                }}
-                                title={action.status === 'schedule_production' ? 'Schedule for production' : `Change status to ${action.status.replace('_', ' ')}`}
-                              >
-                                {action.icon} {action.label}
-                              </button>
-                            )}
-                          </For>
-
-                          {/* Always show View and Edit */}
-                          <button
-                            onClick={() => handleViewDetails(order)}
-                            style={{
-                              padding: "0.5rem 1rem",
-                              "background-color": "var(--primary-color)",
-                              color: "white",
-                              border: "none",
-                              "border-radius": "4px",
-                              cursor: "pointer",
-                              "font-size": "0.875rem",
-                            }}
-                          >
-                            View
-                          </button>
-                          <Show when={order.status !== 'delivered' && order.status !== 'cancelled'}>
-                            <button
-                              onClick={() => handleEditOrder(order)}
-                              style={{
-                                padding: "0.5rem 1rem",
-                                "background-color": "var(--bg-primary)",
-                                color: "var(--text-primary)",
-                                border: "1px solid var(--border-color)",
-                                "border-radius": "4px",
-                                cursor: "pointer",
-                                "font-size": "0.875rem",
-                              }}
+                        <td class={styles.lockCell}>
+                          <Show when={orderLocksStore.isLocked(order.id)}>
+                            <span
+                              class={styles.lockIcon}
+                              title={
+                                orderLocksStore.isLockedByMe(order.id)
+                                  ? 'Locked by you'
+                                  : `Locked by ${orderLocksStore.getLock(order.id)?.locked_by_user_name}`
+                              }
                             >
-                              Edit
-                            </button>
+                              {orderLocksStore.isLockedByMe(order.id) ? '🔓' : '🔒'}
+                            </span>
                           </Show>
-                        </div>
-                      </td>
-                    </tr>
-                  )}
-                </For>
-              </tbody>
-            </table>
+                        </td>
+                        <td class={styles.tableCell}>
+                          <div class={styles.orderNumber}>{order.orderNumber}</div>
+                        </td>
+                        <td class={styles.tableCell}>
+                          <div class={styles.batchNumber}>
+                            {order.batchNumber || '-'}
+                          </div>
+                        </td>
+                        <td class={styles.tableCell}>
+                          <div class={styles.itemCount}>
+                            {order.items.length} item{order.items.length !== 1 ? 's' : ''}
+                          </div>
+                          <Show when={order.items.length > 0}>
+                            <div class={styles.itemNames}>
+                              {order.items.map(item => item.productName).join(', ')}
+                            </div>
+                          </Show>
+                        </td>
+                        <td class={styles.tableCellCenter}>
+                          <Badge
+                            {...getPriorityVariant(order.priority)}
+                            size="sm"
+                          >
+                            {order.priority.charAt(0).toUpperCase() + order.priority.slice(1)}
+                          </Badge>
+                        </td>
+                        <td class={styles.tableCellCenter}>
+                          <Badge
+                            {...getStatusVariant(order.status)}
+                            size="sm"
+                          >
+                            {order.status.replace('_', ' ').charAt(0).toUpperCase() + order.status.replace('_', ' ').slice(1)}
+                          </Badge>
+                        </td>
+                        <td class={styles.tableCell}>
+                          <span class={styles.dateText}>
+                            {order.productionDate ? formatDate(order.productionDate) : '-'}
+                          </span>
+                        </td>
+                        <td class={styles.actionsCell}>
+                          <div class={styles.actionsRow} onClick={(e) => e.stopPropagation()}>
+                            <button
+                              onClick={() => handleViewDetails(order)}
+                              class={styles.actionLink}
+                            >Details</button>
+                            <Show when={order.status === 'approved'}>
+                              <button
+                                onClick={() => handleScheduleProductionClick(order)}
+                                class={styles.successLink}
+                              >Schedule</button>
+                            </Show>
+                            <Show when={order.status !== 'delivered' && order.status !== 'cancelled'}>
+                              <button
+                                onClick={() => handleEditOrder(order)}
+                                class={styles.actionLink}
+                              >Edit</button>
+                            </Show>
+                            <Show when={order.status !== 'delivered' && order.status !== 'cancelled'}>
+                              <button
+                                onClick={() => handleDeleteClick(order)}
+                                class={styles.deleteLink}
+                              >Delete</button>
+                            </Show>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </For>
+                </tbody>
+              </table>
+            </div>
           </Show>
-        </Show>
-      </div>
+        </div>
+      </Show>
 
       {/* Form Modal */}
       <InternalOrderFormModal
@@ -788,68 +568,19 @@ const InternalOrdersPage: Component = () => {
         onStatusChange={handleStatusChange}
       />
 
-      {/* Delete Confirmation Modal */}
+      {/* Delete Confirmation Dialog */}
       <Show when={showDeleteConfirm()}>
-        <div
-          style={{
-            "position": "fixed",
-            "top": "0",
-            "left": "0",
-            "right": "0",
-            "bottom": "0",
-            "z-index": "9999",
-            "display": "flex",
-            "align-items": "center",
-            "justify-content": "center",
-            "padding": "1rem",
-            "background-color": "var(--overlay-bg)",
-            "overflow-y": "auto"
-          }}
-          onClick={handleCancelDelete}
-        >
-          <div
-            style={{
-              "background-color": "var(--bg-primary)",
-              "border": "1px solid var(--border-color)",
-              "border-radius": "0.5rem",
-              "box-shadow": "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
-              "width": "100%",
-              "max-width": "28rem",
-              "padding": "1.5rem",
-              "margin": "auto"
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3 class="text-lg font-semibold mb-4" style="color: var(--text-primary)">
-              Delete Production Order
-            </h3>
-            <p class="mb-6" style="color: var(--text-secondary)">
+        <div class={styles.modalBackdrop} onClick={handleCancelDelete}>
+          <div class={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <h3 class={styles.modalTitle}>Delete Production Order</h3>
+            <p class={styles.modalText}>
               Are you sure you want to delete order "{orderToDelete()?.orderNumber}"? This action cannot be undone.
             </p>
-            <div class="flex justify-end space-x-3">
-              <button
-                onClick={handleCancelDelete}
-                class="px-4 py-2 rounded-md font-medium transition-colors"
-                style={{
-                  "background-color": "transparent",
-                  "border": "1px solid var(--border-color)",
-                  "color": "var(--text-primary)"
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.opacity = "0.8"}
-                onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
-              >
+            <div class={styles.modalActions}>
+              <button onClick={handleCancelDelete} class={styles.cancelButton}>
                 Cancel
               </button>
-              <button
-                onClick={handleConfirmDelete}
-                class="px-4 py-2 rounded-md font-medium transition-colors"
-                style={{
-                  "background-color": "var(--error-color)",
-                  "color": "white"
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "var(--error-hover)"}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "var(--error-color)"}
-              >
+              <button onClick={handleConfirmDelete} class={styles.deleteButton}>
                 Delete
               </button>
             </div>
@@ -859,60 +590,21 @@ const InternalOrdersPage: Component = () => {
 
       {/* Schedule Production Modal */}
       <Show when={showScheduleModal()}>
-        <div
-          style={{
-            "position": "fixed",
-            "top": "0",
-            "left": "0",
-            "right": "0",
-            "bottom": "0",
-            "z-index": "9999",
-            "display": "flex",
-            "align-items": "center",
-            "justify-content": "center",
-            "padding": "1rem",
-            "background-color": "var(--overlay-bg)",
-            "overflow-y": "auto"
-          }}
-          onClick={handleCancelSchedule}
-        >
-          <div
-            style={{
-              "background-color": "var(--bg-primary)",
-              "border": "1px solid var(--border-color)",
-              "border-radius": "0.5rem",
-              "box-shadow": "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
-              "width": "100%",
-              "max-width": "32rem",
-              "padding": "1.5rem",
-              "margin": "auto"
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3 class="text-lg font-semibold mb-4" style="color: var(--text-primary)">
-              Schedule Production
-            </h3>
+        <div class={styles.modalBackdrop} onClick={handleCancelSchedule}>
+          <div class={styles.modalContentLarge} onClick={(e) => e.stopPropagation()}>
+            <h3 class={styles.modalTitle}>Schedule Production</h3>
 
             <Show when={orderToSchedule()}>
               {(order) => (
                 <div>
-                  <div
-                    style={{
-                      "background-color": "var(--bg-secondary)",
-                      "border-radius": "0.5rem",
-                      "padding": "1rem",
-                      "margin-bottom": "1.5rem",
-                    }}
-                  >
-                    <h4 style={{ "font-size": "0.875rem", "font-weight": "600", "color": "var(--text-primary)", "margin-bottom": "0.5rem" }}>
-                      Order Details
-                    </h4>
-                    <div style={{ "font-size": "0.875rem", "color": "var(--text-secondary)", "line-height": "1.5" }}>
+                  <div class={styles.orderDetailsCard}>
+                    <h4 class={styles.orderDetailsTitle}>Order Details</h4>
+                    <div class={styles.orderDetailsList}>
                       <div><strong>Order #:</strong> {order().orderNumber}</div>
-                      <div><strong>Customer:</strong> {order().customerName}</div>
+                      <div><strong>Department:</strong> {order().department || 'N/A'}</div>
                       <div><strong>Items:</strong> {order().items.length} product(s)</div>
                       <Show when={order().items.length > 0}>
-                        <div style={{ "margin-left": "1rem", "margin-top": "0.25rem" }}>
+                        <div class={styles.orderItemsList}>
                           <For each={order().items}>
                             {(item) => (
                               <div>• {item.quantity}x {item.productName}</div>
@@ -923,26 +615,16 @@ const InternalOrdersPage: Component = () => {
                     </div>
                   </div>
 
-                  <div class="mb-4">
-                    <label class="block text-sm font-medium mb-2" style="color: var(--text-primary)">
-                      Production Date
-                    </label>
+                  <div class={styles.formGroup}>
+                    <label class={styles.formLabel}>Production Date</label>
                     <input
                       type="date"
                       value={scheduledProductionDate()}
                       onInput={(e) => setScheduledProductionDate(e.currentTarget.value)}
                       disabled={isScheduling()}
-                      style={{
-                        "width": "100%",
-                        "padding": "0.5rem 0.75rem",
-                        "border": "1px solid var(--border-color)",
-                        "border-radius": "0.375rem",
-                        "background-color": isScheduling() ? "var(--bg-secondary)" : "var(--bg-primary)",
-                        "color": "var(--text-primary)",
-                        "cursor": isScheduling() ? "not-allowed" : "text",
-                      }}
+                      class={styles.formInput}
                     />
-                    <p style={{ "margin-top": "0.5rem", "font-size": "0.875rem", "color": "var(--text-secondary)" }}>
+                    <p class={styles.formHint}>
                       A production schedule will be created for all products in this order.
                     </p>
                   </div>
@@ -950,35 +632,18 @@ const InternalOrdersPage: Component = () => {
               )}
             </Show>
 
-            <div class="flex justify-end space-x-3 mt-6">
+            <div class={styles.modalActions}>
               <button
                 onClick={handleCancelSchedule}
                 disabled={isScheduling()}
-                class="px-4 py-2 rounded-md font-medium transition-colors"
-                style={{
-                  "background-color": "transparent",
-                  "border": "1px solid var(--border-color)",
-                  "color": "var(--text-primary)",
-                  "cursor": isScheduling() ? "not-allowed" : "pointer",
-                  "opacity": isScheduling() ? "0.5" : "1",
-                }}
-                onMouseEnter={(e) => !isScheduling() && (e.currentTarget.style.opacity = "0.8")}
-                onMouseLeave={(e) => !isScheduling() && (e.currentTarget.style.opacity = "1")}
+                class={styles.cancelButton}
               >
                 Cancel
               </button>
               <button
                 onClick={handleScheduleProduction}
                 disabled={isScheduling()}
-                class="px-4 py-2 rounded-md font-medium transition-colors"
-                style={{
-                  "background-color": isScheduling() ? "var(--primary-hover, #0056b3)" : "var(--primary-color)",
-                  "color": "white",
-                  "cursor": isScheduling() ? "not-allowed" : "pointer",
-                  "opacity": isScheduling() ? "0.7" : "1",
-                }}
-                onMouseEnter={(e) => !isScheduling() && (e.currentTarget.style.backgroundColor = "var(--primary-hover, #0056b3)")}
-                onMouseLeave={(e) => !isScheduling() && (e.currentTarget.style.backgroundColor = "var(--primary-color)")}
+                class={styles.submitButton}
               >
                 {isScheduling() ? 'Scheduling...' : 'Schedule Production'}
               </button>

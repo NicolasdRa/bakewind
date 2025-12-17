@@ -8,6 +8,7 @@ import { recipesApi, Recipe, RecipeCategory, CreateRecipeRequest, UpdateRecipeRe
 import Badge from "~/components/common/Badge";
 import { getRecipeCategoryColor } from "~/components/common/Badge.config";
 import { useInfoModal } from "~/stores/infoModalStore";
+import styles from "./RecipesPage.module.css";
 
 type SortField = 'name' | 'prepTime' | 'totalTime';
 type SortDirection = 'asc' | 'desc';
@@ -262,27 +263,23 @@ const RecipesPage: Component = () => {
 
   // Render sort indicator
   const SortIndicator = (field: SortField) => {
-    const isActive = sortField() === field;
+    const isActive = () => sortField() === field;
     return (
-      <span class="ml-1 inline-flex flex-col" style={{ "line-height": "0.5" }}>
+      <span class={styles.sortIndicator}>
         <span
-          class="text-[10px] transition-colors"
-          style={{
-            color: isActive && sortDirection() === 'asc'
-              ? 'var(--primary-color)'
-              : 'var(--text-tertiary)',
-            opacity: isActive && sortDirection() === 'asc' ? '1' : '0.4'
+          class={styles.sortArrow}
+          classList={{
+            [styles.sortArrowActive]: isActive() && sortDirection() === 'asc',
+            [styles.sortArrowInactive]: !isActive() || sortDirection() !== 'asc'
           }}
         >
           ▲
         </span>
         <span
-          class="text-[10px] transition-colors"
-          style={{
-            color: isActive && sortDirection() === 'desc'
-              ? 'var(--primary-color)'
-              : 'var(--text-tertiary)',
-            opacity: isActive && sortDirection() === 'desc' ? '1' : '0.4'
+          class={styles.sortArrow}
+          classList={{
+            [styles.sortArrowActive]: isActive() && sortDirection() === 'desc',
+            [styles.sortArrowInactive]: !isActive() || sortDirection() !== 'desc'
           }}
         >
           ▼
@@ -292,21 +289,16 @@ const RecipesPage: Component = () => {
   };
 
   return (
-    <div class="p-6 md:p-8">
-      <div class="mb-8 flex justify-between items-start">
+    <div class={styles.pageContainer}>
+      <div class={styles.pageHeader}>
         <div>
-          <h1 class="text-3xl font-bold mb-2" style="color: var(--text-primary)">Recipe Management</h1>
-          <p class="text-base" style="color: var(--text-secondary)">Manage your bakery's recipe collection</p>
+          <h1 class={styles.pageTitle}>Recipe Management</h1>
+          <p class={styles.pageSubtitle}>Manage your bakery's recipe collection</p>
         </div>
         <button
           onClick={handleOpenCreateModal}
           disabled={loading()}
-          class="px-6 py-3 rounded-lg font-medium transition-all hover:opacity-90"
-          style={{
-            "background-color": "var(--primary-color)",
-            "color": "white",
-            opacity: loading() ? '0.6' : '1'
-          }}
+          class={styles.primaryButton}
         >
           + Add Recipe
         </button>
@@ -314,20 +306,18 @@ const RecipesPage: Component = () => {
 
       {/* Error Display */}
       <Show when={error()}>
-        <div class="mb-6 p-4 rounded-lg" style={{ "background-color": "var(--error-light)", "border": "1px solid var(--error-color)" }}>
-          <p class="text-sm" style={{ color: "var(--error-color)" }}>{error()}</p>
+        <div class={styles.errorBox}>
+          <p class={styles.errorText}>{error()}</p>
         </div>
       </Show>
 
       {/* Loading State */}
       <Show when={loading() && recipes().length === 0}>
-        <div class="flex justify-center items-center py-12">
-          <div class="text-lg" style="color: var(--text-secondary)">Loading recipes...</div>
-        </div>
+        <div class={styles.loadingText}>Loading recipes...</div>
       </Show>
 
       {/* Stats Cards */}
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div class={styles.statsGrid}>
         <StatsCard
           title="Total Recipes"
           value={recipes().length}
@@ -346,12 +336,8 @@ const RecipesPage: Component = () => {
       </div>
 
       {/* Filter Controls */}
-      <div class="mb-8 rounded-xl p-5 border" style={{
-        "background-color": "var(--bg-primary)",
-        "border-color": "var(--border-color)",
-        "box-shadow": "var(--shadow-card)"
-      }}>
-        <div class="flex flex-wrap gap-4">
+      <div class={styles.filterCard}>
+        <div class={styles.filterRow}>
           <SearchInput
             value={searchQuery()}
             onInput={setSearchQuery}
@@ -380,104 +366,56 @@ const RecipesPage: Component = () => {
       </div>
 
       {/* Recipes Table */}
-      <div class="rounded-xl border overflow-hidden mb-8" style={{
-        "background-color": "var(--bg-primary)",
-        "border-color": "var(--border-color)",
-        "box-shadow": "var(--shadow-card)"
-      }}>
+      <div class={styles.tableContainer}>
         <Show
           when={sortedAndFilteredRecipes().length > 0}
           fallback={
-            <div class="p-12 text-center" style="color: var(--text-secondary)">
+            <div class={styles.emptyState}>
               No recipes found for the selected criteria.
             </div>
           }
         >
-          <div class="overflow-x-auto">
-            <table class="min-w-full" style={{
-              "border-collapse": "separate",
-              "border-spacing": 0
-            }}>
-              <thead style="background-color: var(--bg-tertiary)">
+          <div class={styles.tableWrapper}>
+            <table class={styles.table}>
+              <thead class={styles.tableHead}>
                 <tr>
-                  <th
-                    class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider border-b cursor-pointer select-none transition-all group"
-                    style={{
-                      "color": "var(--text-secondary)",
-                      "border-color": "var(--border-color)"
-                    }}
-                    onClick={() => handleSort('name')}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "var(--bg-hover)"}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
-                  >
-                    <div class="flex items-center justify-between w-full min-w-[180px]">
+                  <th class={styles.tableHeaderCellSortable} onClick={() => handleSort('name')}>
+                    <div class={`${styles.headerContent} ${styles.minWidth180}`}>
                       <span>Recipe Name</span>
                       {SortIndicator('name')}
                     </div>
                   </th>
-                  <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider border-b" style={{
-                    "color": "var(--text-secondary)",
-                    "border-color": "var(--border-color)"
-                  }}>
-                    <div class="min-w-[100px]">Category</div>
+                  <th class={styles.tableHeaderCell}>
+                    <div class={styles.minWidth100}>Category</div>
                   </th>
-                  <th
-                    class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider border-b cursor-pointer select-none transition-all group"
-                    style={{
-                      "color": "var(--text-secondary)",
-                      "border-color": "var(--border-color)"
-                    }}
-                    onClick={() => handleSort('prepTime')}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "var(--bg-hover)"}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
-                  >
-                    <div class="flex items-center justify-between w-full min-w-[100px]">
+                  <th class={styles.tableHeaderCellSortable} onClick={() => handleSort('prepTime')}>
+                    <div class={`${styles.headerContent} ${styles.minWidth100}`}>
                       <span>Prep Time</span>
                       {SortIndicator('prepTime')}
                     </div>
                   </th>
-                  <th
-                    class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider border-b cursor-pointer select-none transition-all group"
-                    style={{
-                      "color": "var(--text-secondary)",
-                      "border-color": "var(--border-color)"
-                    }}
-                    onClick={() => handleSort('totalTime')}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "var(--bg-hover)"}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
-                  >
-                    <div class="flex items-center justify-between w-full min-w-[110px]">
+                  <th class={styles.tableHeaderCellSortable} onClick={() => handleSort('totalTime')}>
+                    <div class={`${styles.headerContent} ${styles.minWidth110}`}>
                       <span>Total Time</span>
                       {SortIndicator('totalTime')}
                     </div>
                   </th>
-                  <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider border-b" style={{
-                    "color": "var(--text-secondary)",
-                    "border-color": "var(--border-color)"
-                  }}>
-                    <div class="min-w-[90px]">Yield</div>
+                  <th class={styles.tableHeaderCell}>
+                    <div class={styles.minWidth90}>Yield</div>
                   </th>
-                  <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider border-b" style={{
-                    "color": "var(--text-secondary)",
-                    "border-color": "var(--border-color)"
-                  }}>
-                    <div class="min-w-[100px]">Actions</div>
+                  <th class={styles.tableHeaderCell}>
+                    <div class={styles.minWidth100}>Actions</div>
                   </th>
                 </tr>
               </thead>
               <tbody>
                 <For each={sortedAndFilteredRecipes()}>
                   {(recipe) => (
-                    <tr class="transition-colors border-b" style={{
-                      "border-color": "var(--border-light)"
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "var(--bg-hover)"}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
-                    >
-                      <td class="px-6 py-4">
+                    <tr class={styles.tableRow}>
+                      <td class={styles.tableCellWrap}>
                         <div>
-                          <div class="text-sm font-medium mb-1" style="color: var(--text-primary)">{recipe.name}</div>
-                          <div class="flex flex-wrap gap-1">
+                          <div class={styles.recipeName}>{recipe.name}</div>
+                          <div class={styles.tagsRow}>
                             <For each={recipe.tags.slice(0, 3)}>
                               {(tag) => (
                                 <Badge size="sm" variant="neutral" rounded="md">
@@ -488,53 +426,29 @@ const RecipesPage: Component = () => {
                           </div>
                         </div>
                       </td>
-                      <td class="px-6 py-4 whitespace-nowrap">
+                      <td class={styles.tableCell}>
                         <Badge color={getRecipeCategoryColor(recipe.category)}>
                           {formatCategoryName(recipe.category)}
                         </Badge>
                       </td>
-                      <td class="px-6 py-4 whitespace-nowrap text-sm" style="color: var(--text-tertiary)">
-                        {formatTime(recipe.prepTime)}
+                      <td class={styles.tableCell}>
+                        <span class={styles.timeText}>{formatTime(recipe.prepTime)}</span>
                       </td>
-                      <td class="px-6 py-4 whitespace-nowrap text-sm font-medium" style="color: var(--text-primary)">
-                        {formatTime(recipe.totalTime)}
+                      <td class={styles.tableCell}>
+                        <span class={styles.totalTimeText}>{formatTime(recipe.totalTime)}</span>
                       </td>
-                      <td class="px-6 py-4 whitespace-nowrap text-sm" style="color: var(--text-tertiary)">
-                        {recipe.yield}
+                      <td class={styles.tableCell}>
+                        <span class={styles.yieldText}>{recipe.yield}</span>
                       </td>
-                      <td class="px-6 py-4 whitespace-nowrap text-sm">
-                        <div class="flex space-x-3">
-                          <button
-                            onClick={() => setSelectedRecipe(recipe)}
-                            class="font-medium transition-colors"
-                            style={{
-                              "color": "var(--primary-color)"
-                            }}
-                            onMouseEnter={(e) => e.currentTarget.style.color = "var(--primary-hover)"}
-                            onMouseLeave={(e) => e.currentTarget.style.color = "var(--primary-color)"}
-                          >
+                      <td class={styles.tableCell}>
+                        <div class={styles.actionsRow}>
+                          <button onClick={() => setSelectedRecipe(recipe)} class={styles.actionLink}>
                             View
                           </button>
-                          <button
-                            onClick={() => handleOpenEditModal(recipe)}
-                            class="font-medium transition-colors"
-                            style={{
-                              "color": "var(--primary-color)"
-                            }}
-                            onMouseEnter={(e) => e.currentTarget.style.color = "var(--primary-hover)"}
-                            onMouseLeave={(e) => e.currentTarget.style.color = "var(--primary-color)"}
-                          >
+                          <button onClick={() => handleOpenEditModal(recipe)} class={styles.actionLink}>
                             Edit
                           </button>
-                          <button
-                            onClick={() => handleDeleteClick(recipe)}
-                            class="font-medium transition-colors"
-                            style={{
-                              "color": "var(--error-color)"
-                            }}
-                            onMouseEnter={(e) => e.currentTarget.style.color = "var(--error-hover)"}
-                            onMouseLeave={(e) => e.currentTarget.style.color = "var(--error-color)"}
-                          >
+                          <button onClick={() => handleDeleteClick(recipe)} class={styles.deleteLink}>
                             Delete
                           </button>
                         </div>
@@ -570,66 +484,17 @@ const RecipesPage: Component = () => {
 
       {/* Delete Confirmation Dialog */}
       <Show when={showDeleteConfirm()}>
-        <div
-          style={{
-            "position": "fixed",
-            "top": "0",
-            "left": "0",
-            "right": "0",
-            "bottom": "0",
-            "z-index": "9999",
-            "display": "flex",
-            "align-items": "center",
-            "justify-content": "center",
-            "padding": "1rem",
-            "background-color": "var(--overlay-bg)",
-            "overflow-y": "auto"
-          }}
-          onClick={handleCancelDelete}
-        >
-          <div
-            style={{
-              "background-color": "var(--bg-primary)",
-              "border": "1px solid var(--border-color)",
-              "border-radius": "0.5rem",
-              "box-shadow": "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
-              "width": "100%",
-              "max-width": "28rem",
-              "padding": "1.5rem",
-              "margin": "auto"
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3 class="text-lg font-semibold mb-4" style="color: var(--text-primary)">
-              Delete Recipe
-            </h3>
-            <p class="mb-6" style="color: var(--text-secondary)">
+        <div class={styles.modalBackdrop} onClick={handleCancelDelete}>
+          <div class={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <h3 class={styles.modalTitle}>Delete Recipe</h3>
+            <p class={styles.modalText}>
               Are you sure you want to delete "{recipeToDelete()?.name}"? This action cannot be undone.
             </p>
-            <div class="flex justify-end space-x-3">
-              <button
-                onClick={handleCancelDelete}
-                class="px-4 py-2 rounded-md font-medium transition-colors"
-                style={{
-                  "background-color": "transparent",
-                  "border": "1px solid var(--border-color)",
-                  "color": "var(--text-primary)"
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.opacity = "0.8"}
-                onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
-              >
+            <div class={styles.modalActions}>
+              <button onClick={handleCancelDelete} class={styles.cancelButton}>
                 Cancel
               </button>
-              <button
-                onClick={handleConfirmDelete}
-                class="px-4 py-2 rounded-md font-medium transition-colors"
-                style={{
-                  "background-color": "var(--error-color)",
-                  "color": "white"
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "var(--error-hover)"}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "var(--error-color)"}
-              >
+              <button onClick={handleConfirmDelete} class={styles.deleteButton}>
                 Delete
               </button>
             </div>

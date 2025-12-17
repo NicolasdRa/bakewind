@@ -1,0 +1,405 @@
+/* AnalyticsPage - CSS Module */
+
+/* Page layout */
+.pageContainer {
+  padding: var(--spacing-6);
+}
+
+.pageHeader {
+  margin-bottom: var(--spacing-6);
+}
+
+.pageTitle {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--spacing-2);
+  color: var(--text-primary);
+}
+
+.pageSubtitle {
+  color: var(--text-secondary);
+}
+
+/* Period selection */
+.periodCard {
+  margin-bottom: var(--spacing-6);
+  background-color: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: var(--spacing-4);
+}
+
+.periodButtons {
+  display: flex;
+  gap: var(--spacing-4);
+}
+
+.periodButton {
+  padding: var(--spacing-2) var(--spacing-4);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+  transition: all 0.2s;
+}
+
+.periodButton:hover {
+  background-color: var(--bg-hover);
+}
+
+.periodButtonActive {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+/* Loading state */
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: var(--spacing-12) 0;
+}
+
+.spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 2px solid transparent;
+  border-bottom-color: var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Key metrics grid */
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: var(--spacing-6);
+  margin-bottom: var(--spacing-8);
+}
+
+@media (min-width: 768px) {
+  .metricsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .metricsGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.metricCard {
+  background-color: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: var(--spacing-6);
+}
+
+.metricContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.metricInfo {
+  flex: 1;
+}
+
+.metricLabel {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+}
+
+.metricValue {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+}
+
+.metricSubtext {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.metricSubtextPositive {
+  color: var(--success-color);
+}
+
+.metricSubtextNegative {
+  color: var(--error-color);
+}
+
+.metricIcon {
+  padding: var(--spacing-3);
+  border-radius: 9999px;
+}
+
+.metricIconGreen {
+  background-color: var(--success-light);
+}
+
+.metricIconBlue {
+  background-color: var(--info-light);
+}
+
+.metricIconPurple {
+  background-color: #f3e8ff;
+}
+
+.metricIconYellow {
+  background-color: var(--warning-light);
+}
+
+/* Charts grid */
+.chartsGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-8);
+  margin-bottom: var(--spacing-8);
+}
+
+@media (min-width: 1024px) {
+  .chartsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.chartCard {
+  background-color: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: var(--spacing-6);
+}
+
+.chartTitle {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-4);
+}
+
+.chartContainer {
+  height: 16rem;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--spacing-2);
+}
+
+.chartBar {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.chartBarFill {
+  width: 100%;
+  background-color: var(--primary-color);
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  transition: all 0.3s;
+}
+
+.chartBarFill:hover {
+  background-color: var(--primary-hover);
+}
+
+.chartBarLabel {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  margin-top: var(--spacing-2);
+  transform: rotate(-45deg);
+  transform-origin: left;
+}
+
+/* Order status list */
+.statusList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.statusItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.statusIndicator {
+  display: flex;
+  align-items: center;
+}
+
+.statusDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 9999px;
+  margin-right: var(--spacing-3);
+}
+
+.statusDotYellow {
+  background-color: var(--warning-color);
+}
+
+.statusDotBlue {
+  background-color: var(--info-color);
+}
+
+.statusDotGreen {
+  background-color: var(--success-color);
+}
+
+.statusDotRed {
+  background-color: var(--error-color);
+}
+
+.statusLabel {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+}
+
+.statusValue {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+}
+
+/* Products and alerts grid */
+.bottomGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-8);
+}
+
+@media (min-width: 1024px) {
+  .bottomGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Top products */
+.productList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.productItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.productInfo {
+  flex: 1;
+}
+
+.productName {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+}
+
+.productSales {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+}
+
+.productRevenue {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--success-color);
+}
+
+/* Inventory alerts */
+.alertList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.alertItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-3);
+  border-radius: var(--radius-lg);
+}
+
+.alertItemUrgent {
+  background-color: var(--error-light);
+}
+
+.alertItemWarning {
+  background-color: var(--warning-light);
+}
+
+.alertInfo {
+  flex: 1;
+}
+
+.alertName {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.alertNameUrgent {
+  color: var(--error-color);
+}
+
+.alertNameWarning {
+  color: var(--warning-color);
+}
+
+.alertStatus {
+  font-size: var(--font-size-xs);
+}
+
+.alertStatusUrgent {
+  color: var(--error-color);
+}
+
+.alertStatusWarning {
+  color: var(--warning-color);
+}
+
+.alertBadge {
+  font-size: var(--font-size-xs);
+  padding: var(--spacing-1) var(--spacing-2);
+  border-radius: 9999px;
+}
+
+.alertBadgeUrgent {
+  background-color: rgba(239, 68, 68, 0.2);
+  color: var(--error-color);
+}
+
+.alertBadgeWarning {
+  background-color: rgba(234, 179, 8, 0.2);
+  color: var(--warning-color);
+}
+
+.viewInventoryButton {
+  width: 100%;
+  margin-top: var(--spacing-4);
+  padding: var(--spacing-2) var(--spacing-4);
+  font-size: var(--font-size-sm);
+  background-color: var(--primary-color);
+  color: white;
+  border-radius: var(--radius-md);
+  transition: background-color 0.2s;
+}
+
+.viewInventoryButton:hover {
+  background-color: var(--primary-hover);
+}

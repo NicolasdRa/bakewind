@@ -6,6 +6,7 @@ import StatsCard from "~/components/common/StatsCard";
 import DatePicker from "~/components/common/DatePicker";
 import FilterSelect from "~/components/common/FilterSelect";
 import Badge from "~/components/common/Badge";
+import styles from "./ProductionPage.module.css";
 
 const ProductionPage: Component = () => {
   const { showSuccess, showError } = useInfoModal();
@@ -95,16 +96,16 @@ const ProductionPage: Component = () => {
   };
 
   return (
-    <div class="p-6 md:p-8">
-      <div class="mb-8 flex justify-between items-start">
+    <div class={styles.pageContainer}>
+      <div class={styles.pageHeader}>
         <div>
-          <h1 class="text-3xl font-bold mb-2" style="color: var(--text-primary)">Production Batches</h1>
-          <p class="text-base" style="color: var(--text-secondary)">View and manage active production schedules</p>
+          <h1 class={styles.pageTitle}>Production Batches</h1>
+          <p class={styles.pageSubtitle}>View and manage active production schedules</p>
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div class={styles.statsGrid}>
         <StatsCard
           title="Scheduled"
           value={getAllItems().filter(item => item.status === 'scheduled').length}
@@ -128,20 +129,16 @@ const ProductionPage: Component = () => {
       </div>
 
       {/* Filter Controls */}
-      <div class="mb-8 rounded-xl p-5 border" style={{
-        "background-color": "var(--bg-primary)",
-        "border-color": "var(--border-color)",
-        "box-shadow": "var(--shadow-card)"
-      }}>
-        <div class="flex flex-wrap gap-4 items-end">
-          <div class="flex-1 min-w-64">
+      <div class={styles.filterCard}>
+        <div class={styles.filterRow}>
+          <div class={styles.filterItem}>
             <DatePicker
               value={selectedDate()}
               onChange={handleDateChange}
               label="Production Date"
             />
           </div>
-          <div class="flex-1 min-w-64">
+          <div class={styles.filterItem}>
             <FilterSelect
               value={selectedStatus()}
               onChange={setSelectedStatus}
@@ -159,13 +156,9 @@ const ProductionPage: Component = () => {
       </div>
 
       {/* Production Schedule */}
-      <div class="rounded-xl border overflow-hidden" style={{
-        "background-color": "var(--bg-primary)",
-        "border-color": "var(--border-color)",
-        "box-shadow": "var(--shadow-card)"
-      }}>
-        <div class="px-6 py-4 border-b" style="border-color: var(--border-color)">
-          <h2 class="text-lg font-semibold" style="color: var(--text-primary)">
+      <div class={styles.scheduleContainer}>
+        <div class={styles.scheduleHeader}>
+          <h2 class={styles.scheduleTitle}>
             Production Schedule - {formatLocalDate(selectedDate())}
           </h2>
         </div>
@@ -173,7 +166,7 @@ const ProductionPage: Component = () => {
         <Show
           when={!loading()}
           fallback={
-            <div class="p-6 text-center" style="color: var(--text-secondary)">
+            <div class={styles.loadingState}>
               Loading production schedules...
             </div>
           }
@@ -181,118 +174,85 @@ const ProductionPage: Component = () => {
           <Show
             when={filteredItems().length > 0}
             fallback={
-              <div class="p-6 text-center" style="color: var(--text-secondary)">
+              <div class={styles.emptyState}>
                 No production items scheduled for this date.
               </div>
             }
           >
-            <div class="divide-y" style="border-color: var(--border-color)">
+            <div class={styles.itemList}>
               <For each={filteredItems()}>
                 {(item) => (
-                  <div
-                    class="p-6 transition-colors"
-                    style={{
-                      "background-color": "var(--bg-primary)"
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = "var(--bg-secondary)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = "var(--bg-primary)";
-                    }}
-                  >
-                    <div class="flex items-start justify-between">
-                      <div class="flex-1">
-                        <div class="flex items-center gap-3 mb-2 flex-wrap">
-                          <h3 class="text-lg font-medium" style="color: var(--text-primary)">
-                            {item.recipe_name}
-                          </h3>
+                  <div class={styles.productionItem}>
+                    <div class={styles.itemContent}>
+                      <div class={styles.itemMain}>
+                        <div class={styles.itemHeader}>
+                          <h3 class={styles.recipeName}>{item.recipe_name}</h3>
                           <Show when={item.internal_order_id}>
-                            <Badge color="#4169E1">
-                              Internal Order
-                            </Badge>
+                            <Badge color="#4169E1">Internal Order</Badge>
                           </Show>
                           <Show when={item.customer_order_id}>
-                            <Badge color="#32CD32">
-                              Customer Order
-                            </Badge>
+                            <Badge color="#32CD32">Customer Order</Badge>
                           </Show>
                           <Badge variant={getStatusVariant(item.status)}>
                             {formatStatus(item.status)}
                           </Badge>
                           <Show when={item.quality_check}>
-                            <Badge variant="success">
-                              Quality Checked
-                            </Badge>
+                            <Badge variant="success">Quality Checked</Badge>
                           </Show>
                         </div>
 
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm" style="color: var(--text-secondary)">
+                        <div class={styles.detailsGrid}>
                           <div>
-                            <span class="font-medium">Quantity:</span> {item.quantity}
+                            <span class={styles.detailLabel}>Quantity:</span> {item.quantity}
                           </div>
                           <div>
-                            <span class="font-medium">Scheduled:</span> {formatTime(item.scheduled_time)}
+                            <span class={styles.detailLabel}>Scheduled:</span> {formatTime(item.scheduled_time)}
                           </div>
                           <Show when={item.start_time}>
                             <div>
-                              <span class="font-medium">Started:</span> {formatTime(item.start_time)}
+                              <span class={styles.detailLabel}>Started:</span> {formatTime(item.start_time)}
                             </div>
                           </Show>
                           <Show when={item.completed_time}>
                             <div>
-                              <span class="font-medium">Completed:</span> {formatTime(item.completed_time)}
+                              <span class={styles.detailLabel}>Completed:</span> {formatTime(item.completed_time)}
                             </div>
                           </Show>
                         </div>
 
                         <Show when={item.assigned_to}>
-                          <div class="mt-2 text-sm" style="color: var(--text-secondary)">
-                            <span class="font-medium">Assigned to:</span> {item.assigned_to}
+                          <div class={styles.extraDetail}>
+                            <span class={styles.detailLabel}>Assigned to:</span> {item.assigned_to}
                           </div>
                         </Show>
 
                         <Show when={item.batch_number}>
-                          <div class="mt-2 text-sm" style="color: var(--text-secondary)">
-                            <span class="font-medium">Batch #:</span> {item.batch_number}
+                          <div class={styles.extraDetail}>
+                            <span class={styles.detailLabel}>Batch #:</span> {item.batch_number}
                           </div>
                         </Show>
 
                         <Show when={item.notes}>
-                          <div class="mt-2 text-sm" style="color: var(--text-secondary)">
-                            <span class="font-medium">Notes:</span> {item.notes}
+                          <div class={styles.extraDetail}>
+                            <span class={styles.detailLabel}>Notes:</span> {item.notes}
                           </div>
                         </Show>
 
                         <Show when={item.quality_notes}>
-                          <div class="mt-2 text-sm" style="color: var(--text-secondary)">
-                            <span class="font-medium">Quality Notes:</span> {item.quality_notes}
+                          <div class={styles.extraDetail}>
+                            <span class={styles.detailLabel}>Quality Notes:</span> {item.quality_notes}
                           </div>
                         </Show>
                       </div>
 
-                      <div class="flex gap-2 ml-4">
+                      <div class={styles.itemActions}>
                         <Show when={item.status === 'scheduled'}>
-                          <button
-                            onClick={() => handleStartProduction(item)}
-                            class="px-4 py-2 rounded-lg text-sm font-medium transition-all hover:opacity-90"
-                            style={{
-                              "background-color": "var(--success-color)",
-                              "color": "white"
-                            }}
-                          >
+                          <button onClick={() => handleStartProduction(item)} class={styles.startButton}>
                             Start
                           </button>
                         </Show>
                         <Show when={item.status === 'in_progress'}>
-                          <button
-                            onClick={() => handleCompleteProduction(item)}
-                            class="px-4 py-2 rounded-lg text-sm font-medium transition-all hover:opacity-90"
-                            style={{
-                              "background-color": "var(--primary-color)",
-                              "color": "white"
-                            }}
-                          >
+                          <button onClick={() => handleCompleteProduction(item)} class={styles.completeButton}>
                             Complete
                           </button>
                         </Show>
