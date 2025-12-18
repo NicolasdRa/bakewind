@@ -1,5 +1,5 @@
-import { Component, createSignal, createResource, For, Show } from "solid-js";
-import { Customer, customersApi, CustomerQueryParams, CustomersResponse } from "../../api/customers";
+import { Component, createSignal, createResource, createEffect, For, Show } from "solid-js";
+import { Customer, customersApi, CustomerQueryParams, CustomersResponse, ImportResult, CreateCustomerDto } from "../../api/customers";
 import CustomerFormModal from "../../components/customers/CustomerFormModal";
 import CustomerDetailsModal from "../../components/customers/CustomerDetailsModal";
 import Badge from "../../components/common/Badge";
@@ -29,34 +29,42 @@ const CustomersPage: Component = () => {
   const [isDetailsModalOpen, setIsDetailsModalOpen] = createSignal(false);
   const [editingCustomer, setEditingCustomer] = createSignal<Customer | null>(null);
 
-  // Get customers list from response
+  // Import modal state
+  const [isImportModalOpen, setIsImportModalOpen] = createSignal(false);
+  const [importData, setImportData] = createSignal("");
+  const [importResult, setImportResult] = createSignal<ImportResult | null>(null);
+  const [isImporting, setIsImporting] = createSignal(false);
+  const [isExporting, setIsExporting] = createSignal(false);
+
+  // Debounce timer for search
+  let searchTimeout: number | undefined;
+
+  // Server-side search effect
+  createEffect(() => {
+    const term = searchTerm();
+    const status = selectedStatus();
+    const type = selectedType();
+
+    // Clear previous timeout
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
+
+    // Debounce search for 300ms
+    searchTimeout = setTimeout(() => {
+      setQueryParams((prev) => ({
+        ...prev,
+        page: 1, // Reset to first page on filter change
+        search: term || undefined,
+        status: status !== "all" ? (status as "active" | "inactive") : undefined,
+        customerType: type !== "all" ? (type as "business" | "individual") : undefined,
+      }));
+    }, 300) as unknown as number;
+  });
+
+  // Get customers list from response (no client-side filtering needed now)
   const customers = () => customersData()?.customers || [];
-
-  // Apply client-side search filter (server-side filtering available via queryParams)
-  const filteredCustomers = () => {
-    let filtered = customers();
-
-    if (searchTerm()) {
-      const term = searchTerm().toLowerCase();
-      filtered = filtered.filter(
-        (customer) =>
-          customer.name.toLowerCase().includes(term) ||
-          customer.email?.toLowerCase().includes(term) ||
-          customer.phone.toLowerCase().includes(term) ||
-          customer.companyName?.toLowerCase().includes(term)
-      );
-    }
-
-    if (selectedStatus() !== "all") {
-      filtered = filtered.filter((customer) => customer.status === selectedStatus());
-    }
-
-    if (selectedType() !== "all") {
-      filtered = filtered.filter((customer) => customer.customerType === selectedType());
-    }
-
-    return filtered;
-  };
+  const filteredCustomers = () => customers();
 
   // Stats calculations
   const getTotalCustomers = () => customersData()?.pagination.total || customers().length;
@@ -100,6 +108,75 @@ const CustomersPage: Component = () => {
     if (customer) {
       setIsDetailsModalOpen(false);
       handleEditCustomer(customer);
+    }
+  };
+
+  // Import handlers
+  const handleOpenImport = () => {
+    setImportData("");
+    setImportResult(null);
+    setIsImportModalOpen(true);
+  };
+
+  const handleCloseImport = () => {
+    setIsImportModalOpen(false);
+    setImportData("");
+    setImportResult(null);
+  };
+
+  const handleImport = async () => {
+    if (!importData().trim()) return;
+
+    setIsImporting(true);
+    setImportResult(null);
+
+    try {
+      // Parse JSON input
+      const customers: CreateCustomerDto[] = JSON.parse(importData());
+
+      if (!Array.isArray(customers)) {
+        throw new Error("Input must be a JSON array of customer objects");
+      }
+
+      const result = await customersApi.importCustomers(customers);
+      setImportResult(result);
+
+      if (result.imported > 0) {
+        refetch();
+      }
+    } catch (error: any) {
+      setImportResult({
+        imported: 0,
+        failed: 1,
+        errors: [{ row: 0, email: undefined, error: error.message || "Invalid JSON format" }],
+      });
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
+  // Export handler
+  const handleExport = async () => {
+    setIsExporting(true);
+    try {
+      const csvContent = await customersApi.exportCustomersCSV(
+        selectedStatus() !== "all" ? (selectedStatus() as "active" | "inactive") : undefined
+      );
+
+      // Create and download file
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `customers-${new Date().toISOString().split("T")[0]}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Export failed:", error);
+    } finally {
+      setIsExporting(false);
     }
   };
 
@@ -175,9 +252,21 @@ const CustomersPage: Component = () => {
             </select>
           </div>
           <div class={styles.filterButtonWrapper}>
-            <button class={styles.addButton} onClick={handleAddCustomer}>
-              Add Customer
-            </button>
+            <div class={styles.actionButtonsGroup}>
+              <button class={styles.secondaryButton} onClick={handleOpenImport}>
+                Import
+              </button>
+              <button
+                class={styles.secondaryButton}
+                onClick={handleExport}
+                disabled={isExporting()}
+              >
+                {isExporting() ? "Exporting..." : "Export CSV"}
+              </button>
+              <button class={styles.addButton} onClick={handleAddCustomer}>
+                Add Customer
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -423,6 +512,70 @@ const CustomersPage: Component = () => {
         onClose={handleDetailsClose}
         onEdit={handleDetailsEdit}
       />
+
+      {/* Import Modal */}
+      <Show when={isImportModalOpen()}>
+        <div class={styles.importModal}>
+          <div class={styles.importModalBackdrop} onClick={handleCloseImport} />
+          <div class={styles.importModalContent}>
+            <h2 class={styles.importModalTitle}>Import Customers</h2>
+            <textarea
+              class={styles.importTextarea}
+              placeholder='Paste JSON array of customers, e.g.:
+[
+  {"name": "John Doe", "phone": "555-1234", "email": "john@example.com"},
+  {"name": "Jane Smith", "phone": "555-5678", "customerType": "business", "companyName": "ABC Corp"}
+]'
+              value={importData()}
+              onInput={(e) => setImportData(e.currentTarget.value)}
+            />
+            <p class={styles.importHelp}>
+              Required fields: name, phone. Optional: email, addressLine1, addressLine2, city,
+              state, zipCode, customerType (business/individual), companyName, taxId,
+              preferredContact (email/phone/text), marketingOptIn, notes.
+            </p>
+
+            <Show when={importResult()}>
+              {(result) => (
+                <div class={styles.importResults}>
+                  <Show when={result().imported > 0}>
+                    <p class={styles.importResultSuccess}>
+                      Successfully imported {result().imported} customer(s)
+                    </p>
+                  </Show>
+                  <Show when={result().failed > 0}>
+                    <p class={styles.importResultError}>
+                      Failed to import {result().failed} customer(s)
+                    </p>
+                    <div class={styles.importErrorList}>
+                      <For each={result().errors}>
+                        {(error) => (
+                          <p class={styles.importErrorItem}>
+                            Row {error.row}: {error.error}
+                          </p>
+                        )}
+                      </For>
+                    </div>
+                  </Show>
+                </div>
+              )}
+            </Show>
+
+            <div class={styles.importModalActions}>
+              <button class={styles.secondaryButton} onClick={handleCloseImport}>
+                Cancel
+              </button>
+              <button
+                class={styles.addButton}
+                onClick={handleImport}
+                disabled={isImporting() || !importData().trim()}
+              >
+                {isImporting() ? "Importing..." : "Import"}
+              </button>
+            </div>
+          </div>
+        </div>
+      </Show>
     </div>
   );
 };

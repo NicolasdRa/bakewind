@@ -125,6 +125,50 @@ export interface CustomerOrdersResponse {
   };
 }
 
+export interface ImportResult {
+  imported: number;
+  failed: number;
+  errors: Array<{
+    row: number;
+    email: string | undefined;
+    error: string;
+  }>;
+}
+
+export interface CustomerAnalytics {
+  overview: {
+    totalOrders: number;
+    totalSpent: number;
+    averageOrderValue: number;
+    firstOrderDate: string | null;
+    lastOrderDate: string | null;
+    customerLifetimeValue: number;
+  };
+  orderFrequency: {
+    averageDaysBetweenOrders: number;
+    orderFrequencyCategory: 'frequent' | 'regular' | 'new';
+    predictedNextOrder: string | null;
+  };
+  preferences: {
+    favoriteProducts: Array<{
+      productName: string;
+      orderCount: number;
+      totalQuantity: number;
+    }>;
+    preferredOrderDays: string[];
+    averageOrderSize: number;
+  };
+  trends: {
+    monthlyOrders: Array<{
+      month: string;
+      orderCount: number;
+      totalAmount: number;
+    }>;
+    orderValueTrend: 'increasing' | 'decreasing' | 'stable';
+    riskLevel: 'low' | 'medium' | 'high';
+  };
+}
+
 export const customersApi = {
   /**
    * Get all customers with filtering, pagination, and sorting
@@ -188,6 +232,44 @@ export const customersApi = {
       ? `/customers/${customerId}/orders?${queryString}`
       : `/customers/${customerId}/orders`;
     return get<CustomerOrdersResponse>(url);
+  },
+
+  /**
+   * Get customer analytics
+   */
+  async getCustomerAnalytics(
+    customerId: string,
+    period?: '30d' | '90d' | '1y' | 'all',
+  ): Promise<CustomerAnalytics> {
+    const searchParams = new URLSearchParams();
+    if (period) searchParams.set('period', period);
+
+    const queryString = searchParams.toString();
+    const url = queryString
+      ? `/customers/${customerId}/analytics?${queryString}`
+      : `/customers/${customerId}/analytics`;
+    return get<CustomerAnalytics>(url);
+  },
+
+  /**
+   * Bulk import customers
+   */
+  async importCustomers(customers: CreateCustomerDto[]): Promise<ImportResult> {
+    return post<ImportResult>('/customers/import', { customers });
+  },
+
+  /**
+   * Export customers to CSV
+   */
+  async exportCustomersCSV(status?: CustomerStatus): Promise<string> {
+    const searchParams = new URLSearchParams();
+    if (status) searchParams.set('status', status);
+
+    const queryString = searchParams.toString();
+    const url = queryString
+      ? `/customers/export/csv?${queryString}`
+      : '/customers/export/csv';
+    return get<string>(url);
   },
 
   // Legacy aliases for backward compatibility

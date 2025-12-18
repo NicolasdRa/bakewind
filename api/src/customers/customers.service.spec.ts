@@ -881,5 +881,239 @@ describe('CustomersService', () => {
 
       expect(result).toContain('""hello""');
     });
+
+    it('should filter by status when provided', async () => {
+      const mockCustomers = [
+        createMockCustomer({
+          name: 'Active Customer',
+          status: 'active',
+        }),
+      ];
+
+      mockDatabaseService.database.select.mockReturnValue({
+        from: jest.fn().mockReturnValue({
+          where: jest.fn().mockReturnValue({
+            orderBy: jest.fn().mockResolvedValue(mockCustomers),
+          }),
+        }),
+      });
+
+      const result = await service.exportToCSV('user-1', { status: 'active' });
+
+      expect(result).toContain('Active Customer');
+      expect(result).toContain('active');
+    });
+  });
+
+  describe('getCustomerAnalytics', () => {
+    it('should return analytics for customer with orders', async () => {
+      const mockCustomer = createMockCustomer();
+      const mockStats = createOrderStatsMock({ totalOrders: 5, totalSpent: 500, lastOrderAt: new Date('2024-06-15') });
+
+      // Mock findByIdAndUser (customer + stats)
+      mockDatabaseService.database.select.mockReturnValueOnce({
+        from: jest.fn().mockReturnValue({
+          where: jest.fn().mockResolvedValue([mockCustomer]),
+        }),
+      });
+      mockDatabaseService.database.select.mockReturnValueOnce({
+        from: jest.fn().mockReturnValue({
+          where: jest.fn().mockResolvedValue([mockStats]),
+        }),
+      });
+
+      // Mock order stats
+      mockDatabaseService.database.select.mockReturnValueOnce({
+        from: jest.fn().mockReturnValue({
+          where: jest.fn().mockResolvedValue([mockStats]),
+        }),
+      });
+
+      // Mock first order date
+      mockDatabaseService.database.select.mockReturnValueOnce({
+        from: jest.fn().mockReturnValue({
+          where: jest.fn().mockReturnValue({
+            orderBy: jest.fn().mockReturnValue({
+              limit: jest.fn().mockResolvedValue([{ createdAt: new Date('2024-01-01') }]),
+            }),
+          }),
+        }),
+      });
+
+      // Mock order dates for frequency calculation
+      mockDatabaseService.database.select.mockReturnValueOnce({
+        from: jest.fn().mockReturnValue({
+          where: jest.fn().mockReturnValue({
+            orderBy: jest.fn().mockResolvedValue([
+              { createdAt: new Date('2024-01-01') },
+              { createdAt: new Date('2024-02-15') },
+              { createdAt: new Date('2024-04-01') },
+            ]),
+          }),
+        }),
+      });
+
+      // Mock favorite products
+      mockDatabaseService.database.select.mockReturnValueOnce({
+        from: jest.fn().mockReturnValue({
+          innerJoin: jest.fn().mockReturnValue({
+            where: jest.fn().mockReturnValue({
+              groupBy: jest.fn().mockReturnValue({
+                orderBy: jest.fn().mockReturnValue({
+                  limit: jest.fn().mockResolvedValue([
+                    { productName: 'Croissant', orderCount: 3, totalQuantity: 15 },
+                    { productName: 'Baguette', orderCount: 2, totalQuantity: 8 },
+                  ]),
+                }),
+              }),
+            }),
+          }),
+        }),
+      });
+
+      // Mock preferred order days
+      mockDatabaseService.database.select.mockReturnValueOnce({
+        from: jest.fn().mockReturnValue({
+          where: jest.fn().mockReturnValue({
+            groupBy: jest.fn().mockReturnValue({
+              orderBy: jest.fn().mockResolvedValue([
+                { dayOfWeek: 1, count: 5 }, // Monday
+                { dayOfWeek: 5, count: 3 }, // Friday
+              ]),
+            }),
+          }),
+        }),
+      });
+
+      // Mock monthly orders
+      mockDatabaseService.database.select.mockReturnValueOnce({
+        from: jest.fn().mockReturnValue({
+          where: jest.fn().mockReturnValue({
+            groupBy: jest.fn().mockReturnValue({
+              orderBy: jest.fn().mockResolvedValue([
+                { month: '2024-01', orderCount: 2, totalAmount: 150 },
+                { month: '2024-02', orderCount: 1, totalAmount: 100 },
+                { month: '2024-04', orderCount: 2, totalAmount: 250 },
+              ]),
+            }),
+          }),
+        }),
+      });
+
+      const result = await service.getCustomerAnalytics('customer-1', 'user-1', '90d');
+
+      expect(result.overview.totalOrders).toBe(5);
+      expect(result.overview.totalSpent).toBe(500);
+      expect(result.overview.averageOrderValue).toBe(100);
+      expect(result.preferences.favoriteProducts).toHaveLength(2);
+      expect(result.preferences.favoriteProducts[0]!.productName).toBe('Croissant');
+      expect(result.preferences.preferredOrderDays).toContain('Monday');
+      expect(result.trends.monthlyOrders).toHaveLength(3);
+      expect(result.orderFrequency.orderFrequencyCategory).toBe('regular');
+    });
+
+    it('should return analytics for new customer with no orders', async () => {
+      const mockCustomer = createMockCustomer();
+      const mockStats = createOrderStatsMock({ totalOrders: 0, totalSpent: 0, lastOrderAt: null });
+
+      // Mock findByIdAndUser
+      mockDatabaseService.database.select.mockReturnValueOnce({
+        from: jest.fn().mockReturnValue({
+          where: jest.fn().mockResolvedValue([mockCustomer]),
+        }),
+      });
+      mockDatabaseService.database.select.mockReturnValueOnce({
+        from: jest.fn().mockReturnValue({
+          where: jest.fn().mockResolvedValue([mockStats]),
+        }),
+      });
+
+      // Mock order stats
+      mockDatabaseService.database.select.mockReturnValueOnce({
+        from: jest.fn().mockReturnValue({
+          where: jest.fn().mockResolvedValue([mockStats]),
+        }),
+      });
+
+      // Mock first order date (none)
+      mockDatabaseService.database.select.mockReturnValueOnce({
+        from: jest.fn().mockReturnValue({
+          where: jest.fn().mockReturnValue({
+            orderBy: jest.fn().mockReturnValue({
+              limit: jest.fn().mockResolvedValue([]),
+            }),
+          }),
+        }),
+      });
+
+      // Mock order dates (empty)
+      mockDatabaseService.database.select.mockReturnValueOnce({
+        from: jest.fn().mockReturnValue({
+          where: jest.fn().mockReturnValue({
+            orderBy: jest.fn().mockResolvedValue([]),
+          }),
+        }),
+      });
+
+      // Mock favorite products (empty)
+      mockDatabaseService.database.select.mockReturnValueOnce({
+        from: jest.fn().mockReturnValue({
+          innerJoin: jest.fn().mockReturnValue({
+            where: jest.fn().mockReturnValue({
+              groupBy: jest.fn().mockReturnValue({
+                orderBy: jest.fn().mockReturnValue({
+                  limit: jest.fn().mockResolvedValue([]),
+                }),
+              }),
+            }),
+          }),
+        }),
+      });
+
+      // Mock preferred order days (empty)
+      mockDatabaseService.database.select.mockReturnValueOnce({
+        from: jest.fn().mockReturnValue({
+          where: jest.fn().mockReturnValue({
+            groupBy: jest.fn().mockReturnValue({
+              orderBy: jest.fn().mockResolvedValue([]),
+            }),
+          }),
+        }),
+      });
+
+      // Mock monthly orders (empty)
+      mockDatabaseService.database.select.mockReturnValueOnce({
+        from: jest.fn().mockReturnValue({
+          where: jest.fn().mockReturnValue({
+            groupBy: jest.fn().mockReturnValue({
+              orderBy: jest.fn().mockResolvedValue([]),
+            }),
+          }),
+        }),
+      });
+
+      const result = await service.getCustomerAnalytics('customer-1', 'user-1', 'all');
+
+      expect(result.overview.totalOrders).toBe(0);
+      expect(result.overview.totalSpent).toBe(0);
+      expect(result.overview.averageOrderValue).toBe(0);
+      expect(result.preferences.favoriteProducts).toHaveLength(0);
+      expect(result.preferences.preferredOrderDays).toHaveLength(0);
+      expect(result.trends.monthlyOrders).toHaveLength(0);
+      expect(result.orderFrequency.orderFrequencyCategory).toBe('new');
+      expect(result.trends.riskLevel).toBe('high');
+    });
+
+    it('should throw NotFoundException for non-existent customer', async () => {
+      mockDatabaseService.database.select.mockReturnValue({
+        from: jest.fn().mockReturnValue({
+          where: jest.fn().mockResolvedValue([]),
+        }),
+      });
+
+      await expect(
+        service.getCustomerAnalytics('non-existent', 'user-1', '30d'),
+      ).rejects.toThrow(NotFoundException);
+    });
   });
 });

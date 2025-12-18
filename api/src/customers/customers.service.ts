@@ -1,8 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { eq, and, ilike, or, sql, SQL, desc, asc } from 'drizzle-orm';
+import { eq, and, ilike, or, sql, SQL, desc, asc, gte } from 'drizzle-orm';
 import { DatabaseService } from '../database/database.service';
 import { customers } from '../database/schemas/customers.schema';
-import { customerOrders } from '../database/schemas/orders.schema';
+import {
+  customerOrders,
+  customerOrderItems,
+} from '../database/schemas/orders.schema';
 import {
   CreateCustomerDto,
   UpdateCustomerDto,
@@ -85,8 +88,8 @@ export class CustomersService {
     const totalPages = Math.ceil(total / limit);
 
     // Build order by clause
-    let orderByClause;
     const sortOrder = query.sortOrder === 'desc' ? desc : asc;
+    let orderByClause: ReturnType<typeof sortOrder>;
 
     switch (query.sortBy) {
       case 'email':
@@ -224,7 +227,7 @@ export class CustomersService {
     dto: UpdateCustomerDto,
   ): Promise<CustomerResponseDto> {
     // Verify ownership
-    const existing = await this.findByIdAndUser(customerId, userId);
+    await this.findByIdAndUser(customerId, userId);
 
     const updateData: Record<string, any> = {
       updatedAt: new Date(),
@@ -234,16 +237,21 @@ export class CustomersService {
     if (dto.name !== undefined) updateData.name = dto.name;
     if (dto.email !== undefined) updateData.email = dto.email;
     if (dto.phone !== undefined) updateData.phone = dto.phone;
-    if (dto.addressLine1 !== undefined) updateData.addressLine1 = dto.addressLine1;
-    if (dto.addressLine2 !== undefined) updateData.addressLine2 = dto.addressLine2;
+    if (dto.addressLine1 !== undefined)
+      updateData.addressLine1 = dto.addressLine1;
+    if (dto.addressLine2 !== undefined)
+      updateData.addressLine2 = dto.addressLine2;
     if (dto.city !== undefined) updateData.city = dto.city;
     if (dto.state !== undefined) updateData.state = dto.state;
     if (dto.zipCode !== undefined) updateData.zipCode = dto.zipCode;
-    if (dto.customerType !== undefined) updateData.customerType = dto.customerType;
+    if (dto.customerType !== undefined)
+      updateData.customerType = dto.customerType;
     if (dto.companyName !== undefined) updateData.companyName = dto.companyName;
     if (dto.taxId !== undefined) updateData.taxId = dto.taxId;
-    if (dto.preferredContact !== undefined) updateData.preferredContact = dto.preferredContact;
-    if (dto.marketingOptIn !== undefined) updateData.marketingOptIn = dto.marketingOptIn;
+    if (dto.preferredContact !== undefined)
+      updateData.preferredContact = dto.preferredContact;
+    if (dto.marketingOptIn !== undefined)
+      updateData.marketingOptIn = dto.marketingOptIn;
     if (dto.status !== undefined) updateData.status = dto.status;
     if (dto.notes !== undefined) updateData.notes = dto.notes;
 
@@ -295,12 +303,16 @@ export class CustomersService {
   /**
    * Get customer orders with pagination
    */
-  async getCustomerOrders(customerId: string, userId: string, options: any) {
+  async getCustomerOrders(
+    customerId: string,
+    userId: string,
+    options: { page?: number; limit?: number; status?: string },
+  ) {
     // Verify ownership
     await this.findByIdAndUser(customerId, userId);
 
-    const page = options.page || 1;
-    const limit = options.limit || 10;
+    const page = options.page ?? 1;
+    const limit = options.limit ?? 10;
     const offset = (page - 1) * limit;
 
     // Get orders for this customer
@@ -341,7 +353,8 @@ export class CustomersService {
       summary: {
         totalOrders: stats.totalOrders,
         totalSpent: stats.totalSpent,
-        averageOrderValue: stats.totalOrders > 0 ? stats.totalSpent / stats.totalOrders : 0,
+        averageOrderValue:
+          stats.totalOrders > 0 ? stats.totalSpent / stats.totalOrders : 0,
         lastOrderDate: stats.lastOrderAt?.toISOString() || null,
       },
     };
@@ -356,10 +369,27 @@ export class CustomersService {
     period: string,
   ) {
     // Verify ownership
-    const customer = await this.findByIdAndUser(customerId, userId);
+    await this.findByIdAndUser(customerId, userId);
     const stats = await this.getCustomerOrderStats(customerId);
 
-    // Get first order date
+    // Determine date range based on period
+    const now = new Date();
+    let startDate: Date;
+    switch (period) {
+      case '30d':
+        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        break;
+      case '90d':
+        startDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+        break;
+      case '1y':
+        startDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+        break;
+      default:
+        startDate = new Date(0); // All time
+    }
+
+    // Get first and last order dates
     const [firstOrder] = await this.databaseService.database
       .select({ createdAt: customerOrders.createdAt })
       .from(customerOrders)
@@ -367,7 +397,131 @@ export class CustomersService {
       .orderBy(asc(customerOrders.createdAt))
       .limit(1);
 
-    const avgOrderValue = stats.totalOrders > 0 ? stats.totalSpent / stats.totalOrders : 0;
+    // Get all order dates for frequency calculation
+    const orderDates = await this.databaseService.database
+      .select({ createdAt: customerOrders.createdAt })
+      .from(customerOrders)
+      .where(eq(customerOrders.customerId, customerId))
+      .orderBy(asc(customerOrders.createdAt));
+
+    // Calculate average days between orders
+    let avgDaysBetween = 0;
+    if (orderDates.length >= 2) {
+      const intervals: number[] = [];
+      for (let i = 1; i < orderDates.length; i++) {
+        const prev = orderDates[i - 1]!.createdAt;
+        const curr = orderDates[i]!.createdAt;
+        const daysDiff = Math.floor(
+          (curr.getTime() - prev.getTime()) / (1000 * 60 * 60 * 24),
+        );
+        intervals.push(daysDiff);
+      }
+      avgDaysBetween = Math.round(
+        intervals.reduce((a, b) => a + b, 0) / intervals.length,
+      );
+    }
+
+    // Get favorite products (top 5 by quantity ordered)
+    const favoriteProducts = await this.databaseService.database
+      .select({
+        productName: customerOrderItems.productName,
+        orderCount: sql<number>`count(distinct ${customerOrderItems.orderId})::int`,
+        totalQuantity: sql<number>`sum(${customerOrderItems.quantity})::int`,
+      })
+      .from(customerOrderItems)
+      .innerJoin(
+        customerOrders,
+        eq(customerOrderItems.orderId, customerOrders.id),
+      )
+      .where(eq(customerOrders.customerId, customerId))
+      .groupBy(customerOrderItems.productName)
+      .orderBy(desc(sql`sum(${customerOrderItems.quantity})`))
+      .limit(5);
+
+    // Get preferred order days (day of week analysis)
+    const orderDayStats = await this.databaseService.database
+      .select({
+        dayOfWeek: sql<number>`extract(dow from ${customerOrders.createdAt})::int`,
+        count: sql<number>`count(*)::int`,
+      })
+      .from(customerOrders)
+      .where(eq(customerOrders.customerId, customerId))
+      .groupBy(sql`extract(dow from ${customerOrders.createdAt})`)
+      .orderBy(desc(sql`count(*)`));
+
+    const dayNames = [
+      'Sunday',
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+    ];
+    const preferredOrderDays = orderDayStats
+      .slice(0, 3)
+      .map((d) => dayNames[d.dayOfWeek] || 'Unknown');
+
+    // Get monthly orders for the period
+    const monthlyOrders = await this.databaseService.database
+      .select({
+        month: sql<string>`to_char(${customerOrders.createdAt}, 'YYYY-MM')`,
+        orderCount: sql<number>`count(*)::int`,
+        totalAmount: sql<number>`sum(${customerOrders.total}::numeric)::float`,
+      })
+      .from(customerOrders)
+      .where(
+        and(
+          eq(customerOrders.customerId, customerId),
+          gte(customerOrders.createdAt, startDate),
+        ),
+      )
+      .groupBy(sql`to_char(${customerOrders.createdAt}, 'YYYY-MM')`)
+      .orderBy(asc(sql`to_char(${customerOrders.createdAt}, 'YYYY-MM')`));
+
+    // Calculate order value trend
+    let orderValueTrend: 'increasing' | 'decreasing' | 'stable' = 'stable';
+    if (monthlyOrders.length >= 3) {
+      const recentMonths = monthlyOrders.slice(-3);
+      const avgValues = recentMonths.map((m) =>
+        m.orderCount > 0 ? (m.totalAmount || 0) / m.orderCount : 0,
+      );
+      if (avgValues.length >= 2) {
+        const lastValue = avgValues[avgValues.length - 1] || 0;
+        const firstValue = avgValues[0] || 0;
+        const change =
+          firstValue > 0 ? ((lastValue - firstValue) / firstValue) * 100 : 0;
+        if (change > 10) orderValueTrend = 'increasing';
+        else if (change < -10) orderValueTrend = 'decreasing';
+      }
+    }
+
+    // Calculate risk level based on recency of last order
+    let riskLevel: 'low' | 'medium' | 'high' = 'high';
+    if (stats.totalOrders === 0) {
+      riskLevel = 'high';
+    } else if (stats.lastOrderAt) {
+      const daysSinceLastOrder = Math.floor(
+        (now.getTime() - stats.lastOrderAt.getTime()) / (1000 * 60 * 60 * 24),
+      );
+      if (daysSinceLastOrder < 30) riskLevel = 'low';
+      else if (daysSinceLastOrder < 90) riskLevel = 'medium';
+      else riskLevel = 'high';
+    }
+
+    // Predict next order date based on average frequency
+    let predictedNextOrder: string | null = null;
+    if (avgDaysBetween > 0 && stats.lastOrderAt) {
+      const predicted = new Date(
+        stats.lastOrderAt.getTime() + avgDaysBetween * 24 * 60 * 60 * 1000,
+      );
+      if (predicted > now) {
+        predictedNextOrder = predicted.toISOString().split('T')[0] || null;
+      }
+    }
+
+    const avgOrderValue =
+      stats.totalOrders > 0 ? stats.totalSpent / stats.totalOrders : 0;
 
     return {
       overview: {
@@ -379,19 +533,32 @@ export class CustomersService {
         customerLifetimeValue: stats.totalSpent,
       },
       orderFrequency: {
-        averageDaysBetweenOrders: 0, // Would need more complex calculation
-        orderFrequencyCategory: stats.totalOrders >= 10 ? 'frequent' : stats.totalOrders >= 3 ? 'regular' : 'new',
-        predictedNextOrder: null,
+        averageDaysBetweenOrders: avgDaysBetween,
+        orderFrequencyCategory:
+          stats.totalOrders >= 10
+            ? 'frequent'
+            : stats.totalOrders >= 3
+              ? 'regular'
+              : 'new',
+        predictedNextOrder,
       },
       preferences: {
-        favoriteProducts: [],
-        preferredOrderDays: [],
+        favoriteProducts: favoriteProducts.map((p) => ({
+          productName: p.productName,
+          orderCount: p.orderCount || 0,
+          totalQuantity: p.totalQuantity || 0,
+        })),
+        preferredOrderDays,
         averageOrderSize: avgOrderValue,
       },
       trends: {
-        monthlyOrders: [],
-        orderValueTrend: 'stable',
-        riskLevel: stats.totalOrders === 0 ? 'high' : 'low',
+        monthlyOrders: monthlyOrders.map((m) => ({
+          month: m.month || '',
+          orderCount: m.orderCount || 0,
+          totalAmount: m.totalAmount || 0,
+        })),
+        orderValueTrend,
+        riskLevel,
       },
     };
   }
@@ -403,7 +570,11 @@ export class CustomersService {
     const results = {
       imported: 0,
       failed: 0,
-      errors: [] as Array<{ row: number; email: string | undefined; error: string }>,
+      errors: [] as Array<{
+        row: number;
+        email: string | undefined;
+        error: string;
+      }>,
     };
 
     for (let i = 0; i < customersData.length; i++) {
@@ -411,12 +582,14 @@ export class CustomersService {
       try {
         await this.create(userId, customerData);
         results.imported++;
-      } catch (error: any) {
+      } catch (error: unknown) {
         results.failed++;
+        const errorMessage =
+          error instanceof Error ? error.message : 'Unknown error';
         results.errors.push({
           row: i + 1,
           email: customerData.email,
-          error: error.message || 'Unknown error',
+          error: errorMessage,
         });
       }
     }
@@ -427,11 +600,21 @@ export class CustomersService {
   /**
    * Export customers to CSV
    */
-  async exportToCSV(userId: string, options: any) {
+  async exportToCSV(
+    userId: string,
+    options?: { status?: 'active' | 'inactive' },
+  ) {
+    // Build conditions
+    const conditions: SQL[] = [eq(customers.userId, userId)];
+
+    if (options?.status) {
+      conditions.push(eq(customers.status, options.status));
+    }
+
     const customerList = await this.databaseService.database
       .select()
       .from(customers)
-      .where(eq(customers.userId, userId))
+      .where(and(...conditions))
       .orderBy(asc(customers.name));
 
     // CSV header
@@ -501,9 +684,8 @@ export class CustomersService {
    * Helper: Map database record to response DTO
    */
   private mapToResponseDto(customer: CustomerWithStats): CustomerResponseDto {
-    const avgOrderValue = customer.totalOrders > 0
-      ? customer.totalSpent / customer.totalOrders
-      : 0;
+    const avgOrderValue =
+      customer.totalOrders > 0 ? customer.totalSpent / customer.totalOrders : 0;
 
     return {
       id: customer.id,
