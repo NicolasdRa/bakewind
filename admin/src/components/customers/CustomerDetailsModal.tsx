@@ -1,6 +1,7 @@
 import { Component, Show } from "solid-js";
 import { Customer } from "~/api/customers";
 import Badge from "~/components/common/Badge";
+import Button from "../common/Button";
 
 interface CustomerDetailsModalProps {
   isOpen: boolean;
@@ -74,7 +75,7 @@ const CustomerDetailsModal: Component<CustomerDetailsModalProps> = (props) => {
                   {props.customer!.name}
                 </h2>
                 <Badge
-                  variant={props.customer!.status === "active" ? "success" : "secondary"}
+                  variant={props.customer!.status === "active" ? "success" : "neutral"}
                 >
                   {props.customer!.status === "active" ? "Active" : "Inactive"}
                 </Badge>
@@ -90,15 +91,16 @@ const CustomerDetailsModal: Component<CustomerDetailsModalProps> = (props) => {
                 </Show>
               </div>
             </div>
-            <button
+            <Button
               onClick={props.onClose}
-              class="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-              style={{ color: "var(--text-secondary)" }}
+              variant="ghost"
+              size="sm"
+              class="p-2"
             >
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
-            </button>
+            </Button>
           </div>
 
           {/* Content */}
@@ -250,24 +252,20 @@ const CustomerDetailsModal: Component<CustomerDetailsModalProps> = (props) => {
             class="p-6 border-t flex justify-end gap-3"
             style={{ "border-color": "var(--border-color)" }}
           >
-            <button
+            <Button
               onClick={props.onClose}
-              class="px-6 py-2.5 rounded-lg border font-medium transition-all"
-              style={{
-                "border-color": "var(--border-color)",
-                color: "var(--text-primary)",
-                "background-color": "transparent",
-              }}
+              variant="secondary"
+              size="sm"
             >
               Close
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={props.onEdit}
-              class="px-6 py-2.5 rounded-lg font-medium text-white transition-all"
-              style={{ "background-color": "var(--primary-color)" }}
+              variant="primary"
+              size="sm"
             >
               Edit Customer
-            </button>
+            </Button>
           </div>
         </div>
       </div>

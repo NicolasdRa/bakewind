@@ -7,6 +7,7 @@ import {
 } from '~/api/internalOrders';
 import { productsApi, Product } from '~/api/products';
 import DatePicker from '~/components/common/DatePicker';
+import Button from '~/components/common/Button';
 
 type ProductionShift = 'morning' | 'afternoon' | 'night';
 
@@ -289,19 +290,14 @@ const InternalOrderFormModal: Component<InternalOrderFormModalProps> = (props) =
                 </For>
               </div>
             </div>
-            <button
+            <Button
               onClick={handleClose}
-              style={{
-                background: 'none',
-                border: 'none',
-                'font-size': '1.5rem',
-                cursor: 'pointer',
-                color: 'var(--text-secondary)',
-                padding: '0.25rem',
-              }}
+              variant="ghost"
+              size="sm"
+              class="p-1"
             >
               ×
-            </button>
+            </Button>
           </div>
 
           {/* Content */}
@@ -597,19 +593,9 @@ const InternalOrderFormModal: Component<InternalOrderFormModalProps> = (props) =
                             {product.category} - ${product.basePrice}
                           </div>
                         </div>
-                        <button
-                          style={{
-                            padding: '0.5rem 1rem',
-                            'background-color': 'var(--primary-color)',
-                            color: 'white',
-                            border: 'none',
-                            'border-radius': '0.375rem',
-                            cursor: 'pointer',
-                            'font-size': '0.875rem',
-                          }}
-                        >
+                        <Button variant="primary" size="sm">
                           Add
-                        </button>
+                        </Button>
                       </div>
                     )}
                   </For>
@@ -644,49 +630,31 @@ const InternalOrderFormModal: Component<InternalOrderFormModalProps> = (props) =
                           </div>
                           <div style={{ display: 'flex', 'align-items': 'center', gap: '1rem' }}>
                             <div style={{ display: 'flex', 'align-items': 'center', gap: '0.5rem' }}>
-                              <button
+                              <Button
                                 onClick={() => updateQuantity(item.productId, item.quantity - 1)}
-                                style={{
-                                  padding: '0.25rem 0.5rem',
-                                  border: '1px solid var(--border-color)',
-                                  'border-radius': '0.25rem',
-                                  'background-color': 'var(--bg-primary)',
-                                  color: 'var(--text-primary)',
-                                  cursor: 'pointer',
-                                }}
+                                variant="secondary"
+                                size="sm"
                               >
                                 -
-                              </button>
+                              </Button>
                               <span style={{ 'min-width': '2rem', 'text-align': 'center', color: 'var(--text-primary)' }}>
                                 {item.quantity}
                               </span>
-                              <button
+                              <Button
                                 onClick={() => updateQuantity(item.productId, item.quantity + 1)}
-                                style={{
-                                  padding: '0.25rem 0.5rem',
-                                  border: '1px solid var(--border-color)',
-                                  'border-radius': '0.25rem',
-                                  'background-color': 'var(--bg-primary)',
-                                  color: 'var(--text-primary)',
-                                  cursor: 'pointer',
-                                }}
+                                variant="secondary"
+                                size="sm"
                               >
                                 +
-                              </button>
+                              </Button>
                             </div>
-                            <button
+                            <Button
                               onClick={() => removeProduct(item.productId)}
-                              style={{
-                                padding: '0.5rem',
-                                border: 'none',
-                                'background-color': 'var(--error-color)',
-                                color: 'white',
-                                'border-radius': '0.25rem',
-                                cursor: 'pointer',
-                              }}
+                              variant="danger"
+                              size="sm"
                             >
                               Remove
-                            </button>
+                            </Button>
                           </div>
                         </div>
                       )}
@@ -842,70 +810,44 @@ const InternalOrderFormModal: Component<InternalOrderFormModalProps> = (props) =
             'justify-content': 'space-between',
             gap: '1rem',
           }}>
-            <button
+            <Button
               onClick={prevStep}
               disabled={currentStep() === 1}
-              style={{
-                padding: '0.75rem 1.5rem',
-                border: '1px solid var(--border-color)',
-                'border-radius': '0.375rem',
-                'background-color': 'var(--bg-primary)',
-                color: 'var(--text-primary)',
-                cursor: currentStep() === 1 ? 'not-allowed' : 'pointer',
-                opacity: currentStep() === 1 ? '0.5' : '1',
-              }}
+              variant="secondary"
+              size="sm"
             >
               Previous
-            </button>
+            </Button>
 
             <div style={{ display: 'flex', gap: '1rem' }}>
-              <button
+              <Button
                 onClick={handleClose}
-                style={{
-                  padding: '0.75rem 1.5rem',
-                  border: '1px solid var(--border-color)',
-                  'border-radius': '0.375rem',
-                  'background-color': 'var(--bg-primary)',
-                  color: 'var(--text-primary)',
-                  cursor: 'pointer',
-                }}
+                variant="secondary"
+                size="sm"
               >
                 Cancel
-              </button>
+              </Button>
 
               <Show
                 when={currentStep() === 3}
                 fallback={
-                  <button
+                  <Button
                     onClick={nextStep}
-                    style={{
-                      padding: '0.75rem 1.5rem',
-                      border: 'none',
-                      'border-radius': '0.375rem',
-                      'background-color': 'var(--primary-color)',
-                      color: 'white',
-                      cursor: 'pointer',
-                    }}
+                    variant="primary"
+                    size="sm"
                   >
                     Next
-                  </button>
+                  </Button>
                 }
               >
-                <button
+                <Button
                   onClick={handleSubmit}
                   disabled={loading()}
-                  style={{
-                    padding: '0.75rem 1.5rem',
-                    border: 'none',
-                    'border-radius': '0.375rem',
-                    'background-color': 'var(--primary-color)',
-                    color: 'white',
-                    cursor: loading() ? 'not-allowed' : 'pointer',
-                    opacity: loading() ? '0.5' : '1',
-                  }}
+                  variant="primary"
+                  size="sm"
                 >
                   {loading() ? 'Submitting...' : props.editOrder ? 'Update Order' : 'Create Order'}
-                </button>
+                </Button>
               </Show>
             </div>
           </div>

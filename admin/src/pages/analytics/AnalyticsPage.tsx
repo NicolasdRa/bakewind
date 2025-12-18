@@ -1,5 +1,6 @@
 import { Component, createSignal, createResource, For, Show } from "solid-js";
 import { analyticsApi } from "../../api/analytics";
+import Button from "~/components/common/Button";
 import styles from "./AnalyticsPage.module.css";
 
 interface DashboardStats {
@@ -312,9 +313,13 @@ const AnalyticsPage: Component = () => {
                 <span class={`${styles.alertBadge} ${styles.alertBadgeWarning}`}>Low</span>
               </div>
             </div>
-            <button class={styles.viewInventoryButton}>
+            <Button
+              variant="secondary"
+              size="sm"
+              fullWidth
+            >
               View Full Inventory
-            </button>
+            </Button>
           </div>
         </div>
       </Show>

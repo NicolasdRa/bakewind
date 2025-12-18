@@ -6,6 +6,7 @@ import {
   CreateProductRequest,
   UpdateProductRequest,
 } from "~/api/products";
+import Button from "~/components/common/Button";
 
 interface ProductFormModalProps {
   isOpen: boolean;
@@ -118,13 +119,14 @@ const ProductFormModal: Component<ProductFormModalProps> = (props) => {
             <h2 class="text-2xl font-bold" style="color: var(--text-primary)">
               {props.mode === 'create' ? 'Create New Product' : 'Edit Product'}
             </h2>
-            <button
+            <Button
               onClick={props.onClose}
-              class="text-2xl font-bold hover:opacity-70 transition-opacity"
-              style="color: var(--text-secondary)"
+              variant="ghost"
+              size="sm"
+              class="p-1"
             >
               ×
-            </button>
+            </Button>
           </div>
 
           <form onSubmit={handleSubmit} class="p-6">
@@ -416,30 +418,23 @@ const ProductFormModal: Component<ProductFormModalProps> = (props) => {
 
             {/* Actions */}
             <div class="flex justify-end gap-3 pt-4 border-t" style={{ "border-color": "var(--border-color)" }}>
-              <button
+              <Button
                 type="button"
                 onClick={props.onClose}
                 disabled={loading()}
-                class="px-6 py-2.5 rounded-lg font-medium transition-all"
-                style={{
-                  "background-color": "var(--bg-secondary)",
-                  "color": "var(--text-primary)",
-                  "border": "1px solid var(--border-color)"
-                }}
+                variant="secondary"
+                size="sm"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 type="submit"
                 disabled={loading()}
-                class="px-6 py-2.5 rounded-lg font-medium transition-all disabled:opacity-50"
-                style={{
-                  "background-color": "var(--primary-color)",
-                  "color": "white"
-                }}
+                variant="primary"
+                size="sm"
               >
                 {loading() ? 'Saving...' : props.mode === 'create' ? 'Create Product' : 'Save Changes'}
-              </button>
+              </Button>
             </div>
           </form>
         </div>

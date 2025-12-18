@@ -2,6 +2,7 @@ import { Component, createSignal, createEffect, createMemo, Show } from "solid-j
 import { useAuth } from "~/context/AuthContext"
 import * as usersApi from '~/api/users'
 import LoadingSpinner from "~/components/LoadingSpinner/LoadingSpinner"
+import Button from "~/components/common/Button"
 import styles from './ProfilePage.module.css'
 
 // Type Definitions
@@ -351,32 +352,35 @@ const ProfilePage: Component = () => {
                 </Show>
 
                 <Show when={!isEditMode()}>
-                  <button
+                  <Button
                     onClick={handleEnterEditMode}
-                    class={styles.editButton}
+                    variant="primary"
+                    size="sm"
                   >
                     <svg class={styles.editIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
                     Edit Profile
-                  </button>
+                  </Button>
                 </Show>
 
                 <Show when={isEditMode()}>
                   <div class={styles.editActions}>
-                    <button
+                    <Button
                       onClick={handleCancelEdit}
-                      class={styles.cancelButton}
+                      variant="secondary"
+                      size="sm"
                     >
                       Cancel
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       onClick={handleSaveProfile}
                       disabled={isUpdating()}
-                      class={styles.saveButton}
+                      variant="primary"
+                      size="sm"
                     >
                       {isUpdating() ? 'Saving...' : 'Save Changes'}
-                    </button>
+                    </Button>
                   </div>
                 </Show>
               </div>
@@ -658,15 +662,16 @@ const ProfilePage: Component = () => {
 
               <div class={styles.securityCard}>
                 <Show when={!passwordForm().showForm}>
-                  <button
+                  <Button
                     onClick={togglePasswordForm}
-                    class={styles.changePasswordButton}
+                    variant="secondary"
+                    size="sm"
                   >
                     <svg class={styles.buttonIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
                     </svg>
                     Change Password
-                  </button>
+                  </Button>
                 </Show>
 
                 <Show when={passwordForm().showForm}>
@@ -711,19 +716,21 @@ const ProfilePage: Component = () => {
                     </div>
 
                     <div class={styles.passwordFormActions}>
-                      <button
+                      <Button
                         onClick={togglePasswordForm}
-                        class={styles.cancelButton}
+                        variant="secondary"
+                        size="sm"
                       >
                         Cancel
-                      </button>
-                      <button
+                      </Button>
+                      <Button
                         onClick={handleChangePassword}
                         disabled={!isPasswordFormValid() || isChangingPassword()}
-                        class={styles.dangerButton}
+                        variant="danger"
+                        size="sm"
                       >
                         {isChangingPassword() ? 'Changing...' : 'Change Password'}
-                      </button>
+                      </Button>
                     </div>
 
                     <Show when={passwordError()}>

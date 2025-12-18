@@ -1,4 +1,5 @@
-import { Component, JSX, Show } from "solid-js";
+import { Component, Show } from "solid-js";
+import Button from "./Button";
 
 interface InfoModalProps {
   isOpen: boolean;
@@ -80,18 +81,12 @@ const InfoModal: Component<InfoModalProps> = (props) => {
             </div>
           </div>
           <div class="flex justify-end">
-            <button
+            <Button
               onClick={props.onClose}
-              class="px-4 py-2 rounded-md font-medium transition-colors"
-              style={{
-                "background-color": "var(--primary-color)",
-                "color": "white"
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "var(--primary-hover)"}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "var(--primary-color)"}
+              variant="primary"
             >
               OK
-            </button>
+            </Button>
           </div>
         </div>
       </div>

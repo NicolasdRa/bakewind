@@ -1,5 +1,6 @@
 import { Show, createSignal, onCleanup } from 'solid-js';
 import { A, useLocation } from '@solidjs/router';
+import Button from '../common/Button';
 import {
   HomeIcon,
   ShoppingBagIcon,
@@ -100,14 +101,14 @@ export function MobileMenu(props: MobileMenuProps) {
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
               BakeWind
             </h2>
-            <button
+            <Button
+              variant="ghost"
               onClick={props.onClose}
-              class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700
-                     transition-colors"
+              class="p-2"
               aria-label="Close menu"
             >
               <XMarkIcon class="w-5 h-5 text-gray-600 dark:text-gray-300" />
-            </button>
+            </Button>
           </div>
 
           {/* Navigation */}

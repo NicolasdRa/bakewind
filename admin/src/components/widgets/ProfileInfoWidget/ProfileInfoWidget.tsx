@@ -2,6 +2,7 @@ import { createSignal, Show } from 'solid-js'
 import { useAuth } from '~/context/AuthContext'
 import * as usersApi from '~/api/users'
 import BaseWidget from '~/components/BaseWidget/BaseWidget'
+import Button from '~/components/common/Button'
 import styles from './ProfileInfoWidget.module.css'
 
 interface ProfileInfoWidgetProps {
@@ -83,26 +84,28 @@ export default function ProfileInfoWidget(props: ProfileInfoWidgetProps) {
       <div class={styles.container}>
         <div class={styles.header}>
           {!isEditing() ? (
-            <button onClick={handleEdit} class={styles.editButton}>
+            <Button variant="secondary" onClick={handleEdit} class={styles.editButton}>
               Edit Profile
-            </button>
+            </Button>
           ) : (
             <div class={styles.actionButtons}>
-              <button
+              <Button
+                variant="secondary"
                 onClick={handleCancel}
                 class={styles.cancelButton}
                 disabled={isUpdating()}
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="primary"
                 type="submit"
                 form="profile-widget-form"
                 class={styles.saveButton}
                 disabled={isUpdating()}
               >
                 {isUpdating() ? 'Saving...' : 'Save'}
-              </button>
+              </Button>
             </div>
           )}
         </div>

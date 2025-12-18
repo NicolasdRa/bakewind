@@ -1,5 +1,6 @@
 import { ErrorBoundary } from 'solid-js';
 import { JSX } from 'solid-js';
+import Button from '../common/Button';
 
 interface DashboardErrorBoundaryProps {
   children: JSX.Element;
@@ -24,17 +25,18 @@ export default function DashboardErrorBoundary(props: DashboardErrorBoundaryProp
             {props.fallbackMessage || 'An error occurred while loading this section. Please try again.'}
           </p>
           <div class="flex flex-col gap-3 w-full">
-            <button
+            <Button
               onClick={() => {
                 if (props.onRetry) {
                   props.onRetry();
                 }
                 reset();
               }}
-              class="px-4 py-2 bg-primary-600 text-white rounded-lg font-medium transition-colors hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+              variant="primary"
+              fullWidth
             >
               Try Again
-            </button>
+            </Button>
             <p class="text-sm text-secondary-500 text-center">
               Error: {err.message}
             </p>

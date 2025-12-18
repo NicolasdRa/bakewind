@@ -3,6 +3,9 @@ import { Customer, customersApi, CustomerQueryParams, CustomersResponse, ImportR
 import CustomerFormModal from "../../components/customers/CustomerFormModal";
 import CustomerDetailsModal from "../../components/customers/CustomerDetailsModal";
 import Badge from "../../components/common/Badge";
+import Button from "../../components/common/Button";
+import SearchInput from "../../components/common/SearchInput";
+import FilterSelect from "../../components/common/FilterSelect";
 import styles from "./CustomersPage.module.css";
 
 const CustomersPage: Component = () => {
@@ -216,56 +219,50 @@ const CustomersPage: Component = () => {
 
       {/* Filter Controls */}
       <div class={styles.filterCard}>
-        <div class={styles.filterGrid}>
-          <div>
-            <label class={styles.filterLabel}>Search Customers</label>
-            <input
-              type="text"
-              placeholder="Search by name, email, phone, or company..."
-              value={searchTerm()}
-              onInput={(e) => setSearchTerm(e.currentTarget.value)}
-              class={styles.filterInput}
-            />
-          </div>
-          <div>
-            <label class={styles.filterLabel}>Status</label>
-            <select
-              value={selectedStatus()}
-              onChange={(e) => setSelectedStatus(e.currentTarget.value)}
-              class={styles.filterInput}
-            >
-              <option value="all">All Statuses</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-            </select>
-          </div>
-          <div>
-            <label class={styles.filterLabel}>Customer Type</label>
-            <select
-              value={selectedType()}
-              onChange={(e) => setSelectedType(e.currentTarget.value)}
-              class={styles.filterInput}
-            >
-              <option value="all">All Types</option>
-              <option value="business">Business</option>
-              <option value="individual">Individual</option>
-            </select>
-          </div>
-          <div class={styles.filterButtonWrapper}>
-            <div class={styles.actionButtonsGroup}>
-              <button class={styles.secondaryButton} onClick={handleOpenImport}>
+        <div class={styles.filterRow}>
+          <SearchInput
+            value={searchTerm()}
+            onInput={setSearchTerm}
+            placeholder="Search by name, email, phone, or company..."
+            label="Search Customers"
+          />
+          <FilterSelect
+            value={selectedStatus()}
+            onChange={setSelectedStatus}
+            label="Status"
+            options={[
+              { value: "all", label: "All Statuses" },
+              { value: "active", label: "Active" },
+              { value: "inactive", label: "Inactive" },
+            ]}
+          />
+          <FilterSelect
+            value={selectedType()}
+            onChange={setSelectedType}
+            label="Customer Type"
+            options={[
+              { value: "all", label: "All Types" },
+              { value: "business", label: "Business" },
+              { value: "individual", label: "Individual" },
+            ]}
+          />
+          <div class={styles.buttonGroup}>
+            <label class={styles.buttonGroupLabel}>&nbsp;</label>
+            <div class={styles.buttonGroupRow}>
+              <Button variant="secondary" size="sm" onClick={handleOpenImport}>
                 Import
-              </button>
-              <button
-                class={styles.secondaryButton}
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
                 onClick={handleExport}
                 disabled={isExporting()}
               >
-                {isExporting() ? "Exporting..." : "Export CSV"}
-              </button>
-              <button class={styles.addButton} onClick={handleAddCustomer}>
+                {isExporting() ? "Exporting..." : "Export"}
+              </Button>
+              <Button variant="primary" size="sm" onClick={handleAddCustomer}>
                 Add Customer
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -342,24 +339,26 @@ const CustomersPage: Component = () => {
                           </div>
 
                           <div class={styles.customerActions}>
-                            <button
-                              class={styles.actionLink}
+                            <Button
+                              variant="text"
+                              size="sm"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleEditCustomer(customer);
                               }}
                             >
                               Edit
-                            </button>
-                            <button
-                              class={styles.actionLinkSecondary}
+                            </Button>
+                            <Button
+                              variant="text"
+                              size="sm"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleViewCustomer(customer);
                               }}
                             >
                               View
-                            </button>
+                            </Button>
                           </div>
                         </div>
                       </div>
@@ -478,18 +477,20 @@ const CustomersPage: Component = () => {
                   </Show>
 
                   <div class={styles.detailActions}>
-                    <button
-                      class={styles.viewOrdersButton}
+                    <Button
+                      variant="secondary"
+                      size="sm"
                       onClick={() => handleViewCustomer(customer())}
                     >
                       View Full Details
-                    </button>
-                    <button
-                      class={styles.editButton}
+                    </Button>
+                    <Button
+                      variant="primary"
+                      size="sm"
                       onClick={() => handleEditCustomer(customer())}
                     >
                       Edit
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -562,16 +563,17 @@ const CustomersPage: Component = () => {
             </Show>
 
             <div class={styles.importModalActions}>
-              <button class={styles.secondaryButton} onClick={handleCloseImport}>
+              <Button variant="secondary" size="sm" onClick={handleCloseImport}>
                 Cancel
-              </button>
-              <button
-                class={styles.addButton}
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
                 onClick={handleImport}
                 disabled={isImporting() || !importData().trim()}
               >
                 {isImporting() ? "Importing..." : "Import"}
-              </button>
+              </Button>
             </div>
           </div>
         </div>

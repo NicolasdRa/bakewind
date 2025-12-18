@@ -1,5 +1,6 @@
 import { Component, createSignal, Show } from "solid-js";
 import { inventoryApi, CreateInventoryItemRequest } from "~/api/inventory";
+import Button from "~/components/common/Button";
 
 interface AddInventoryItemModalProps {
   isOpen: boolean;
@@ -343,29 +344,22 @@ const AddInventoryItemModal: Component<AddInventoryItemModalProps> = (props) => 
 
             {/* Action Buttons */}
             <div class="flex justify-end gap-3 pt-4">
-              <button
+              <Button
                 type="button"
                 onClick={props.onClose}
-                class="px-5 py-2.5 rounded-lg font-medium transition-all"
-                style={{
-                  "background-color": "var(--bg-secondary)",
-                  color: "var(--text-secondary)",
-                }}
+                variant="secondary"
+                size="sm"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 type="submit"
                 disabled={loading()}
-                class="px-5 py-2.5 rounded-lg font-medium transition-all hover:shadow-md focus:outline-none focus:ring-2 disabled:opacity-50"
-                style={{
-                  "background-color": "var(--primary-color)",
-                  color: "white",
-                  "--tw-ring-color": "var(--primary-color)",
-                }}
+                variant="primary"
+                size="sm"
               >
                 {loading() ? "Creating..." : "Create Item"}
-              </button>
+              </Button>
             </div>
           </form>
         </div>

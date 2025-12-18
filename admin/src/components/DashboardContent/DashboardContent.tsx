@@ -2,6 +2,7 @@ import { createSignal, onMount, For, Show, Index, ErrorBoundary } from 'solid-js
 import { Portal } from 'solid-js/web'
 import { useAppStore } from '~/stores/appStore'
 import BaseWidget from '../BaseWidget/BaseWidget'
+import Button from '../common/Button'
 import styles from './DashboardContent.module.css'
 import StatsWidget from '../widgets/StatsWidget/StatsWidget'
 import ActivityWidget from '../widgets/ActivityWidget/ActivityWidget'
@@ -258,12 +259,13 @@ export default function DashboardContent(props: DashboardContentProps) {
                       <div class={styles.errorIcon}>⚠️</div>
                       <h3 class={styles.errorTitle}>Widget Error</h3>
                       <p class={styles.errorMessage}>{err.message}</p>
-                      <button 
+                      <Button
+                        variant="secondary"
                         onClick={reset}
                         class={styles.errorButton}
                       >
                         Try Again
-                      </button>
+                      </Button>
                     </div>
                   </BaseWidget>
                 )}
@@ -289,18 +291,20 @@ export default function DashboardContent(props: DashboardContentProps) {
             <div class={styles.modalContainer}>
               <div class={styles.modalHeader}>
                 <h2 class={styles.modalTitle}>Add Widget</h2>
-                <button
+                <Button
+                  variant="ghost"
                   onClick={() => actions.setShowWidgetModal(false)}
                   class={styles.modalCloseButton}
                 >
                   ×
-                </button>
+                </Button>
               </div>
               <div class={styles.modalContent}>
                 <div class={styles.widgetGrid}>
                   <Index each={widgetTypes}>
                     {(widget) => (
-                      <button
+                      <Button
+                        variant="secondary"
                         onClick={() => addWidget(widget().type)}
                         class={styles.widgetTypeButton}
                       >
@@ -308,7 +312,7 @@ export default function DashboardContent(props: DashboardContentProps) {
                           {widget().icon}
                         </div>
                         <span class={styles.widgetTypeName}>{widget().name}</span>
-                      </button>
+                      </Button>
                     )}
                   </Index>
                 </div>

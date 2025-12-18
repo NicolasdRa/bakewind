@@ -7,6 +7,7 @@ import StatsCard from "~/components/common/StatsCard";
 import SearchInput from "~/components/common/SearchInput";
 import FilterSelect from "~/components/common/FilterSelect";
 import Badge from "~/components/common/Badge";
+import Button from "~/components/common/Button";
 import { getStockStatusVariant } from "~/components/common/Badge.config";
 import { useInfoModal } from "~/stores/infoModalStore";
 import styles from "./InventoryPage.module.css";
@@ -182,9 +183,9 @@ const InventoryPage: Component = () => {
           <h1 class={styles.pageTitle}>Inventory Management</h1>
           <p class={styles.pageSubtitle}>Track ingredients, packaging, and supplies</p>
         </div>
-        <button onClick={() => setIsAddModalOpen(true)} class={styles.primaryButton}>
+        <Button variant="primary" size="md" onClick={() => setIsAddModalOpen(true)}>
           + Add Item
-        </button>
+        </Button>
       </div>
 
       {/* Stats Cards */}

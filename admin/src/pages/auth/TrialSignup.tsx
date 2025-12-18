@@ -3,6 +3,7 @@ import { useNavigate } from '@solidjs/router';
 import * as authApi from '~/api/auth';
 import { logger } from '../../utils/logger';
 import AuthLayout from '../../layouts/AuthLayout';
+import Button from '~/components/common/Button';
 
 const TrialSignup: Component = () => {
   const [businessName, setBusinessName] = createSignal('');
@@ -195,13 +196,15 @@ const TrialSignup: Component = () => {
         </Show>
 
         {/* Submit button */}
-        <button
+        <Button
           type="submit"
           disabled={isLoading()}
-          class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed font-medium"
+          variant="primary"
+          size="lg"
+          fullWidth
         >
           {isLoading() ? 'Creating Account...' : 'Start Free Trial'}
-        </button>
+        </Button>
       </form>
 
       {/* Links */}

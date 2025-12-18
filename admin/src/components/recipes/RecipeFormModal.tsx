@@ -1,4 +1,5 @@
 import { Component, createSignal, Show, For, createEffect } from "solid-js";
+import Button from "../common/Button";
 
 type RecipeCategory = 'bread' | 'pastry' | 'cake' | 'cookie' | 'sandwich' | 'beverage' | 'sauce' | 'filling' | 'topping' | 'other';
 
@@ -394,14 +395,15 @@ const RecipeFormModal: Component<RecipeFormModalProps> = (props) => {
                               </span>
                             </Show>
                           </span>
-                          <button
+                          <Button
                             type="button"
                             onClick={() => removeIngredient(index())}
-                            class="px-3 py-1 text-sm rounded-lg transition-colors"
+                            variant="text"
+                            size="sm"
                             style={{ color: "var(--error-color)" }}
                           >
                             Remove
-                          </button>
+                          </Button>
                         </div>
                       )}
                     </For>
@@ -472,17 +474,15 @@ const RecipeFormModal: Component<RecipeFormModalProps> = (props) => {
                     />
                   </div>
                   <div>
-                    <button
+                    <Button
                       type="button"
                       onClick={addIngredient}
-                      class="w-full px-4 py-2 rounded-lg font-medium transition-all hover:opacity-90"
-                      style={{
-                        "background-color": "var(--primary-color)",
-                        "color": "white",
-                      }}
+                      variant="primary"
+                      size="sm"
+                      fullWidth
                     >
                       Add
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -510,35 +510,38 @@ const RecipeFormModal: Component<RecipeFormModalProps> = (props) => {
                           </span>
                           <div class="flex gap-2">
                             <Show when={index() > 0}>
-                              <button
+                              <Button
                                 type="button"
                                 onClick={() => moveInstruction(index(), 'up')}
-                                class="px-2 py-1 text-sm rounded transition-colors"
+                                variant="text"
+                                size="sm"
                                 style={{ color: "var(--text-secondary)" }}
                                 title="Move up"
                               >
                                 ↑
-                              </button>
+                              </Button>
                             </Show>
                             <Show when={index() < instructions().length - 1}>
-                              <button
+                              <Button
                                 type="button"
                                 onClick={() => moveInstruction(index(), 'down')}
-                                class="px-2 py-1 text-sm rounded transition-colors"
+                                variant="text"
+                                size="sm"
                                 style={{ color: "var(--text-secondary)" }}
                                 title="Move down"
                               >
                                 ↓
-                              </button>
+                              </Button>
                             </Show>
-                            <button
+                            <Button
                               type="button"
                               onClick={() => removeInstruction(index())}
-                              class="px-2 py-1 text-sm rounded transition-colors"
+                              variant="text"
+                              size="sm"
                               style={{ color: "var(--error-color)" }}
                             >
                               ×
-                            </button>
+                            </Button>
                           </div>
                         </div>
                       )}
@@ -561,17 +564,14 @@ const RecipeFormModal: Component<RecipeFormModalProps> = (props) => {
                     placeholder="Enter instruction step"
                     rows="2"
                   />
-                  <button
+                  <Button
                     type="button"
                     onClick={addInstruction}
-                    class="px-6 py-2 rounded-lg font-medium transition-all hover:opacity-90"
-                    style={{
-                      "background-color": "var(--primary-color)",
-                      "color": "white",
-                    }}
+                    variant="primary"
+                    size="sm"
                   >
                     Add Step
-                  </button>
+                  </Button>
                 </div>
               </div>
 
@@ -671,31 +671,25 @@ const RecipeFormModal: Component<RecipeFormModalProps> = (props) => {
 
             {/* Footer */}
             <div class="p-6 border-t flex gap-3" style={{ "border-color": "var(--border-color)" }}>
-              <button
+              <Button
                 type="button"
                 onClick={props.onClose}
                 disabled={loading()}
-                class="flex-1 px-5 py-2.5 rounded-lg font-medium transition-all"
-                style={{
-                  "background-color": "var(--bg-secondary)",
-                  color: "var(--text-primary)",
-                  "border": "1px solid var(--border-color)"
-                }}
+                variant="secondary"
+                size="sm"
+                fullWidth
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 type="submit"
                 disabled={loading()}
-                class="flex-1 px-5 py-2.5 rounded-lg font-medium transition-all hover:opacity-90"
-                style={{
-                  "background-color": "var(--primary-color)",
-                  color: "white",
-                  opacity: loading() ? '0.6' : '1',
-                }}
+                variant="primary"
+                size="sm"
+                fullWidth
               >
                 {loading() ? 'Saving...' : props.mode === 'create' ? 'Create Recipe' : 'Update Recipe'}
-              </button>
+              </Button>
             </div>
           </form>
         </div>

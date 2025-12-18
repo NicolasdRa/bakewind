@@ -6,6 +6,7 @@ import StatsCard from "~/components/common/StatsCard";
 import DatePicker from "~/components/common/DatePicker";
 import FilterSelect from "~/components/common/FilterSelect";
 import Badge from "~/components/common/Badge";
+import Button from "~/components/common/Button";
 import styles from "./ProductionPage.module.css";
 
 const ProductionPage: Component = () => {
@@ -247,14 +248,14 @@ const ProductionPage: Component = () => {
 
                       <div class={styles.itemActions}>
                         <Show when={item.status === 'scheduled'}>
-                          <button onClick={() => handleStartProduction(item)} class={styles.startButton}>
+                          <Button onClick={() => handleStartProduction(item)} variant="primary" size="sm">
                             Start
-                          </button>
+                          </Button>
                         </Show>
                         <Show when={item.status === 'in_progress'}>
-                          <button onClick={() => handleCompleteProduction(item)} class={styles.completeButton}>
+                          <Button onClick={() => handleCompleteProduction(item)} variant="success" size="sm">
                             Complete
-                          </button>
+                          </Button>
                         </Show>
                       </div>
                     </div>

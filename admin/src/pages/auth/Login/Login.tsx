@@ -4,6 +4,7 @@ import { useNavigate, A } from '@solidjs/router';
 import styles from './Login.module.css';
 import { logger } from '~/utils/logger';
 import * as authApi from '~/api/auth';
+import Button from '~/components/common/Button';
 
 
 const Login: Component = () => {
@@ -90,13 +91,15 @@ const Login: Component = () => {
             </div>
           </Show>
 
-          <button
+          <Button
             type="submit"
             disabled={isLoading() || !email() || !password()}
-            class={styles.submitButton}
+            variant="primary"
+            size="lg"
+            fullWidth
           >
             {isLoading() ? 'Signing In...' : 'Sign In'}
-          </button>
+          </Button>
 
           <div class={styles.links}>
             <div>

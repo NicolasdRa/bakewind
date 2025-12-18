@@ -2,6 +2,7 @@ import { Component, createSignal, Show } from 'solid-js';
 import { API_BASE_URL } from '../../config/constants';
 import { logger } from '../../utils/logger';
 import AuthLayout from '../../layouts/AuthLayout';
+import Button from '~/components/common/Button';
 
 const ForgotPassword: Component = () => {
   const [email, setEmail] = createSignal('');
@@ -85,13 +86,15 @@ const ForgotPassword: Component = () => {
           </Show>
 
           {/* Submit button */}
-          <button
+          <Button
             type="submit"
             disabled={isLoading() || !email()}
-            class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed font-medium"
+            variant="primary"
+            size="lg"
+            fullWidth
           >
             {isLoading() ? 'Sending...' : 'Send Reset Instructions'}
-          </button>
+          </Button>
         </form>
 
         {/* Links */}

@@ -5,6 +5,7 @@ import StatsCard from "~/components/common/StatsCard";
 import SearchInput from "~/components/common/SearchInput";
 import FilterSelect from "~/components/common/FilterSelect";
 import Badge from "~/components/common/Badge";
+import Button from "~/components/common/Button";
 import { getCategoryBadgeColor, getProductStatusVariant } from "~/components/common/Badge.config";
 import styles from "./ProductsPage.module.css";
 
@@ -203,9 +204,9 @@ const ProductsPage: Component = () => {
           <h1 class={styles.pageTitle}>Products Management</h1>
           <p class={styles.pageSubtitle}>Manage your bakery products and menu items</p>
         </div>
-        <button onClick={handleCreate} class={styles.primaryButton}>
+        <Button variant="primary" size="md" onClick={handleCreate}>
           + Create Product
-        </button>
+        </Button>
       </div>
 
       {/* Stats Cards */}
@@ -393,12 +394,12 @@ const ProductsPage: Component = () => {
                         </td>
                         <td class={styles.tableCell}>
                           <div class={styles.actionsRow}>
-                            <button onClick={() => handleEdit(product)} class={styles.actionLink}>
+                            <Button variant="text" size="sm" onClick={() => handleEdit(product)}>
                               Edit
-                            </button>
-                            <button onClick={() => handleDeleteClick(product)} class={styles.deleteLink}>
+                            </Button>
+                            <Button variant="text" size="sm" onClick={() => handleDeleteClick(product)} class={styles.deleteLink}>
                               Delete
-                            </button>
+                            </Button>
                           </div>
                         </td>
                       </tr>
@@ -429,18 +430,19 @@ const ProductsPage: Component = () => {
               Are you sure you want to delete "{productToDelete()?.name}"? This action cannot be undone.
             </p>
             <div class={styles.modalActions}>
-              <button
+              <Button
+                variant="secondary"
+                size="sm"
                 onClick={() => {
                   setShowDeleteConfirm(false);
                   setProductToDelete(undefined);
                 }}
-                class={styles.cancelButton}
               >
                 Cancel
-              </button>
-              <button onClick={handleDeleteConfirm} class={styles.deleteButton}>
+              </Button>
+              <Button variant="danger" size="sm" onClick={handleDeleteConfirm}>
                 Delete
-              </button>
+              </Button>
             </div>
           </div>
         </div>

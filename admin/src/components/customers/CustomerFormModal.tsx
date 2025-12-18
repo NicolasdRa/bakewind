@@ -7,6 +7,7 @@ import {
   CustomerType,
   PreferredContact,
 } from "~/api/customers";
+import Button from "../common/Button";
 
 interface CustomerFormModalProps {
   isOpen: boolean;
@@ -468,30 +469,23 @@ const CustomerFormModal: Component<CustomerFormModalProps> = (props) => {
 
             {/* Actions */}
             <div class="flex justify-end gap-3 pt-4 border-t" style={{ "border-color": "var(--border-color)" }}>
-              <button
+              <Button
                 type="button"
                 onClick={props.onClose}
                 disabled={loading()}
-                class="px-6 py-2.5 rounded-lg border font-medium transition-all"
-                style={{
-                  "border-color": "var(--border-color)",
-                  color: "var(--text-primary)",
-                  "background-color": "transparent",
-                }}
+                variant="secondary"
+                size="sm"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 type="submit"
                 disabled={loading()}
-                class="px-6 py-2.5 rounded-lg font-medium text-white transition-all"
-                style={{
-                  "background-color": loading() ? "var(--primary-hover)" : "var(--primary-color)",
-                  opacity: loading() ? 0.7 : 1,
-                }}
+                variant="primary"
+                size="sm"
               >
                 {loading() ? "Saving..." : isEditMode() ? "Save Changes" : "Add Customer"}
-              </button>
+              </Button>
             </div>
           </form>
         </div>

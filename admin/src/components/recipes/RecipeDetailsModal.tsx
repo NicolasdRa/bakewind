@@ -1,4 +1,5 @@
 import { Component, For, Show } from "solid-js";
+import Button from "../common/Button";
 
 type RecipeCategory = 'bread' | 'pastry' | 'cake' | 'cookie' | 'sandwich' | 'beverage' | 'sauce' | 'filling' | 'topping' | 'other';
 
@@ -73,15 +74,16 @@ const RecipeDetailsModal: Component<RecipeDetailsModalProps> = (props) => {
                   </Show>
                 </div>
               </div>
-              <button
+              <Button
                 onClick={props.onClose}
-                class="p-2 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
-                style={{ color: "var(--text-secondary)" }}
+                variant="ghost"
+                size="sm"
+                class="p-2"
               >
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -256,28 +258,23 @@ const RecipeDetailsModal: Component<RecipeDetailsModalProps> = (props) => {
 
           {/* Footer */}
           <div class="p-6 border-t flex gap-3" style={{ "border-color": "var(--border-color)" }}>
-            <button
+            <Button
               onClick={props.onClose}
-              class="flex-1 px-5 py-2.5 rounded-lg font-medium transition-all"
-              style={{
-                "background-color": "var(--bg-secondary)",
-                color: "var(--text-primary)",
-                "border": "1px solid var(--border-color)"
-              }}
+              variant="secondary"
+              size="sm"
+              fullWidth
             >
               Close
-            </button>
+            </Button>
             <Show when={props.onEdit}>
-              <button
+              <Button
                 onClick={props.onEdit}
-                class="flex-1 px-5 py-2.5 rounded-lg font-medium transition-all hover:opacity-90"
-                style={{
-                  "background-color": "var(--primary-color)",
-                  color: "white",
-                }}
+                variant="primary"
+                size="sm"
+                fullWidth
               >
                 Edit Recipe
-              </button>
+              </Button>
             </Show>
           </div>
         </div>

@@ -6,6 +6,7 @@ import RecipeDetailsModal from "~/components/recipes/RecipeDetailsModal";
 import RecipeFormModal from "~/components/recipes/RecipeFormModal";
 import { recipesApi, Recipe, RecipeCategory, CreateRecipeRequest, UpdateRecipeRequest } from "~/api/recipes";
 import Badge from "~/components/common/Badge";
+import Button from "~/components/common/Button";
 import { getRecipeCategoryColor } from "~/components/common/Badge.config";
 import { useInfoModal } from "~/stores/infoModalStore";
 import styles from "./RecipesPage.module.css";
@@ -304,13 +305,14 @@ const RecipesPage: Component = () => {
           <h1 class={styles.pageTitle}>Recipe Management</h1>
           <p class={styles.pageSubtitle}>Manage your bakery's recipe collection</p>
         </div>
-        <button
+        <Button
+          variant="primary"
+          size="md"
           onClick={handleOpenCreateModal}
           disabled={loading()}
-          class={styles.primaryButton}
         >
           + Add Recipe
-        </button>
+        </Button>
       </div>
 
       {/* Error Display */}

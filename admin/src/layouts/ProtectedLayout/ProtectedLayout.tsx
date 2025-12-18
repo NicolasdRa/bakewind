@@ -3,6 +3,7 @@ import { RouteSectionProps } from "@solidjs/router";
 import { AuthProvider, useAuth } from "../../context/AuthContext";
 import DashboardLayout from "../DashboardLayout/DashboardLayout";
 import { logger } from "../../utils/logger";
+import Button from "../../components/common/Button";
 import styles from "./ProtectedLayout.module.css";
 
 /**
@@ -48,9 +49,9 @@ function ProtectedContent(props: RouteSectionProps) {
           <div class={styles.authRedirect}>
             <h2>Authentication Required</h2>
             <p>You need to log in to access the BakeWind Admin Dashboard.</p>
-            <button onClick={handleLoginRedirect} class={styles.loginRedirectBtn} type="button">
+            <Button variant="primary" onClick={handleLoginRedirect} class={styles.loginRedirectBtn} type="button">
               Go to Login
-            </button>
+            </Button>
           </div>
         }
       >

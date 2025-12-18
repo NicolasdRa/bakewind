@@ -75,26 +75,28 @@
 
 /* Filter section */
 .filterCard {
-  margin-bottom: var(--spacing-6);
+  margin-bottom: var(--spacing-8);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-5);
+  border: 1px solid var(--border-color);
   background-color: var(--bg-primary);
-  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
-  padding: var(--spacing-4);
 }
 
-.filterGrid {
-  display: grid;
-  grid-template-columns: repeat(1, 1fr);
+.filterRow {
+  display: flex;
+  flex-wrap: wrap;
   gap: var(--spacing-4);
+  align-items: flex-end;
 }
 
-@media (min-width: 768px) {
-  .filterGrid {
-    grid-template-columns: repeat(4, 1fr);
-  }
+.buttonGroup {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
 }
 
-.filterLabel {
+.buttonGroupLabel {
   display: block;
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
@@ -102,38 +104,10 @@
   color: var(--text-secondary);
 }
 
-.filterInput {
-  width: 100%;
-  padding: var(--spacing-2) var(--spacing-3);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
-}
-
-.filterInput:focus {
-  outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 2px var(--primary-light);
-}
-
-.filterButtonWrapper {
+.buttonGroupRow {
   display: flex;
-  align-items: flex-end;
-}
-
-.addButton {
-  width: 100%;
-  padding: var(--spacing-2) var(--spacing-4);
-  background-color: var(--primary-color);
-  color: white;
-  border-radius: var(--radius-md);
-  font-weight: var(--font-weight-medium);
-  transition: background-color 0.2s;
-}
-
-.addButton:hover {
-  background-color: var(--primary-hover);
+  gap: var(--spacing-2);
+  align-items: stretch;
 }
 
 /* Main grid layout */
@@ -527,28 +501,6 @@
   background-color: var(--bg-hover);
 }
 
-/* Action buttons group */
-.actionButtonsGroup {
-  display: flex;
-  gap: var(--spacing-2);
-  align-items: flex-end;
-}
-
-.secondaryButton {
-  padding: var(--spacing-2) var(--spacing-4);
-  border: 1px solid var(--border-color);
-  background-color: var(--bg-primary);
-  color: var(--text-secondary);
-  border-radius: var(--radius-md);
-  font-weight: var(--font-weight-medium);
-  font-size: var(--font-size-sm);
-  transition: all 0.2s;
-}
-
-.secondaryButton:hover {
-  background-color: var(--bg-hover);
-  color: var(--text-primary);
-}
 
 /* Import modal styles */
 .importModal {

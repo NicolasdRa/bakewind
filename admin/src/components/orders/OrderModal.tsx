@@ -1,7 +1,8 @@
-import { Component, Show, createSignal, onMount, onCleanup, createEffect } from 'solid-js';
+import { Component, Show, createSignal, onCleanup, createEffect } from 'solid-js';
 import { orderLocksStore } from '../../stores/order-locks';
 import OrderLockIndicator from './OrderLockIndicator';
 import { XMarkIcon } from '../Icons/icons';
+import Button from '../common/Button';
 
 interface Order {
   id: string;
@@ -185,13 +186,15 @@ const OrderModal: Component<OrderModalProps> = (props) => {
                 Order ID: {props.order!.id}
               </p>
             </div>
-            <button
+            <Button
               onClick={handleClose}
-              class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              variant="ghost"
+              size="sm"
+              class="p-2"
               aria-label="Close modal"
             >
               <XMarkIcon class="w-6 h-6 text-gray-600 dark:text-gray-300" />
-            </button>
+            </Button>
           </div>
 
           {/* Content */}
@@ -293,18 +296,20 @@ const OrderModal: Component<OrderModalProps> = (props) => {
 
           {/* Footer */}
           <div class="flex items-center justify-end gap-3 p-6 border-t border-gray-200 dark:border-gray-700">
-            <button
+            <Button
               onClick={handleClose}
-              class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              variant="secondary"
+              size="sm"
             >
               Close
-            </button>
-            <button
+            </Button>
+            <Button
               disabled={!canEdit()}
-              class="px-4 py-2 rounded-lg bg-amber-600 text-white hover:bg-amber-700 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed transition-colors"
+              variant="primary"
+              size="sm"
             >
               Edit Order
-            </button>
+            </Button>
           </div>
         </div>
       </div>

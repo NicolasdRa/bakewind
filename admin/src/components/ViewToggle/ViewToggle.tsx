@@ -1,4 +1,5 @@
 import { For } from 'solid-js'
+import Button from '../common/Button'
 import styles from './ViewToggle.module.css'
 
 export interface ViewToggleOption {
@@ -22,7 +23,8 @@ export default function ViewToggle(props: ViewToggleProps) {
     <div class={`${styles.viewToggle} ${props.class || ''}`}>
       <For each={props.options}>
         {(option) => (
-          <button
+          <Button
+            variant="ghost"
             onClick={() => props.onChange(option.value)}
             class={`${styles.toggleButton} ${
               props.currentValue === option.value
@@ -37,14 +39,14 @@ export default function ViewToggle(props: ViewToggleProps) {
                 {option.mobileIcon || option.icon}
               </span>
             )}
-            
+
             {/* Desktop Label */}
             {(option.desktopLabel || option.label) && (
               <span class={styles.toggleButtonLabel}>
                 {option.desktopLabel || option.label}
               </span>
             )}
-          </button>
+          </Button>
         )}
       </For>
     </div>

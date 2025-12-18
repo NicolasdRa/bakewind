@@ -4,6 +4,7 @@ import { A, useNavigate } from '@solidjs/router'
 import { useAppStore } from '~/stores/appStore'
 import { useAuth } from '~/context/AuthContext'
 import Logo from '~/components/Logo/Logo'
+import Button from '~/components/common/Button'
 import styles from './Sidebar.module.css'
 
 interface SidebarProps {
@@ -105,7 +106,8 @@ export default function Sidebar(props: SidebarProps) {
           <div class={styles.headerMobile}>
             <Logo size="small" />
 
-            <button
+            <Button
+              variant="ghost"
               onClick={() => props.onMobileToggle(false)}
               class={styles.toggleButton}
               title="Close sidebar"
@@ -113,12 +115,13 @@ export default function Sidebar(props: SidebarProps) {
               <svg class={styles.icon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
-            </button>
+            </Button>
           </div>
         ) : props.collapsed ? (
           // Desktop collapsed view - only expand button, no logo
           <div class={styles.headerCollapsed}>
-            <button
+            <Button
+              variant="ghost"
               onClick={() => props.onToggle(!props.collapsed)}
               class={styles.toggleButtonCentered}
               title="Expand sidebar"
@@ -126,14 +129,15 @@ export default function Sidebar(props: SidebarProps) {
               <svg class={styles.iconSmall} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
               </svg>
-            </button>
+            </Button>
           </div>
         ) : (
           // Desktop expanded view - horizontal layout
           <div class={styles.headerExpanded}>
             <Logo size="small" />
 
-            <button
+            <Button
+              variant="ghost"
               onClick={() => props.onToggle(!props.collapsed)}
               class={styles.toggleButton}
               title="Collapse sidebar"
@@ -141,7 +145,7 @@ export default function Sidebar(props: SidebarProps) {
               <svg class={styles.icon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
               </svg>
-            </button>
+            </Button>
           </div>
         )}
       </div>
@@ -193,7 +197,8 @@ export default function Sidebar(props: SidebarProps) {
       {/* User Section */}
       <div class={styles.userSection}>
         {/* Theme Toggle */}
-        <button
+        <Button
+          variant="ghost"
           onClick={toggleTheme}
           class={styles.themeButton}
           classList={{
@@ -215,12 +220,13 @@ export default function Sidebar(props: SidebarProps) {
               </div>
             </Portal>
           </Show>
-        </button>
+        </Button>
 
         {/* User Profile with Dropdown */}
         <Show when={auth.user}>
           <div class={styles.userContainer}>
-            <button
+            <Button
+              variant="ghost"
               onClick={toggleUserDropdown}
               class={styles.userProfile}
               classList={{
@@ -270,7 +276,7 @@ export default function Sidebar(props: SidebarProps) {
                   </svg>
                 </div>
               </Show>
-            </button>
+            </Button>
 
             {/* User Dropdown Menu */}
             <Show when={showUserDropdown()}>
@@ -294,7 +300,8 @@ export default function Sidebar(props: SidebarProps) {
                     </div>
                   </div>
                   <div class={styles.dropdownDivider}></div>
-                  <button
+                  <Button
+                    variant="ghost"
                     onClick={handleLogout}
                     class={styles.dropdownLogoutButton}
                     disabled={isLoggingOut()}
@@ -313,7 +320,7 @@ export default function Sidebar(props: SidebarProps) {
                       </svg>
                       <span class={styles.dropdownLogoutText}>Sign Out</span>
                     </Show>
-                  </button>
+                  </Button>
                 </div>
               </div>
             </Show>

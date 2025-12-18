@@ -1,13 +1,14 @@
 import { Component, Show, For } from 'solid-js';
-import { Order, OrderStatus } from '~/api/orders';
+import { InternalOrder, InternalOrderStatus } from '~/api/internalOrders';
+import Button from '~/components/common/Button';
 
 interface InternalOrderDetailsModalProps {
   show: boolean;
-  order: Order | null;
+  order: InternalOrder | null;
   onClose: () => void;
-  onEdit: (order: Order) => void;
-  onDelete: (order: Order) => void;
-  onStatusChange: (order: Order, status: OrderStatus) => void;
+  onEdit: (order: InternalOrder) => void;
+  onDelete: (order: InternalOrder) => void;
+  onStatusChange: (order: InternalOrder, status: InternalOrderStatus) => void;
 }
 
 const InternalOrderDetailsModal: Component<InternalOrderDetailsModalProps> = (props) => {
@@ -23,15 +24,15 @@ const InternalOrderDetailsModal: Component<InternalOrderDetailsModalProps> = (pr
     });
   };
 
-  const getStatusColor = (status: OrderStatus): string => {
-    const colors: Record<OrderStatus, string> = {
+  const getStatusColor = (status: InternalOrderStatus): string => {
+    const colors: Record<InternalOrderStatus, string> = {
       draft: '#6B7280',
-      pending: '#F59E0B',
-      confirmed: '#3B82F6',
+      requested: '#F59E0B',
+      approved: '#3B82F6',
       scheduled: '#8B5CF6',
-      ready: '#10B981',
       in_production: '#EC4899',
       quality_check: '#F97316',
+      ready: '#10B981',
       completed: '#22C55E',
       delivered: '#059669',
       cancelled: '#EF4444',
@@ -49,16 +50,16 @@ const InternalOrderDetailsModal: Component<InternalOrderDetailsModalProps> = (pr
     return colors[priority] || '#3B82F6';
   };
 
-  const getNextStatus = (currentStatus: OrderStatus): OrderStatus | null => {
-    const statusFlow: Record<OrderStatus, OrderStatus | null> = {
-      draft: 'scheduled',
-      pending: 'scheduled',
-      confirmed: 'scheduled',
-      scheduled: 'ready',
-      ready: 'in_production',
+  const getNextStatus = (currentStatus: InternalOrderStatus): InternalOrderStatus | null => {
+    const statusFlow: Record<InternalOrderStatus, InternalOrderStatus | null> = {
+      draft: 'requested',
+      requested: 'approved',
+      approved: 'scheduled',
+      scheduled: 'in_production',
       in_production: 'quality_check',
-      quality_check: 'completed',
-      completed: null,
+      quality_check: 'ready',
+      ready: 'completed',
+      completed: 'delivered',
       delivered: null,
       cancelled: null,
     };
@@ -154,19 +155,14 @@ const InternalOrderDetailsModal: Component<InternalOrderDetailsModalProps> = (pr
                   </span>
                 </div>
               </div>
-              <button
+              <Button
                 onClick={props.onClose}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  'font-size': '1.5rem',
-                  cursor: 'pointer',
-                  color: 'var(--text-secondary)',
-                  padding: '0.25rem',
-                }}
+                variant="ghost"
+                size="sm"
+                class="p-1"
               >
                 ×
-              </button>
+              </Button>
             </div>
 
             {/* Content */}
@@ -320,7 +316,7 @@ const InternalOrderDetailsModal: Component<InternalOrderDetailsModalProps> = (pr
                               {item.productName}
                             </div>
                             <div style={{ 'font-size': '0.875rem', color: 'var(--text-secondary)' }}>
-                              ${item.unitPrice} per unit
+                              ${item.unitCost || '0.00'} per unit
                             </div>
                           </div>
                           <div style={{ 'text-align': 'right' }}>
@@ -328,7 +324,7 @@ const InternalOrderDetailsModal: Component<InternalOrderDetailsModalProps> = (pr
                               {item.quantity} units
                             </div>
                             <div style={{ 'font-size': '0.875rem', color: 'var(--text-secondary)' }}>
-                              ${(parseFloat(item.unitPrice) * item.quantity).toFixed(2)}
+                              ${(parseFloat(item.unitCost || '0') * item.quantity).toFixed(2)}
                             </div>
                           </div>
                         </div>
@@ -424,63 +420,39 @@ const InternalOrderDetailsModal: Component<InternalOrderDetailsModalProps> = (pr
               gap: '1rem',
             }}>
               <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <button
+                <Button
                   onClick={() => props.onEdit(order())}
-                  style={{
-                    padding: '0.75rem 1.5rem',
-                    border: '1px solid var(--border-color)',
-                    'border-radius': '0.375rem',
-                    'background-color': 'var(--bg-primary)',
-                    color: 'var(--text-primary)',
-                    cursor: 'pointer',
-                  }}
+                  variant="text"
+                  size="sm"
                 >
                   Edit
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={() => props.onDelete(order())}
-                  style={{
-                    padding: '0.75rem 1.5rem',
-                    border: 'none',
-                    'border-radius': '0.375rem',
-                    'background-color': 'var(--error-color)',
-                    color: 'white',
-                    cursor: 'pointer',
-                  }}
+                  variant="danger"
+                  size="sm"
                 >
                   Delete
-                </button>
+                </Button>
               </div>
 
               <div style={{ display: 'flex', gap: '0.5rem' }}>
                 <Show when={canAdvanceStatus()}>
-                  <button
+                  <Button
                     onClick={handleAdvanceStatus}
-                    style={{
-                      padding: '0.75rem 1.5rem',
-                      border: 'none',
-                      'border-radius': '0.375rem',
-                      'background-color': 'var(--primary-color)',
-                      color: 'white',
-                      cursor: 'pointer',
-                    }}
+                    variant="primary"
+                    size="sm"
                   >
                     Advance to {getNextStatus(order().status)?.replace('_', ' ')}
-                  </button>
+                  </Button>
                 </Show>
-                <button
+                <Button
                   onClick={props.onClose}
-                  style={{
-                    padding: '0.75rem 1.5rem',
-                    border: '1px solid var(--border-color)',
-                    'border-radius': '0.375rem',
-                    'background-color': 'var(--bg-primary)',
-                    color: 'var(--text-primary)',
-                    cursor: 'pointer',
-                  }}
+                  variant="secondary"
+                  size="sm"
                 >
                   Close
-                </button>
+                </Button>
               </div>
             </div>
           </div>

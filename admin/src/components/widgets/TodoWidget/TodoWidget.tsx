@@ -1,5 +1,6 @@
 import { createSignal, For } from 'solid-js'
 import BaseWidget from '../../BaseWidget/BaseWidget'
+import Button from '../../common/Button'
 import styles from './TodoWidget.module.css'
 
 
@@ -69,12 +70,13 @@ export default function TodoWidget(props: TodoWidgetProps) {
             placeholder="Add new task..."
             class={styles.input}
           />
-          <button
+          <Button
+            variant="primary"
             onClick={addTodo}
             class={styles.addButton}
           >
             +
-          </button>
+          </Button>
         </div>
 
         {/* Todo list */}
@@ -97,18 +99,19 @@ export default function TodoWidget(props: TodoWidgetProps) {
                   class={styles.checkbox}
                 />
                 <span class={`${styles.todoText} ${
-                  todo.completed 
+                  todo.completed
                     ? styles.todoTextCompleted
                     : styles.todoTextActive
                 }`}>
                   {todo.text}
                 </span>
-                <button
+                <Button
+                  variant="text"
                   onClick={() => deleteTodo(todo.id)}
                   class={styles.deleteButton}
                 >
                   <span class={styles.deleteIcon}>🗑</span>
-                </button>
+                </Button>
               </div>
             )}
           </For>

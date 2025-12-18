@@ -11,6 +11,7 @@ import StatsCard from "~/components/common/StatsCard";
 import SearchInput from "~/components/common/SearchInput";
 import FilterSelect from "~/components/common/FilterSelect";
 import Badge from "~/components/common/Badge";
+import Button from "~/components/common/Button";
 import { useInfoModal } from "~/stores/infoModalStore";
 import { orderLocksStore } from "~/stores/order-locks";
 import InternalOrderFormModal from "~/components/orders/InternalOrderFormModal";
@@ -340,9 +341,9 @@ const InternalOrdersPage: Component = () => {
           <h1 class={styles.pageTitle}>Internal Production Orders</h1>
           <p class={styles.pageSubtitle}>Track and manage internal production orders</p>
         </div>
-        <button onClick={handleCreateNew} class={styles.primaryButton}>
+        <Button variant="primary" size="md" onClick={handleCreateNew}>
           + Create Order
-        </button>
+        </Button>
       </div>
 
       {/* Stats Cards */}
@@ -633,20 +634,22 @@ const InternalOrdersPage: Component = () => {
             </Show>
 
             <div class={styles.modalActions}>
-              <button
+              <Button
+                variant="secondary"
+                size="sm"
                 onClick={handleCancelSchedule}
                 disabled={isScheduling()}
-                class={styles.cancelButton}
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
                 onClick={handleScheduleProduction}
                 disabled={isScheduling()}
-                class={styles.submitButton}
               >
                 {isScheduling() ? 'Scheduling...' : 'Schedule Production'}
-              </button>
+              </Button>
             </div>
           </div>
         </div>

@@ -1,6 +1,7 @@
 import { useAppStore } from '~/stores/appStore'
-import { Show, createSignal, onMount, createMemo } from 'solid-js'
+import { Show, createMemo } from 'solid-js'
 import { useLocation } from '@solidjs/router'
+import Button from '../common/Button'
 import styles from './Header.module.css'
 
 // Route configuration for header content
@@ -68,15 +69,16 @@ export default function DashboardHeader() {
       <div class={styles.header}>
         <div class={styles.headerContent}>
           {/* Mobile hamburger menu */}
-          <button
+          <Button
             onClick={() => actions.setSidebarOpen(true)}
+            variant="ghost"
             class={styles.mobileMenuButton}
             title="Open sidebar"
           >
             <svg class={styles.mobileMenuIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
-          </button>
+          </Button>
           
           <div class={styles.titleSection}>
             <h1 class={styles.title}>{currentRoute().title}</h1>
@@ -88,8 +90,9 @@ export default function DashboardHeader() {
           <div class={styles.controls}>
             {/* Layout Controls */}
             <div class={styles.layoutControls}>
-              <button
+              <Button
                 onClick={() => handleLayoutChange('grid')}
+                variant={state.dashboardLayout === 'grid' ? 'secondary' : 'ghost'}
                 class={`${styles.layoutButton} ${
                   state.dashboardLayout === 'grid'
                     ? styles.layoutButtonActive
@@ -99,9 +102,10 @@ export default function DashboardHeader() {
               >
                 <span class={styles.layoutButtonText}>⊞</span>
                 <span class={styles.layoutButtonTextDesktop}>Grid</span>
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={() => handleLayoutChange('list')}
+                variant={state.dashboardLayout === 'list' ? 'secondary' : 'ghost'}
                 class={`${styles.layoutButton} ${
                   state.dashboardLayout === 'list'
                     ? styles.layoutButtonActive
@@ -111,9 +115,10 @@ export default function DashboardHeader() {
               >
                 <span class={styles.layoutButtonText}>☰</span>
                 <span class={styles.layoutButtonTextDesktop}>List</span>
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={() => handleLayoutChange('masonry')}
+                variant={state.dashboardLayout === 'masonry' ? 'secondary' : 'ghost'}
                 class={`${styles.layoutButton} ${
                   state.dashboardLayout === 'masonry'
                     ? styles.layoutButtonActive
@@ -123,38 +128,44 @@ export default function DashboardHeader() {
               >
                 <span class={styles.layoutButtonText}>⊡</span>
                 <span class={styles.layoutButtonTextDesktop}>Masonry</span>
-              </button>
+              </Button>
             </div>
 
             {/* Action Buttons */}
             <div class={styles.actionButtons}>
-              <button
+              <Button
                 onClick={handleAddWidget}
+                variant="primary"
                 class={styles.addButton}
               >
                 <span class={styles.addButtonIcon}>+</span>
                 <span class={styles.addButtonText}>Add Widget</span>
-              </button>
-              
+              </Button>
+
               <div class={styles.dropdownContainer}>
-                <button class={styles.dropdownTrigger}>
+                <Button
+                  variant="ghost"
+                  class={styles.dropdownTrigger}
+                >
                   <span class={styles.dropdownIcon}>⋮</span>
-                </button>
-                
+                </Button>
+
                 {/* Dropdown Menu - No Portal needed */}
                 <div class={styles.dropdownMenu}>
-                  <button
+                  <Button
                     onClick={handleResetLayout}
+                    variant="text"
                     class={`${styles.dropdownItem} ${styles.dropdownItemDefault}`}
                   >
                     Reset Layout
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     onClick={handleClearLayout}
+                    variant="text"
                     class={`${styles.dropdownItem} ${styles.dropdownItemDanger}`}
                   >
                     Clear All Widgets
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>

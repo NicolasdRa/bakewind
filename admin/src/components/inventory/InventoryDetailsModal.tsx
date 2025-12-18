@@ -1,5 +1,6 @@
-import { Component, createSignal, createResource, Show } from "solid-js";
-import { inventoryApi, InventoryItem, ConsumptionTracking } from "~/api/inventory";
+import { Component, createResource, Show } from "solid-js";
+import { inventoryApi} from "~/api/inventory";
+import Button from "~/components/common/Button";
 
 interface InventoryDetailsModalProps {
   isOpen: boolean;
@@ -77,15 +78,16 @@ const InventoryDetailsModal: Component<InventoryDetailsModalProps> = (props) => 
                   </p>
                 </Show>
               </div>
-              <button
+              <Button
                 onClick={props.onClose}
-                class="p-2 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
-                style={{ color: "var(--text-secondary)" }}
+                variant="ghost"
+                size="sm"
+                class="p-2"
               >
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -224,7 +226,7 @@ const InventoryDetailsModal: Component<InventoryDetailsModalProps> = (props) => 
                   <div class="flex justify-between py-2 border-b" style={{ "border-color": "var(--border-light)" }}>
                     <span class="font-medium" style={{ color: "var(--text-secondary)" }}>Last Restocked</span>
                     <span style={{ color: "var(--text-primary)" }}>
-                      {itemDetails()!.lastRestocked ? formatDateTime(itemDetails()!.lastRestocked) : "N/A"}
+                      {itemDetails()!.lastRestocked ? formatDateTime(itemDetails()!.lastRestocked!) : "N/A"}
                     </span>
                   </div>
                   <Show when={itemDetails()!.notes}>
@@ -250,16 +252,14 @@ const InventoryDetailsModal: Component<InventoryDetailsModalProps> = (props) => 
 
           {/* Footer */}
           <div class="p-6 border-t" style={{ "border-color": "var(--border-color)" }}>
-            <button
+            <Button
               onClick={props.onClose}
-              class="w-full px-5 py-2.5 rounded-lg font-medium transition-all"
-              style={{
-                "background-color": "var(--bg-secondary)",
-                color: "var(--text-primary)",
-              }}
+              variant="secondary"
+              size="sm"
+              fullWidth
             >
               Close
-            </button>
+            </Button>
           </div>
         </div>
       </div>

@@ -1,6 +1,7 @@
 import { Component, createSignal, Show, For } from 'solid-js';
 import { A, useLocation } from '@solidjs/router';
 import { useAuth } from '../context/AuthContext';
+import Button from '../common/Button';
 
 interface NavigationItem {
   path: string;
@@ -103,14 +104,15 @@ const Navigation: Component = () => {
             <span class="brand-name">BakeWind</span>
           </div>
         </Show>
-        <button
+        <Button
+          variant="ghost"
           class="collapse-toggle"
           onClick={() => setIsCollapsed(!isCollapsed())}
           type="button"
           aria-label="Toggle navigation"
         >
           <span>{isCollapsed() ? '→' : '←'}</span>
-        </button>
+        </Button>
       </div>
 
       <div class="navigation-content">
@@ -122,7 +124,8 @@ const Navigation: Component = () => {
                   when={!item.subItems}
                   fallback={
                     <>
-                      <button
+                      <Button
+                        variant="ghost"
                         class={`nav-link expandable ${isParentActive(item) ? 'active' : ''}`}
                         onClick={() => toggleSection(item.path)}
                         type="button"
@@ -137,7 +140,7 @@ const Navigation: Component = () => {
                             {expandedSections().has(item.path) ? '▼' : '▶'}
                           </span>
                         </Show>
-                      </button>
+                      </Button>
                       <Show when={expandedSections().has(item.path) && !isCollapsed()}>
                         <ul class="sub-nav-list">
                           <For each={item.subItems}>

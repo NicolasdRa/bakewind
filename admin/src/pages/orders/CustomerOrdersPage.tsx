@@ -5,6 +5,7 @@ import StatsCard from "~/components/common/StatsCard";
 import SearchInput from "~/components/common/SearchInput";
 import FilterSelect from "~/components/common/FilterSelect";
 import Badge from "~/components/common/Badge";
+import Button from "~/components/common/Button";
 import { useInfoModal } from "~/stores/infoModalStore";
 import styles from "./CustomerOrdersPage.module.css";
 
@@ -358,12 +359,12 @@ const CustomerOrdersPage: Component = () => {
               />
             </div>
             <div class={styles.modalActions}>
-              <button onClick={handleCancelSchedule} class={styles.cancelButton}>
+              <Button variant="secondary" size="sm" onClick={handleCancelSchedule}>
                 Cancel
-              </button>
-              <button onClick={handleConfirmSchedule} class={styles.submitButton}>
+              </Button>
+              <Button variant="primary" size="sm" onClick={handleConfirmSchedule}>
                 Schedule Production
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -378,12 +379,12 @@ const CustomerOrdersPage: Component = () => {
               Are you sure you want to delete order "{orderToDelete()?.orderNumber}"? This action cannot be undone.
             </p>
             <div class={styles.modalActions}>
-              <button onClick={handleCancelDelete} class={styles.cancelButton}>
+              <Button variant="secondary" size="sm" onClick={handleCancelDelete}>
                 Cancel
-              </button>
-              <button onClick={handleConfirmDelete} class={styles.deleteButton}>
+              </Button>
+              <Button variant="danger" size="sm" onClick={handleConfirmDelete}>
                 Delete
-              </button>
+              </Button>
             </div>
           </div>
         </div>

@@ -1,5 +1,6 @@
 import { createSignal, Show } from 'solid-js'
 import type { JSX } from 'solid-js'
+import Button from '../common/Button'
 import styles from './BaseWidget.module.css'
 
 interface BaseWidgetProps {
@@ -38,20 +39,22 @@ export default function BaseWidget(props: BaseWidgetProps) {
         <h3 class={styles.title}>{props.title}</h3>
         
         <div class={styles.controls}>
-          <button
+          <Button
+            variant="ghost"
             onClick={toggleMinimize}
             class={styles.controlButton}
             title={minimized() ? 'Maximize' : 'Minimize'}
           >
             <span class={styles.buttonIcon}>{minimized() ? '⬜' : '➖'}</span>
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="ghost"
             onClick={props.onClose}
             class={styles.closeButton}
             title="Close"
           >
             <span class={styles.buttonIcon}>✕</span>
-          </button>
+          </Button>
         </div>
       </div>
 
