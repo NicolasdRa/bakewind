@@ -33,37 +33,64 @@ export class CustomerResponseDto {
   @ApiProperty({
     description: 'Customer phone number',
     example: '+1 (555) 987-6543',
-    nullable: true,
   })
-  phone!: string | null;
+  phone!: string;
 
   @ApiProperty({
-    description: 'Customer address',
-    example: '456 Oak Avenue, Springfield, IL 62701',
+    description: 'Address line 1',
+    example: '456 Oak Avenue',
     nullable: true,
   })
-  address!: string | null;
+  addressLine1!: string | null;
 
   @ApiProperty({
-    description: 'Company or organization name',
-    example: 'Springfield Elementary School',
+    description: 'Address line 2',
+    example: 'Suite 100',
     nullable: true,
   })
-  company!: string | null;
+  addressLine2!: string | null;
 
   @ApiProperty({
-    description: 'Customer notes or preferences',
-    example: 'Prefers gluten-free options, large orders for school events',
+    description: 'City',
+    example: 'Springfield',
     nullable: true,
   })
-  notes!: string | null;
+  city!: string | null;
+
+  @ApiProperty({
+    description: 'State',
+    example: 'IL',
+    nullable: true,
+  })
+  state!: string | null;
+
+  @ApiProperty({
+    description: 'ZIP code',
+    example: '62701',
+    nullable: true,
+  })
+  zipCode!: string | null;
 
   @ApiProperty({
     description: 'Customer type',
     example: 'business',
-    enum: ['individual', 'business', 'restaurant', 'event_planner'],
+    enum: ['individual', 'business'],
   })
-  customerType!: 'individual' | 'business' | 'restaurant' | 'event_planner';
+  customerType!: 'individual' | 'business';
+
+  @ApiProperty({
+    description: 'Company name (for business customers)',
+    example: 'Springfield Elementary School',
+    nullable: true,
+  })
+  companyName!: string | null;
+
+  @ApiProperty({
+    description: 'Tax ID (for business invoicing)',
+    example: '12-3456789',
+    nullable: true,
+  })
+  taxId!: string | null;
 
   @ApiProperty({
     description: 'Preferred contact method',
@@ -74,6 +101,12 @@ export class CustomerResponseDto {
   preferredContact!: 'email' | 'phone' | 'text' | null;
 
   @ApiProperty({
+    description: 'Marketing opt-in status',
+    example: true,
+  })
+  marketingOptIn!: boolean;
+
+  @ApiProperty({
     description: 'Customer status',
     example: 'active',
     enum: ['active', 'inactive'],
@@ -81,10 +114,17 @@ export class CustomerResponseDto {
   status!: 'active' | 'inactive';
 
   @ApiProperty({
-    description: 'Marketing opt-in status',
-    example: true,
+    description: 'Customer notes or preferences',
+    example: 'Prefers gluten-free options, large orders for school events',
+    nullable: true,
   })
-  marketingOptIn!: boolean;
+  notes!: string | null;
+
+  @ApiProperty({
+    description: 'Loyalty points balance',
+    example: 150,
+  })
+  loyaltyPoints!: number;
 
   @ApiProperty({
     description: 'Total number of orders',
@@ -140,7 +180,7 @@ export class CustomerQueryDto {
   limit?: number;
 
   @ApiPropertyOptional({
-    description: 'Search by name, email, or phone',
+    description: 'Search by name, email, phone, or company name',
     example: 'jane smith',
   })
   @IsOptional()
@@ -159,11 +199,11 @@ export class CustomerQueryDto {
   @ApiPropertyOptional({
     description: 'Filter by customer type',
     example: 'business',
-    enum: ['individual', 'business', 'restaurant', 'event_planner'],
+    enum: ['individual', 'business'],
   })
   @IsOptional()
-  @IsEnum(['individual', 'business', 'restaurant', 'event_planner'])
-  customerType?: 'individual' | 'business' | 'restaurant' | 'event_planner';
+  @IsEnum(['individual', 'business'])
+  customerType?: 'individual' | 'business';
 
   @ApiPropertyOptional({
     description: 'Sort field',

@@ -287,6 +287,11 @@
   margin-bottom: var(--spacing-2);
 }
 
+.companyName {
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+}
+
 .customerStatsGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -352,9 +357,22 @@
   color: var(--text-primary);
 }
 
+.detailCompany {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+  margin-top: var(--spacing-1);
+}
+
 .detailEmail {
   font-size: var(--font-size-sm);
   color: var(--text-secondary);
+}
+
+.detailBadges {
+  display: flex;
+  gap: var(--spacing-2);
+  margin-top: var(--spacing-2);
 }
 
 .detailContent {

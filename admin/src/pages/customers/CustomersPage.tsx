@@ -1,94 +1,113 @@
 import { Component, createSignal, createResource, For, Show } from "solid-js";
-import { customersApi } from "../../api/customers";
+import { Customer, customersApi, CustomerQueryParams, CustomersResponse } from "../../api/customers";
+import CustomerFormModal from "../../components/customers/CustomerFormModal";
+import CustomerDetailsModal from "../../components/customers/CustomerDetailsModal";
+import Badge from "../../components/common/Badge";
 import styles from "./CustomersPage.module.css";
 
-interface Customer {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone?: string;
-  address?: {
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
-  };
-  dateOfBirth?: string;
-  allergens?: string[];
-  preferences?: string[];
-  orderHistory: {
-    totalOrders: number;
-    totalSpent: number;
-    avgOrderValue: number;
-    lastOrderDate?: string;
-  };
-  loyalty: {
-    points: number;
-    tier: 'bronze' | 'silver' | 'gold' | 'platinum';
-  };
-  status: 'active' | 'inactive' | 'banned';
-  createdAt: string;
-  notes?: string;
-}
-
 const CustomersPage: Component = () => {
-  const [customers] = createResource<Customer[]>(() => customersApi.getCustomers());
-  const [selectedCustomer, setSelectedCustomer] = createSignal<Customer | null>(null);
-  const [searchTerm, setSearchTerm] = createSignal('');
-  const [selectedStatus, setSelectedStatus] = createSignal<string>('all');
-  const [selectedTier, setSelectedTier] = createSignal<string>('all');
+  // Query params for filtering
+  const [queryParams, setQueryParams] = createSignal<CustomerQueryParams>({
+    page: 1,
+    limit: 20,
+  });
 
+  // Fetch customers with query params
+  const [customersData, { refetch }] = createResource<CustomersResponse, CustomerQueryParams>(
+    queryParams,
+    (params) => customersApi.getCustomers(params)
+  );
+
+  // UI state
+  const [selectedCustomer, setSelectedCustomer] = createSignal<Customer | null>(null);
+  const [searchTerm, setSearchTerm] = createSignal("");
+  const [selectedStatus, setSelectedStatus] = createSignal<string>("all");
+  const [selectedType, setSelectedType] = createSignal<string>("all");
+
+  // Modal state
+  const [isFormModalOpen, setIsFormModalOpen] = createSignal(false);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = createSignal(false);
+  const [editingCustomer, setEditingCustomer] = createSignal<Customer | null>(null);
+
+  // Get customers list from response
+  const customers = () => customersData()?.customers || [];
+
+  // Apply client-side search filter (server-side filtering available via queryParams)
   const filteredCustomers = () => {
-    let filtered = customers() || [];
+    let filtered = customers();
 
     if (searchTerm()) {
       const term = searchTerm().toLowerCase();
-      filtered = filtered.filter(customer =>
-        customer.firstName.toLowerCase().includes(term) ||
-        customer.lastName.toLowerCase().includes(term) ||
-        customer.email.toLowerCase().includes(term)
+      filtered = filtered.filter(
+        (customer) =>
+          customer.name.toLowerCase().includes(term) ||
+          customer.email?.toLowerCase().includes(term) ||
+          customer.phone.toLowerCase().includes(term) ||
+          customer.companyName?.toLowerCase().includes(term)
       );
     }
 
-    if (selectedStatus() !== 'all') {
-      filtered = filtered.filter(customer => customer.status === selectedStatus());
+    if (selectedStatus() !== "all") {
+      filtered = filtered.filter((customer) => customer.status === selectedStatus());
     }
 
-    if (selectedTier() !== 'all') {
-      filtered = filtered.filter(customer => customer.loyalty.tier === selectedTier());
+    if (selectedType() !== "all") {
+      filtered = filtered.filter((customer) => customer.customerType === selectedType());
     }
 
     return filtered;
   };
 
-  const getStatusClass = (status: string) => {
-    switch (status) {
-      case 'active': return styles.statusActive;
-      case 'inactive': return styles.statusInactive;
-      case 'banned': return styles.statusBanned;
-      default: return styles.statusInactive;
+  // Stats calculations
+  const getTotalCustomers = () => customersData()?.pagination.total || customers().length;
+  const getActiveCustomers = () => customers().filter((c) => c.status === "active").length;
+  const getBusinessCustomers = () => customers().filter((c) => c.customerType === "business").length;
+  const getTotalRevenue = () => customers().reduce((sum, c) => sum + c.totalSpent, 0);
+
+  // Modal handlers
+  const handleAddCustomer = () => {
+    setEditingCustomer(null);
+    setIsFormModalOpen(true);
+  };
+
+  const handleEditCustomer = (customer: Customer) => {
+    setEditingCustomer(customer);
+    setIsFormModalOpen(true);
+  };
+
+  const handleViewCustomer = (customer: Customer) => {
+    setSelectedCustomer(customer);
+    setIsDetailsModalOpen(true);
+  };
+
+  const handleFormClose = () => {
+    setIsFormModalOpen(false);
+    setEditingCustomer(null);
+  };
+
+  const handleFormSuccess = () => {
+    setIsFormModalOpen(false);
+    setEditingCustomer(null);
+    refetch();
+  };
+
+  const handleDetailsClose = () => {
+    setIsDetailsModalOpen(false);
+  };
+
+  const handleDetailsEdit = () => {
+    const customer = selectedCustomer();
+    if (customer) {
+      setIsDetailsModalOpen(false);
+      handleEditCustomer(customer);
     }
   };
 
-  const getTierClass = (tier: string) => {
-    switch (tier) {
-      case 'bronze': return styles.tierBronze;
-      case 'silver': return styles.tierSilver;
-      case 'gold': return styles.tierGold;
-      case 'platinum': return styles.tierPlatinum;
-      default: return styles.tierSilver;
-    }
-  };
-
-  const getTotalCustomers = () => customers()?.length || 0;
-  const getActiveCustomers = () => customers()?.filter(c => c.status === 'active').length || 0;
-  const getTotalRevenue = () => customers()?.reduce((sum, c) => sum + c.orderHistory.totalSpent, 0) || 0;
-  const getAvgOrderValue = () => {
-    const allCustomers = customers() || [];
-    if (allCustomers.length === 0) return 0;
-    const totalValue = allCustomers.reduce((sum, c) => sum + c.orderHistory.avgOrderValue, 0);
-    return totalValue / allCustomers.length;
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+    }).format(amount);
   };
 
   return (
@@ -109,12 +128,12 @@ const CustomersPage: Component = () => {
           <p class={styles.statValueSuccess}>{getActiveCustomers()}</p>
         </div>
         <div class={styles.statCard}>
-          <h3 class={styles.statTitle}>Total Revenue</h3>
-          <p class={styles.statValueInfo}>${getTotalRevenue().toFixed(2)}</p>
+          <h3 class={styles.statTitle}>Business Customers</h3>
+          <p class={styles.statValueInfo}>{getBusinessCustomers()}</p>
         </div>
         <div class={styles.statCard}>
-          <h3 class={styles.statTitle}>Avg Order Value</h3>
-          <p class={styles.statValueWarning}>${getAvgOrderValue().toFixed(2)}</p>
+          <h3 class={styles.statTitle}>Total Revenue</h3>
+          <p class={styles.statValueWarning}>{formatCurrency(getTotalRevenue())}</p>
         </div>
       </div>
 
@@ -125,9 +144,9 @@ const CustomersPage: Component = () => {
             <label class={styles.filterLabel}>Search Customers</label>
             <input
               type="text"
-              placeholder="Search by name or email..."
+              placeholder="Search by name, email, phone, or company..."
               value={searchTerm()}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onInput={(e) => setSearchTerm(e.currentTarget.value)}
               class={styles.filterInput}
             />
           </div>
@@ -135,31 +154,28 @@ const CustomersPage: Component = () => {
             <label class={styles.filterLabel}>Status</label>
             <select
               value={selectedStatus()}
-              onChange={(e) => setSelectedStatus(e.target.value)}
+              onChange={(e) => setSelectedStatus(e.currentTarget.value)}
               class={styles.filterInput}
             >
               <option value="all">All Statuses</option>
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
-              <option value="banned">Banned</option>
             </select>
           </div>
           <div>
-            <label class={styles.filterLabel}>Loyalty Tier</label>
+            <label class={styles.filterLabel}>Customer Type</label>
             <select
-              value={selectedTier()}
-              onChange={(e) => setSelectedTier(e.target.value)}
+              value={selectedType()}
+              onChange={(e) => setSelectedType(e.currentTarget.value)}
               class={styles.filterInput}
             >
-              <option value="all">All Tiers</option>
-              <option value="bronze">Bronze</option>
-              <option value="silver">Silver</option>
-              <option value="gold">Gold</option>
-              <option value="platinum">Platinum</option>
+              <option value="all">All Types</option>
+              <option value="business">Business</option>
+              <option value="individual">Individual</option>
             </select>
           </div>
           <div class={styles.filterButtonWrapper}>
-            <button class={styles.addButton}>
+            <button class={styles.addButton} onClick={handleAddCustomer}>
               Add Customer
             </button>
           </div>
@@ -171,13 +187,11 @@ const CustomersPage: Component = () => {
         <div>
           <div class={styles.listCard}>
             <div class={styles.listHeader}>
-              <h2 class={styles.listTitle}>
-                Customers ({filteredCustomers().length})
-              </h2>
+              <h2 class={styles.listTitle}>Customers ({filteredCustomers().length})</h2>
             </div>
 
             <Show
-              when={!customers.loading}
+              when={!customersData.loading}
               fallback={
                 <div class={styles.loadingContainer}>
                   <div class={styles.spinner}></div>
@@ -187,9 +201,7 @@ const CustomersPage: Component = () => {
               <Show
                 when={filteredCustomers().length > 0}
                 fallback={
-                  <div class={styles.emptyState}>
-                    No customers found matching your criteria.
-                  </div>
+                  <div class={styles.emptyState}>No customers found matching your criteria.</div>
                 }
               >
                 <div class={styles.customerList}>
@@ -197,45 +209,68 @@ const CustomersPage: Component = () => {
                     {(customer) => (
                       <div
                         class={styles.customerItem}
-                        onClick={() => setSelectedCustomer(customer)}
+                        onClick={() => handleViewCustomer(customer)}
                       >
                         <div class={styles.customerItemContent}>
                           <div class={styles.customerInfo}>
                             <div class={styles.customerNameRow}>
-                              <h3 class={styles.customerName}>
-                                {customer.firstName} {customer.lastName}
-                              </h3>
-                              <span class={`${styles.statusBadge} ${getStatusClass(customer.status)}`}>
-                                {customer.status.charAt(0).toUpperCase() + customer.status.slice(1)}
-                              </span>
-                              <span class={`${styles.tierBadge} ${getTierClass(customer.loyalty.tier)}`}>
-                                {customer.loyalty.tier.charAt(0).toUpperCase() + customer.loyalty.tier.slice(1)}
-                              </span>
+                              <h3 class={styles.customerName}>{customer.name}</h3>
+                              <Badge
+                                variant={customer.status === "active" ? "success" : "secondary"}
+                                size="sm"
+                              >
+                                {customer.status === "active" ? "Active" : "Inactive"}
+                              </Badge>
+                              <Badge
+                                color={customer.customerType === "business" ? "blue" : "gray"}
+                                size="sm"
+                              >
+                                {customer.customerType === "business" ? "Business" : "Individual"}
+                              </Badge>
                             </div>
 
                             <div class={styles.customerContact}>
-                              <p>{customer.email}</p>
-                              <Show when={customer.phone}>
-                                <p>{customer.phone}</p>
+                              <Show when={customer.companyName}>
+                                <p class={styles.companyName}>{customer.companyName}</p>
                               </Show>
+                              <p>{customer.email || "No email"}</p>
+                              <p>{customer.phone}</p>
                             </div>
 
                             <div class={styles.customerStatsGrid}>
                               <div>
-                                <span class={styles.statLabel}>Orders:</span> {customer.orderHistory.totalOrders}
+                                <span class={styles.statLabel}>Orders:</span> {customer.totalOrders}
                               </div>
                               <div>
-                                <span class={styles.statLabel}>Spent:</span> ${customer.orderHistory.totalSpent.toFixed(2)}
+                                <span class={styles.statLabel}>Spent:</span>{" "}
+                                {formatCurrency(customer.totalSpent)}
                               </div>
                               <div>
-                                <span class={styles.statLabel}>Points:</span> {customer.loyalty.points}
+                                <span class={styles.statLabel}>Points:</span>{" "}
+                                {customer.loyaltyPoints}
                               </div>
                             </div>
                           </div>
 
                           <div class={styles.customerActions}>
-                            <button class={styles.actionLink}>Edit</button>
-                            <button class={styles.actionLinkSecondary}>Orders</button>
+                            <button
+                              class={styles.actionLink}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleEditCustomer(customer);
+                              }}
+                            >
+                              Edit
+                            </button>
+                            <button
+                              class={styles.actionLinkSecondary}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleViewCustomer(customer);
+                              }}
+                            >
+                              View
+                            </button>
                           </div>
                         </div>
                       </div>
@@ -247,23 +282,30 @@ const CustomersPage: Component = () => {
           </div>
         </div>
 
-        {/* Customer Detail */}
+        {/* Customer Detail Sidebar */}
         <div>
           <Show
             when={selectedCustomer()}
             fallback={
-              <div class={styles.detailEmpty}>
-                Select a customer to view details
-              </div>
+              <div class={styles.detailEmpty}>Select a customer to view details</div>
             }
           >
             {(customer) => (
               <div class={styles.detailCard}>
                 <div class={styles.detailHeader}>
-                  <h2 class={styles.detailName}>
-                    {customer().firstName} {customer().lastName}
-                  </h2>
-                  <p class={styles.detailEmail}>{customer().email}</p>
+                  <h2 class={styles.detailName}>{customer().name}</h2>
+                  <Show when={customer().companyName}>
+                    <p class={styles.detailCompany}>{customer().companyName}</p>
+                  </Show>
+                  <p class={styles.detailEmail}>{customer().email || "No email"}</p>
+                  <div class={styles.detailBadges}>
+                    <Badge variant={customer().status === "active" ? "success" : "secondary"}>
+                      {customer().status === "active" ? "Active" : "Inactive"}
+                    </Badge>
+                    <Badge color={customer().customerType === "business" ? "blue" : "gray"}>
+                      {customer().customerType === "business" ? "Business" : "Individual"}
+                    </Badge>
+                  </div>
                 </div>
 
                 <div class={styles.detailContent}>
@@ -271,17 +313,27 @@ const CustomersPage: Component = () => {
                   <div class={styles.detailSection}>
                     <h3 class={styles.sectionTitle}>Contact Information</h3>
                     <div class={styles.detailRow}>
-                      <Show when={customer().phone}>
-                        <div>
-                          <span class={styles.detailLabel}>Phone:</span> <span class={styles.detailValue}>{customer().phone}</span>
-                        </div>
-                      </Show>
-                      <Show when={customer().address}>
+                      <div>
+                        <span class={styles.detailLabel}>Phone:</span>{" "}
+                        <span class={styles.detailValue}>{customer().phone}</span>
+                      </div>
+                      <Show when={customer().addressLine1}>
                         <div>
                           <span class={styles.detailLabel}>Address:</span>
                           <div class={styles.addressBlock}>
-                            {customer().address!.street}<br/>
-                            {customer().address!.city}, {customer().address!.state} {customer().address!.zipCode}
+                            {customer().addressLine1}
+                            <Show when={customer().addressLine2}>
+                              <br />
+                              {customer().addressLine2}
+                            </Show>
+                            <Show
+                              when={customer().city || customer().state || customer().zipCode}
+                            >
+                              <br />
+                              {[customer().city, customer().state, customer().zipCode]
+                                .filter(Boolean)
+                                .join(", ")}
+                            </Show>
                           </div>
                         </div>
                       </Show>
@@ -294,23 +346,26 @@ const CustomersPage: Component = () => {
                     <div class={styles.orderHistoryGrid}>
                       <div>
                         <span class={styles.orderStatLabel}>Total Orders:</span>
-                        <div class={styles.orderStatValuePrimary}>{customer().orderHistory.totalOrders}</div>
+                        <div class={styles.orderStatValuePrimary}>{customer().totalOrders}</div>
                       </div>
                       <div>
                         <span class={styles.orderStatLabel}>Total Spent:</span>
-                        <div class={styles.orderStatValueSuccess}>${customer().orderHistory.totalSpent.toFixed(2)}</div>
+                        <div class={styles.orderStatValueSuccess}>
+                          {formatCurrency(customer().totalSpent)}
+                        </div>
                       </div>
                       <div>
                         <span class={styles.orderStatLabel}>Avg Order:</span>
-                        <div class={styles.orderStatValueInfo}>${customer().orderHistory.avgOrderValue.toFixed(2)}</div>
+                        <div class={styles.orderStatValueInfo}>
+                          {formatCurrency(customer().averageOrderValue)}
+                        </div>
                       </div>
                       <div>
                         <span class={styles.orderStatLabel}>Last Order:</span>
                         <div class={styles.lastOrderValue}>
-                          {customer().orderHistory.lastOrderDate ?
-                            new Date(customer().orderHistory.lastOrderDate!).toLocaleDateString() :
-                            'Never'
-                          }
+                          {customer().lastOrderAt
+                            ? new Date(customer().lastOrderAt!).toLocaleDateString()
+                            : "Never"}
                         </div>
                       </div>
                     </div>
@@ -320,48 +375,12 @@ const CustomersPage: Component = () => {
                   <div class={styles.detailSection}>
                     <h3 class={styles.sectionTitle}>Loyalty Program</h3>
                     <div class={styles.loyaltyRow}>
-                      <span class={styles.loyaltyLabel}>Tier:</span>
-                      <span class={`${styles.tierBadge} ${getTierClass(customer().loyalty.tier)}`}>
-                        {customer().loyalty.tier.charAt(0).toUpperCase() + customer().loyalty.tier.slice(1)}
-                      </span>
-                    </div>
-                    <div class={styles.loyaltyRow}>
                       <span class={styles.loyaltyLabel}>Points:</span>
-                      <span class={styles.loyaltyPoints}>{customer().loyalty.points}</span>
+                      <span class={styles.loyaltyPoints}>{customer().loyaltyPoints}</span>
                     </div>
                   </div>
 
-                  {/* Dietary Information */}
-                  <Show when={customer().allergens && customer().allergens!.length > 0}>
-                    <div class={styles.detailSection}>
-                      <h3 class={styles.sectionTitle}>Allergens</h3>
-                      <div class={styles.tagList}>
-                        <For each={customer().allergens}>
-                          {(allergen) => (
-                            <span class={styles.allergenTag}>
-                              {allergen}
-                            </span>
-                          )}
-                        </For>
-                      </div>
-                    </div>
-                  </Show>
-
-                  <Show when={customer().preferences && customer().preferences!.length > 0}>
-                    <div class={styles.detailSection}>
-                      <h3 class={styles.sectionTitle}>Preferences</h3>
-                      <div class={styles.tagList}>
-                        <For each={customer().preferences}>
-                          {(preference) => (
-                            <span class={styles.preferenceTag}>
-                              {preference}
-                            </span>
-                          )}
-                        </For>
-                      </div>
-                    </div>
-                  </Show>
-
+                  {/* Notes */}
                   <Show when={customer().notes}>
                     <div class={styles.detailSection}>
                       <h3 class={styles.sectionTitle}>Notes</h3>
@@ -370,10 +389,16 @@ const CustomersPage: Component = () => {
                   </Show>
 
                   <div class={styles.detailActions}>
-                    <button class={styles.viewOrdersButton}>
-                      View Orders
+                    <button
+                      class={styles.viewOrdersButton}
+                      onClick={() => handleViewCustomer(customer())}
+                    >
+                      View Full Details
                     </button>
-                    <button class={styles.editButton}>
+                    <button
+                      class={styles.editButton}
+                      onClick={() => handleEditCustomer(customer())}
+                    >
                       Edit
                     </button>
                   </div>
@@ -383,6 +408,21 @@ const CustomersPage: Component = () => {
           </Show>
         </div>
       </div>
+
+      {/* Modals */}
+      <CustomerFormModal
+        isOpen={isFormModalOpen()}
+        customer={editingCustomer()}
+        onClose={handleFormClose}
+        onSuccess={handleFormSuccess}
+      />
+
+      <CustomerDetailsModal
+        isOpen={isDetailsModalOpen()}
+        customer={selectedCustomer()}
+        onClose={handleDetailsClose}
+        onEdit={handleDetailsEdit}
+      />
     </div>
   );
 };

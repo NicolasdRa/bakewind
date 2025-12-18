@@ -109,7 +109,7 @@ export class CustomersController {
     description: 'Unauthorized',
   })
   async getCustomers(@Request() req: any, @Query() query: CustomerQueryDto) {
-    const userId = req.user.sub;
+    const userId = req.user.userId;
     return this.customersService.findAllByUser(userId, query);
   }
 
@@ -140,7 +140,7 @@ export class CustomersController {
     @Request() req: any,
     @Param('customerId') customerId: string,
   ): Promise<CustomerResponseDto> {
-    const userId = req.user.sub;
+    const userId = req.user.userId;
     return this.customersService.findByIdAndUser(customerId, userId);
   }
 
@@ -167,7 +167,7 @@ export class CustomersController {
     @Request() req: any,
     @Body() createCustomerDto: CreateCustomerDto,
   ): Promise<CustomerResponseDto> {
-    const userId = req.user.sub;
+    const userId = req.user.userId;
     return this.customersService.create(userId, createCustomerDto);
   }
 
@@ -204,7 +204,7 @@ export class CustomersController {
     @Param('customerId') customerId: string,
     @Body() updateCustomerDto: UpdateCustomerDto,
   ): Promise<CustomerResponseDto> {
-    const userId = req.user.sub;
+    const userId = req.user.userId;
     return this.customersService.updateByIdAndUser(
       customerId,
       userId,
@@ -238,7 +238,7 @@ export class CustomersController {
     @Request() req: any,
     @Param('customerId') customerId: string,
   ): Promise<void> {
-    const userId = req.user.sub;
+    const userId = req.user.userId;
     return this.customersService.deleteByIdAndUser(customerId, userId);
   }
 
@@ -355,7 +355,7 @@ export class CustomersController {
     @Query('limit') limit?: string,
     @Query('status') status?: string,
   ) {
-    const userId = req.user.sub;
+    const userId = req.user.userId;
     const pageNum = page ? parseInt(page, 10) : 1;
     const limitNum = limit ? parseInt(limit, 10) : 10;
 
@@ -474,7 +474,7 @@ export class CustomersController {
     @Param('customerId') customerId: string,
     @Query('period') period?: string,
   ) {
-    const userId = req.user.sub;
+    const userId = req.user.userId;
     return this.customersService.getCustomerAnalytics(
       customerId,
       userId,
@@ -522,7 +522,7 @@ export class CustomersController {
     @Request() req: any,
     @Body() importData: { customers: CreateCustomerDto[] },
   ) {
-    const userId = req.user.sub;
+    const userId = req.user.userId;
     return this.customersService.bulkImport(userId, importData.customers);
   }
 
@@ -555,7 +555,7 @@ export class CustomersController {
     @Request() req: any,
     @Query('status') status?: string,
   ) {
-    const userId = req.user.sub;
+    const userId = req.user.userId;
     return this.customersService.exportToCSV(userId, { status: status as any });
   }
 }

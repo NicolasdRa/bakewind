@@ -14,7 +14,11 @@ import { trialAccountsTable } from './trial-accounts.schema';
 import { userSessionsTable } from './user-sessions.schema';
 
 // Customer relations
-export const customersRelations = relations(customers, ({ many }) => ({
+export const customersRelations = relations(customers, ({ one, many }) => ({
+  user: one(usersTable, {
+    fields: [customers.userId],
+    references: [usersTable.id],
+  }),
   orders: many(customerOrders),
 }));
 
@@ -138,6 +142,7 @@ export const productionItemsRelations = relations(
 // User relations
 export const usersRelations = relations(usersTable, ({ many }) => ({
   userLocations: many(userLocationsTable),
+  customers: many(customers),
 }));
 
 // Location relations
