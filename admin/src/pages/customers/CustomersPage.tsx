@@ -302,7 +302,7 @@ const CustomersPage: Component = () => {
                             <div class={styles.customerNameRow}>
                               <h3 class={styles.customerName}>{customer.name}</h3>
                               <Badge
-                                variant={customer.status === "active" ? "success" : "secondary"}
+                                variant={customer.status === "active" ? "success" : "neutral"}
                                 size="sm"
                               >
                                 {customer.status === "active" ? "Active" : "Inactive"}
@@ -387,7 +387,7 @@ const CustomersPage: Component = () => {
                   </Show>
                   <p class={styles.detailEmail}>{customer().email || "No email"}</p>
                   <div class={styles.detailBadges}>
-                    <Badge variant={customer().status === "active" ? "success" : "secondary"}>
+                    <Badge variant={customer().status === "active" ? "success" : "neutral"}>
                       {customer().status === "active" ? "Active" : "Inactive"}
                     </Badge>
                     <Badge color={customer().customerType === "business" ? "blue" : "gray"}>

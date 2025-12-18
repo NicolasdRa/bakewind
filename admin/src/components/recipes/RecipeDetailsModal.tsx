@@ -11,6 +11,7 @@ interface Recipe {
   cookTime: number;
   totalTime: number;
   yield: string;
+  servings?: number;
   ingredients: Array<{
     name: string;
     amount: number;
@@ -19,6 +20,7 @@ interface Recipe {
   }>;
   instructions: string[];
   tags: string[];
+  notes?: string;
   nutritionalInfo?: {
     calories?: number;
     fat?: number;
@@ -143,7 +145,7 @@ const RecipeDetailsModal: Component<RecipeDetailsModalProps> = (props) => {
             {/* Ingredients */}
             <div>
               <h3 class="text-lg font-semibold mb-4" style={{ color: "var(--text-primary)" }}>
-                Ingredients ({props.recipe!.servings} servings)
+                Ingredients {props.recipe!.servings ? `(${props.recipe!.servings} servings)` : `(${props.recipe!.yield})`}
               </h3>
               <div class="p-5 rounded-lg" style={{ "background-color": "var(--bg-secondary)" }}>
                 <ul class="space-y-2.5">

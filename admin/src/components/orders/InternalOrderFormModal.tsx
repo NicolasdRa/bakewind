@@ -22,7 +22,7 @@ interface OrderItemForm {
   productId: string;
   productName: string;
   quantity: number;
-  unitPrice: string;
+  unitCost: string;
 }
 
 const InternalOrderFormModal: Component<InternalOrderFormModalProps> = (props) => {
@@ -71,7 +71,7 @@ const InternalOrderFormModal: Component<InternalOrderFormModalProps> = (props) =
         setRequestedDate(props.editOrder.requestedDate?.split('T')[0] || '');
         setNeededByDate(props.editOrder.neededByDate?.split('T')[0] || '');
         setProductionDate(props.editOrder.productionDate?.split('T')[0] || '');
-        setProductionShift(props.editOrder.productionShift || 'morning');
+        setProductionShift((props.editOrder.productionShift as ProductionShift) || 'morning');
         setAssignedStaff(props.editOrder.assignedStaff || '');
         setWorkstation(props.editOrder.workstation || '');
         setBatchNumber(props.editOrder.batchNumber || '');
@@ -81,7 +81,7 @@ const InternalOrderFormModal: Component<InternalOrderFormModalProps> = (props) =
           productId: item.productId,
           productName: item.productName,
           quantity: item.quantity,
-          unitPrice: item.unitPrice,
+          unitCost: item.unitCost || '0',
         })));
       } else {
         // Reset for new order
@@ -131,7 +131,7 @@ const InternalOrderFormModal: Component<InternalOrderFormModalProps> = (props) =
         productId: product.id,
         productName: product.name,
         quantity: 1,
-        unitPrice: product.basePrice.toString(),
+        unitCost: product.basePrice.toString(),
       }]);
     }
   };
@@ -149,7 +149,7 @@ const InternalOrderFormModal: Component<InternalOrderFormModalProps> = (props) =
 
   const calculateTotal = () => {
     return items().reduce((sum, item) => {
-      return sum + (parseFloat(item.unitPrice) * item.quantity);
+      return sum + (parseFloat(item.unitCost) * item.quantity);
     }, 0);
   };
 
@@ -191,7 +191,7 @@ const InternalOrderFormModal: Component<InternalOrderFormModalProps> = (props) =
         productId: item.productId,
         productName: item.productName,
         quantity: item.quantity,
-        unitCost: item.unitPrice,
+        unitCost: item.unitCost,
       })),
     };
 
@@ -625,7 +625,7 @@ const InternalOrderFormModal: Component<InternalOrderFormModalProps> = (props) =
                               {item.productName}
                             </div>
                             <div style={{ 'font-size': '0.875rem', color: 'var(--text-secondary)' }}>
-                              ${item.unitPrice} each
+                              ${item.unitCost} each
                             </div>
                           </div>
                           <div style={{ display: 'flex', 'align-items': 'center', gap: '1rem' }}>

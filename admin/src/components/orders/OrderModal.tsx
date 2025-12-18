@@ -113,7 +113,7 @@ const OrderModal: Component<OrderModalProps> = (props) => {
 
   const isLockedByOther = () => {
     if (!props.order) return false;
-    const lock = orderLocksStore.locks().get(props.order.id);
+    const lock = orderLocksStore.locks.get(props.order.id);
     return lock ? !orderLocksStore.isLockedByMe(props.order.id) : false;
   };
 
@@ -218,7 +218,7 @@ const OrderModal: Component<OrderModalProps> = (props) => {
 
             <Show when={isLockedByOther()}>
               <div class="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
-                <OrderLockIndicator lock={orderLocksStore.locks().get(props.order!.id) || null} />
+                <OrderLockIndicator lock={orderLocksStore.locks.get(props.order!.id) || null} />
                 <p class="text-sm text-amber-800 dark:text-amber-400 mt-2">
                   You cannot edit this order while it's locked by another user.
                 </p>
