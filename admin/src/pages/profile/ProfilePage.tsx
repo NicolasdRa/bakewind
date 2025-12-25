@@ -260,15 +260,11 @@ const ProfilePage: Component = () => {
   const getRoleBadgeClass = () => {
     const currentUser = user()
     if (!currentUser?.role) return styles.roleBadgeGray
-    const role = currentUser.role.toLowerCase()
-    switch (role) {
-      case 'admin': return styles.roleBadgeRed
-      case 'manager': return styles.roleBadgeBlue
-      case 'head_baker':
-      case 'head_pastry_chef': return styles.roleBadgeGreen
-      case 'baker':
-      case 'pastry_chef': return styles.roleBadgeYellow
-      case 'cashier': return styles.roleBadgeOrange
+    switch (currentUser.role) {
+      case 'ADMIN': return styles.roleBadgeRed
+      case 'OWNER': return styles.roleBadgeBlue
+      case 'STAFF': return styles.roleBadgeGreen
+      case 'CUSTOMER': return styles.roleBadgeYellow
       default: return styles.roleBadgeGray
     }
   }
@@ -276,16 +272,11 @@ const ProfilePage: Component = () => {
   const getRoleDescription = () => {
     const currentUser = user()
     if (!currentUser?.role) return 'No role assigned'
-    const role = currentUser.role.toLowerCase()
-    switch (role) {
-      case 'admin': return 'Full system access and user management'
-      case 'manager': return 'Location management and reporting'
-      case 'head_baker': return 'Bakery operations and team lead'
-      case 'head_pastry_chef': return 'Pastry operations and team lead'
-      case 'baker': return 'Bread and bakery production'
-      case 'pastry_chef': return 'Pastry and dessert production'
-      case 'cashier': return 'Customer service and sales'
-      case 'viewer': return 'Read-only access to assigned areas'
+    switch (currentUser.role) {
+      case 'ADMIN': return 'Full system access to all tenants and data'
+      case 'OWNER': return 'Bakery business owner with full tenant management'
+      case 'STAFF': return 'Bakery employee with operational access'
+      case 'CUSTOMER': return 'Customer portal access'
       default: return 'Custom role permissions'
     }
   }
@@ -615,7 +606,7 @@ const ProfilePage: Component = () => {
                 <label class={styles.label}>Role & Permissions</label>
                 <div class={styles.roleContainer}>
                   <span class={getRoleBadgeClass()}>
-                    {user()?.role?.replace('_', ' ').toLowerCase().replace(/\b\w/g, (l: string) => l.toUpperCase()) || 'No Role'}
+                    {user()?.role || 'No Role'}
                   </span>
                   <p class={styles.roleDescription}>
                     {getRoleDescription()}

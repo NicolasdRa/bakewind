@@ -7,6 +7,7 @@ import {
 } from '~/api/internalOrders';
 import { productsApi, Product } from '~/api/products';
 import { useAuth } from '~/context/AuthContext';
+import { useStaff } from '~/context/StaffContext';
 import { getTomorrowDateString, getCurrentDateString } from '~/utils/dateUtils';
 
 // Common components
@@ -49,10 +50,14 @@ interface OrderItemForm {
 
 const InternalOrderFormModal: Component<InternalOrderFormModalProps> = (props) => {
   const auth = useAuth();
+  const staff = useStaff();
   const [currentStep, setCurrentStep] = createSignal(1);
   const [loading, setLoading] = createSignal(false);
   const [products, setProducts] = createSignal<Product[]>([]);
   const [searchQuery, setSearchQuery] = createSignal('');
+
+  // All available source areas for internal orders
+  const allAreas = ['cafe', 'restaurant', 'front_house', 'catering', 'retail', 'events', 'management', 'bakery', 'patisserie'] as const;
 
   // User-derived values
   const userFullName = createMemo(() => {
@@ -61,9 +66,17 @@ const InternalOrderFormModal: Component<InternalOrderFormModalProps> = (props) =
     return `${user.firstName} ${user.lastName}`.trim();
   });
 
+  // Get areas from staff profile if STAFF role, otherwise show all areas
   const userAreas = createMemo(() => {
     const user = auth.user;
-    return user?.areas || [];
+    // For STAFF users, use their assigned areas from staff profile
+    if (user?.role === 'STAFF' && staff.hasProfile) {
+      const staffAreas = staff.areas;
+      // If staff has assigned areas, use them; otherwise fall back to all
+      return staffAreas.length > 0 ? staffAreas : allAreas;
+    }
+    // For OWNER/ADMIN users, show all areas
+    return allAreas;
   });
 
   const hasMultipleAreas = createMemo(() => userAreas().length > 1);

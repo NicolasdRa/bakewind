@@ -1,5 +1,9 @@
-// Main schema exports
+// Core identity/auth schema exports
 export * from './users.schema';
+export * from './tenants.schema';
+export * from './staff.schema';
+
+// Business entity schema exports
 export * from './locations.schema';
 export * from './customers.schema';
 export * from './suppliers.schema';
@@ -11,10 +15,8 @@ export * from './internal-orders.schema';
 export * from './production.schema';
 export * from './analytics.schema';
 
-// SaaS schema exports
-export * from './saas-users';
+// SaaS/subscription schema exports
 export * from './subscription-plans.schema';
-export * from './trial-accounts.schema';
 export * from './software-features.schema';
 export * from './user-sessions.schema';
 

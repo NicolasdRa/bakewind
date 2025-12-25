@@ -15,7 +15,7 @@ import {
 
 interface CustomerWithStats {
   id: string;
-  userId: string;
+  tenantId: string;
   name: string;
   email: string | null;
   phone: string;
@@ -44,15 +44,15 @@ export class CustomersService {
   constructor(private readonly databaseService: DatabaseService) {}
 
   /**
-   * Get all customers for a user with filtering, pagination, and sorting
+   * Get all customers for a tenant with filtering, pagination, and sorting
    */
-  async findAllByUser(userId: string, query: CustomerQueryDto) {
+  async findAllByTenant(tenantId: string, query: CustomerQueryDto) {
     const page = query.page || 1;
     const limit = query.limit || 20;
     const offset = (page - 1) * limit;
 
     // Build filter conditions
-    const conditions: SQL[] = [eq(customers.userId, userId)];
+    const conditions: SQL[] = [eq(customers.tenantId, tenantId)];
 
     // Filter by status
     if (query.status) {
@@ -106,7 +106,7 @@ export class CustomersService {
     const customerList = await this.databaseService.database
       .select({
         id: customers.id,
-        userId: customers.userId,
+        tenantId: customers.tenantId,
         name: customers.name,
         email: customers.email,
         phone: customers.phone,
@@ -155,16 +155,16 @@ export class CustomersService {
   }
 
   /**
-   * Get a single customer by ID with ownership check
+   * Get a single customer by ID with tenant ownership check
    */
-  async findByIdAndUser(
+  async findByIdAndTenant(
     customerId: string,
-    userId: string,
+    tenantId: string,
   ): Promise<CustomerResponseDto> {
     const [customer] = await this.databaseService.database
       .select()
       .from(customers)
-      .where(and(eq(customers.id, customerId), eq(customers.userId, userId)));
+      .where(and(eq(customers.id, customerId), eq(customers.tenantId, tenantId)));
 
     if (!customer) {
       throw new NotFoundException(`Customer with ID ${customerId} not found`);
@@ -182,13 +182,13 @@ export class CustomersService {
    * Create a new customer
    */
   async create(
-    userId: string,
+    tenantId: string,
     dto: CreateCustomerDto,
   ): Promise<CustomerResponseDto> {
     const [created] = await this.databaseService.database
       .insert(customers)
       .values({
-        userId,
+        tenantId,
         name: dto.name,
         email: dto.email || null,
         phone: dto.phone,
@@ -221,13 +221,13 @@ export class CustomersService {
   /**
    * Update an existing customer
    */
-  async updateByIdAndUser(
+  async updateByIdAndTenant(
     customerId: string,
-    userId: string,
+    tenantId: string,
     dto: UpdateCustomerDto,
   ): Promise<CustomerResponseDto> {
     // Verify ownership
-    await this.findByIdAndUser(customerId, userId);
+    await this.findByIdAndTenant(customerId, tenantId);
 
     const updateData: Record<string, any> = {
       updatedAt: new Date(),
@@ -258,7 +258,7 @@ export class CustomersService {
     const [updated] = await this.databaseService.database
       .update(customers)
       .set(updateData)
-      .where(and(eq(customers.id, customerId), eq(customers.userId, userId)))
+      .where(and(eq(customers.id, customerId), eq(customers.tenantId, tenantId)))
       .returning();
 
     if (!updated) {
@@ -276,9 +276,9 @@ export class CustomersService {
   /**
    * Delete a customer (soft delete by setting status to inactive, or hard delete if no orders)
    */
-  async deleteByIdAndUser(customerId: string, userId: string): Promise<void> {
+  async deleteByIdAndTenant(customerId: string, tenantId: string): Promise<void> {
     // Verify ownership
-    await this.findByIdAndUser(customerId, userId);
+    await this.findByIdAndTenant(customerId, tenantId);
 
     // Check if customer has orders
     const [orderCount] = await this.databaseService.database
@@ -291,12 +291,12 @@ export class CustomersService {
       await this.databaseService.database
         .update(customers)
         .set({ status: 'inactive', updatedAt: new Date() })
-        .where(and(eq(customers.id, customerId), eq(customers.userId, userId)));
+        .where(and(eq(customers.id, customerId), eq(customers.tenantId, tenantId)));
     } else {
       // Hard delete: remove the customer
       await this.databaseService.database
         .delete(customers)
-        .where(and(eq(customers.id, customerId), eq(customers.userId, userId)));
+        .where(and(eq(customers.id, customerId), eq(customers.tenantId, tenantId)));
     }
   }
 
@@ -305,11 +305,11 @@ export class CustomersService {
    */
   async getCustomerOrders(
     customerId: string,
-    userId: string,
+    tenantId: string,
     options: { page?: number; limit?: number; status?: string },
   ) {
     // Verify ownership
-    await this.findByIdAndUser(customerId, userId);
+    await this.findByIdAndTenant(customerId, tenantId);
 
     const page = options.page ?? 1;
     const limit = options.limit ?? 10;
@@ -365,11 +365,11 @@ export class CustomersService {
    */
   async getCustomerAnalytics(
     customerId: string,
-    userId: string,
+    tenantId: string,
     period: string,
   ) {
     // Verify ownership
-    await this.findByIdAndUser(customerId, userId);
+    await this.findByIdAndTenant(customerId, tenantId);
     const stats = await this.getCustomerOrderStats(customerId);
 
     // Determine date range based on period
@@ -566,7 +566,7 @@ export class CustomersService {
   /**
    * Bulk import customers
    */
-  async bulkImport(userId: string, customersData: CreateCustomerDto[]) {
+  async bulkImport(tenantId: string, customersData: CreateCustomerDto[]) {
     const results = {
       imported: 0,
       failed: 0,
@@ -580,7 +580,7 @@ export class CustomersService {
     for (let i = 0; i < customersData.length; i++) {
       const customerData = customersData[i]!;
       try {
-        await this.create(userId, customerData);
+        await this.create(tenantId, customerData);
         results.imported++;
       } catch (error: unknown) {
         results.failed++;
@@ -601,11 +601,11 @@ export class CustomersService {
    * Export customers to CSV
    */
   async exportToCSV(
-    userId: string,
+    tenantId: string,
     options?: { status?: 'active' | 'inactive' },
   ) {
     // Build conditions
-    const conditions: SQL[] = [eq(customers.userId, userId)];
+    const conditions: SQL[] = [eq(customers.tenantId, tenantId)];
 
     if (options?.status) {
       conditions.push(eq(customers.status, options.status));

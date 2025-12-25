@@ -207,17 +207,17 @@ export class AuthController {
     const auditContext = this.getAuditContext(req);
 
     // Map to standard register DTO and call register with metadata
+    // Creates OWNER user, tenant creation happens in post-registration hook
     const result = await this.authService.register(
       {
         email,
         password,
         firstName,
         lastName,
-        businessName,
         ...(phone && { phoneNumber: phone }),
-        role: 'TRIAL_USER',
-        subscriptionStatus: 'trial' as const,
-        trialEndsAt,
+        role: 'OWNER',
+        // Note: businessName, subscriptionStatus, trialEndsAt are now on tenants table
+        // Tenant will be created in handleOwnerRegistration with trial status
       },
       auditContext,
       {

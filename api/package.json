@@ -22,7 +22,7 @@
     "test:contract:watch": "jest --config ./test/jest-contract.json --watch",
     "test:contract:setup": "ts-node -r tsconfig-paths/register test/setup-contract-tests.ts",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate",
+    "db:migrate": "ts-node -r tsconfig-paths/register scripts/migrate.ts",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "db:seed": "ts-node -r tsconfig-paths/register src/database/seed.ts"

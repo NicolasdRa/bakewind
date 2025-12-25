@@ -8,7 +8,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
 import { UsersService } from '../users/users.service';
-import { TrialAccountsService } from '../trials/trial-accounts.service';
+// TODO: Replace TrialAccountsService with TenantsService after tenants module is implemented
 import { StripeService } from '../stripe/stripe.service';
 import { RedisService } from '../redis/redis.service';
 import type {
@@ -55,7 +55,7 @@ export class AuthService {
 
   constructor(
     private usersService: UsersService,
-    private trialAccountsService: TrialAccountsService,
+    // TODO: Inject TenantsService when implemented
     private stripeService: StripeService,
     private jwtService: JwtService,
     private configService: ConfigService,
@@ -420,9 +420,9 @@ export class AuthService {
       businessName?: string;
     },
   ): Promise<void> {
-    // Trial user-specific setup
-    if (user.role === 'TRIAL_USER') {
-      await this.handleTrialRegistration(user, metadata);
+    // Owner user-specific setup (creates tenant with trial)
+    if (user.role === 'OWNER') {
+      await this.handleOwnerRegistration(user, metadata);
     }
 
     // Future: Add more role-based hooks here
@@ -430,11 +430,11 @@ export class AuthService {
   }
 
   /**
-   * Handle trial-specific registration tasks
+   * Handle owner registration tasks
    * - Creates Stripe customer for future billing
-   * - Creates trial tracking record for analytics
+   * - Creates tenant with trial tracking
    */
-  private async handleTrialRegistration(
+  private async handleOwnerRegistration(
     user: Omit<UsersData, 'password' | 'refreshToken'>,
     metadata?: {
       businessSize?: '1' | '2-3' | '4-10' | '10+';
@@ -451,13 +451,15 @@ export class AuthService {
       );
     }
 
-    // Create trial tracking record (for analytics/marketing)
-    if (metadata?.businessSize) {
-      await this.trialAccountsService.create({
-        userId: user.id,
-        signupSource: 'landing_page',
-        businessSize: metadata.businessSize,
-      });
-    }
+    // TODO: Implement with TenantsService
+    // Create tenant record with trial tracking (replaces trial_accounts)
+    // This should:
+    // 1. Create a tenant with ownerUserId = user.id
+    // 2. Set businessName from metadata
+    // 3. Set businessSize, signupSource in tenant for analytics
+    // 4. Calculate and set trialEndsAt based on trialLengthDays
+    this.logger.log(
+      `Trial registration - TenantsService needed for user ${user.id}`,
+    );
   }
 }

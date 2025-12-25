@@ -19,7 +19,7 @@ describe('CustomersService', () => {
   // Helper to create mock customer data
   const createMockCustomer = (overrides = {}) => ({
     id: 'customer-1',
-    userId: 'user-1',
+    tenantId: 'tenant-1',
     name: 'Test Customer',
     email: 'test@example.com',
     phone: '555-1234',
@@ -70,7 +70,7 @@ describe('CustomersService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('findAllByUser', () => {
+  describe('findAllByTenant', () => {
     it('should return paginated customers with order stats', async () => {
       const mockCustomers = [createMockCustomer()];
       const mockStats = createOrderStatsMock();
@@ -102,7 +102,7 @@ describe('CustomersService', () => {
         }),
       });
 
-      const result = await service.findAllByUser('user-1', { page: 1, limit: 20 });
+      const result = await service.findAllByTenant('tenant-1', { page: 1, limit: 20 });
 
       expect(result.customers).toHaveLength(1);
       expect(result.pagination.total).toBe(1);
@@ -134,7 +134,7 @@ describe('CustomersService', () => {
         }),
       });
 
-      const result = await service.findAllByUser('user-1', {});
+      const result = await service.findAllByTenant('tenant-1', {});
 
       expect(result.customers).toHaveLength(0);
       expect(result.pagination.total).toBe(0);
@@ -171,7 +171,7 @@ describe('CustomersService', () => {
         }),
       });
 
-      const result = await service.findAllByUser('user-1', { status: 'inactive' });
+      const result = await service.findAllByTenant('tenant-1', { status: 'inactive' });
 
       expect(result.customers).toHaveLength(1);
       expect(result.customers[0]!.status).toBe('inactive');
@@ -208,7 +208,7 @@ describe('CustomersService', () => {
         }),
       });
 
-      const result = await service.findAllByUser('user-1', { customerType: 'individual' });
+      const result = await service.findAllByTenant('tenant-1', { customerType: 'individual' });
 
       expect(result.customers).toHaveLength(1);
       expect(result.customers[0]!.customerType).toBe('individual');
@@ -245,7 +245,7 @@ describe('CustomersService', () => {
         }),
       });
 
-      const result = await service.findAllByUser('user-1', {});
+      const result = await service.findAllByTenant('tenant-1', {});
 
       expect(result.customers[0]!.averageOrderValue).toBe(50.0);
     });
@@ -281,7 +281,7 @@ describe('CustomersService', () => {
         }),
       });
 
-      const result = await service.findAllByUser('user-1', {});
+      const result = await service.findAllByTenant('tenant-1', {});
 
       expect(result.customers[0]!.totalOrders).toBe(0);
       expect(result.customers[0]!.totalSpent).toBe(0);
@@ -290,7 +290,7 @@ describe('CustomersService', () => {
     });
   });
 
-  describe('findByIdAndUser', () => {
+  describe('findByIdAndTenant', () => {
     it('should return a customer by ID with order stats', async () => {
       const mockCustomer = createMockCustomer();
       const mockStats = createOrderStatsMock();
@@ -309,7 +309,7 @@ describe('CustomersService', () => {
         }),
       });
 
-      const result = await service.findByIdAndUser('customer-1', 'user-1');
+      const result = await service.findByIdAndTenant('customer-1', 'tenant-1');
 
       expect(result.id).toBe('customer-1');
       expect(result.name).toBe('Test Customer');
@@ -324,7 +324,7 @@ describe('CustomersService', () => {
         }),
       });
 
-      await expect(service.findByIdAndUser('non-existent', 'user-1')).rejects.toThrow(
+      await expect(service.findByIdAndTenant('non-existent', 'tenant-1')).rejects.toThrow(
         NotFoundException,
       );
     });
@@ -336,7 +336,7 @@ describe('CustomersService', () => {
         }),
       });
 
-      await expect(service.findByIdAndUser('customer-1', 'different-user')).rejects.toThrow(
+      await expect(service.findByIdAndTenant('customer-1', 'different-tenant')).rejects.toThrow(
         NotFoundException,
       );
     });
@@ -367,7 +367,7 @@ describe('CustomersService', () => {
         }),
       });
 
-      const result = await service.create('user-1', createDto);
+      const result = await service.create('tenant-1', createDto);
 
       expect(result.id).toBe('new-customer-1');
       expect(result.name).toBe('New Customer');
@@ -405,7 +405,7 @@ describe('CustomersService', () => {
         }),
       });
 
-      const result = await service.create('user-1', createDto);
+      const result = await service.create('tenant-1', createDto);
 
       expect(result.name).toBe('Business Customer');
       expect(result.companyName).toBe('Big Corp');
@@ -434,19 +434,19 @@ describe('CustomersService', () => {
         }),
       });
 
-      const result = await service.create('user-1', createDto);
+      const result = await service.create('tenant-1', createDto);
 
       expect(result.customerType).toBe('individual');
       expect(result.companyName).toBeNull();
     });
   });
 
-  describe('updateByIdAndUser', () => {
+  describe('updateByIdAndTenant', () => {
     it('should update customer fields', async () => {
       const mockExisting = createMockCustomer();
       const mockStats = createOrderStatsMock();
 
-      // Mock findByIdAndUser (select customer + order stats)
+      // Mock findByIdAndTenant (select customer + order stats)
       mockDatabaseService.database.select.mockReturnValueOnce({
         from: jest.fn().mockReturnValue({
           where: jest.fn().mockResolvedValue([mockExisting]),
@@ -478,7 +478,7 @@ describe('CustomersService', () => {
         }),
       });
 
-      const result = await service.updateByIdAndUser('customer-1', 'user-1', {
+      const result = await service.updateByIdAndTenant('customer-1', 'tenant-1', {
         name: 'Updated Name',
         phone: '555-0000',
       });
@@ -490,7 +490,7 @@ describe('CustomersService', () => {
       const mockExisting = createMockCustomer();
       const mockStats = createOrderStatsMock();
 
-      // Mock findByIdAndUser
+      // Mock findByIdAndTenant
       mockDatabaseService.database.select.mockReturnValueOnce({
         from: jest.fn().mockReturnValue({
           where: jest.fn().mockResolvedValue([mockExisting]),
@@ -518,7 +518,7 @@ describe('CustomersService', () => {
         }),
       });
 
-      const result = await service.updateByIdAndUser('customer-1', 'user-1', {
+      const result = await service.updateByIdAndTenant('customer-1', 'tenant-1', {
         status: 'inactive',
       });
 
@@ -533,17 +533,17 @@ describe('CustomersService', () => {
       });
 
       await expect(
-        service.updateByIdAndUser('non-existent', 'user-1', { name: 'New Name' }),
+        service.updateByIdAndTenant('non-existent', 'tenant-1', { name: 'New Name' }),
       ).rejects.toThrow(NotFoundException);
     });
   });
 
-  describe('deleteByIdAndUser', () => {
+  describe('deleteByIdAndTenant', () => {
     it('should soft delete customer with orders', async () => {
       const mockExisting = createMockCustomer();
       const mockStats = createOrderStatsMock({ totalOrders: 5 });
 
-      // Mock findByIdAndUser
+      // Mock findByIdAndTenant
       mockDatabaseService.database.select.mockReturnValueOnce({
         from: jest.fn().mockReturnValue({
           where: jest.fn().mockResolvedValue([mockExisting]),
@@ -569,7 +569,7 @@ describe('CustomersService', () => {
         }),
       });
 
-      await service.deleteByIdAndUser('customer-1', 'user-1');
+      await service.deleteByIdAndTenant('customer-1', 'tenant-1');
 
       expect(mockDatabaseService.database.update).toHaveBeenCalled();
       expect(mockDatabaseService.database.delete).not.toHaveBeenCalled();
@@ -579,7 +579,7 @@ describe('CustomersService', () => {
       const mockExisting = createMockCustomer();
       const mockStats = createOrderStatsMock({ totalOrders: 0 });
 
-      // Mock findByIdAndUser
+      // Mock findByIdAndTenant
       mockDatabaseService.database.select.mockReturnValueOnce({
         from: jest.fn().mockReturnValue({
           where: jest.fn().mockResolvedValue([mockExisting]),
@@ -603,7 +603,7 @@ describe('CustomersService', () => {
         where: jest.fn().mockResolvedValue(undefined),
       });
 
-      await service.deleteByIdAndUser('customer-1', 'user-1');
+      await service.deleteByIdAndTenant('customer-1', 'tenant-1');
 
       expect(mockDatabaseService.database.delete).toHaveBeenCalled();
     });
@@ -615,7 +615,7 @@ describe('CustomersService', () => {
         }),
       });
 
-      await expect(service.deleteByIdAndUser('non-existent', 'user-1')).rejects.toThrow(
+      await expect(service.deleteByIdAndTenant('non-existent', 'tenant-1')).rejects.toThrow(
         NotFoundException,
       );
     });
@@ -642,7 +642,7 @@ describe('CustomersService', () => {
         },
       ];
 
-      // Mock findByIdAndUser
+      // Mock findByIdAndTenant
       mockDatabaseService.database.select.mockReturnValueOnce({
         from: jest.fn().mockReturnValue({
           where: jest.fn().mockResolvedValue([mockCustomer]),
@@ -681,7 +681,7 @@ describe('CustomersService', () => {
         }),
       });
 
-      const result = await service.getCustomerOrders('customer-1', 'user-1', {
+      const result = await service.getCustomerOrders('customer-1', 'tenant-1', {
         page: 1,
         limit: 10,
       });
@@ -700,7 +700,7 @@ describe('CustomersService', () => {
       });
 
       await expect(
-        service.getCustomerOrders('non-existent', 'user-1', {}),
+        service.getCustomerOrders('non-existent', 'tenant-1', {}),
       ).rejects.toThrow(NotFoundException);
     });
   });
@@ -709,7 +709,7 @@ describe('CustomersService', () => {
     it('should calculate correct average order value', async () => {
       const mockCustomer = createMockCustomer();
 
-      // Mock findByIdAndUser
+      // Mock findByIdAndTenant
       mockDatabaseService.database.select.mockReturnValueOnce({
         from: jest.fn().mockReturnValue({
           where: jest.fn().mockResolvedValue([mockCustomer]),
@@ -723,7 +723,7 @@ describe('CustomersService', () => {
         }),
       });
 
-      const result = await service.findByIdAndUser('customer-1', 'user-1');
+      const result = await service.findByIdAndTenant('customer-1', 'tenant-1');
 
       expect(result.averageOrderValue).toBe(50.0);
     });
@@ -743,7 +743,7 @@ describe('CustomersService', () => {
         }),
       });
 
-      const result = await service.findByIdAndUser('customer-1', 'user-1');
+      const result = await service.findByIdAndTenant('customer-1', 'tenant-1');
 
       expect(result.averageOrderValue).toBe(0);
     });
@@ -769,7 +769,7 @@ describe('CustomersService', () => {
         }),
       });
 
-      const result = await service.findByIdAndUser('customer-1', 'user-1');
+      const result = await service.findByIdAndTenant('customer-1', 'tenant-1');
 
       expect(result.createdAt).toBe('2024-01-15T10:30:00.000Z');
       expect(result.updatedAt).toBe('2024-06-20T14:45:00.000Z');
@@ -799,7 +799,7 @@ describe('CustomersService', () => {
           }),
         });
 
-      const result = await service.bulkImport('user-1', customersToImport);
+      const result = await service.bulkImport('tenant-1', customersToImport);
 
       expect(result.imported).toBe(2);
       expect(result.failed).toBe(0);
@@ -826,7 +826,7 @@ describe('CustomersService', () => {
           }),
         });
 
-      const result = await service.bulkImport('user-1', customersToImport);
+      const result = await service.bulkImport('tenant-1', customersToImport);
 
       expect(result.imported).toBe(1);
       expect(result.failed).toBe(1);
@@ -854,7 +854,7 @@ describe('CustomersService', () => {
         }),
       });
 
-      const result = await service.exportToCSV('user-1', {});
+      const result = await service.exportToCSV('tenant-1', {});
 
       expect(result).toContain('Name,Email,Phone');
       expect(result).toContain('Test Export');
@@ -877,7 +877,7 @@ describe('CustomersService', () => {
         }),
       });
 
-      const result = await service.exportToCSV('user-1', {});
+      const result = await service.exportToCSV('tenant-1', {});
 
       expect(result).toContain('""hello""');
     });
@@ -898,7 +898,7 @@ describe('CustomersService', () => {
         }),
       });
 
-      const result = await service.exportToCSV('user-1', { status: 'active' });
+      const result = await service.exportToCSV('tenant-1', { status: 'active' });
 
       expect(result).toContain('Active Customer');
       expect(result).toContain('active');
@@ -910,7 +910,7 @@ describe('CustomersService', () => {
       const mockCustomer = createMockCustomer();
       const mockStats = createOrderStatsMock({ totalOrders: 5, totalSpent: 500, lastOrderAt: new Date('2024-06-15') });
 
-      // Mock findByIdAndUser (customer + stats)
+      // Mock findByIdAndTenant (customer + stats)
       mockDatabaseService.database.select.mockReturnValueOnce({
         from: jest.fn().mockReturnValue({
           where: jest.fn().mockResolvedValue([mockCustomer]),
@@ -1000,7 +1000,7 @@ describe('CustomersService', () => {
         }),
       });
 
-      const result = await service.getCustomerAnalytics('customer-1', 'user-1', '90d');
+      const result = await service.getCustomerAnalytics('customer-1', 'tenant-1', '90d');
 
       expect(result.overview.totalOrders).toBe(5);
       expect(result.overview.totalSpent).toBe(500);
@@ -1016,7 +1016,7 @@ describe('CustomersService', () => {
       const mockCustomer = createMockCustomer();
       const mockStats = createOrderStatsMock({ totalOrders: 0, totalSpent: 0, lastOrderAt: null });
 
-      // Mock findByIdAndUser
+      // Mock findByIdAndTenant
       mockDatabaseService.database.select.mockReturnValueOnce({
         from: jest.fn().mockReturnValue({
           where: jest.fn().mockResolvedValue([mockCustomer]),
@@ -1092,7 +1092,7 @@ describe('CustomersService', () => {
         }),
       });
 
-      const result = await service.getCustomerAnalytics('customer-1', 'user-1', 'all');
+      const result = await service.getCustomerAnalytics('customer-1', 'tenant-1', 'all');
 
       expect(result.overview.totalOrders).toBe(0);
       expect(result.overview.totalSpent).toBe(0);
@@ -1112,7 +1112,7 @@ describe('CustomersService', () => {
       });
 
       await expect(
-        service.getCustomerAnalytics('non-existent', 'user-1', '30d'),
+        service.getCustomerAnalytics('non-existent', 'tenant-1', '30d'),
       ).rejects.toThrow(NotFoundException);
     });
   });

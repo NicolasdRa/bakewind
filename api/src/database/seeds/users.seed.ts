@@ -35,7 +35,11 @@ export async function seedUsers(db: NodePgDatabase<typeof schema>) {
   // Hash passwords
   const hashedPassword = await bcrypt.hash('password123', 12);
 
-  // Create test users
+  // Create test users with new role structure
+  // ADMIN: System admin with full access
+  // OWNER: Bakery business owner (has associated tenant)
+  // STAFF: Bakery employee (has associated staff profile in staff table)
+  // CUSTOMER: End customer (has associated customer profile)
   const users = await db
     .insert(usersTable)
     .values([
@@ -54,9 +58,9 @@ export async function seedUsers(db: NodePgDatabase<typeof schema>) {
       {
         firstName: 'Jane',
         lastName: 'Smith',
-        email: 'manager@bakewind.com',
+        email: 'owner@bakewind.com',
         password: hashedPassword,
-        role: 'MANAGER',
+        role: 'OWNER',
         isActive: true,
         isEmailVerified: true,
         phoneNumber: '+1-555-0002',
@@ -68,7 +72,7 @@ export async function seedUsers(db: NodePgDatabase<typeof schema>) {
         lastName: 'Wilson',
         email: 'staff@bakewind.com',
         password: hashedPassword,
-        role: 'BAKER',
+        role: 'STAFF',
         isActive: true,
         isEmailVerified: true,
         phoneNumber: '+1-555-0003',
@@ -78,9 +82,9 @@ export async function seedUsers(db: NodePgDatabase<typeof schema>) {
       {
         firstName: 'Alice',
         lastName: 'Johnson',
-        email: 'viewer@bakewind.com',
+        email: 'customer@bakewind.com',
         password: hashedPassword,
-        role: 'VIEWER',
+        role: 'CUSTOMER',
         isActive: true,
         isEmailVerified: true,
         phoneNumber: '+1-555-0004',
@@ -145,7 +149,7 @@ export async function seedUsers(db: NodePgDatabase<typeof schema>) {
   console.log('✅ Users seeded successfully!');
   console.log('Test accounts:');
   console.log('  Admin: admin@bakewind.com / password123');
-  console.log('  Manager: manager@bakewind.com / password123');
+  console.log('  Owner: owner@bakewind.com / password123');
   console.log('  Staff: staff@bakewind.com / password123');
-  console.log('  Viewer: viewer@bakewind.com / password123');
+  console.log('  Customer: customer@bakewind.com / password123');
 }

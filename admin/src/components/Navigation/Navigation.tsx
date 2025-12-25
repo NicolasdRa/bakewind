@@ -216,19 +216,7 @@ const Navigation: Component = () => {
             </div>
           </div>
         </Show>
-        <Show when={auth.user?.subscriptionStatus === 'trial' && !isCollapsed()}>
-          <div class={styles.trialNotice}>
-            <p class={styles.trialText}>Trial Account</p>
-            <Show when={auth.user?.trialEndsAt}>
-              <p class={styles.trialCountdown}>
-                {auth.user?.trialEndsAt && Math.ceil((new Date(auth.user.trialEndsAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24))} days left
-              </p>
-            </Show>
-            <A href="/upgrade" class={styles.upgradeButton}>
-              Upgrade Now
-            </A>
-          </div>
-        </Show>
+        {/* TODO: Add trial notice for OWNER users once tenant context is implemented */}
       </div>
     </nav>
   );

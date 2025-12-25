@@ -109,8 +109,9 @@ export class CustomersController {
     description: 'Unauthorized',
   })
   async getCustomers(@Request() req: any, @Query() query: CustomerQueryDto) {
-    const userId = req.user.userId;
-    return this.customersService.findAllByUser(userId, query);
+    // TODO: Get tenantId from user's associated tenant (staff.tenantId or ownedTenant.id)
+    const tenantId = req.user.userId; // Temporary - needs proper tenant resolution
+    return this.customersService.findAllByTenant(tenantId, query);
   }
 
   @Get(':customerId')
@@ -140,8 +141,9 @@ export class CustomersController {
     @Request() req: any,
     @Param('customerId') customerId: string,
   ): Promise<CustomerResponseDto> {
-    const userId = req.user.userId;
-    return this.customersService.findByIdAndUser(customerId, userId);
+    // TODO: Get tenantId from user's associated tenant
+    const tenantId = req.user.userId; // Temporary - needs proper tenant resolution
+    return this.customersService.findByIdAndTenant(customerId, tenantId);
   }
 
   @Post()
@@ -204,10 +206,11 @@ export class CustomersController {
     @Param('customerId') customerId: string,
     @Body() updateCustomerDto: UpdateCustomerDto,
   ): Promise<CustomerResponseDto> {
-    const userId = req.user.userId;
-    return this.customersService.updateByIdAndUser(
+    // TODO: Get tenantId from user's associated tenant
+    const tenantId = req.user.userId; // Temporary - needs proper tenant resolution
+    return this.customersService.updateByIdAndTenant(
       customerId,
-      userId,
+      tenantId,
       updateCustomerDto,
     );
   }
@@ -238,8 +241,9 @@ export class CustomersController {
     @Request() req: any,
     @Param('customerId') customerId: string,
   ): Promise<void> {
-    const userId = req.user.userId;
-    return this.customersService.deleteByIdAndUser(customerId, userId);
+    // TODO: Get tenantId from user's associated tenant
+    const tenantId = req.user.userId; // Temporary - needs proper tenant resolution
+    return this.customersService.deleteByIdAndTenant(customerId, tenantId);
   }
 
   @Get(':customerId/orders')

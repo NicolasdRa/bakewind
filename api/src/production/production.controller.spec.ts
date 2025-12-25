@@ -168,7 +168,7 @@ describe('ProductionController', () => {
 
       const mockRequest = {
         user: {
-          sub: 'user-1',
+          userId: 'user-1',
         },
       };
 

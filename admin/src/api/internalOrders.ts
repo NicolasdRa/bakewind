@@ -6,7 +6,10 @@ export type InternalOrderSource =
   | 'front_house'
   | 'catering'
   | 'retail'
-  | 'events';
+  | 'events'
+  | 'management'
+  | 'bakery'
+  | 'patisserie';
 
 export type InternalOrderStatus =
   | 'draft'

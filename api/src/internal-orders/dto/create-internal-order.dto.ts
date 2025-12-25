@@ -22,6 +22,9 @@ export enum InternalOrderSource {
   CATERING = 'catering',
   RETAIL = 'retail',
   EVENTS = 'events',
+  MANAGEMENT = 'management',
+  BAKERY = 'bakery',
+  PATISSERIE = 'patisserie',
 }
 
 export enum InternalOrderStatus {
@@ -85,6 +88,10 @@ export class CreateInternalOrderDto {
   @IsString()
   orderNumber: string;
 
+  @ApiProperty({ description: 'Tenant ID (bakery this order belongs to)' })
+  @IsUUID()
+  tenantId: string;
+
   @ApiProperty({
     enum: InternalOrderSource,
     description: 'Source department/area within the company',
@@ -110,9 +117,14 @@ export class CreateInternalOrderDto {
   @IsEnum(InternalOrderPriority)
   priority?: InternalOrderPriority;
 
+  @ApiPropertyOptional({ description: 'Staff ID of person requesting the order' })
+  @IsOptional()
+  @IsUUID()
+  requestedByStaffId?: string;
+
   @ApiProperty({ description: 'Name of person requesting the order' })
   @IsString()
-  requestedBy: string;
+  requestedByName: string;
 
   @ApiPropertyOptional({ description: 'Email of person requesting' })
   @IsOptional()
@@ -128,10 +140,15 @@ export class CreateInternalOrderDto {
   @IsDateString()
   neededByDate: string;
 
+  @ApiPropertyOptional({ description: 'Staff ID of person who approved' })
+  @IsOptional()
+  @IsUUID()
+  approvedByStaffId?: string;
+
   @ApiPropertyOptional({ description: 'Name of person who approved' })
   @IsOptional()
   @IsString()
-  approvedBy?: string;
+  approvedByName?: string;
 
   @ApiPropertyOptional({ description: 'Date order was approved (ISO 8601)' })
   @IsOptional()

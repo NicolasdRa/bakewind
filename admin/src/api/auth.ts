@@ -29,17 +29,21 @@ export interface TrialSignupData {
   agreeToTerms: boolean;
 }
 
+export type UserRole = 'ADMIN' | 'OWNER' | 'STAFF' | 'CUSTOMER';
+
 export interface UserProfile {
   id: string;
   email: string;
   firstName: string;
   lastName: string;
-  businessName: string;
-  role: string;
-  subscriptionStatus: 'trial' | 'active' | 'past_due' | 'canceled';
-  trialEndsAt: string | null;
+  role: UserRole;
+  isActive: boolean;
   isEmailVerified: boolean;
+  phoneNumber?: string | null;
+  country?: string | null;
+  city?: string | null;
   createdAt: string;
+  locationId?: string[];  // User's assigned location IDs
 }
 
 /**

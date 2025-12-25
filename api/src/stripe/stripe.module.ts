@@ -3,11 +3,11 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { StripeService } from './stripe.service';
 import { StripeWebhookController } from './stripe-webhook.controller';
 import { SubscriptionsModule } from '../subscriptions/subscriptions.module';
-import { TrialsModule } from '../trials/trials.module';
-import { SaasUsersModule } from '../saas-users/saas-users.module';
+// TrialsModule removed - merged into tenants
+// SaasUsersModule removed - will be replaced by TenantsModule
 
 @Module({
-  imports: [ConfigModule, SubscriptionsModule, TrialsModule, SaasUsersModule],
+  imports: [ConfigModule, SubscriptionsModule],
   providers: [
     {
       provide: 'STRIPE',

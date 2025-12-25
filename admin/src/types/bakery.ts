@@ -1,6 +1,6 @@
 export type OrderStatus = 'pending' | 'confirmed' | 'in_production' | 'ready' | 'delivered' | 'cancelled'
 export type OrderSource = 'online' | 'phone' | 'walk_in' | 'wholesale'
-export type InternalOrderSource = 'cafe' | 'restaurant' | 'front_house' | 'catering' | 'retail' | 'events'
+export type InternalOrderSource = 'cafe' | 'restaurant' | 'front_house' | 'catering' | 'retail' | 'events' | 'management' | 'bakery' | 'patisserie'
 export type InternalOrderStatus = 'requested' | 'approved' | 'in_preparation' | 'ready' | 'delivered' | 'rejected'
 export type InternalOrderPriority = 'low' | 'normal' | 'high' | 'urgent'
 export type PaymentStatus = 'pending' | 'paid' | 'partial' | 'refunded'

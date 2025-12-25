@@ -8,19 +8,104 @@ import { inventoryItems } from './inventory.schema';
 import { productionSchedules, productionItems } from './production.schema';
 import { usersTable } from './users.schema';
 import { locationsTable, userLocationsTable } from './locations.schema';
-import { saasUsersTable } from './saas-users';
 import { subscriptionPlansTable } from './subscription-plans.schema';
-import { trialAccountsTable } from './trial-accounts.schema';
 import { userSessionsTable } from './user-sessions.schema';
+import { tenantsTable } from './tenants.schema';
+import { staffTable } from './staff.schema';
 
-// Customer relations
-export const customersRelations = relations(customers, ({ one, many }) => ({
-  user: one(usersTable, {
-    fields: [customers.userId],
+// ==================== TENANT RELATIONS ====================
+
+// Tenant relations (bakery business)
+export const tenantsRelations = relations(tenantsTable, ({ one, many }) => ({
+  // Owner of the bakery business
+  owner: one(usersTable, {
+    fields: [tenantsTable.ownerUserId],
     references: [usersTable.id],
   }),
+  // Subscription plan
+  subscriptionPlan: one(subscriptionPlansTable, {
+    fields: [tenantsTable.subscriptionPlanId],
+    references: [subscriptionPlansTable.id],
+  }),
+  // Staff members working for this tenant
+  staff: many(staffTable),
+  // Customers of this bakery
+  customers: many(customers),
+  // Internal orders for this tenant
+  internalOrders: many(internalOrders),
+}));
+
+// ==================== STAFF RELATIONS ====================
+
+// Staff relations (bakery employees)
+export const staffRelations = relations(staffTable, ({ one, many }) => ({
+  // The user account for this staff member
+  user: one(usersTable, {
+    fields: [staffTable.userId],
+    references: [usersTable.id],
+  }),
+  // The tenant (bakery) they work for
+  tenant: one(tenantsTable, {
+    fields: [staffTable.tenantId],
+    references: [tenantsTable.id],
+  }),
+  // Internal orders requested by this staff member
+  requestedOrders: many(internalOrders, { relationName: 'requestedBy' }),
+  // Internal orders approved by this staff member
+  approvedOrders: many(internalOrders, { relationName: 'approvedBy' }),
+  // Internal orders assigned to this staff member
+  assignedOrders: many(internalOrders, { relationName: 'assignedTo' }),
+}));
+
+// ==================== USER RELATIONS ====================
+
+// User relations (auth/identity)
+export const usersRelations = relations(usersTable, ({ one, many }) => ({
+  // User-location assignments
+  userLocations: many(userLocationsTable),
+  // Staff profile (if user is STAFF role)
+  staff: one(staffTable, {
+    fields: [usersTable.id],
+    references: [staffTable.userId],
+  }),
+  // Tenant owned by this user (if user is OWNER role)
+  ownedTenant: one(tenantsTable, {
+    fields: [usersTable.id],
+    references: [tenantsTable.ownerUserId],
+  }),
+  // Customer profile with portal access (if user is CUSTOMER role)
+  customerProfile: one(customers, {
+    fields: [usersTable.id],
+    references: [customers.authUserId],
+  }),
+  // User sessions
+  sessions: many(userSessionsTable),
+}));
+
+// ==================== CUSTOMER RELATIONS ====================
+
+// Customer relations (bakery's B2B/B2C clients)
+export const customersRelations = relations(customers, ({ one, many }) => ({
+  // The tenant (bakery) this customer belongs to
+  tenant: one(tenantsTable, {
+    fields: [customers.tenantId],
+    references: [tenantsTable.id],
+  }),
+  // Optional auth user (for customer portal access)
+  authUser: one(usersTable, {
+    fields: [customers.authUserId],
+    references: [usersTable.id],
+  }),
+  // Subscription plan for recurring orders
+  subscriptionPlan: one(subscriptionPlansTable, {
+    fields: [customers.subscriptionPlanId],
+    references: [subscriptionPlansTable.id],
+  }),
+  // Customer orders
   orders: many(customerOrders),
 }));
+
+// ==================== ORDER RELATIONS ====================
 
 // Customer Order relations
 export const customerOrdersRelations = relations(
@@ -51,8 +136,33 @@ export const customerOrderItemsRelations = relations(
 // Internal Order relations
 export const internalOrdersRelations = relations(
   internalOrders,
-  ({ many }) => ({
+  ({ one, many }) => ({
+    // Tenant this order belongs to
+    tenant: one(tenantsTable, {
+      fields: [internalOrders.tenantId],
+      references: [tenantsTable.id],
+    }),
+    // Staff member who requested the order
+    requestedByStaff: one(staffTable, {
+      fields: [internalOrders.requestedByStaffId],
+      references: [staffTable.id],
+      relationName: 'requestedBy',
+    }),
+    // Staff member who approved the order
+    approvedByStaff: one(staffTable, {
+      fields: [internalOrders.approvedByStaffId],
+      references: [staffTable.id],
+      relationName: 'approvedBy',
+    }),
+    // Staff member assigned to the order
+    assignedStaff: one(staffTable, {
+      fields: [internalOrders.assignedStaffId],
+      references: [staffTable.id],
+      relationName: 'assignedTo',
+    }),
+    // Order items
     items: many(internalOrderItems),
+    // Production items
     productionItems: many(productionItems),
   }),
 );
@@ -71,6 +181,8 @@ export const internalOrderItemsRelations = relations(
   }),
 );
 
+// ==================== PRODUCT RELATIONS ====================
+
 // Product relations
 export const productsRelations = relations(products, ({ one, many }) => ({
   recipe: one(recipes, {
@@ -80,6 +192,8 @@ export const productsRelations = relations(products, ({ one, many }) => ({
   customerOrderItems: many(customerOrderItems),
   internalOrderItems: many(internalOrderItems),
 }));
+
+// ==================== RECIPE RELATIONS ====================
 
 // Recipe relations
 export const recipesRelations = relations(recipes, ({ one, many }) => ({
@@ -105,6 +219,8 @@ export const recipeIngredientsRelations = relations(
   }),
 );
 
+// ==================== INVENTORY RELATIONS ====================
+
 // Inventory relations
 export const inventoryItemsRelations = relations(
   inventoryItems,
@@ -112,6 +228,8 @@ export const inventoryItemsRelations = relations(
     recipeIngredients: many(recipeIngredients),
   }),
 );
+
+// ==================== PRODUCTION RELATIONS ====================
 
 // Production relations
 export const productionSchedulesRelations = relations(
@@ -139,11 +257,7 @@ export const productionItemsRelations = relations(
   }),
 );
 
-// User relations
-export const usersRelations = relations(usersTable, ({ many }) => ({
-  userLocations: many(userLocationsTable),
-  customers: many(customers),
-}));
+// ==================== LOCATION RELATIONS ====================
 
 // Location relations
 export const locationsRelations = relations(locationsTable, ({ many }) => ({
@@ -165,49 +279,20 @@ export const userLocationsRelations = relations(
   }),
 );
 
-// SaaS User relations
-export const saasUsersRelations = relations(
-  saasUsersTable,
-  ({ one, many }) => ({
-    subscriptionPlan: one(subscriptionPlansTable, {
-      fields: [saasUsersTable.subscriptionPlanId],
-      references: [subscriptionPlansTable.id],
-    }),
-    trialAccount: one(trialAccountsTable, {
-      fields: [saasUsersTable.trialAccountId],
-      references: [trialAccountsTable.id],
-    }),
-    userSessions: many(userSessionsTable),
-  }),
-);
+// ==================== SUBSCRIPTION RELATIONS ====================
 
 // Subscription Plan relations
 export const subscriptionPlansRelations = relations(
   subscriptionPlansTable,
   ({ many }) => ({
-    saasUsers: many(saasUsersTable),
-    convertedTrials: many(trialAccountsTable),
+    // Tenants subscribed to this plan
+    tenants: many(tenantsTable),
+    // Customers with recurring subscriptions on this plan
+    customers: many(customers),
   }),
 );
 
-// Trial Account relations
-export const trialAccountsRelations = relations(
-  trialAccountsTable,
-  ({ one }) => ({
-    user: one(usersTable, {
-      fields: [trialAccountsTable.userId],
-      references: [usersTable.id],
-    }),
-    convertedToPlan: one(subscriptionPlansTable, {
-      fields: [trialAccountsTable.convertedToPlanId],
-      references: [subscriptionPlansTable.id],
-    }),
-    saasUser: one(saasUsersTable, {
-      fields: [trialAccountsTable.id],
-      references: [saasUsersTable.trialAccountId],
-    }),
-  }),
-);
+// ==================== SESSION RELATIONS ====================
 
 // User Session relations
 export const userSessionsRelations = relations(
@@ -216,10 +301,6 @@ export const userSessionsRelations = relations(
     user: one(usersTable, {
       fields: [userSessionsTable.userId],
       references: [usersTable.id],
-    }),
-    saasUser: one(saasUsersTable, {
-      fields: [userSessionsTable.userId],
-      references: [saasUsersTable.id],
     }),
   }),
 );

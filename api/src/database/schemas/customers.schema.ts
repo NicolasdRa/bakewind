@@ -10,6 +10,8 @@ import {
   index,
 } from 'drizzle-orm/pg-core';
 import { usersTable } from './users.schema';
+import { tenantsTable } from './tenants.schema';
+import { subscriptionPlansTable } from './subscription-plans.schema';
 
 // Customer type enum
 export const customerTypeEnum = pgEnum('customer_type', [
@@ -35,10 +37,15 @@ export const customers = pgTable(
   {
     id: uuid('id').primaryKey().defaultRandom(),
 
-    // Multi-tenancy: which bakery user owns this customer
-    userId: uuid('user_id')
-      .references(() => usersTable.id, { onDelete: 'cascade' })
+    // Multi-tenancy: which bakery business owns this customer
+    tenantId: uuid('tenant_id')
+      .references(() => tenantsTable.id, { onDelete: 'cascade' })
       .notNull(),
+
+    // Optional auth: if customer has portal access, link to their user account
+    authUserId: uuid('auth_user_id').references(() => usersTable.id, {
+      onDelete: 'set null',
+    }),
 
     // Core contact info
     name: varchar('name', { length: 255 }).notNull(),
@@ -70,16 +77,29 @@ export const customers = pgTable(
     // Loyalty
     loyaltyPoints: integer('loyalty_points').default(0).notNull(),
 
+    // Payment/subscription (for recurring orders)
+    stripeCustomerId: varchar('stripe_customer_id', { length: 100 }),
+    subscriptionPlanId: uuid('subscription_plan_id').references(
+      () => subscriptionPlansTable.id,
+      { onDelete: 'set null' },
+    ),
+
     // Timestamps
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
   },
   (table) => ({
     // Performance indexes
-    idxCustomerUserId: index('idx_customer_user_id').on(table.userId),
+    idxCustomerTenantId: index('idx_customer_tenant_id').on(table.tenantId),
+    idxCustomerAuthUserId: index('idx_customer_auth_user_id').on(table.authUserId),
     idxCustomerStatus: index('idx_customer_status').on(table.status),
     idxCustomerType: index('idx_customer_type').on(table.customerType),
     idxCustomerName: index('idx_customer_name').on(table.name),
     idxCustomerEmail: index('idx_customer_email').on(table.email),
+    idxCustomerStripe: index('idx_customer_stripe').on(table.stripeCustomerId),
+    idxCustomerTenantStatus: index('idx_customer_tenant_status').on(
+      table.tenantId,
+      table.status,
+    ),
   }),
 );

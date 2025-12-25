@@ -22,15 +22,22 @@ import { RealtimeService } from '../realtime/realtime.service';
 export interface InternalOrderWithItems {
   id: string;
   orderNumber: string;
+  tenantId: string;
   source: string;
   status: string;
   priority: string;
-  requestedBy: string;
+  // Staff references
+  requestedByStaffId: string | null;
+  requestedByName: string;
   requestedByEmail: string | null;
+  approvedByStaffId: string | null;
+  approvedByName: string | null;
+  assignedStaffId: string | null;
+  assignedStaffName: string | null;
+  // Order details
   totalCost: string | null;
   requestedDate: Date;
   neededByDate: Date;
-  approvedBy: string | null;
   approvedAt: Date | null;
   completedAt: Date | null;
   deliveredAt: Date | null;
@@ -40,7 +47,6 @@ export interface InternalOrderWithItems {
   productionDate: Date | null;
   productionShift: string | null;
   batchNumber: string | null;
-  assignedStaff: string | null;
   workstation: string | null;
   targetQuantity: number | null;
   actualQuantity: number | null;
@@ -175,7 +181,7 @@ export class InternalOrdersService {
       conditions.push(
         or(
           ilike(internalOrders.orderNumber, `%${params.search}%`),
-          ilike(internalOrders.requestedBy, `%${params.search}%`),
+          ilike(internalOrders.requestedByName, `%${params.search}%`),
         ),
       );
     }
@@ -268,15 +274,22 @@ export class InternalOrdersService {
       .insert(internalOrders)
       .values({
         orderNumber: createOrderDto.orderNumber,
+        tenantId: createOrderDto.tenantId,
         source: createOrderDto.source,
         status: createOrderDto.status || 'draft',
         priority: createOrderDto.priority || 'normal',
-        requestedBy: createOrderDto.requestedBy,
+        // Staff references - using name fields, staff IDs set separately
+        requestedByStaffId: createOrderDto.requestedByStaffId || null,
+        requestedByName: createOrderDto.requestedByName,
         requestedByEmail: createOrderDto.requestedByEmail || null,
+        approvedByStaffId: createOrderDto.approvedByStaffId || null,
+        approvedByName: createOrderDto.approvedByName || null,
+        assignedStaffId: null,
+        assignedStaffName: null,
+        // Order details
         totalCost: createOrderDto.totalCost || null,
         requestedDate: new Date(),
         neededByDate: new Date(createOrderDto.neededByDate),
-        approvedBy: createOrderDto.approvedBy || null,
         approvedAt: createOrderDto.approvedAt
           ? new Date(createOrderDto.approvedAt)
           : null,
@@ -286,7 +299,6 @@ export class InternalOrdersService {
         productionDate: null,
         productionShift: null,
         batchNumber: createOrderDto.batchNumber || null,
-        assignedStaff: null,
         workstation: null,
         targetQuantity: null,
         actualQuantity: null,

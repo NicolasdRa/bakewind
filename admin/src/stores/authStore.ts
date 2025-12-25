@@ -11,20 +11,44 @@ import * as authApi from '../api/auth';
 import { logger } from '../utils/logger';
 
 // Types
+export type UserRole = 'ADMIN' | 'OWNER' | 'STAFF' | 'CUSTOMER';
+export type SubscriptionStatus = 'trial' | 'active' | 'past_due' | 'canceled';
 export type UserArea = 'cafe' | 'restaurant' | 'front_house' | 'catering' | 'retail' | 'events';
 
+// Slim user - pure auth/identity (matches refactored backend schema)
 export interface User {
   id: string;
   email: string;
   firstName: string;
   lastName: string;
-  businessName: string;
-  role: string;
-  areas: UserArea[];
-  subscriptionStatus: 'trial' | 'active' | 'past_due' | 'canceled';
-  trialEndsAt: string | null;
+  role: UserRole;
+  isActive: boolean;
   isEmailVerified: boolean;
+  phoneNumber?: string | null;
+  country?: string | null;
+  city?: string | null;
   createdAt: string;
+  locationId?: string[];  // User's assigned location IDs
+}
+
+// Tenant info for OWNER users (fetched separately when needed)
+export interface Tenant {
+  id: string;
+  businessName: string;
+  businessPhone?: string | null;
+  businessAddress?: string | null;
+  subscriptionStatus: SubscriptionStatus;
+  trialEndsAt: string | null;
+  onboardingCompleted: boolean;
+}
+
+// Staff info for STAFF users (fetched separately when needed)
+export interface Staff {
+  id: string;
+  tenantId: string;
+  position?: string | null;
+  department?: string | null;
+  areas: UserArea[];
 }
 
 export interface AuthState {
@@ -112,13 +136,14 @@ export function createAuthStore() {
         email: user.email || '',
         firstName: user.firstName || '',
         lastName: user.lastName || '',
-        businessName: user.businessName || '',
-        role: user.role || 'VIEWER',
-        areas: user.areas || [],
-        subscriptionStatus: user.subscriptionStatus || 'trial',
-        trialEndsAt: user.trialEndsAt || null,
-        isEmailVerified: user.isEmailVerified || false,
+        role: user.role || 'CUSTOMER',
+        isActive: user.isActive ?? true,
+        isEmailVerified: user.isEmailVerified ?? false,
+        phoneNumber: user.phoneNumber,
+        country: user.country,
+        city: user.city,
         createdAt: user.createdAt || new Date().toISOString(),
+        locationId: user.locationId || [],
       };
 
       // Set all state SYNCHRONOUSLY so components see authenticated user immediately

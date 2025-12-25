@@ -11,11 +11,11 @@ import { HealthModule } from './health/health.module';
 import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
-import { SaasUsersModule } from './saas-users/saas-users.module';
+// SaasUsersModule removed - merged into tenants
 import { LocationsModule } from './locations/locations.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { FeaturesModule } from './features/features.module';
-import { TrialsModule } from './trials/trials.module';
+// TrialsModule removed - merged into tenants
 import { CustomersModule } from './customers/customers.module';
 import { UserSessionsModule } from './user-sessions/user-sessions.module';
 import { StripeModule } from './stripe/stripe.module';
@@ -28,6 +28,7 @@ import { OrdersModule } from './orders/orders.module';
 import { InternalOrdersModule } from './internal-orders/internal-orders.module';
 import { RealtimeModule } from './realtime/realtime.module';
 import { ProductionModule } from './production/production.module';
+import { StaffModule } from './staff/staff.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
 import { CorrelationIdMiddleware } from './common/middleware/correlation-id.middleware';
@@ -74,11 +75,9 @@ import configuration, { AppConfig } from './config/configuration';
     DatabaseModule,
     AuthModule,
     UsersModule,
-    SaasUsersModule,
     LocationsModule,
     SubscriptionsModule,
     FeaturesModule,
-    TrialsModule,
     CustomersModule,
     UserSessionsModule,
     StripeModule,
@@ -91,6 +90,7 @@ import configuration, { AppConfig } from './config/configuration';
     InternalOrdersModule,
     RealtimeModule,
     ProductionModule,
+    StaffModule,
     HealthModule,
     CommonModule,
   ],

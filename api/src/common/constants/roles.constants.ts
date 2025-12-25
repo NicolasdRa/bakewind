@@ -1,16 +1,17 @@
+/**
+ * User roles for the BakeWind platform
+ *
+ * Class Table Inheritance pattern:
+ * - ADMIN: System administrator with full access to all tenants
+ * - OWNER: Bakery business owner, manages their own tenant
+ * - STAFF: Bakery employee, works within a specific tenant (has staff profile)
+ * - CUSTOMER: End customer with optional portal access (has customer profile)
+ */
 export const USER_ROLES = {
   ADMIN: 'ADMIN',
-  MANAGER: 'MANAGER',
-  HEAD_BAKER: 'HEAD_BAKER',
-  BAKER: 'BAKER',
-  HEAD_PASTRY_CHEF: 'HEAD_PASTRY_CHEF',
-  PASTRY_CHEF: 'PASTRY_CHEF',
-  CASHIER: 'CASHIER',
-  INVENTORY_MANAGER: 'INVENTORY_MANAGER',
+  OWNER: 'OWNER',
+  STAFF: 'STAFF',
   CUSTOMER: 'CUSTOMER',
-  GUEST: 'GUEST',
-  VIEWER: 'VIEWER',
-  TRIAL_USER: 'TRIAL_USER',
 } as const;
 
 export type UserRole = (typeof USER_ROLES)[keyof typeof USER_ROLES];
@@ -20,15 +21,7 @@ export const USER_ROLES_ARRAY = Object.values(USER_ROLES);
 // For Zod validation - array format for use with z.enum()
 export const userRoleValues = [
   'ADMIN',
-  'MANAGER',
-  'HEAD_BAKER',
-  'BAKER',
-  'HEAD_PASTRY_CHEF',
-  'PASTRY_CHEF',
-  'CASHIER',
-  'INVENTORY_MANAGER',
+  'OWNER',
+  'STAFF',
   'CUSTOMER',
-  'GUEST',
-  'VIEWER',
-  'TRIAL_USER',
 ] as const;

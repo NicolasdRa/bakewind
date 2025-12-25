@@ -1,6 +1,7 @@
 import { Show } from "solid-js";
 import { RouteSectionProps } from "@solidjs/router";
 import { AuthProvider, useAuth } from "../../context/AuthContext";
+import { StaffProvider } from "../../context/StaffContext";
 import DashboardLayout from "../DashboardLayout/DashboardLayout";
 import { logger } from "../../utils/logger";
 import Button from "../../components/common/Button";
@@ -8,12 +9,14 @@ import styles from "./ProtectedLayout.module.css";
 
 /**
  * ProtectedLayout - Wraps routes that require authentication
- * Provides AuthProvider and auth guard logic with DashboardLayout
+ * Provides AuthProvider, StaffProvider and auth guard logic with DashboardLayout
  */
 export default function ProtectedLayout(props: RouteSectionProps) {
   return (
     <AuthProvider>
-      <ProtectedContent {...props} />
+      <StaffProvider>
+        <ProtectedContent {...props} />
+      </StaffProvider>
     </AuthProvider>
   );
 }

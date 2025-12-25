@@ -73,7 +73,7 @@ export const userRegistrationSchema = z
       .nullable()
       .optional(),
     bio: z.string().max(1000).nullable().optional(),
-    role: z.enum(userRoleValues).default('GUEST'),
+    role: z.enum(userRoleValues).default('CUSTOMER'),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
