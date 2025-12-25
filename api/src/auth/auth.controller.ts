@@ -410,10 +410,12 @@ export class AuthController {
   })
   async getProfile(@Request() req: RequestWithUser) {
     const userId: string = req.user.id;
-    const locationIds = await this.authService.getUserLocationIds(userId);
-    return {
-      ...req.user,
-      locationId: locationIds,
-    };
+    const profile = await this.authService.getUserProfile(userId);
+
+    if (!profile) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    return profile;
   }
 }

@@ -390,6 +390,24 @@ export class AuthService {
     return this.usersService.getUserLocationIds(userId);
   }
 
+  async getUserProfile(userId: string): Promise<
+    | (Omit<UsersData, 'password' | 'refreshToken'> & { locationId: string[] })
+    | null
+  > {
+    const user = await this.usersService.findById(userId);
+    if (!user) {
+      return null;
+    }
+
+    const locationIds = await this.usersService.getUserLocationIds(userId);
+
+    // user already has password and refreshToken omitted by findById
+    return {
+      ...user,
+      locationId: locationIds,
+    };
+  }
+
   /**
    * Apply role-based post-registration hooks
    * Extensible for future roles (ENTERPRISE, PARTNER, etc.)
