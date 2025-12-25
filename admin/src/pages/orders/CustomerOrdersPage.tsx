@@ -9,6 +9,7 @@ import Badge from "~/components/common/Badge";
 import Button from "~/components/common/Button";
 import DatePicker from "~/components/common/DatePicker";
 import { useInfoModal } from "~/stores/infoModalStore";
+import { getCurrentDateString } from "~/utils/dateUtils";
 import styles from "./CustomerOrdersPage.module.css";
 
 const CustomerOrdersPage: Component = () => {
@@ -356,7 +357,7 @@ const CustomerOrdersPage: Component = () => {
                 label="Scheduled Date"
                 value={scheduledDate()}
                 onChange={(value) => setScheduledDate(value)}
-                minDate={new Date().toISOString().split('T')[0]}
+                minDate={getCurrentDateString()}
               />
             </div>
             <div class={styles.modalActions}>

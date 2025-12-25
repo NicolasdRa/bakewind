@@ -4,7 +4,7 @@
  * Following date-fns v4 best practices with @date-fns/utc for timezone handling
  */
 
-import { format, parseISO, parse } from 'date-fns';
+import { format, parseISO, parse, addDays } from 'date-fns';
 import { UTCDate } from '@date-fns/utc';
 
 /**
@@ -82,10 +82,20 @@ export const formatInUTC = (
 
 /**
  * Get current date in YYYY-MM-DD format for date inputs
+ * Uses local timezone to avoid UTC date shift issues
  * @returns Current date string in YYYY-MM-DD format
  */
 export const getCurrentDateString = (): string => {
   return format(new Date(), 'yyyy-MM-dd');
+};
+
+/**
+ * Get tomorrow's date in YYYY-MM-DD format for date inputs
+ * Uses local timezone to avoid UTC date shift issues
+ * @returns Tomorrow's date string in YYYY-MM-DD format
+ */
+export const getTomorrowDateString = (): string => {
+  return format(addDays(new Date(), 1), 'yyyy-MM-dd');
 };
 
 /**

@@ -1,0 +1,300 @@
+/* Modal Overlay */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background-color: var(--overlay-bg);
+  overflow-y: auto;
+}
+
+/* Modal Container */
+.modal {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 800px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+.header {
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.headerContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.orderNumber {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.badges {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+/* Content */
+.content {
+  padding: 1.5rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.sections {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Section */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.sectionTitle {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 1.125rem;
+  margin: 0;
+}
+
+/* Info Grid */
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.infoGrid3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.infoItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.infoLabel {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.infoValue {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.infoValueMono {
+  font-family: monospace;
+}
+
+.infoValueCapitalize {
+  text-transform: capitalize;
+}
+
+/* Stat Cards */
+.statCards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.statCard {
+  padding: 1rem;
+  background-color: var(--bg-secondary);
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-color);
+}
+
+.statLabel {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.statValue {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.statValueSuccess {
+  color: #10B981;
+}
+
+.statValueDanger {
+  color: #EF4444;
+}
+
+/* Products List */
+.productsList {
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.productItem {
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.productItem:last-child {
+  border-bottom: none;
+}
+
+.productInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.productName {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.productCost {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.productQuantity {
+  text-align: right;
+}
+
+.productQuantityValue {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.productTotal {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+/* Notes Box */
+.notesBox {
+  padding: 1rem;
+  background-color: var(--bg-secondary);
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  white-space: pre-wrap;
+}
+
+/* Timeline */
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.timelineItem {
+  display: flex;
+  justify-content: space-between;
+}
+
+.timelineLabel {
+  color: var(--text-secondary);
+}
+
+.timelineValue {
+  color: var(--text-primary);
+}
+
+.timelineValueSuccess {
+  color: #10B981;
+  font-weight: 500;
+}
+
+/* Footer */
+.footer {
+  padding: 1.5rem;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.footerLeft {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.footerRight {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Total Cost Highlight */
+.totalCost {
+  padding: 1rem;
+  background-color: var(--bg-secondary);
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.totalCostLabel {
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.totalCostValue {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Source Badge */
+.sourceBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.375rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  text-transform: capitalize;
+}

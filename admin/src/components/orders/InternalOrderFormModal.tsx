@@ -7,6 +7,7 @@ import {
 } from '~/api/internalOrders';
 import { productsApi, Product } from '~/api/products';
 import { useAuth } from '~/context/AuthContext';
+import { getTomorrowDateString, getCurrentDateString } from '~/utils/dateUtils';
 
 // Common components
 import { Modal, ModalHeader, ModalBody, ModalFooter } from '~/components/common/Modal';
@@ -106,14 +107,13 @@ const InternalOrderFormModal: Component<InternalOrderFormModalProps> = (props) =
         })));
       } else {
         const timestamp = Date.now();
-        const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
         const areas = userAreas();
 
         setOrderNumber(`IO-${timestamp}`);
         setSource(areas.length > 0 ? areas[0] as InternalOrderSource : 'cafe');
         setPriority('normal');
         setRequestedBy(userFullName());
-        setNeededByDate(tomorrow);
+        setNeededByDate(getTomorrowDateString());
         setBatchNumber(`BATCH-${timestamp}`);
         setNotes('');
         setItems([]);
@@ -296,7 +296,7 @@ const InternalOrderFormModal: Component<InternalOrderFormModalProps> = (props) =
                 value={neededByDate()}
                 onChange={(value) => setNeededByDate(value)}
                 placeholder="When is it needed"
-                minDate={new Date().toISOString().split('T')[0]}
+                minDate={getCurrentDateString()}
               />
             </FormRow>
           </FormStack>

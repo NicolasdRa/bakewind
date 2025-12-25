@@ -1,6 +1,7 @@
 import { Component, Show, For } from 'solid-js';
 import { InternalOrder, InternalOrderStatus } from '~/api/internalOrders';
 import Button from '~/components/common/Button';
+import styles from './InternalOrderDetailsModal.module.css';
 
 interface InternalOrderDetailsModalProps {
   show: boolean;
@@ -9,19 +10,32 @@ interface InternalOrderDetailsModalProps {
   onEdit: (order: InternalOrder) => void;
   onDelete: (order: InternalOrder) => void;
   onStatusChange: (order: InternalOrder, status: InternalOrderStatus) => void;
+  onScheduleProduction?: (order: InternalOrder) => void;
 }
 
 const InternalOrderDetailsModal: Component<InternalOrderDetailsModalProps> = (props) => {
-  const formatDate = (dateString: string | null) => {
+  const formatDate = (dateString: string | null, includeTime = true) => {
     if (!dateString) return 'Not set';
     const date = new Date(dateString);
+    if (includeTime) {
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    }
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
     });
+  };
+
+  const formatCurrency = (value: string | null) => {
+    if (!value) return '$0.00';
+    return `$${parseFloat(value).toFixed(2)}`;
   };
 
   const getStatusColor = (status: InternalOrderStatus): string => {
@@ -50,6 +64,10 @@ const InternalOrderDetailsModal: Component<InternalOrderDetailsModalProps> = (pr
     return colors[priority] || '#3B82F6';
   };
 
+  const formatSource = (source: string): string => {
+    return source.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+  };
+
   const getNextStatus = (currentStatus: InternalOrderStatus): InternalOrderStatus | null => {
     const statusFlow: Record<InternalOrderStatus, InternalOrderStatus | null> = {
       draft: 'requested',
@@ -68,7 +86,10 @@ const InternalOrderDetailsModal: Component<InternalOrderDetailsModalProps> = (pr
 
   const canAdvanceStatus = () => {
     if (!props.order) return false;
-    return getNextStatus(props.order.status) !== null;
+    const status = props.order.status;
+    // Can't advance from approved directly - must use Schedule button
+    if (status === 'approved') return false;
+    return getNextStatus(status) !== null;
   };
 
   const handleAdvanceStatus = () => {
@@ -79,331 +100,258 @@ const InternalOrderDetailsModal: Component<InternalOrderDetailsModalProps> = (pr
     }
   };
 
+  // Status-based visibility helpers
+  const isScheduledOrLater = () => {
+    if (!props.order) return false;
+    const scheduledStatuses: InternalOrderStatus[] = [
+      'scheduled', 'in_production', 'quality_check', 'ready', 'completed', 'delivered'
+    ];
+    return scheduledStatuses.includes(props.order.status);
+  };
+
+  const isInProductionOrLater = () => {
+    if (!props.order) return false;
+    const productionStatuses: InternalOrderStatus[] = [
+      'in_production', 'quality_check', 'ready', 'completed', 'delivered'
+    ];
+    return productionStatuses.includes(props.order.status);
+  };
+
+  const isApproved = () => {
+    if (!props.order) return false;
+    return props.order.approvedAt !== null;
+  };
+
+  const getTotalItems = () => {
+    if (!props.order) return 0;
+    return props.order.items.reduce((sum, item) => sum + item.quantity, 0);
+  };
+
   return (
     <Show when={props.show && props.order}>
       {(order) => (
-        <div
-          style={{
-            position: 'fixed',
-            top: '0',
-            left: '0',
-            right: '0',
-            bottom: '0',
-            'z-index': '9999',
-            display: 'flex',
-            'align-items': 'center',
-            'justify-content': 'center',
-            padding: '1rem',
-            'background-color': 'var(--overlay-bg)',
-            'overflow-y': 'auto',
-          }}
-          onClick={props.onClose}
-        >
-          <div
-            style={{
-              'background-color': 'var(--bg-primary)',
-              border: '1px solid var(--border-color)',
-              'border-radius': '0.5rem',
-              'box-shadow': '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
-              width: '100%',
-              'max-width': '800px',
-              'max-height': '90vh',
-              display: 'flex',
-              'flex-direction': 'column',
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div class={styles.overlay} onClick={props.onClose}>
+          <div class={styles.modal} onClick={(e) => e.stopPropagation()}>
             {/* Header */}
-            <div style={{
-              padding: '1.5rem',
-              'border-bottom': '1px solid var(--border-color)',
-              display: 'flex',
-              'justify-content': 'space-between',
-              'align-items': 'flex-start',
-            }}>
-              <div>
-                <h2 style={{
-                  'font-size': '1.5rem',
-                  'font-weight': '600',
-                  color: 'var(--text-primary)',
-                  margin: '0 0 0.5rem 0',
-                }}>
-                  {order().orderNumber}
-                </h2>
-                <div style={{ display: 'flex', gap: '0.5rem', 'align-items': 'center' }}>
-                  <span style={{
-                    padding: '0.25rem 0.75rem',
-                    'border-radius': '9999px',
-                    'background-color': getStatusColor(order().status),
-                    color: 'white',
-                    'font-size': '0.75rem',
-                    'font-weight': '500',
-                    'text-transform': 'capitalize',
-                  }}>
+            <div class={styles.header}>
+              <div class={styles.headerContent}>
+                <h2 class={styles.orderNumber}>{order().orderNumber}</h2>
+                <div class={styles.badges}>
+                  <span
+                    class={styles.badge}
+                    style={{ "background-color": getStatusColor(order().status) }}
+                  >
                     {order().status.replace('_', ' ')}
                   </span>
-                  <span style={{
-                    padding: '0.25rem 0.75rem',
-                    'border-radius': '9999px',
-                    'background-color': getPriorityColor(order().priority),
-                    color: 'white',
-                    'font-size': '0.75rem',
-                    'font-weight': '500',
-                    'text-transform': 'capitalize',
-                  }}>
-                    {order().priority} Priority
+                  <span
+                    class={styles.badge}
+                    style={{ "background-color": getPriorityColor(order().priority) }}
+                  >
+                    {order().priority} priority
                   </span>
                 </div>
               </div>
-              <Button
-                onClick={props.onClose}
-                variant="ghost"
-                size="sm"
-                class="p-1"
-              >
+              <Button onClick={props.onClose} variant="ghost" size="sm">
                 ×
               </Button>
             </div>
 
             {/* Content */}
-            <div style={{
-              padding: '1.5rem',
-              'overflow-y': 'auto',
-              flex: '1',
-            }}>
-              <div style={{ display: 'flex', 'flex-direction': 'column', gap: '1.5rem' }}>
-                {/* Production Details */}
-                <div>
-                  <h3 style={{
-                    'font-weight': '600',
-                    color: 'var(--text-primary)',
-                    'margin-bottom': '1rem',
-                    'font-size': '1.125rem',
-                  }}>
-                    Production Details
-                  </h3>
-                  <div style={{
-                    display: 'grid',
-                    'grid-template-columns': 'repeat(2, 1fr)',
-                    gap: '1rem',
-                  }}>
-                    <div>
-                      <div style={{ 'font-size': '0.875rem', color: 'var(--text-secondary)', 'margin-bottom': '0.25rem' }}>
-                        Production Date
-                      </div>
-                      <div style={{ color: 'var(--text-primary)', 'font-weight': '500' }}>
-                        {formatDate(order().productionDate)}
-                      </div>
+            <div class={styles.content}>
+              <div class={styles.sections}>
+                {/* Order Information */}
+                <div class={styles.section}>
+                  <h3 class={styles.sectionTitle}>Order Information</h3>
+                  <div class={styles.infoGrid}>
+                    <div class={styles.infoItem}>
+                      <span class={styles.infoLabel}>Source</span>
+                      <span class={`${styles.infoValue} ${styles.infoValueCapitalize}`}>
+                        {formatSource(order().source)}
+                      </span>
                     </div>
-                    <div>
-                      <div style={{ 'font-size': '0.875rem', color: 'var(--text-secondary)', 'margin-bottom': '0.25rem' }}>
-                        Production Shift
-                      </div>
-                      <div style={{ color: 'var(--text-primary)', 'font-weight': '500', 'text-transform': 'capitalize' }}>
-                        {order().productionShift || 'Not set'}
-                      </div>
+                    <div class={styles.infoItem}>
+                      <span class={styles.infoLabel}>Requested By</span>
+                      <span class={styles.infoValue}>{order().requestedBy}</span>
                     </div>
-                    <div>
-                      <div style={{ 'font-size': '0.875rem', color: 'var(--text-secondary)', 'margin-bottom': '0.25rem' }}>
-                        Assigned Staff
-                      </div>
-                      <div style={{ color: 'var(--text-primary)', 'font-weight': '500' }}>
-                        {order().assignedStaff || 'Not assigned'}
-                      </div>
+                    <div class={styles.infoItem}>
+                      <span class={styles.infoLabel}>Needed By</span>
+                      <span class={styles.infoValue}>{formatDate(order().neededByDate, false)}</span>
                     </div>
-                    <div>
-                      <div style={{ 'font-size': '0.875rem', color: 'var(--text-secondary)', 'margin-bottom': '0.25rem' }}>
-                        Workstation
-                      </div>
-                      <div style={{ color: 'var(--text-primary)', 'font-weight': '500' }}>
-                        {order().workstation || 'Not assigned'}
-                      </div>
+                    <div class={styles.infoItem}>
+                      <span class={styles.infoLabel}>Requested Date</span>
+                      <span class={styles.infoValue}>{formatDate(order().requestedDate, false)}</span>
                     </div>
-                    <div>
-                      <div style={{ 'font-size': '0.875rem', color: 'var(--text-secondary)', 'margin-bottom': '0.25rem' }}>
-                        Batch Number
+                    <Show when={order().batchNumber}>
+                      <div class={styles.infoItem}>
+                        <span class={styles.infoLabel}>Batch Number</span>
+                        <span class={`${styles.infoValue} ${styles.infoValueMono}`}>
+                          {order().batchNumber}
+                        </span>
                       </div>
-                      <div style={{ color: 'var(--text-primary)', 'font-weight': '500', 'font-family': 'monospace' }}>
-                        {order().batchNumber || 'Not set'}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Quantities */}
-                <div>
-                  <h3 style={{
-                    'font-weight': '600',
-                    color: 'var(--text-primary)',
-                    'margin-bottom': '1rem',
-                    'font-size': '1.125rem',
-                  }}>
-                    Quantities
-                  </h3>
-                  <div style={{
-                    display: 'grid',
-                    'grid-template-columns': 'repeat(3, 1fr)',
-                    gap: '1rem',
-                  }}>
-                    <div style={{
-                      padding: '1rem',
-                      'background-color': 'var(--bg-secondary)',
-                      'border-radius': '0.5rem',
-                      border: '1px solid var(--border-color)',
-                    }}>
-                      <div style={{ 'font-size': '0.875rem', color: 'var(--text-secondary)', 'margin-bottom': '0.5rem' }}>
-                        Target
-                      </div>
-                      <div style={{ 'font-size': '1.5rem', 'font-weight': '600', color: 'var(--text-primary)' }}>
-                        {order().targetQuantity || 0}
-                      </div>
-                    </div>
-                    <div style={{
-                      padding: '1rem',
-                      'background-color': 'var(--bg-secondary)',
-                      'border-radius': '0.5rem',
-                      border: '1px solid var(--border-color)',
-                    }}>
-                      <div style={{ 'font-size': '0.875rem', color: 'var(--text-secondary)', 'margin-bottom': '0.5rem' }}>
-                        Actual
-                      </div>
-                      <div style={{ 'font-size': '1.5rem', 'font-weight': '600', color: '#10B981' }}>
-                        {order().actualQuantity || 0}
-                      </div>
-                    </div>
-                    <div style={{
-                      padding: '1rem',
-                      'background-color': 'var(--bg-secondary)',
-                      'border-radius': '0.5rem',
-                      border: '1px solid var(--border-color)',
-                    }}>
-                      <div style={{ 'font-size': '0.875rem', color: 'var(--text-secondary)', 'margin-bottom': '0.5rem' }}>
-                        Waste
-                      </div>
-                      <div style={{ 'font-size': '1.5rem', 'font-weight': '600', color: '#EF4444' }}>
-                        {order().wasteQuantity || 0}
-                      </div>
-                    </div>
+                    </Show>
                   </div>
                 </div>
 
                 {/* Products */}
-                <div>
-                  <h3 style={{
-                    'font-weight': '600',
-                    color: 'var(--text-primary)',
-                    'margin-bottom': '1rem',
-                    'font-size': '1.125rem',
-                  }}>
-                    Products ({order().items.length})
-                  </h3>
-                  <div style={{
-                    border: '1px solid var(--border-color)',
-                    'border-radius': '0.5rem',
-                    overflow: 'hidden',
-                  }}>
+                <div class={styles.section}>
+                  <h3 class={styles.sectionTitle}>Products ({order().items.length})</h3>
+                  <div class={styles.productsList}>
                     <For each={order().items}>
-                      {(item, index) => (
-                        <div style={{
-                          padding: '1rem',
-                          display: 'flex',
-                          'justify-content': 'space-between',
-                          'align-items': 'center',
-                          'border-bottom': index() < order().items.length - 1 ? '1px solid var(--border-color)' : 'none',
-                        }}>
-                          <div>
-                            <div style={{ 'font-weight': '500', color: 'var(--text-primary)' }}>
-                              {item.productName}
-                            </div>
-                            <div style={{ 'font-size': '0.875rem', color: 'var(--text-secondary)' }}>
-                              ${item.unitCost || '0.00'} per unit
-                            </div>
+                      {(item) => (
+                        <div class={styles.productItem}>
+                          <div class={styles.productInfo}>
+                            <span class={styles.productName}>{item.productName}</span>
+                            <span class={styles.productCost}>
+                              {formatCurrency(item.unitCost)} per unit
+                            </span>
                           </div>
-                          <div style={{ 'text-align': 'right' }}>
-                            <div style={{ 'font-weight': '600', color: 'var(--text-primary)' }}>
-                              {item.quantity} units
-                            </div>
-                            <div style={{ 'font-size': '0.875rem', color: 'var(--text-secondary)' }}>
-                              ${(parseFloat(item.unitCost || '0') * item.quantity).toFixed(2)}
+                          <div class={styles.productQuantity}>
+                            <div class={styles.productQuantityValue}>{item.quantity} units</div>
+                            <div class={styles.productTotal}>
+                              {formatCurrency(
+                                (parseFloat(item.unitCost || '0') * item.quantity).toString()
+                              )}
                             </div>
                           </div>
                         </div>
                       )}
                     </For>
                   </div>
+                  {/* Total Cost */}
+                  <div class={styles.totalCost}>
+                    <span class={styles.totalCostLabel}>Total ({getTotalItems()} items)</span>
+                    <span class={styles.totalCostValue}>{formatCurrency(order().totalCost)}</span>
+                  </div>
                 </div>
+
+                {/* Notes */}
+                <Show when={order().notes || order().specialInstructions}>
+                  <div class={styles.section}>
+                    <h3 class={styles.sectionTitle}>Notes</h3>
+                    <Show when={order().notes}>
+                      <div class={styles.notesBox}>{order().notes}</div>
+                    </Show>
+                    <Show when={order().specialInstructions}>
+                      <div class={styles.notesBox}>
+                        <strong>Special Instructions:</strong> {order().specialInstructions}
+                      </div>
+                    </Show>
+                  </div>
+                </Show>
+
+                {/* Approval Information */}
+                <Show when={isApproved()}>
+                  <div class={styles.section}>
+                    <h3 class={styles.sectionTitle}>Approval</h3>
+                    <div class={styles.infoGrid}>
+                      <div class={styles.infoItem}>
+                        <span class={styles.infoLabel}>Approved By</span>
+                        <span class={styles.infoValue}>{order().approvedBy || 'Unknown'}</span>
+                      </div>
+                      <div class={styles.infoItem}>
+                        <span class={styles.infoLabel}>Approved At</span>
+                        <span class={styles.infoValue}>{formatDate(order().approvedAt)}</span>
+                      </div>
+                    </div>
+                  </div>
+                </Show>
+
+                {/* Production Details - Only show when scheduled or later */}
+                <Show when={isScheduledOrLater()}>
+                  <div class={styles.section}>
+                    <h3 class={styles.sectionTitle}>Production Details</h3>
+                    <div class={styles.infoGrid}>
+                      <div class={styles.infoItem}>
+                        <span class={styles.infoLabel}>Production Date</span>
+                        <span class={styles.infoValue}>
+                          {formatDate(order().productionDate, false)}
+                        </span>
+                      </div>
+                      <Show when={order().productionShift}>
+                        <div class={styles.infoItem}>
+                          <span class={styles.infoLabel}>Shift</span>
+                          <span class={`${styles.infoValue} ${styles.infoValueCapitalize}`}>
+                            {order().productionShift}
+                          </span>
+                        </div>
+                      </Show>
+                      <Show when={order().assignedStaff}>
+                        <div class={styles.infoItem}>
+                          <span class={styles.infoLabel}>Assigned Staff</span>
+                          <span class={styles.infoValue}>{order().assignedStaff}</span>
+                        </div>
+                      </Show>
+                      <Show when={order().workstation}>
+                        <div class={styles.infoItem}>
+                          <span class={styles.infoLabel}>Workstation</span>
+                          <span class={styles.infoValue}>{order().workstation}</span>
+                        </div>
+                      </Show>
+                    </div>
+                  </div>
+                </Show>
+
+                {/* Production Quantities - Only show when in production or later */}
+                <Show when={isInProductionOrLater()}>
+                  <div class={styles.section}>
+                    <h3 class={styles.sectionTitle}>Production Quantities</h3>
+                    <div class={styles.statCards}>
+                      <div class={styles.statCard}>
+                        <div class={styles.statLabel}>Target</div>
+                        <div class={styles.statValue}>{order().targetQuantity || 0}</div>
+                      </div>
+                      <div class={styles.statCard}>
+                        <div class={styles.statLabel}>Actual</div>
+                        <div class={`${styles.statValue} ${styles.statValueSuccess}`}>
+                          {order().actualQuantity || 0}
+                        </div>
+                      </div>
+                      <div class={styles.statCard}>
+                        <div class={styles.statLabel}>Waste</div>
+                        <div class={`${styles.statValue} ${styles.statValueDanger}`}>
+                          {order().wasteQuantity || 0}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </Show>
 
                 {/* Quality Notes */}
                 <Show when={order().qualityNotes}>
-                  <div>
-                    <h3 style={{
-                      'font-weight': '600',
-                      color: 'var(--text-primary)',
-                      'margin-bottom': '1rem',
-                      'font-size': '1.125rem',
-                    }}>
-                      Quality Notes
-                    </h3>
-                    <div style={{
-                      padding: '1rem',
-                      'background-color': 'var(--bg-secondary)',
-                      'border-radius': '0.5rem',
-                      border: '1px solid var(--border-color)',
-                      color: 'var(--text-primary)',
-                      'white-space': 'pre-wrap',
-                    }}>
-                      {order().qualityNotes}
-                    </div>
+                  <div class={styles.section}>
+                    <h3 class={styles.sectionTitle}>Quality Notes</h3>
+                    <div class={styles.notesBox}>{order().qualityNotes}</div>
                   </div>
                 </Show>
 
-                {/* Notes */}
-                <Show when={order().notes}>
-                  <div>
-                    <h3 style={{
-                      'font-weight': '600',
-                      color: 'var(--text-primary)',
-                      'margin-bottom': '1rem',
-                      'font-size': '1.125rem',
-                    }}>
-                      Notes
-                    </h3>
-                    <div style={{
-                      padding: '1rem',
-                      'background-color': 'var(--bg-secondary)',
-                      'border-radius': '0.5rem',
-                      border: '1px solid var(--border-color)',
-                      color: 'var(--text-primary)',
-                      'white-space': 'pre-wrap',
-                    }}>
-                      {order().notes}
+                {/* Timeline */}
+                <div class={styles.section}>
+                  <h3 class={styles.sectionTitle}>Timeline</h3>
+                  <div class={styles.timeline}>
+                    <div class={styles.timelineItem}>
+                      <span class={styles.timelineLabel}>Created</span>
+                      <span class={styles.timelineValue}>{formatDate(order().createdAt)}</span>
                     </div>
-                  </div>
-                </Show>
-
-                {/* Timestamps */}
-                <div>
-                  <h3 style={{
-                    'font-weight': '600',
-                    color: 'var(--text-primary)',
-                    'margin-bottom': '1rem',
-                    'font-size': '1.125rem',
-                  }}>
-                    Timeline
-                  </h3>
-                  <div style={{ display: 'flex', 'flex-direction': 'column', gap: '0.75rem' }}>
-                    <div style={{ display: 'flex', 'justify-content': 'space-between' }}>
-                      <span style={{ color: 'var(--text-secondary)' }}>Created:</span>
-                      <span style={{ color: 'var(--text-primary)' }}>{formatDate(order().createdAt)}</span>
+                    <div class={styles.timelineItem}>
+                      <span class={styles.timelineLabel}>Last Updated</span>
+                      <span class={styles.timelineValue}>{formatDate(order().updatedAt)}</span>
                     </div>
-                    <div style={{ display: 'flex', 'justify-content': 'space-between' }}>
-                      <span style={{ color: 'var(--text-secondary)' }}>Last Updated:</span>
-                      <span style={{ color: 'var(--text-primary)' }}>{formatDate(order().updatedAt)}</span>
-                    </div>
+                    <Show when={order().approvedAt}>
+                      <div class={styles.timelineItem}>
+                        <span class={styles.timelineLabel}>Approved</span>
+                        <span class={styles.timelineValue}>{formatDate(order().approvedAt)}</span>
+                      </div>
+                    </Show>
                     <Show when={order().completedAt}>
-                      <div style={{ display: 'flex', 'justify-content': 'space-between' }}>
-                        <span style={{ color: 'var(--text-secondary)' }}>Completed:</span>
-                        <span style={{ color: '#10B981', 'font-weight': '500' }}>{formatDate(order().completedAt)}</span>
+                      <div class={styles.timelineItem}>
+                        <span class={styles.timelineLabel}>Completed</span>
+                        <span class={styles.timelineValueSuccess}>{formatDate(order().completedAt)}</span>
+                      </div>
+                    </Show>
+                    <Show when={order().deliveredAt}>
+                      <div class={styles.timelineItem}>
+                        <span class={styles.timelineLabel}>Delivered</span>
+                        <span class={styles.timelineValueSuccess}>{formatDate(order().deliveredAt)}</span>
                       </div>
                     </Show>
                   </div>
@@ -412,45 +360,32 @@ const InternalOrderDetailsModal: Component<InternalOrderDetailsModalProps> = (pr
             </div>
 
             {/* Footer */}
-            <div style={{
-              padding: '1.5rem',
-              'border-top': '1px solid var(--border-color)',
-              display: 'flex',
-              'justify-content': 'space-between',
-              gap: '1rem',
-            }}>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <Button
-                  onClick={() => props.onEdit(order())}
-                  variant="text"
-                  size="sm"
-                >
+            <div class={styles.footer}>
+              <div class={styles.footerLeft}>
+                <Button onClick={() => props.onEdit(order())} variant="text" size="sm">
                   Edit
                 </Button>
-                <Button
-                  onClick={() => props.onDelete(order())}
-                  variant="danger"
-                  size="sm"
-                >
+                <Button onClick={() => props.onDelete(order())} variant="danger" size="sm">
                   Delete
                 </Button>
               </div>
 
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <Show when={canAdvanceStatus()}>
+              <div class={styles.footerRight}>
+                <Show when={order().status === 'approved' && props.onScheduleProduction}>
                   <Button
-                    onClick={handleAdvanceStatus}
+                    onClick={() => props.onScheduleProduction?.(order())}
                     variant="primary"
                     size="sm"
                   >
+                    Schedule Production
+                  </Button>
+                </Show>
+                <Show when={canAdvanceStatus()}>
+                  <Button onClick={handleAdvanceStatus} variant="primary" size="sm">
                     Advance to {getNextStatus(order().status)?.replace('_', ' ')}
                   </Button>
                 </Show>
-                <Button
-                  onClick={props.onClose}
-                  variant="secondary"
-                  size="sm"
-                >
+                <Button onClick={props.onClose} variant="secondary" size="sm">
                   Close
                 </Button>
               </div>

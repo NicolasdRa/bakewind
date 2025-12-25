@@ -1,4 +1,4 @@
-import { Component, createSignal, Show, onMount, onCleanup } from "solid-js";
+import { Component, createSignal, createEffect, Show, onMount, onCleanup } from "solid-js";
 import { Portal } from "solid-js/web";
 import styles from "./DatePicker.module.css";
 
@@ -14,16 +14,34 @@ interface DatePickerProps {
 
 const DatePicker: Component<DatePickerProps> = (props) => {
   const [showCalendar, setShowCalendar] = createSignal(false);
+
+  // Parse YYYY-MM-DD string as local date (not UTC)
+  const parseLocalDate = (dateString: string): Date => {
+    const [year, month, day] = dateString.split('-').map(Number);
+    return new Date(year, month - 1, day);
+  };
+
   const [selectedDate, setSelectedDate] = createSignal<Date | null>(
-    props.value ? new Date(props.value) : null
+    props.value ? parseLocalDate(props.value) : null
   );
   const [currentMonth, setCurrentMonth] = createSignal(
-    props.value ? new Date(props.value) : new Date()
+    props.value ? parseLocalDate(props.value) : new Date()
   );
   const [dropdownPosition, setDropdownPosition] = createSignal({ top: 0, left: 0 });
   let containerRef: HTMLDivElement | undefined;
   let inputRef: HTMLInputElement | undefined;
   let calendarRef: HTMLDivElement | undefined;
+
+  // Sync internal state when props.value changes
+  createEffect(() => {
+    if (props.value) {
+      const date = parseLocalDate(props.value);
+      setSelectedDate(date);
+      setCurrentMonth(date);
+    } else {
+      setSelectedDate(null);
+    }
+  });
 
   // Handle clicks outside to close calendar
   const handleClickOutside = (e: MouseEvent) => {
@@ -89,8 +107,12 @@ const DatePicker: Component<DatePickerProps> = (props) => {
     });
   };
 
+  // Format date as YYYY-MM-DD using local timezone (not UTC)
   const formatISODate = (date: Date): string => {
-    return date.toISOString().split("T")[0];
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   };
 
   const getDaysInMonth = (date: Date): number => {

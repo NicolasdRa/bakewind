@@ -1,7 +1,7 @@
 import { Component, createSignal, For, Show, onMount } from "solid-js";
 import { productionApi, ProductionSchedule, ProductionItem, ProductionStatus } from "~/api/production";
 import { useInfoModal } from "~/stores/infoModalStore";
-import { formatLocalDate, formatTime } from "~/utils/dateUtils";
+import { formatLocalDate, formatTime, getCurrentDateString } from "~/utils/dateUtils";
 import StatsCard from "~/components/common/StatsCard";
 import DatePicker from "~/components/common/DatePicker";
 import FilterSelect from "~/components/common/FilterSelect";
@@ -14,7 +14,7 @@ const ProductionPage: Component = () => {
 
   const [schedules, setSchedules] = createSignal<ProductionSchedule[]>([]);
   const [loading, setLoading] = createSignal(true);
-  const [selectedDate, setSelectedDate] = createSignal(new Date().toISOString().split('T')[0]);
+  const [selectedDate, setSelectedDate] = createSignal(getCurrentDateString());
   const [selectedStatus, setSelectedStatus] = createSignal<ProductionStatus | 'all'>('all');
 
   // Fetch schedules on mount

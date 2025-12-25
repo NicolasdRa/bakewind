@@ -15,6 +15,7 @@ import Button from "~/components/common/Button";
 import DatePicker from "~/components/common/DatePicker";
 import { useInfoModal } from "~/stores/infoModalStore";
 import { orderLocksStore } from "~/stores/order-locks";
+import { getCurrentDateString } from "~/utils/dateUtils";
 import InternalOrderFormModal from "~/components/orders/InternalOrderFormModal";
 import InternalOrderDetailsModal from "~/components/orders/InternalOrderDetailsModal";
 import styles from "./InternalOrdersPage.module.css";
@@ -44,7 +45,7 @@ const InternalOrdersPage: Component = () => {
   // Schedule Production modal
   const [showScheduleModal, setShowScheduleModal] = createSignal(false);
   const [orderToSchedule, setOrderToSchedule] = createSignal<InternalOrder | undefined>();
-  const [scheduledProductionDate, setScheduledProductionDate] = createSignal(new Date().toISOString().split('T')[0]);
+  const [scheduledProductionDate, setScheduledProductionDate] = createSignal(getCurrentDateString());
   const [isScheduling, setIsScheduling] = createSignal(false);
 
   // Fetch orders
@@ -210,7 +211,7 @@ const InternalOrdersPage: Component = () => {
   // Schedule Production handlers
   const handleScheduleProductionClick = (order: InternalOrder) => {
     setOrderToSchedule(order);
-    setScheduledProductionDate(order.productionDate?.split('T')[0] || new Date().toISOString().split('T')[0]);
+    setScheduledProductionDate(order.productionDate?.split('T')[0] || getCurrentDateString());
     setShowScheduleModal(true);
     setShowDetailsModal(false);
   };
@@ -568,6 +569,7 @@ const InternalOrdersPage: Component = () => {
         onEdit={handleEditOrder}
         onDelete={handleDeleteClick}
         onStatusChange={handleStatusChange}
+        onScheduleProduction={handleScheduleProductionClick}
       />
 
       {/* Delete Confirmation Dialog */}
@@ -622,7 +624,7 @@ const InternalOrdersPage: Component = () => {
                       label="Production Date"
                       value={scheduledProductionDate()}
                       onChange={(value) => setScheduledProductionDate(value)}
-                      minDate={new Date().toISOString().split('T')[0]}
+                      minDate={getCurrentDateString()}
                       disabled={isScheduling()}
                     />
                     <p class={styles.formHint}>
