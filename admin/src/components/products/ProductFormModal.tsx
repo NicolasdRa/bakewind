@@ -6,7 +6,16 @@ import {
   CreateProductRequest,
   UpdateProductRequest,
 } from "~/api/products";
+
+// Common components
+import { Modal, ModalHeader, ModalBody, ModalFooter } from "~/components/common/Modal";
+import { FormRow, FormStack } from "~/components/common/FormRow";
+import { SectionTitle, ButtonGroup } from "~/components/common/Card";
+import Alert from "~/components/common/Alert";
 import Button from "~/components/common/Button";
+import TextField from "~/components/common/TextField";
+import TextArea from "~/components/common/TextArea";
+import Select from "~/components/common/Select";
 
 interface ProductFormModalProps {
   isOpen: boolean;
@@ -101,345 +110,179 @@ const ProductFormModal: Component<ProductFormModalProps> = (props) => {
   };
 
   return (
-    <Show when={props.isOpen}>
-      <div class="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ "background-color": "rgba(0, 0, 0, 0.5)" }}>
-        <div
-          class="w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-xl border"
-          style={{
-            "background-color": "var(--bg-primary)",
-            "border-color": "var(--border-color)",
-            "box-shadow": "var(--shadow-card)"
-          }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div class="sticky top-0 z-10 px-6 py-4 border-b flex justify-between items-center" style={{
-            "background-color": "var(--bg-primary)",
-            "border-color": "var(--border-color)"
-          }}>
-            <h2 class="text-2xl font-bold" style="color: var(--text-primary)">
-              {props.mode === 'create' ? 'Create New Product' : 'Edit Product'}
-            </h2>
-            <Button
-              onClick={props.onClose}
-              variant="ghost"
-              size="sm"
-              class="p-1"
-            >
-              ×
-            </Button>
-          </div>
+    <Modal isOpen={props.isOpen} onClose={props.onClose} size="xl">
+      <ModalHeader
+        title={props.mode === 'create' ? 'Create New Product' : 'Edit Product'}
+        onClose={props.onClose}
+      />
 
-          <form onSubmit={handleSubmit} class="p-6">
+      <form onSubmit={handleSubmit}>
+        <ModalBody>
+          <FormStack>
             <Show when={error()}>
-              <div class="mb-4 p-4 rounded-lg border" style={{
-                "background-color": "var(--error-bg)",
-                "border-color": "var(--error-color)",
-                "color": "var(--error-color)"
-              }}>
-                {error()}
-              </div>
+              <Alert variant="error">{error()}</Alert>
             </Show>
 
             {/* Basic Information */}
-            <div class="mb-6">
-              <h3 class="text-lg font-semibold mb-4" style="color: var(--text-primary)">Basic Information</h3>
+            <FormStack>
+              <SectionTitle>Basic Information</SectionTitle>
 
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-sm font-medium mb-2" style="color: var(--text-secondary)">
-                    Product Name *
-                  </label>
-                  <input
-                    type="text"
-                    value={name()}
-                    onInput={(e) => setName(e.currentTarget.value)}
-                    required
-                    class="w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2"
-                    style={{
-                      "background-color": "var(--bg-primary)",
-                      "border-color": "var(--border-color)",
-                      "color": "var(--text-primary)",
-                      "--tw-ring-color": "var(--primary-color)"
-                    }}
-                  />
-                </div>
-
-                <div>
-                  <label class="block text-sm font-medium mb-2" style="color: var(--text-secondary)">
-                    Category *
-                  </label>
-                  <select
-                    value={category()}
-                    onChange={(e) => setCategory(e.target.value as ProductCategory)}
-                    required
-                    class="w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2"
-                    style={{
-                      "background-color": "var(--bg-primary)",
-                      "border-color": "var(--border-color)",
-                      "color": "var(--text-primary)",
-                      "--tw-ring-color": "var(--primary-color)"
-                    }}
-                  >
-                    <option value="bread">Bread</option>
-                    <option value="pastry">Pastry</option>
-                    <option value="cake">Cake</option>
-                    <option value="cookie">Cookie</option>
-                    <option value="sandwich">Sandwich</option>
-                    <option value="beverage">Beverage</option>
-                    <option value="seasonal">Seasonal</option>
-                    <option value="custom">Custom</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label class="block text-sm font-medium mb-2" style="color: var(--text-secondary)">
-                    Status *
-                  </label>
-                  <select
-                    value={status()}
-                    onChange={(e) => setStatus(e.target.value as ProductStatus)}
-                    required
-                    class="w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2"
-                    style={{
-                      "background-color": "var(--bg-primary)",
-                      "border-color": "var(--border-color)",
-                      "color": "var(--text-primary)",
-                      "--tw-ring-color": "var(--primary-color)"
-                    }}
-                  >
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                    <option value="seasonal">Seasonal</option>
-                    <option value="discontinued">Discontinued</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label class="block text-sm font-medium mb-2" style="color: var(--text-secondary)">
-                    Base Price ($) *
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={basePrice()}
-                    onInput={(e) => setBasePrice(e.currentTarget.value)}
-                    required
-                    class="w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2"
-                    style={{
-                      "background-color": "var(--bg-primary)",
-                      "border-color": "var(--border-color)",
-                      "color": "var(--text-primary)",
-                      "--tw-ring-color": "var(--primary-color)"
-                    }}
-                  />
-                </div>
-
-                <div class="md:col-span-2">
-                  <label class="block text-sm font-medium mb-2" style="color: var(--text-secondary)">
-                    Cost of Goods ($)
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={costOfGoods()}
-                    onInput={(e) => setCostOfGoods(e.currentTarget.value)}
-                    class="w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2"
-                    style={{
-                      "background-color": "var(--bg-primary)",
-                      "border-color": "var(--border-color)",
-                      "color": "var(--text-primary)",
-                      "--tw-ring-color": "var(--primary-color)"
-                    }}
-                  />
-                  <p class="mt-1 text-xs" style="color: var(--text-tertiary)">
-                    Margin will be calculated automatically based on base price and cost of goods
-                  </p>
-                </div>
-              </div>
-
-              <div class="mt-4">
-                <label class="block text-sm font-medium mb-2" style="color: var(--text-secondary)">
-                  Description
-                </label>
-                <textarea
-                  value={description()}
-                  onInput={(e) => setDescription(e.currentTarget.value)}
-                  rows="3"
-                  class="w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2"
-                  style={{
-                    "background-color": "var(--bg-primary)",
-                    "border-color": "var(--border-color)",
-                    "color": "var(--text-primary)",
-                    "--tw-ring-color": "var(--primary-color)"
-                  }}
+              <FormRow cols={2}>
+                <TextField
+                  label="Product Name *"
+                  type="text"
+                  value={name()}
+                  onInput={(e) => setName(e.currentTarget.value)}
+                  required
                 />
-              </div>
-            </div>
+
+                <Select
+                  label="Category *"
+                  value={category()}
+                  onChange={(e) => setCategory(e.currentTarget.value as ProductCategory)}
+                  required
+                >
+                  <option value="bread">Bread</option>
+                  <option value="pastry">Pastry</option>
+                  <option value="cake">Cake</option>
+                  <option value="cookie">Cookie</option>
+                  <option value="sandwich">Sandwich</option>
+                  <option value="beverage">Beverage</option>
+                  <option value="seasonal">Seasonal</option>
+                  <option value="custom">Custom</option>
+                </Select>
+              </FormRow>
+
+              <FormRow cols={2}>
+                <Select
+                  label="Status *"
+                  value={status()}
+                  onChange={(e) => setStatus(e.currentTarget.value as ProductStatus)}
+                  required
+                >
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                  <option value="seasonal">Seasonal</option>
+                  <option value="discontinued">Discontinued</option>
+                </Select>
+
+                <TextField
+                  label="Base Price ($) *"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={basePrice()}
+                  onInput={(e) => setBasePrice(e.currentTarget.value)}
+                  required
+                />
+              </FormRow>
+
+              <TextField
+                label="Cost of Goods ($)"
+                type="number"
+                step="0.01"
+                min="0"
+                value={costOfGoods()}
+                onInput={(e) => setCostOfGoods(e.currentTarget.value)}
+                helperText="Margin will be calculated automatically based on base price and cost of goods"
+              />
+
+              <TextArea
+                label="Description"
+                value={description()}
+                onInput={(e) => setDescription(e.currentTarget.value)}
+                rows={3}
+              />
+            </FormStack>
 
             {/* Additional Details */}
-            <div class="mb-6">
-              <h3 class="text-lg font-semibold mb-4" style="color: var(--text-primary)">Additional Details</h3>
+            <FormStack>
+              <SectionTitle>Additional Details</SectionTitle>
 
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-sm font-medium mb-2" style="color: var(--text-secondary)">
-                    Estimated Prep Time (minutes)
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={estimatedPrepTime()}
-                    onInput={(e) => setEstimatedPrepTime(e.currentTarget.value)}
-                    class="w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2"
-                    style={{
-                      "background-color": "var(--bg-primary)",
-                      "border-color": "var(--border-color)",
-                      "color": "var(--text-primary)",
-                      "--tw-ring-color": "var(--primary-color)"
-                    }}
-                  />
-                </div>
+              <FormRow cols={2}>
+                <TextField
+                  label="Estimated Prep Time (minutes)"
+                  type="number"
+                  min="0"
+                  value={estimatedPrepTime()}
+                  onInput={(e) => setEstimatedPrepTime(e.currentTarget.value)}
+                />
 
-                <div>
-                  <label class="block text-sm font-medium mb-2" style="color: var(--text-secondary)">
-                    Shelf Life (hours)
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={shelfLife()}
-                    onInput={(e) => setShelfLife(e.currentTarget.value)}
-                    class="w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2"
-                    style={{
-                      "background-color": "var(--bg-primary)",
-                      "border-color": "var(--border-color)",
-                      "color": "var(--text-primary)",
-                      "--tw-ring-color": "var(--primary-color)"
-                    }}
-                  />
-                </div>
+                <TextField
+                  label="Shelf Life (hours)"
+                  type="number"
+                  min="0"
+                  value={shelfLife()}
+                  onInput={(e) => setShelfLife(e.currentTarget.value)}
+                />
+              </FormRow>
 
-                <div>
-                  <label class="block text-sm font-medium mb-2" style="color: var(--text-secondary)">
-                    Minimum Order Quantity
-                  </label>
-                  <input
-                    type="number"
-                    min="1"
-                    value={minimumOrderQuantity()}
-                    onInput={(e) => setMinimumOrderQuantity(e.currentTarget.value)}
-                    class="w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2"
-                    style={{
-                      "background-color": "var(--bg-primary)",
-                      "border-color": "var(--border-color)",
-                      "color": "var(--text-primary)",
-                      "--tw-ring-color": "var(--primary-color)"
-                    }}
-                  />
-                </div>
+              <FormRow cols={2}>
+                <TextField
+                  label="Minimum Order Quantity"
+                  type="number"
+                  min="1"
+                  value={minimumOrderQuantity()}
+                  onInput={(e) => setMinimumOrderQuantity(e.currentTarget.value)}
+                />
 
-                <div>
-                  <label class="block text-sm font-medium mb-2" style="color: var(--text-secondary)">
-                    Image URL
-                  </label>
-                  <input
-                    type="url"
-                    value={imageUrl()}
-                    onInput={(e) => setImageUrl(e.currentTarget.value)}
-                    class="w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2"
-                    style={{
-                      "background-color": "var(--bg-primary)",
-                      "border-color": "var(--border-color)",
-                      "color": "var(--text-primary)",
-                      "--tw-ring-color": "var(--primary-color)"
-                    }}
-                  />
-                </div>
+                <TextField
+                  label="Image URL"
+                  type="url"
+                  value={imageUrl()}
+                  onInput={(e) => setImageUrl(e.currentTarget.value)}
+                />
+              </FormRow>
 
-                <div class="md:col-span-2">
-                  <label class="block text-sm font-medium mb-2" style="color: var(--text-secondary)">
-                    Allergens (comma-separated)
-                  </label>
-                  <input
-                    type="text"
-                    value={allergens()}
-                    onInput={(e) => setAllergens(e.currentTarget.value)}
-                    placeholder="e.g., gluten, dairy, nuts"
-                    class="w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2"
-                    style={{
-                      "background-color": "var(--bg-primary)",
-                      "border-color": "var(--border-color)",
-                      "color": "var(--text-primary)",
-                      "--tw-ring-color": "var(--primary-color)"
-                    }}
-                  />
-                </div>
+              <TextField
+                label="Allergens (comma-separated)"
+                type="text"
+                value={allergens()}
+                onInput={(e) => setAllergens(e.currentTarget.value)}
+                placeholder="e.g., gluten, dairy, nuts"
+              />
 
-                <div class="md:col-span-2">
-                  <label class="block text-sm font-medium mb-2" style="color: var(--text-secondary)">
-                    Tags (comma-separated)
-                  </label>
-                  <input
-                    type="text"
-                    value={tags()}
-                    onInput={(e) => setTags(e.currentTarget.value)}
-                    placeholder="e.g., popular, signature, vegan"
-                    class="w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2"
-                    style={{
-                      "background-color": "var(--bg-primary)",
-                      "border-color": "var(--border-color)",
-                      "color": "var(--text-primary)",
-                      "--tw-ring-color": "var(--primary-color)"
-                    }}
-                  />
-                </div>
+              <TextField
+                label="Tags (comma-separated)"
+                type="text"
+                value={tags()}
+                onInput={(e) => setTags(e.currentTarget.value)}
+                placeholder="e.g., popular, signature, vegan"
+              />
 
-                <div class="md:col-span-2">
-                  <label class="block text-sm font-medium mb-2" style="color: var(--text-secondary)">
-                    Storage Instructions
-                  </label>
-                  <textarea
-                    value={storageInstructions()}
-                    onInput={(e) => setStorageInstructions(e.currentTarget.value)}
-                    rows="2"
-                    class="w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2"
-                    style={{
-                      "background-color": "var(--bg-primary)",
-                      "border-color": "var(--border-color)",
-                      "color": "var(--text-primary)",
-                      "--tw-ring-color": "var(--primary-color)"
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
+              <TextArea
+                label="Storage Instructions"
+                value={storageInstructions()}
+                onInput={(e) => setStorageInstructions(e.currentTarget.value)}
+                rows={2}
+              />
+            </FormStack>
+          </FormStack>
+        </ModalBody>
 
-            {/* Actions */}
-            <div class="flex justify-end gap-3 pt-4 border-t" style={{ "border-color": "var(--border-color)" }}>
-              <Button
-                type="button"
-                onClick={props.onClose}
-                disabled={loading()}
-                variant="secondary"
-                size="sm"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={loading()}
-                variant="primary"
-                size="sm"
-              >
-                {loading() ? 'Saving...' : props.mode === 'create' ? 'Create Product' : 'Save Changes'}
-              </Button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </Show>
+        <ModalFooter>
+          <ButtonGroup>
+            <Button
+              type="button"
+              onClick={props.onClose}
+              disabled={loading()}
+              variant="secondary"
+              size="sm"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={loading()}
+              variant="primary"
+              size="sm"
+            >
+              {loading() ? 'Saving...' : props.mode === 'create' ? 'Create Product' : 'Save Changes'}
+            </Button>
+          </ButtonGroup>
+        </ModalFooter>
+      </form>
+    </Modal>
   );
 };
 

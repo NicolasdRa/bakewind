@@ -129,7 +129,7 @@ export class InternalOrdersController {
     @Param('id') id: string,
     @Body() updateDto: UpdateInternalOrderDto,
   ) {
-    const userId = req.user.sub;
+    const userId = req.user.userId;
     return this.internalOrdersService.updateOrder(id, updateDto, userId);
   }
 
@@ -152,7 +152,7 @@ export class InternalOrdersController {
     @Param('id') id: string,
     @Body('status') status: InternalOrderStatus,
   ) {
-    const userId = req.user.sub;
+    const userId = req.user.userId;
     return this.internalOrdersService.updateOrderStatus(id, status, userId);
   }
 
@@ -175,7 +175,7 @@ export class InternalOrdersController {
     @Request() req: any,
     @Param('id') id: string,
   ): Promise<void> {
-    const userId = req.user.sub;
+    const userId = req.user.userId;
     await this.internalOrdersService.deleteOrder(id, userId);
   }
 }

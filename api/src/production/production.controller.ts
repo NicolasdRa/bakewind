@@ -95,7 +95,7 @@ export class ProductionController {
     @Request() req: any,
     @Body() createDto: CreateProductionScheduleDto,
   ): Promise<ProductionScheduleDto> {
-    const userId = req.user.sub;
+    const userId = req.user.userId;
     return this.productionService.createSchedule(createDto, userId);
   }
 
@@ -121,7 +121,7 @@ export class ProductionController {
     @Param('orderId') orderId: string,
     @Body('scheduledDate') scheduledDate: string,
   ): Promise<ProductionScheduleDto> {
-    const userId = req.user.sub;
+    const userId = req.user.userId;
     return this.productionService.createScheduleFromOrder(
       orderId,
       scheduledDate,
@@ -151,7 +151,7 @@ export class ProductionController {
     @Param('orderId') orderId: string,
     @Body('scheduledDate') scheduledDate: string,
   ): Promise<ProductionScheduleDto> {
-    const userId = req.user.sub;
+    const userId = req.user.userId;
     return this.productionService.createScheduleFromInternalOrder(
       orderId,
       scheduledDate,
@@ -181,7 +181,7 @@ export class ProductionController {
     @Param('orderId') orderId: string,
     @Body('scheduledDate') scheduledDate: string,
   ): Promise<ProductionScheduleDto> {
-    const userId = req.user.sub;
+    const userId = req.user.userId;
     return this.productionService.createScheduleFromCustomerOrder(
       orderId,
       scheduledDate,

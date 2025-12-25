@@ -1,5 +1,17 @@
 import { Component, createSignal, Show, For, createEffect } from "solid-js";
+
+// Common components
+import { Modal, ModalHeader, ModalBody, ModalFooter } from "~/components/common/Modal";
+import { FormRow, FormStack } from "~/components/common/FormRow";
+import { SectionTitle, ItemStack, ButtonGroup } from "~/components/common/Card";
+import Alert from "~/components/common/Alert";
 import Button from "../common/Button";
+import TextField from "../common/TextField";
+import TextArea from "../common/TextArea";
+import Select from "../common/Select";
+import Checkbox from "../common/Checkbox";
+
+import styles from "./RecipeFormModal.module.css";
 
 type RecipeCategory = 'bread' | 'pastry' | 'cake' | 'cookie' | 'sandwich' | 'beverage' | 'sauce' | 'filling' | 'topping' | 'other';
 
@@ -215,486 +227,293 @@ const RecipeFormModal: Component<RecipeFormModalProps> = (props) => {
   };
 
   return (
-    <Show when={props.isOpen}>
-      <div
-        class="fixed inset-0 z-50 flex items-center justify-center p-4"
-        style={{ "background-color": "rgba(0, 0, 0, 0.5)" }}
-        onClick={props.onClose}
-      >
-        <div
-          class="rounded-xl border shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-y-auto"
-          style={{
-            "background-color": "var(--bg-primary)",
-            "border-color": "var(--border-color)",
-          }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          {/* Header */}
-          <div class="p-6 border-b" style={{ "border-color": "var(--border-color)" }}>
-            <h2 class="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
-              {props.mode === 'create' ? 'Create New Recipe' : 'Edit Recipe'}
-            </h2>
-          </div>
+    <Modal isOpen={props.isOpen} onClose={props.onClose} size="xl">
+      <ModalHeader
+        title={props.mode === 'create' ? 'Create New Recipe' : 'Edit Recipe'}
+        onClose={props.onClose}
+      />
 
-          {/* Form */}
-          <form onSubmit={handleSubmit}>
-            <div class="p-6 space-y-6">
-              <Show when={error()}>
-                <div class="p-4 rounded-lg" style={{ "background-color": "var(--error-light)", "border": "1px solid var(--error-color)" }}>
-                  <p class="text-sm" style={{ color: "var(--error-color)" }}>{error()}</p>
-                </div>
+      <form onSubmit={handleSubmit}>
+        <ModalBody>
+          <FormStack>
+            <Show when={error()}>
+              <Alert variant="error">{error()}</Alert>
+            </Show>
+
+            {/* Basic Information */}
+            <FormStack>
+              <TextField
+                label="Recipe Name *"
+                type="text"
+                value={name()}
+                onInput={(e) => setName(e.currentTarget.value)}
+                placeholder="e.g., Classic Chocolate Chip Cookies"
+                required
+              />
+
+              <FormRow cols={2}>
+                <Select
+                  label="Category *"
+                  value={category()}
+                  onChange={(e) => setCategory(e.currentTarget.value as RecipeCategory)}
+                >
+                  <option value="bread">Bread</option>
+                  <option value="pastry">Pastry</option>
+                  <option value="cake">Cake</option>
+                  <option value="cookie">Cookie</option>
+                  <option value="sandwich">Sandwich</option>
+                  <option value="beverage">Beverage</option>
+                  <option value="sauce">Sauce</option>
+                  <option value="filling">Filling</option>
+                  <option value="topping">Topping</option>
+                  <option value="other">Other</option>
+                </Select>
+
+                <TextField
+                  label="Yield *"
+                  type="text"
+                  value={yieldValue()}
+                  onInput={(e) => setYieldValue(e.currentTarget.value)}
+                  placeholder="e.g., 24 cookies"
+                  required
+                />
+              </FormRow>
+
+              <FormRow cols={2}>
+                <TextField
+                  label="Prep Time (minutes) *"
+                  type="number"
+                  value={prepTime()}
+                  onInput={(e) => setPrepTime(e.currentTarget.value)}
+                  min="0"
+                  required
+                />
+
+                <TextField
+                  label="Cook Time (minutes) *"
+                  type="number"
+                  value={cookTime()}
+                  onInput={(e) => setCookTime(e.currentTarget.value)}
+                  min="0"
+                  required
+                />
+              </FormRow>
+
+              <TextField
+                label="Tags (comma-separated)"
+                type="text"
+                value={tags()}
+                onInput={(e) => setTags(e.currentTarget.value)}
+                placeholder="e.g., classic, popular, beginner-friendly"
+              />
+            </FormStack>
+
+            {/* Ingredients Section */}
+            <FormStack>
+              <SectionTitle>Ingredients *</SectionTitle>
+
+              {/* Ingredient List */}
+              <Show when={ingredients().length > 0}>
+                <ItemStack>
+                  <For each={ingredients()}>
+                    {(ingredient, index) => (
+                      <div class={styles.ingredientItem}>
+                        <span class={styles.ingredientItemContent}>
+                          <span class={styles.ingredientAmount}>{ingredient.amount} {ingredient.unit}</span> {ingredient.name}
+                          <Show when={ingredient.notes}>
+                            <span class={styles.ingredientNotes}>({ingredient.notes})</span>
+                          </Show>
+                        </span>
+                        <Button
+                          type="button"
+                          onClick={() => removeIngredient(index())}
+                          variant="danger"
+                          size="sm"
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    )}
+                  </For>
+                </ItemStack>
               </Show>
 
-              {/* Basic Information */}
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="md:col-span-2">
-                  <label class="block text-sm font-medium mb-2" style={{ color: "var(--text-primary)" }}>
-                    Recipe Name *
-                  </label>
-                  <input
-                    type="text"
-                    value={name()}
-                    onInput={(e) => setName(e.currentTarget.value)}
-                    class="w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2"
-                    style={{
-                      "background-color": "var(--bg-secondary)",
-                      "border-color": "var(--border-color)",
-                      "color": "var(--text-primary)",
-                      "--tw-ring-color": "var(--primary-color)"
-                    }}
-                    placeholder="e.g., Classic Chocolate Chip Cookies"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label class="block text-sm font-medium mb-2" style={{ color: "var(--text-primary)" }}>
-                    Category *
-                  </label>
-                  <select
-                    value={category()}
-                    onChange={(e) => setCategory(e.currentTarget.value as RecipeCategory)}
-                    class="w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2"
-                    style={{
-                      "background-color": "var(--bg-secondary)",
-                      "border-color": "var(--border-color)",
-                      "color": "var(--text-primary)",
-                      "--tw-ring-color": "var(--primary-color)"
-                    }}
-                  >
-                    <option value="bread">Bread</option>
-                    <option value="pastry">Pastry</option>
-                    <option value="cake">Cake</option>
-                    <option value="cookie">Cookie</option>
-                    <option value="sandwich">Sandwich</option>
-                    <option value="beverage">Beverage</option>
-                    <option value="sauce">Sauce</option>
-                    <option value="filling">Filling</option>
-                    <option value="topping">Topping</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label class="block text-sm font-medium mb-2" style={{ color: "var(--text-primary)" }}>
-                    Prep Time (minutes) *
-                  </label>
-                  <input
-                    type="number"
-                    value={prepTime()}
-                    onInput={(e) => setPrepTime(e.currentTarget.value)}
-                    class="w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2"
-                    style={{
-                      "background-color": "var(--bg-secondary)",
-                      "border-color": "var(--border-color)",
-                      "color": "var(--text-primary)",
-                      "--tw-ring-color": "var(--primary-color)"
-                    }}
-                    min="0"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label class="block text-sm font-medium mb-2" style={{ color: "var(--text-primary)" }}>
-                    Cook Time (minutes) *
-                  </label>
-                  <input
-                    type="number"
-                    value={cookTime()}
-                    onInput={(e) => setCookTime(e.currentTarget.value)}
-                    class="w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2"
-                    style={{
-                      "background-color": "var(--bg-secondary)",
-                      "border-color": "var(--border-color)",
-                      "color": "var(--text-primary)",
-                      "--tw-ring-color": "var(--primary-color)"
-                    }}
-                    min="0"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label class="block text-sm font-medium mb-2" style={{ color: "var(--text-primary)" }}>
-                    Yield *
-                  </label>
-                  <input
-                    type="text"
-                    value={yieldValue()}
-                    onInput={(e) => setYieldValue(e.currentTarget.value)}
-                    class="w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2"
-                    style={{
-                      "background-color": "var(--bg-secondary)",
-                      "border-color": "var(--border-color)",
-                      "color": "var(--text-primary)",
-                      "--tw-ring-color": "var(--primary-color)"
-                    }}
-                    placeholder="e.g., 24 cookies"
-                    required
-                  />
-                </div>
-
-                <div class="md:col-span-2">
-                  <label class="block text-sm font-medium mb-2" style={{ color: "var(--text-primary)" }}>
-                    Tags (comma-separated)
-                  </label>
-                  <input
-                    type="text"
-                    value={tags()}
-                    onInput={(e) => setTags(e.currentTarget.value)}
-                    class="w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2"
-                    style={{
-                      "background-color": "var(--bg-secondary)",
-                      "border-color": "var(--border-color)",
-                      "color": "var(--text-primary)",
-                      "--tw-ring-color": "var(--primary-color)"
-                    }}
-                    placeholder="e.g., classic, popular, beginner-friendly"
-                  />
-                </div>
+              {/* Add Ingredient Form */}
+              <div class={styles.ingredientForm}>
+                <TextField
+                  type="text"
+                  value={newIngredientName()}
+                  onInput={(e) => setNewIngredientName(e.currentTarget.value)}
+                  placeholder="Ingredient name"
+                />
+                <TextField
+                  type="number"
+                  step="0.01"
+                  value={newIngredientAmount()}
+                  onInput={(e) => setNewIngredientAmount(e.currentTarget.value)}
+                  placeholder="Amount"
+                />
+                <TextField
+                  type="text"
+                  value={newIngredientUnit()}
+                  onInput={(e) => setNewIngredientUnit(e.currentTarget.value)}
+                  placeholder="Unit"
+                />
+                <TextField
+                  type="text"
+                  value={newIngredientNotes()}
+                  onInput={(e) => setNewIngredientNotes(e.currentTarget.value)}
+                  placeholder="Notes"
+                />
+                <Button
+                  type="button"
+                  onClick={addIngredient}
+                  variant="primary"
+                  size="sm"
+                >
+                  Add
+                </Button>
               </div>
+            </FormStack>
 
-              {/* Ingredients Section */}
-              <div class="border-t pt-6" style={{ "border-color": "var(--border-color)" }}>
-                <h3 class="text-lg font-semibold mb-4" style={{ color: "var(--text-primary)" }}>
-                  Ingredients *
-                </h3>
+            {/* Instructions Section */}
+            <FormStack>
+              <SectionTitle>Instructions *</SectionTitle>
 
-                {/* Ingredient List */}
-                <Show when={ingredients().length > 0}>
-                  <div class="mb-4 space-y-2">
-                    <For each={ingredients()}>
-                      {(ingredient, index) => (
-                        <div class="flex items-center gap-3 p-3 rounded-lg" style={{ "background-color": "var(--bg-secondary)" }}>
-                          <span class="flex-1" style={{ color: "var(--text-primary)" }}>
-                            <span class="font-medium">{ingredient.amount} {ingredient.unit}</span> {ingredient.name}
-                            <Show when={ingredient.notes}>
-                              <span class="text-sm italic ml-1" style={{ color: "var(--text-tertiary)" }}>
-                                ({ingredient.notes})
-                              </span>
-                            </Show>
-                          </span>
-                          <Button
-                            type="button"
-                            onClick={() => removeIngredient(index())}
-                            variant="text"
-                            size="sm"
-                            style={{ color: "var(--error-color)" }}
-                          >
-                            Remove
-                          </Button>
-                        </div>
-                      )}
-                    </For>
-                  </div>
-                </Show>
-
-                {/* Add Ingredient Form */}
-                <div class="grid grid-cols-1 md:grid-cols-6 gap-3">
-                  <div class="md:col-span-2">
-                    <input
-                      type="text"
-                      value={newIngredientName()}
-                      onInput={(e) => setNewIngredientName(e.currentTarget.value)}
-                      class="w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2"
-                      style={{
-                        "background-color": "var(--bg-secondary)",
-                        "border-color": "var(--border-color)",
-                        "color": "var(--text-primary)",
-                        "--tw-ring-color": "var(--primary-color)"
-                      }}
-                      placeholder="Ingredient name"
-                    />
-                  </div>
-                  <div>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={newIngredientAmount()}
-                      onInput={(e) => setNewIngredientAmount(e.currentTarget.value)}
-                      class="w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2"
-                      style={{
-                        "background-color": "var(--bg-secondary)",
-                        "border-color": "var(--border-color)",
-                        "color": "var(--text-primary)",
-                        "--tw-ring-color": "var(--primary-color)"
-                      }}
-                      placeholder="Amount"
-                    />
-                  </div>
-                  <div>
-                    <input
-                      type="text"
-                      value={newIngredientUnit()}
-                      onInput={(e) => setNewIngredientUnit(e.currentTarget.value)}
-                      class="w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2"
-                      style={{
-                        "background-color": "var(--bg-secondary)",
-                        "border-color": "var(--border-color)",
-                        "color": "var(--text-primary)",
-                        "--tw-ring-color": "var(--primary-color)"
-                      }}
-                      placeholder="Unit"
-                    />
-                  </div>
-                  <div>
-                    <input
-                      type="text"
-                      value={newIngredientNotes()}
-                      onInput={(e) => setNewIngredientNotes(e.currentTarget.value)}
-                      class="w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2"
-                      style={{
-                        "background-color": "var(--bg-secondary)",
-                        "border-color": "var(--border-color)",
-                        "color": "var(--text-primary)",
-                        "--tw-ring-color": "var(--primary-color)"
-                      }}
-                      placeholder="Notes"
-                    />
-                  </div>
-                  <div>
-                    <Button
-                      type="button"
-                      onClick={addIngredient}
-                      variant="primary"
-                      size="sm"
-                      fullWidth
-                    >
-                      Add
-                    </Button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Instructions Section */}
-              <div class="border-t pt-6" style={{ "border-color": "var(--border-color)" }}>
-                <h3 class="text-lg font-semibold mb-4" style={{ color: "var(--text-primary)" }}>
-                  Instructions *
-                </h3>
-
-                {/* Instruction List */}
-                <Show when={instructions().length > 0}>
-                  <div class="mb-4 space-y-2">
-                    <For each={instructions()}>
-                      {(instruction, index) => (
-                        <div class="flex items-start gap-3 p-3 rounded-lg" style={{ "background-color": "var(--bg-secondary)" }}>
-                          <span
-                            class="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold"
-                            style={{ "background-color": "var(--primary-color)", color: "white" }}
-                          >
-                            {index() + 1}
-                          </span>
-                          <span class="flex-1" style={{ color: "var(--text-primary)" }}>
-                            {instruction}
-                          </span>
-                          <div class="flex gap-2">
-                            <Show when={index() > 0}>
-                              <Button
-                                type="button"
-                                onClick={() => moveInstruction(index(), 'up')}
-                                variant="text"
-                                size="sm"
-                                style={{ color: "var(--text-secondary)" }}
-                                title="Move up"
-                              >
-                                ↑
-                              </Button>
-                            </Show>
-                            <Show when={index() < instructions().length - 1}>
-                              <Button
-                                type="button"
-                                onClick={() => moveInstruction(index(), 'down')}
-                                variant="text"
-                                size="sm"
-                                style={{ color: "var(--text-secondary)" }}
-                                title="Move down"
-                              >
-                                ↓
-                              </Button>
-                            </Show>
+              {/* Instruction List */}
+              <Show when={instructions().length > 0}>
+                <ItemStack>
+                  <For each={instructions()}>
+                    {(instruction, index) => (
+                      <div class={styles.instructionItem}>
+                        <span class={styles.instructionNumber}>{index() + 1}</span>
+                        <span class={styles.instructionContent}>{instruction}</span>
+                        <div class={styles.instructionActions}>
+                          <Show when={index() > 0}>
                             <Button
                               type="button"
-                              onClick={() => removeInstruction(index())}
-                              variant="text"
+                              onClick={() => moveInstruction(index(), 'up')}
+                              variant="secondary"
                               size="sm"
-                              style={{ color: "var(--error-color)" }}
+                              title="Move up"
                             >
-                              ×
+                              ↑
                             </Button>
-                          </div>
+                          </Show>
+                          <Show when={index() < instructions().length - 1}>
+                            <Button
+                              type="button"
+                              onClick={() => moveInstruction(index(), 'down')}
+                              variant="secondary"
+                              size="sm"
+                              title="Move down"
+                            >
+                              ↓
+                            </Button>
+                          </Show>
+                          <Button
+                            type="button"
+                            onClick={() => removeInstruction(index())}
+                            variant="danger"
+                            size="sm"
+                          >
+                            ×
+                          </Button>
                         </div>
-                      )}
-                    </For>
-                  </div>
-                </Show>
+                      </div>
+                    )}
+                  </For>
+                </ItemStack>
+              </Show>
 
-                {/* Add Instruction Form */}
-                <div class="flex gap-3">
-                  <textarea
+              {/* Add Instruction Form */}
+              <div class={styles.addRow}>
+                <div class={styles.addRowInput}>
+                  <TextArea
                     value={newInstruction()}
                     onInput={(e) => setNewInstruction(e.currentTarget.value)}
-                    class="flex-1 px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2"
-                    style={{
-                      "background-color": "var(--bg-secondary)",
-                      "border-color": "var(--border-color)",
-                      "color": "var(--text-primary)",
-                      "--tw-ring-color": "var(--primary-color)"
-                    }}
                     placeholder="Enter instruction step"
-                    rows="2"
+                    rows={2}
                   />
-                  <Button
-                    type="button"
-                    onClick={addInstruction}
-                    variant="primary"
-                    size="sm"
-                  >
-                    Add Step
-                  </Button>
                 </div>
+                <Button
+                  type="button"
+                  onClick={addInstruction}
+                  variant="primary"
+                  size="sm"
+                >
+                  Add Step
+                </Button>
               </div>
+            </FormStack>
 
-              {/* Nutrition Information (Optional) */}
-              <div class="border-t pt-6" style={{ "border-color": "var(--border-color)" }}>
-                <label class="flex items-center gap-3 mb-4 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={includeNutrition()}
-                    onChange={(e) => setIncludeNutrition(e.currentTarget.checked)}
-                    class="w-5 h-5 rounded"
+            {/* Nutrition Information (Optional) */}
+            <FormStack>
+              <Checkbox
+                label="Include Nutrition Information"
+                checked={includeNutrition()}
+                onChange={(e) => setIncludeNutrition(e.currentTarget.checked)}
+              />
+
+              <Show when={includeNutrition()}>
+                <FormRow cols={4}>
+                  <TextField
+                    label="Calories"
+                    type="number"
+                    value={calories()}
+                    onInput={(e) => setCalories(e.currentTarget.value)}
+                    min="0"
                   />
-                  <span class="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
-                    Include Nutrition Information
-                  </span>
-                </label>
+                  <TextField
+                    label="Fat (g)"
+                    type="number"
+                    value={fat()}
+                    onInput={(e) => setFat(e.currentTarget.value)}
+                    min="0"
+                  />
+                  <TextField
+                    label="Carbs (g)"
+                    type="number"
+                    value={carbs()}
+                    onInput={(e) => setCarbs(e.currentTarget.value)}
+                    min="0"
+                  />
+                  <TextField
+                    label="Protein (g)"
+                    type="number"
+                    value={protein()}
+                    onInput={(e) => setProtein(e.currentTarget.value)}
+                    min="0"
+                  />
+                </FormRow>
+              </Show>
+            </FormStack>
+          </FormStack>
+        </ModalBody>
 
-                <Show when={includeNutrition()}>
-                  <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div>
-                      <label class="block text-sm font-medium mb-2" style={{ color: "var(--text-primary)" }}>
-                        Calories
-                      </label>
-                      <input
-                        type="number"
-                        value={calories()}
-                        onInput={(e) => setCalories(e.currentTarget.value)}
-                        class="w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2"
-                        style={{
-                          "background-color": "var(--bg-secondary)",
-                          "border-color": "var(--border-color)",
-                          "color": "var(--text-primary)",
-                          "--tw-ring-color": "var(--primary-color)"
-                        }}
-                        min="0"
-                      />
-                    </div>
-                    <div>
-                      <label class="block text-sm font-medium mb-2" style={{ color: "var(--text-primary)" }}>
-                        Fat (g)
-                      </label>
-                      <input
-                        type="number"
-                        value={fat()}
-                        onInput={(e) => setFat(e.currentTarget.value)}
-                        class="w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2"
-                        style={{
-                          "background-color": "var(--bg-secondary)",
-                          "border-color": "var(--border-color)",
-                          "color": "var(--text-primary)",
-                          "--tw-ring-color": "var(--primary-color)"
-                        }}
-                        min="0"
-                      />
-                    </div>
-                    <div>
-                      <label class="block text-sm font-medium mb-2" style={{ color: "var(--text-primary)" }}>
-                        Carbs (g)
-                      </label>
-                      <input
-                        type="number"
-                        value={carbs()}
-                        onInput={(e) => setCarbs(e.currentTarget.value)}
-                        class="w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2"
-                        style={{
-                          "background-color": "var(--bg-secondary)",
-                          "border-color": "var(--border-color)",
-                          "color": "var(--text-primary)",
-                          "--tw-ring-color": "var(--primary-color)"
-                        }}
-                        min="0"
-                      />
-                    </div>
-                    <div>
-                      <label class="block text-sm font-medium mb-2" style={{ color: "var(--text-primary)" }}>
-                        Protein (g)
-                      </label>
-                      <input
-                        type="number"
-                        value={protein()}
-                        onInput={(e) => setProtein(e.currentTarget.value)}
-                        class="w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2"
-                        style={{
-                          "background-color": "var(--bg-secondary)",
-                          "border-color": "var(--border-color)",
-                          "color": "var(--text-primary)",
-                          "--tw-ring-color": "var(--primary-color)"
-                        }}
-                        min="0"
-                      />
-                    </div>
-                  </div>
-                </Show>
-              </div>
-
-            </div>
-
-            {/* Footer */}
-            <div class="p-6 border-t flex gap-3" style={{ "border-color": "var(--border-color)" }}>
-              <Button
-                type="button"
-                onClick={props.onClose}
-                disabled={loading()}
-                variant="secondary"
-                size="sm"
-                fullWidth
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={loading()}
-                variant="primary"
-                size="sm"
-                fullWidth
-              >
-                {loading() ? 'Saving...' : props.mode === 'create' ? 'Create Recipe' : 'Update Recipe'}
-              </Button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </Show>
+        <ModalFooter>
+          <ButtonGroup>
+            <Button
+              type="button"
+              onClick={props.onClose}
+              disabled={loading()}
+              variant="secondary"
+              size="sm"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={loading()}
+              variant="primary"
+              size="sm"
+            >
+              {loading() ? 'Saving...' : props.mode === 'create' ? 'Create Recipe' : 'Update Recipe'}
+            </Button>
+          </ButtonGroup>
+        </ModalFooter>
+      </form>
+    </Modal>
   );
 };
 

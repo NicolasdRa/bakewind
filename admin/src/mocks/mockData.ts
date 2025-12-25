@@ -240,7 +240,6 @@ export const mockInternalOrders: InternalOrder[] = [
     priority: 'high',
     requestedBy: 'Alice Manager',
     requestedByEmail: 'alice@bakery.com',
-    department: 'Front of House',
     items: [
       { id: '1', productId: '2', productName: 'Chocolate Croissant', quantity: 24 },
       { id: '2', productId: '4', productName: 'Blueberry Muffin', quantity: 36 }
@@ -257,7 +256,6 @@ export const mockInternalOrders: InternalOrder[] = [
     status: 'approved',
     priority: 'normal',
     requestedBy: 'Bob Chef',
-    department: 'Kitchen',
     items: [
       { id: '3', productId: '1', productName: 'Sourdough Bread', quantity: 10 }
     ],

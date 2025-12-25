@@ -7,7 +7,17 @@ import {
   CustomerType,
   PreferredContact,
 } from "~/api/customers";
+
+// Common components
+import { Modal, ModalHeader, ModalBody, ModalFooter } from "~/components/common/Modal";
+import { FormRow, FormStack } from "~/components/common/FormRow";
+import { SectionTitle, ButtonGroup } from "~/components/common/Card";
+import Alert from "~/components/common/Alert";
 import Button from "../common/Button";
+import TextField from "../common/TextField";
+import TextArea from "../common/TextArea";
+import Select from "../common/Select";
+import Checkbox from "../common/Checkbox";
 
 interface CustomerFormModalProps {
   isOpen: boolean;
@@ -87,13 +97,11 @@ const CustomerFormModal: Component<CustomerFormModalProps> = (props) => {
 
   const handleSubmit = async (e: Event) => {
     e.preventDefault();
-    console.log("[CustomerFormModal] Form submitted, isEditMode:", isEditMode());
     setLoading(true);
     setError(null);
 
     try {
       const data = formData();
-      console.log("[CustomerFormModal] Form data:", data);
 
       if (!isEditMode()) {
         const createData: CreateCustomerDto = {
@@ -112,9 +120,7 @@ const CustomerFormModal: Component<CustomerFormModalProps> = (props) => {
           marketingOptIn: data.marketingOptIn,
           notes: data.notes || undefined,
         };
-        console.log("[CustomerFormModal] Creating customer with data:", createData);
-        const result = await customersApi.createCustomer(createData);
-        console.log("[CustomerFormModal] Customer created:", result);
+        await customersApi.createCustomer(createData);
       } else if (props.customer) {
         const updateData: UpdateCustomerDto = {
           name: data.name,
@@ -135,11 +141,9 @@ const CustomerFormModal: Component<CustomerFormModalProps> = (props) => {
         await customersApi.updateCustomer(props.customer.id, updateData);
       }
 
-      console.log("[CustomerFormModal] Calling onSuccess and onClose");
       props.onSuccess();
       props.onClose();
     } catch (err: any) {
-      console.error("[CustomerFormModal] Error:", err);
       setError(err?.data?.message || `Failed to ${isEditMode() ? "update" : "create"} customer`);
     } finally {
       setLoading(false);
@@ -151,346 +155,183 @@ const CustomerFormModal: Component<CustomerFormModalProps> = (props) => {
   };
 
   return (
-    <Show when={props.isOpen}>
-      <div
-        class="fixed inset-0 z-50 flex items-center justify-center p-4"
-        style={{ "background-color": "rgba(0, 0, 0, 0.5)" }}
-        onClick={props.onClose}
-      >
-        <div
-          class="rounded-xl border shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
-          style={{
-            "background-color": "var(--bg-primary)",
-            "border-color": "var(--border-color)",
-          }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div class="p-6 border-b" style={{ "border-color": "var(--border-color)" }}>
-            <h2 class="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
-              {isEditMode() ? "Edit Customer" : "Add Customer"}
-            </h2>
-          </div>
+    <Modal isOpen={props.isOpen} onClose={props.onClose} size="lg">
+      <ModalHeader
+        title={isEditMode() ? "Edit Customer" : "Add Customer"}
+        onClose={props.onClose}
+      />
 
-          <form onSubmit={handleSubmit} class="p-6 space-y-6">
+      <form onSubmit={handleSubmit}>
+        <ModalBody>
+          <FormStack>
             <Show when={error()}>
-              <div
-                class="p-4 rounded-lg"
-                style={{
-                  "background-color": "var(--error-light)",
-                  color: "var(--error-color)",
-                }}
-              >
-                {error()}
-              </div>
+              <Alert variant="error">{error()}</Alert>
             </Show>
 
             {/* Customer Type */}
-            <div>
-              <label class="block text-sm font-medium mb-2" style={{ color: "var(--text-secondary)" }}>
-                Customer Type *
-              </label>
-              <select
-                required
-                value={formData().customerType}
-                onChange={(e) => updateField("customerType", e.currentTarget.value as CustomerType)}
-                class="w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2"
-                style={{
-                  "background-color": "var(--bg-primary)",
-                  "border-color": "var(--border-color)",
-                  color: "var(--text-primary)",
-                }}
-              >
-                <option value="business">Business</option>
-                <option value="individual">Individual</option>
-              </select>
-            </div>
+            <Select
+              label="Customer Type *"
+              required
+              value={formData().customerType}
+              onChange={(e) => updateField("customerType", e.currentTarget.value as CustomerType)}
+            >
+              <option value="business">Business</option>
+              <option value="individual">Individual</option>
+            </Select>
 
             {/* Business Info (conditional) */}
             <Show when={formData().customerType === "business"}>
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-sm font-medium mb-2" style={{ color: "var(--text-secondary)" }}>
-                    Company Name
-                  </label>
-                  <input
-                    type="text"
-                    value={formData().companyName}
-                    onInput={(e) => updateField("companyName", e.currentTarget.value)}
-                    class="w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2"
-                    style={{
-                      "background-color": "var(--bg-primary)",
-                      "border-color": "var(--border-color)",
-                      color: "var(--text-primary)",
-                    }}
-                    placeholder="Company name"
-                  />
-                </div>
-                <div>
-                  <label class="block text-sm font-medium mb-2" style={{ color: "var(--text-secondary)" }}>
-                    Tax ID
-                  </label>
-                  <input
-                    type="text"
-                    value={formData().taxId}
-                    onInput={(e) => updateField("taxId", e.currentTarget.value)}
-                    class="w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2"
-                    style={{
-                      "background-color": "var(--bg-primary)",
-                      "border-color": "var(--border-color)",
-                      color: "var(--text-primary)",
-                    }}
-                    placeholder="Tax ID for invoicing"
-                  />
-                </div>
-              </div>
+              <FormRow cols={2}>
+                <TextField
+                  label="Company Name"
+                  type="text"
+                  value={formData().companyName}
+                  onInput={(e) => updateField("companyName", e.currentTarget.value)}
+                  placeholder="Company name"
+                />
+                <TextField
+                  label="Tax ID"
+                  type="text"
+                  value={formData().taxId}
+                  onInput={(e) => updateField("taxId", e.currentTarget.value)}
+                  placeholder="Tax ID for invoicing"
+                />
+              </FormRow>
             </Show>
 
             {/* Contact Info */}
-            <div class="space-y-4">
-              <h3 class="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
-                Contact Information
-              </h3>
+            <FormStack>
+              <SectionTitle>Contact Information</SectionTitle>
 
-              <div>
-                <label class="block text-sm font-medium mb-2" style={{ color: "var(--text-secondary)" }}>
-                  Contact Name *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData().name}
-                  onInput={(e) => updateField("name", e.currentTarget.value)}
-                  class="w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2"
-                  style={{
-                    "background-color": "var(--bg-primary)",
-                    "border-color": "var(--border-color)",
-                    color: "var(--text-primary)",
-                  }}
-                  placeholder="Full name"
+              <TextField
+                label="Contact Name *"
+                type="text"
+                required
+                value={formData().name}
+                onInput={(e) => updateField("name", e.currentTarget.value)}
+                placeholder="Full name"
+              />
+
+              <FormRow cols={2}>
+                <TextField
+                  label="Email"
+                  type="email"
+                  value={formData().email}
+                  onInput={(e) => updateField("email", e.currentTarget.value)}
+                  placeholder="email@example.com"
                 />
-              </div>
-
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-sm font-medium mb-2" style={{ color: "var(--text-secondary)" }}>
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    value={formData().email}
-                    onInput={(e) => updateField("email", e.currentTarget.value)}
-                    class="w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2"
-                    style={{
-                      "background-color": "var(--bg-primary)",
-                      "border-color": "var(--border-color)",
-                      color: "var(--text-primary)",
-                    }}
-                    placeholder="email@example.com"
-                  />
-                </div>
-                <div>
-                  <label class="block text-sm font-medium mb-2" style={{ color: "var(--text-secondary)" }}>
-                    Phone *
-                  </label>
-                  <input
-                    type="tel"
-                    required
-                    value={formData().phone}
-                    onInput={(e) => updateField("phone", e.currentTarget.value)}
-                    class="w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2"
-                    style={{
-                      "background-color": "var(--bg-primary)",
-                      "border-color": "var(--border-color)",
-                      color: "var(--text-primary)",
-                    }}
-                    placeholder="+1 (555) 123-4567"
-                  />
-                </div>
-              </div>
-            </div>
+                <TextField
+                  label="Phone *"
+                  type="tel"
+                  required
+                  value={formData().phone}
+                  onInput={(e) => updateField("phone", e.currentTarget.value)}
+                  placeholder="+1 (555) 123-4567"
+                />
+              </FormRow>
+            </FormStack>
 
             {/* Address */}
-            <div class="space-y-4">
-              <h3 class="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
-                Address
-              </h3>
+            <FormStack>
+              <SectionTitle>Address</SectionTitle>
 
-              <div>
-                <label class="block text-sm font-medium mb-2" style={{ color: "var(--text-secondary)" }}>
-                  Address Line 1
-                </label>
-                <input
+              <TextField
+                label="Address Line 1"
+                type="text"
+                value={formData().addressLine1}
+                onInput={(e) => updateField("addressLine1", e.currentTarget.value)}
+                placeholder="Street address"
+              />
+
+              <TextField
+                label="Address Line 2"
+                type="text"
+                value={formData().addressLine2}
+                onInput={(e) => updateField("addressLine2", e.currentTarget.value)}
+                placeholder="Suite, unit, building, etc."
+              />
+
+              <FormRow cols={3}>
+                <TextField
+                  label="City"
                   type="text"
-                  value={formData().addressLine1}
-                  onInput={(e) => updateField("addressLine1", e.currentTarget.value)}
-                  class="w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2"
-                  style={{
-                    "background-color": "var(--bg-primary)",
-                    "border-color": "var(--border-color)",
-                    color: "var(--text-primary)",
-                  }}
-                  placeholder="Street address"
+                  value={formData().city}
+                  onInput={(e) => updateField("city", e.currentTarget.value)}
+                  placeholder="City"
                 />
-              </div>
-
-              <div>
-                <label class="block text-sm font-medium mb-2" style={{ color: "var(--text-secondary)" }}>
-                  Address Line 2
-                </label>
-                <input
+                <TextField
+                  label="State"
                   type="text"
-                  value={formData().addressLine2}
-                  onInput={(e) => updateField("addressLine2", e.currentTarget.value)}
-                  class="w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2"
-                  style={{
-                    "background-color": "var(--bg-primary)",
-                    "border-color": "var(--border-color)",
-                    color: "var(--text-primary)",
-                  }}
-                  placeholder="Suite, unit, building, etc."
+                  value={formData().state}
+                  onInput={(e) => updateField("state", e.currentTarget.value)}
+                  placeholder="State"
                 />
-              </div>
-
-              <div class="grid grid-cols-3 gap-4">
-                <div>
-                  <label class="block text-sm font-medium mb-2" style={{ color: "var(--text-secondary)" }}>
-                    City
-                  </label>
-                  <input
-                    type="text"
-                    value={formData().city}
-                    onInput={(e) => updateField("city", e.currentTarget.value)}
-                    class="w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2"
-                    style={{
-                      "background-color": "var(--bg-primary)",
-                      "border-color": "var(--border-color)",
-                      color: "var(--text-primary)",
-                    }}
-                    placeholder="City"
-                  />
-                </div>
-                <div>
-                  <label class="block text-sm font-medium mb-2" style={{ color: "var(--text-secondary)" }}>
-                    State
-                  </label>
-                  <input
-                    type="text"
-                    value={formData().state}
-                    onInput={(e) => updateField("state", e.currentTarget.value)}
-                    class="w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2"
-                    style={{
-                      "background-color": "var(--bg-primary)",
-                      "border-color": "var(--border-color)",
-                      color: "var(--text-primary)",
-                    }}
-                    placeholder="State"
-                  />
-                </div>
-                <div>
-                  <label class="block text-sm font-medium mb-2" style={{ color: "var(--text-secondary)" }}>
-                    ZIP Code
-                  </label>
-                  <input
-                    type="text"
-                    value={formData().zipCode}
-                    onInput={(e) => updateField("zipCode", e.currentTarget.value)}
-                    class="w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2"
-                    style={{
-                      "background-color": "var(--bg-primary)",
-                      "border-color": "var(--border-color)",
-                      color: "var(--text-primary)",
-                    }}
-                    placeholder="ZIP"
-                  />
-                </div>
-              </div>
-            </div>
+                <TextField
+                  label="ZIP Code"
+                  type="text"
+                  value={formData().zipCode}
+                  onInput={(e) => updateField("zipCode", e.currentTarget.value)}
+                  placeholder="ZIP"
+                />
+              </FormRow>
+            </FormStack>
 
             {/* Preferences */}
-            <div class="space-y-4">
-              <h3 class="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
-                Preferences
-              </h3>
+            <FormStack>
+              <SectionTitle>Preferences</SectionTitle>
 
-              <div>
-                <label class="block text-sm font-medium mb-2" style={{ color: "var(--text-secondary)" }}>
-                  Preferred Contact Method
-                </label>
-                <select
-                  value={formData().preferredContact}
-                  onChange={(e) => updateField("preferredContact", e.currentTarget.value as PreferredContact | "")}
-                  class="w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2"
-                  style={{
-                    "background-color": "var(--bg-primary)",
-                    "border-color": "var(--border-color)",
-                    color: "var(--text-primary)",
-                  }}
-                >
-                  <option value="">No preference</option>
-                  <option value="email">Email</option>
-                  <option value="phone">Phone</option>
-                  <option value="text">Text</option>
-                </select>
-              </div>
+              <Select
+                label="Preferred Contact Method"
+                value={formData().preferredContact}
+                onChange={(e) => updateField("preferredContact", e.currentTarget.value as PreferredContact | "")}
+              >
+                <option value="">No preference</option>
+                <option value="email">Email</option>
+                <option value="phone">Phone</option>
+                <option value="text">Text</option>
+              </Select>
 
-              <div class="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  id="marketingOptIn"
-                  checked={formData().marketingOptIn}
-                  onChange={(e) => updateField("marketingOptIn", e.currentTarget.checked)}
-                  class="w-4 h-4 rounded border"
-                  style={{ "border-color": "var(--border-color)" }}
-                />
-                <label for="marketingOptIn" class="text-sm" style={{ color: "var(--text-primary)" }}>
-                  Opt in to marketing communications
-                </label>
-              </div>
-            </div>
+              <Checkbox
+                label="Opt in to marketing communications"
+                checked={formData().marketingOptIn}
+                onChange={(e) => updateField("marketingOptIn", e.currentTarget.checked)}
+              />
+            </FormStack>
 
             {/* Notes */}
-            <div>
-              <label class="block text-sm font-medium mb-2" style={{ color: "var(--text-secondary)" }}>
-                Notes
-              </label>
-              <textarea
-                value={formData().notes}
-                onInput={(e) => updateField("notes", e.currentTarget.value)}
-                rows={3}
-                class="w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2 resize-none"
-                style={{
-                  "background-color": "var(--bg-primary)",
-                  "border-color": "var(--border-color)",
-                  color: "var(--text-primary)",
-                }}
-                placeholder="Additional notes about this customer..."
-              />
-            </div>
+            <TextArea
+              label="Notes"
+              value={formData().notes}
+              onInput={(e) => updateField("notes", e.currentTarget.value)}
+              rows={3}
+              placeholder="Additional notes about this customer..."
+            />
+          </FormStack>
+        </ModalBody>
 
-            {/* Actions */}
-            <div class="flex justify-end gap-3 pt-4 border-t" style={{ "border-color": "var(--border-color)" }}>
-              <Button
-                type="button"
-                onClick={props.onClose}
-                disabled={loading()}
-                variant="secondary"
-                size="sm"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={loading()}
-                variant="primary"
-                size="sm"
-              >
-                {loading() ? "Saving..." : isEditMode() ? "Save Changes" : "Add Customer"}
-              </Button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </Show>
+        <ModalFooter>
+          <ButtonGroup>
+            <Button
+              type="button"
+              onClick={props.onClose}
+              disabled={loading()}
+              variant="secondary"
+              size="sm"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={loading()}
+              variant="primary"
+              size="sm"
+            >
+              {loading() ? "Saving..." : isEditMode() ? "Save Changes" : "Add Customer"}
+            </Button>
+          </ButtonGroup>
+        </ModalFooter>
+      </form>
+    </Modal>
   );
 };
 

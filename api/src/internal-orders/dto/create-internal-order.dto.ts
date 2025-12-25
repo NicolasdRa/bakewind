@@ -10,7 +10,6 @@ import {
   IsNumber,
   Min,
   IsObject,
-  IsInt,
   IsBoolean,
   IsUUID,
 } from 'class-validator';
@@ -120,18 +119,10 @@ export class CreateInternalOrderDto {
   @IsEmail()
   requestedByEmail?: string;
 
-  @ApiProperty({ description: 'Department making the request' })
-  @IsString()
-  department: string;
-
   @ApiPropertyOptional({ description: 'Total cost of the order' })
   @IsOptional()
   @IsString()
   totalCost?: string;
-
-  @ApiProperty({ description: 'Date order was requested (ISO 8601)' })
-  @IsDateString()
-  requestedDate: string;
 
   @ApiProperty({ description: 'Date order is needed by (ISO 8601)' })
   @IsDateString()
@@ -158,52 +149,10 @@ export class CreateInternalOrderDto {
   notes?: string;
 
   // Production-specific fields
-  @ApiPropertyOptional({ description: 'Production date (ISO 8601)' })
-  @IsOptional()
-  @IsDateString()
-  productionDate?: string;
-
-  @ApiPropertyOptional({
-    description: 'Production shift (morning, afternoon, night)',
-  })
-  @IsOptional()
-  @IsString()
-  productionShift?: string;
-
   @ApiPropertyOptional({ description: 'Batch number for traceability' })
   @IsOptional()
   @IsString()
   batchNumber?: string;
-
-  @ApiPropertyOptional({
-    description: 'Staff member(s) assigned to production',
-  })
-  @IsOptional()
-  @IsString()
-  assignedStaff?: string;
-
-  @ApiPropertyOptional({ description: 'Workstation or equipment assigned' })
-  @IsOptional()
-  @IsString()
-  workstation?: string;
-
-  @ApiPropertyOptional({ description: 'Target quantity to produce' })
-  @IsOptional()
-  @IsInt()
-  @Min(1)
-  targetQuantity?: number;
-
-  @ApiPropertyOptional({ description: 'Actual quantity produced' })
-  @IsOptional()
-  @IsInt()
-  @Min(0)
-  actualQuantity?: number;
-
-  @ApiPropertyOptional({ description: 'Waste quantity' })
-  @IsOptional()
-  @IsInt()
-  @Min(0)
-  wasteQuantity?: number;
 
   @ApiPropertyOptional({ description: 'Quality control notes' })
   @IsOptional()

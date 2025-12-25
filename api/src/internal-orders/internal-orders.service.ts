@@ -27,7 +27,6 @@ export interface InternalOrderWithItems {
   priority: string;
   requestedBy: string;
   requestedByEmail: string | null;
-  department: string;
   totalCost: string | null;
   requestedDate: Date;
   neededByDate: Date;
@@ -177,7 +176,6 @@ export class InternalOrdersService {
         or(
           ilike(internalOrders.orderNumber, `%${params.search}%`),
           ilike(internalOrders.requestedBy, `%${params.search}%`),
-          ilike(internalOrders.department, `%${params.search}%`),
         ),
       );
     }
@@ -275,9 +273,8 @@ export class InternalOrdersService {
         priority: createOrderDto.priority || 'normal',
         requestedBy: createOrderDto.requestedBy,
         requestedByEmail: createOrderDto.requestedByEmail || null,
-        department: createOrderDto.department,
         totalCost: createOrderDto.totalCost || null,
-        requestedDate: new Date(createOrderDto.requestedDate),
+        requestedDate: new Date(),
         neededByDate: new Date(createOrderDto.neededByDate),
         approvedBy: createOrderDto.approvedBy || null,
         approvedAt: createOrderDto.approvedAt
@@ -286,16 +283,14 @@ export class InternalOrdersService {
         specialInstructions: createOrderDto.specialInstructions || null,
         notes: createOrderDto.notes || null,
         // Production fields
-        productionDate: createOrderDto.productionDate
-          ? new Date(createOrderDto.productionDate)
-          : null,
-        productionShift: createOrderDto.productionShift || null,
+        productionDate: null,
+        productionShift: null,
         batchNumber: createOrderDto.batchNumber || null,
-        assignedStaff: createOrderDto.assignedStaff || null,
-        workstation: createOrderDto.workstation || null,
-        targetQuantity: createOrderDto.targetQuantity || null,
-        actualQuantity: createOrderDto.actualQuantity || null,
-        wasteQuantity: createOrderDto.wasteQuantity || null,
+        assignedStaff: null,
+        workstation: null,
+        targetQuantity: null,
+        actualQuantity: null,
+        wasteQuantity: null,
         qualityNotes: createOrderDto.qualityNotes || null,
         // Recurring fields
         isRecurring: createOrderDto.isRecurring || false,

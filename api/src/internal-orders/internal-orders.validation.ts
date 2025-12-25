@@ -46,7 +46,6 @@ export const internalOrderResponseDataSchema = z.object({
   priority: z.enum(internalOrderPriorityValues),
   requestedBy: z.string(),
   requestedByEmail: z.string().nullable(),
-  department: z.string(),
   totalCost: z.string().nullable(),
   requestedDate: z.date().transform((date) => date.toISOString()),
   neededByDate: z.date().transform((date) => date.toISOString()),
@@ -122,7 +121,6 @@ export const internalOrderCreationSchema = z.object({
   priority: z.enum(internalOrderPriorityValues).default('normal'),
   requestedBy: z.string().min(1).max(255),
   requestedByEmail: z.string().email().optional(),
-  department: z.string().min(1).max(255),
   totalCost: z
     .string()
     .refine((val) => val === '' || (!isNaN(Number(val)) && Number(val) >= 0), {

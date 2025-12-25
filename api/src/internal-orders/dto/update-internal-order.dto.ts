@@ -42,11 +42,6 @@ export class UpdateInternalOrderDto {
   @IsEmail()
   requestedByEmail?: string;
 
-  @ApiPropertyOptional({ description: 'Department making the request' })
-  @IsOptional()
-  @IsString()
-  department?: string;
-
   @ApiPropertyOptional({ description: 'Total cost of the order' })
   @IsOptional()
   @IsString()

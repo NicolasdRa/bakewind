@@ -4,6 +4,8 @@ import * as authApi from '~/api/auth';
 import { logger } from '../../utils/logger';
 import AuthLayout from '../../layouts/AuthLayout';
 import Button from '~/components/common/Button';
+import TextField from '~/components/common/TextField';
+import Select from '~/components/common/Select';
 
 const TrialSignup: Component = () => {
   const [businessName, setBusinessName] = createSignal('');
@@ -61,110 +63,74 @@ const TrialSignup: Component = () => {
       subtitle="Get 14 days of full access to BakeWind. No credit card required."
     >
       <form onSubmit={handleSubmit} class="space-y-4">
-        {/* Business Name */}
-        <div>
-          <label for="businessName" class="block text-sm font-medium text-gray-700 mb-1">
-            Business Name
-          </label>
-          <input
-            type="text"
-            id="businessName"
-            value={businessName()}
-            onInput={(e) => setBusinessName(e.currentTarget.value)}
-            required
-            autocomplete="organization"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Your Bakery Name"
-          />
-        </div>
+        <TextField
+          label="Business Name"
+          type="text"
+          id="businessName"
+          value={businessName()}
+          onInput={(e) => setBusinessName(e.currentTarget.value)}
+          required
+          autocomplete="organization"
+          placeholder="Your Bakery Name"
+        />
 
-        {/* Full Name */}
-        <div>
-          <label for="fullName" class="block text-sm font-medium text-gray-700 mb-1">
-            Your Name
-          </label>
-          <input
-            type="text"
-            id="fullName"
-            value={fullName()}
-            onInput={(e) => setFullName(e.currentTarget.value)}
-            required
-            autocomplete="name"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="John Smith"
-          />
-        </div>
+        <TextField
+          label="Your Name"
+          type="text"
+          id="fullName"
+          value={fullName()}
+          onInput={(e) => setFullName(e.currentTarget.value)}
+          required
+          autocomplete="name"
+          placeholder="John Smith"
+        />
 
-        {/* Email */}
-        <div>
-          <label for="email" class="block text-sm font-medium text-gray-700 mb-1">
-            Email Address
-          </label>
-          <input
-            type="email"
-            id="email"
-            value={email()}
-            onInput={(e) => setEmail(e.currentTarget.value)}
-            required
-            autocomplete="email"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="john@yourbakery.com"
-          />
-        </div>
+        <TextField
+          label="Email Address"
+          type="email"
+          id="email"
+          value={email()}
+          onInput={(e) => setEmail(e.currentTarget.value)}
+          required
+          autocomplete="email"
+          placeholder="john@yourbakery.com"
+        />
 
-        {/* Phone */}
-        <div>
-          <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">
-            Phone Number
-          </label>
-          <input
-            type="tel"
-            id="phone"
-            value={phone()}
-            onInput={(e) => setPhone(e.currentTarget.value)}
-            required
-            autocomplete="tel"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="+1 (555) 123-4567"
-          />
-        </div>
+        <TextField
+          label="Phone Number"
+          type="tel"
+          id="phone"
+          value={phone()}
+          onInput={(e) => setPhone(e.currentTarget.value)}
+          required
+          autocomplete="tel"
+          placeholder="+1 (555) 123-4567"
+        />
 
-        {/* Password */}
-        <div>
-          <label for="password" class="block text-sm font-medium text-gray-700 mb-1">
-            Password
-          </label>
-          <input
-            type="password"
-            id="password"
-            value={password()}
-            onInput={(e) => setPassword(e.currentTarget.value)}
-            required
-            autocomplete="new-password"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Create a secure password"
-          />
-        </div>
+        <TextField
+          label="Password"
+          type="password"
+          id="password"
+          value={password()}
+          onInput={(e) => setPassword(e.currentTarget.value)}
+          required
+          autocomplete="new-password"
+          placeholder="Create a secure password"
+        />
 
-        {/* Number of Locations */}
-        <div>
-          <label for="locations" class="block text-sm font-medium text-gray-700 mb-1">
-            Number of Locations
-          </label>
-          <select
-            id="locations"
-            value={locations()}
-            onChange={(e) => setLocations(e.currentTarget.value)}
-            required
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            <option value="">Select number of locations</option>
-            <option value="1">1 location</option>
-            <option value="2-3">2-3 locations</option>
-            <option value="4-10">4-10 locations</option>
-            <option value="10+">10+ locations</option>
-          </select>
-        </div>
+        <Select
+          label="Number of Locations"
+          id="locations"
+          value={locations()}
+          onChange={(e) => setLocations(e.currentTarget.value)}
+          required
+        >
+          <option value="">Select number of locations</option>
+          <option value="1">1 location</option>
+          <option value="2-3">2-3 locations</option>
+          <option value="4-10">4-10 locations</option>
+          <option value="10+">10+ locations</option>
+        </Select>
 
         {/* Terms & Conditions */}
         <div class="flex items-start gap-2">
@@ -175,14 +141,15 @@ const TrialSignup: Component = () => {
             onChange={(e) => setAgreeToTerms(e.currentTarget.checked)}
             required
             class="mt-1 flex-shrink-0"
+            style={{ "accent-color": "var(--primary-color)" }}
           />
-          <label for="agreeToTerms" class="text-sm text-gray-600">
+          <label for="agreeToTerms" class="text-sm" style={{ color: "var(--text-secondary)" }}>
             I agree to the{' '}
-            <a href="#terms" class="text-blue-600 hover:underline">
+            <a href="#terms" style={{ color: "var(--primary-color)" }} class="hover:underline">
               Terms of Service
             </a>{' '}
             and{' '}
-            <a href="#privacy" class="text-blue-600 hover:underline">
+            <a href="#privacy" style={{ color: "var(--primary-color)" }} class="hover:underline">
               Privacy Policy
             </a>
           </label>
@@ -190,7 +157,13 @@ const TrialSignup: Component = () => {
 
         {/* Error message */}
         <Show when={error()}>
-          <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+          <div
+            class="p-4 rounded-lg"
+            style={{
+              "background-color": "var(--error-light)",
+              color: "var(--error-color)"
+            }}
+          >
             {error()}
           </div>
         </Show>
@@ -209,9 +182,9 @@ const TrialSignup: Component = () => {
 
       {/* Links */}
       <div class="mt-6 text-center">
-        <p class="text-sm text-gray-600">
+        <p class="text-sm" style={{ color: "var(--text-secondary)" }}>
           Already have an account?{' '}
-          <a href="/login" class="text-blue-600 hover:text-blue-700 font-medium">
+          <a href="/login" style={{ color: "var(--primary-color)" }} class="font-medium hover:underline">
             Sign in here
           </a>
         </p>

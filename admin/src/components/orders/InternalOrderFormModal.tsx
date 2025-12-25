@@ -1,4 +1,4 @@
-import { Component, createSignal, Show, For, onMount, createEffect } from 'solid-js';
+import { Component, createSignal, Show, For, onMount, createEffect, createMemo } from 'solid-js';
 import {
   InternalOrder,
   InternalOrderPriority,
@@ -6,10 +6,31 @@ import {
   CreateInternalOrderRequest
 } from '~/api/internalOrders';
 import { productsApi, Product } from '~/api/products';
-import DatePicker from '~/components/common/DatePicker';
-import Button from '~/components/common/Button';
+import { useAuth } from '~/context/AuthContext';
 
-type ProductionShift = 'morning' | 'afternoon' | 'night';
+// Common components
+import { Modal, ModalHeader, ModalBody, ModalFooter } from '~/components/common/Modal';
+import { FormRow, FormStack } from '~/components/common/FormRow';
+import { StepIndicator } from '~/components/common/StepIndicator';
+import {
+  Card,
+  CardTitle,
+  SummaryRow,
+  SummaryStack,
+  ListItem,
+  SelectedItem,
+  QuantityControl,
+  QuantityValue,
+  ScrollableList,
+  SectionTitle,
+  ItemStack,
+  ButtonGroup,
+} from '~/components/common/Card';
+import Button from '~/components/common/Button';
+import TextField from '~/components/common/TextField';
+import TextArea from '~/components/common/TextArea';
+import Select from '~/components/common/Select';
+import DatePicker from '~/components/common/DatePicker';
 
 interface InternalOrderFormModalProps {
   show: boolean;
@@ -26,25 +47,33 @@ interface OrderItemForm {
 }
 
 const InternalOrderFormModal: Component<InternalOrderFormModalProps> = (props) => {
+  const auth = useAuth();
   const [currentStep, setCurrentStep] = createSignal(1);
   const [loading, setLoading] = createSignal(false);
   const [products, setProducts] = createSignal<Product[]>([]);
   const [searchQuery, setSearchQuery] = createSignal('');
+
+  // User-derived values
+  const userFullName = createMemo(() => {
+    const user = auth.user;
+    if (!user) return '';
+    return `${user.firstName} ${user.lastName}`.trim();
+  });
+
+  const userAreas = createMemo(() => {
+    const user = auth.user;
+    return user?.areas || [];
+  });
+
+  const hasMultipleAreas = createMemo(() => userAreas().length > 1);
 
   // Form fields
   const [orderNumber, setOrderNumber] = createSignal('');
   const [source, setSource] = createSignal<InternalOrderSource>('cafe');
   const [priority, setPriority] = createSignal<InternalOrderPriority>('normal');
   const [requestedBy, setRequestedBy] = createSignal('');
-  const [department, setDepartment] = createSignal('');
-  const [requestedDate, setRequestedDate] = createSignal('');
   const [neededByDate, setNeededByDate] = createSignal('');
-  const [productionDate, setProductionDate] = createSignal('');
-  const [productionShift, setProductionShift] = createSignal<ProductionShift>('morning');
-  const [assignedStaff, setAssignedStaff] = createSignal('');
-  const [workstation, setWorkstation] = createSignal('');
   const [batchNumber, setBatchNumber] = createSignal('');
-  const [targetQuantity, setTargetQuantity] = createSignal<number>(0);
   const [notes, setNotes] = createSignal('');
   const [items, setItems] = createSignal<OrderItemForm[]>([]);
 
@@ -62,20 +91,12 @@ const InternalOrderFormModal: Component<InternalOrderFormModalProps> = (props) =
   createEffect(() => {
     if (props.show) {
       if (props.editOrder) {
-        // Populate with existing order data
         setOrderNumber(props.editOrder.orderNumber);
         setSource(props.editOrder.source);
         setPriority(props.editOrder.priority);
         setRequestedBy(props.editOrder.requestedBy);
-        setDepartment(props.editOrder.department);
-        setRequestedDate(props.editOrder.requestedDate?.split('T')[0] || '');
         setNeededByDate(props.editOrder.neededByDate?.split('T')[0] || '');
-        setProductionDate(props.editOrder.productionDate?.split('T')[0] || '');
-        setProductionShift((props.editOrder.productionShift as ProductionShift) || 'morning');
-        setAssignedStaff(props.editOrder.assignedStaff || '');
-        setWorkstation(props.editOrder.workstation || '');
         setBatchNumber(props.editOrder.batchNumber || '');
-        setTargetQuantity(props.editOrder.targetQuantity || 0);
         setNotes(props.editOrder.notes || '');
         setItems(props.editOrder.items.map(item => ({
           productId: item.productId,
@@ -84,24 +105,16 @@ const InternalOrderFormModal: Component<InternalOrderFormModalProps> = (props) =
           unitCost: item.unitCost || '0',
         })));
       } else {
-        // Reset for new order
         const timestamp = Date.now();
-        const today = new Date().toISOString().split('T')[0];
         const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+        const areas = userAreas();
 
         setOrderNumber(`IO-${timestamp}`);
-        setSource('cafe');
+        setSource(areas.length > 0 ? areas[0] as InternalOrderSource : 'cafe');
         setPriority('normal');
-        setRequestedBy('');
-        setDepartment('');
-        setRequestedDate(today);
+        setRequestedBy(userFullName());
         setNeededByDate(tomorrow);
-        setProductionDate('');
-        setProductionShift('morning');
-        setAssignedStaff('');
-        setWorkstation('');
         setBatchNumber(`BATCH-${timestamp}`);
-        setTargetQuantity(0);
         setNotes('');
         setItems([]);
         setCurrentStep(1);
@@ -164,11 +177,6 @@ const InternalOrderFormModal: Component<InternalOrderFormModalProps> = (props) =
       return;
     }
 
-    if (!department()) {
-      alert('Please enter the department');
-      return;
-    }
-
     const total = calculateTotal();
     const orderData: CreateInternalOrderRequest = {
       orderNumber: orderNumber(),
@@ -176,16 +184,9 @@ const InternalOrderFormModal: Component<InternalOrderFormModalProps> = (props) =
       status: props.editOrder ? props.editOrder.status : 'draft',
       priority: priority(),
       requestedBy: requestedBy(),
-      department: department(),
       totalCost: total.toFixed(2),
-      requestedDate: new Date(requestedDate()).toISOString(),
       neededByDate: new Date(neededByDate()).toISOString(),
-      productionDate: productionDate() ? new Date(productionDate()).toISOString() : undefined,
-      productionShift: productionShift() || undefined,
-      assignedStaff: assignedStaff() || undefined,
-      workstation: workstation() || undefined,
       batchNumber: batchNumber() || undefined,
-      targetQuantity: targetQuantity() || undefined,
       notes: notes() || undefined,
       items: items().map(item => ({
         productId: item.productId,
@@ -214,646 +215,236 @@ const InternalOrderFormModal: Component<InternalOrderFormModalProps> = (props) =
   };
 
   const nextStep = () => {
-    if (currentStep() < 3) {
-      setCurrentStep(currentStep() + 1);
-    }
+    if (currentStep() < 3) setCurrentStep(currentStep() + 1);
   };
 
   const prevStep = () => {
-    if (currentStep() > 1) {
-      setCurrentStep(currentStep() - 1);
-    }
+    if (currentStep() > 1) setCurrentStep(currentStep() - 1);
+  };
+
+  const formatSourceLabel = (area: string) => {
+    return area.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
   };
 
   return (
-    <Show when={props.show}>
-      <div
-        style={{
-          position: 'fixed',
-          top: '0',
-          left: '0',
-          right: '0',
-          bottom: '0',
-          'z-index': '9999',
-          display: 'flex',
-          'align-items': 'center',
-          'justify-content': 'center',
-          padding: '1rem',
-          'background-color': 'var(--overlay-bg)',
-          'overflow-y': 'auto',
-        }}
-        onClick={handleClose}
+    <Modal isOpen={props.show} onClose={handleClose} size="lg">
+      <ModalHeader
+        title={`${props.editOrder ? 'Edit' : 'Create'} Internal Production Order`}
+        onClose={handleClose}
       >
-        <div
-          style={{
-            'background-color': 'var(--bg-primary)',
-            border: '1px solid var(--border-color)',
-            'border-radius': '0.5rem',
-            'box-shadow': '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
-            width: '100%',
-            'max-width': '900px',
-            'max-height': '90vh',
-            display: 'flex',
-            'flex-direction': 'column',
-          }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          {/* Header */}
-          <div style={{
-            padding: '1.5rem',
-            'border-bottom': '1px solid var(--border-color)',
-            display: 'flex',
-            'justify-content': 'space-between',
-            'align-items': 'center',
-          }}>
-            <div>
-              <h2 style={{
-                'font-size': '1.5rem',
-                'font-weight': '600',
-                color: 'var(--text-primary)',
-                margin: '0 0 0.5rem 0',
-              }}>
-                {props.editOrder ? 'Edit' : 'Create'} Internal Production Order
-              </h2>
-              <div style={{ display: 'flex', gap: '0.5rem', 'margin-top': '1rem' }}>
-                <For each={[1, 2, 3]}>
-                  {(step) => (
-                    <div style={{
-                      flex: '1',
-                      height: '4px',
-                      'background-color': step <= currentStep()
-                        ? 'var(--primary-color)'
-                        : 'var(--border-color)',
-                      'border-radius': '2px',
-                    }} />
-                  )}
-                </For>
-              </div>
-            </div>
-            <Button
-              onClick={handleClose}
-              variant="ghost"
-              size="sm"
-              class="p-1"
-            >
-              ×
-            </Button>
-          </div>
+        <StepIndicator totalSteps={3} currentStep={currentStep()} />
+      </ModalHeader>
 
-          {/* Content */}
-          <div style={{
-            padding: '1.5rem',
-            'overflow-y': 'auto',
-            flex: '1',
-          }}>
-            {/* Step 1: Basic Info */}
-            <Show when={currentStep() === 1}>
-              <div style={{ display: 'flex', 'flex-direction': 'column', gap: '1.5rem' }}>
-                <div>
-                  <label style={{
-                    display: 'block',
-                    'margin-bottom': '0.5rem',
-                    'font-weight': '500',
-                    color: 'var(--text-primary)',
-                  }}>
-                    Order Number *
-                  </label>
-                  <input
-                    type="text"
-                    value={orderNumber()}
-                    onInput={(e) => setOrderNumber(e.currentTarget.value)}
-                    disabled={!!props.editOrder}
-                    style={{
-                      width: '100%',
-                      padding: '0.75rem',
-                      border: '1px solid var(--border-color)',
-                      'border-radius': '0.375rem',
-                      'background-color': props.editOrder ? 'var(--bg-secondary)' : 'var(--bg-primary)',
-                      color: 'var(--text-primary)',
-                    }}
-                  />
-                </div>
+      <ModalBody>
+        {/* Step 1: Basic Info */}
+        <Show when={currentStep() === 1}>
+          <FormStack>
+            <TextField
+              label="Order Number"
+              type="text"
+              value={orderNumber()}
+              disabled
+            />
 
-                <div style={{ display: 'grid', 'grid-template-columns': '1fr 1fr', gap: '1rem' }}>
-                  <div>
-                    <label style={{
-                      display: 'block',
-                      'margin-bottom': '0.5rem',
-                      'font-weight': '500',
-                      color: 'var(--text-primary)',
-                    }}>
-                      Source Department *
-                    </label>
-                    <select
-                      value={source()}
-                      onInput={(e) => setSource(e.currentTarget.value as InternalOrderSource)}
-                      style={{
-                        width: '100%',
-                        padding: '0.75rem',
-                        border: '1px solid var(--border-color)',
-                        'border-radius': '0.375rem',
-                        'background-color': 'var(--bg-primary)',
-                        color: 'var(--text-primary)',
-                      }}
-                    >
-                      <option value="cafe">Cafe</option>
-                      <option value="restaurant">Restaurant</option>
-                      <option value="front_house">Front House</option>
-                      <option value="catering">Catering</option>
-                      <option value="retail">Retail</option>
-                      <option value="events">Events</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label style={{
-                      display: 'block',
-                      'margin-bottom': '0.5rem',
-                      'font-weight': '500',
-                      color: 'var(--text-primary)',
-                    }}>
-                      Priority
-                    </label>
-                    <select
-                      value={priority()}
-                      onInput={(e) => setPriority(e.currentTarget.value as InternalOrderPriority)}
-                      style={{
-                        width: '100%',
-                        padding: '0.75rem',
-                        border: '1px solid var(--border-color)',
-                        'border-radius': '0.375rem',
-                        'background-color': 'var(--bg-primary)',
-                        color: 'var(--text-primary)',
-                      }}
-                    >
-                      <option value="low">Low</option>
-                      <option value="normal">Normal</option>
-                      <option value="high">High</option>
-                      <option value="rush">Rush</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div style={{ display: 'grid', 'grid-template-columns': '1fr 1fr', gap: '1rem' }}>
-                  <div>
-                    <label style={{
-                      display: 'block',
-                      'margin-bottom': '0.5rem',
-                      'font-weight': '500',
-                      color: 'var(--text-primary)',
-                    }}>
-                      Requested By *
-                    </label>
-                    <input
-                      type="text"
-                      value={requestedBy()}
-                      onInput={(e) => setRequestedBy(e.currentTarget.value)}
-                      placeholder="Name of person requesting"
-                      style={{
-                        width: '100%',
-                        padding: '0.75rem',
-                        border: '1px solid var(--border-color)',
-                        'border-radius': '0.375rem',
-                        'background-color': 'var(--bg-primary)',
-                        color: 'var(--text-primary)',
-                      }}
-                    />
-                  </div>
-
-                  <div>
-                    <label style={{
-                      display: 'block',
-                      'margin-bottom': '0.5rem',
-                      'font-weight': '500',
-                      color: 'var(--text-primary)',
-                    }}>
-                      Department *
-                    </label>
-                    <input
-                      type="text"
-                      value={department()}
-                      onInput={(e) => setDepartment(e.currentTarget.value)}
-                      placeholder="Department name"
-                      style={{
-                        width: '100%',
-                        padding: '0.75rem',
-                        border: '1px solid var(--border-color)',
-                        'border-radius': '0.375rem',
-                        'background-color': 'var(--bg-primary)',
-                        color: 'var(--text-primary)',
-                      }}
-                    />
-                  </div>
-                </div>
-
-                <div style={{ display: 'grid', 'grid-template-columns': '1fr 1fr', gap: '1rem' }}>
-                  <div>
-                    <DatePicker
-                      label="Requested Date *"
-                      value={requestedDate()}
-                      onChange={(value) => setRequestedDate(value)}
-                      placeholder="When was this requested"
-                    />
-                  </div>
-
-                  <div>
-                    <DatePicker
-                      label="Needed By Date *"
-                      value={neededByDate()}
-                      onChange={(value) => setNeededByDate(value)}
-                      placeholder="When is it needed"
-                      minDate={requestedDate() || new Date().toISOString().split('T')[0]}
-                    />
-                  </div>
-                </div>
-
-                <div style={{ display: 'grid', 'grid-template-columns': '1fr 1fr', gap: '1rem' }}>
-                  <div>
-                    <DatePicker
-                      label="Production Date"
-                      value={productionDate()}
-                      onChange={(value) => setProductionDate(value)}
-                      placeholder="Select production date"
-                      minDate={new Date().toISOString().split('T')[0]}
-                    />
-                  </div>
-                </div>
-
-                <div style={{ display: 'grid', 'grid-template-columns': '1fr 1fr', gap: '1rem' }}>
-                  <div>
-                    <label style={{
-                      display: 'block',
-                      'margin-bottom': '0.5rem',
-                      'font-weight': '500',
-                      color: 'var(--text-primary)',
-                    }}>
-                      Production Shift
-                    </label>
-                    <select
-                      value={productionShift()}
-                      onInput={(e) => setProductionShift(e.currentTarget.value as ProductionShift)}
-                      style={{
-                        width: '100%',
-                        padding: '0.75rem',
-                        border: '1px solid var(--border-color)',
-                        'border-radius': '0.375rem',
-                        'background-color': 'var(--bg-primary)',
-                        color: 'var(--text-primary)',
-                      }}
-                    >
-                      <option value="morning">Morning</option>
-                      <option value="afternoon">Afternoon</option>
-                      <option value="night">Night</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label style={{
-                      display: 'block',
-                      'margin-bottom': '0.5rem',
-                      'font-weight': '500',
-                      color: 'var(--text-primary)',
-                    }}>
-                      Assigned Staff
-                    </label>
-                    <input
-                      type="text"
-                      value={assignedStaff()}
-                      onInput={(e) => setAssignedStaff(e.currentTarget.value)}
-                      placeholder="Staff member name"
-                      style={{
-                        width: '100%',
-                        padding: '0.75rem',
-                        border: '1px solid var(--border-color)',
-                        'border-radius': '0.375rem',
-                        'background-color': 'var(--bg-primary)',
-                        color: 'var(--text-primary)',
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-            </Show>
-
-            {/* Step 2: Products */}
-            <Show when={currentStep() === 2}>
-              <div style={{ display: 'flex', 'flex-direction': 'column', gap: '1.5rem' }}>
-                <div>
-                  <label style={{
-                    display: 'block',
-                    'margin-bottom': '0.5rem',
-                    'font-weight': '500',
-                    color: 'var(--text-primary)',
-                  }}>
-                    Search Products
-                  </label>
-                  <input
-                    type="text"
-                    value={searchQuery()}
-                    onInput={(e) => setSearchQuery(e.currentTarget.value)}
-                    placeholder="Search by name or category..."
-                    style={{
-                      width: '100%',
-                      padding: '0.75rem',
-                      border: '1px solid var(--border-color)',
-                      'border-radius': '0.375rem',
-                      'background-color': 'var(--bg-primary)',
-                      color: 'var(--text-primary)',
-                    }}
-                  />
-                </div>
-
-                <div style={{
-                  'max-height': '200px',
-                  'overflow-y': 'auto',
-                  border: '1px solid var(--border-color)',
-                  'border-radius': '0.375rem',
-                }}>
-                  <For each={filteredProducts()}>
-                    {(product) => (
-                      <div
-                        onClick={() => addProduct(product)}
-                        style={{
-                          padding: '0.75rem',
-                          'border-bottom': '1px solid var(--border-color)',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          'justify-content': 'space-between',
-                          'align-items': 'center',
-                          transition: 'background-color 0.2s',
-                        }}
-                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-secondary)'}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                      >
-                        <div>
-                          <div style={{ 'font-weight': '500', color: 'var(--text-primary)' }}>
-                            {product.name}
-                          </div>
-                          <div style={{ 'font-size': '0.875rem', color: 'var(--text-secondary)' }}>
-                            {product.category} - ${product.basePrice}
-                          </div>
-                        </div>
-                        <Button variant="primary" size="sm">
-                          Add
-                        </Button>
-                      </div>
-                    )}
-                  </For>
-                </div>
-
-                <div>
-                  <h3 style={{
-                    'font-weight': '500',
-                    color: 'var(--text-primary)',
-                    'margin-bottom': '1rem',
-                  }}>
-                    Selected Products ({items().length})
-                  </h3>
-                  <div style={{ display: 'flex', 'flex-direction': 'column', gap: '0.75rem' }}>
-                    <For each={items()}>
-                      {(item) => (
-                        <div style={{
-                          padding: '0.75rem',
-                          border: '1px solid var(--border-color)',
-                          'border-radius': '0.375rem',
-                          display: 'flex',
-                          'justify-content': 'space-between',
-                          'align-items': 'center',
-                        }}>
-                          <div style={{ flex: '1' }}>
-                            <div style={{ 'font-weight': '500', color: 'var(--text-primary)' }}>
-                              {item.productName}
-                            </div>
-                            <div style={{ 'font-size': '0.875rem', color: 'var(--text-secondary)' }}>
-                              ${item.unitCost} each
-                            </div>
-                          </div>
-                          <div style={{ display: 'flex', 'align-items': 'center', gap: '1rem' }}>
-                            <div style={{ display: 'flex', 'align-items': 'center', gap: '0.5rem' }}>
-                              <Button
-                                onClick={() => updateQuantity(item.productId, item.quantity - 1)}
-                                variant="secondary"
-                                size="sm"
-                              >
-                                -
-                              </Button>
-                              <span style={{ 'min-width': '2rem', 'text-align': 'center', color: 'var(--text-primary)' }}>
-                                {item.quantity}
-                              </span>
-                              <Button
-                                onClick={() => updateQuantity(item.productId, item.quantity + 1)}
-                                variant="secondary"
-                                size="sm"
-                              >
-                                +
-                              </Button>
-                            </div>
-                            <Button
-                              onClick={() => removeProduct(item.productId)}
-                              variant="danger"
-                              size="sm"
-                            >
-                              Remove
-                            </Button>
-                          </div>
-                        </div>
-                      )}
-                    </For>
-                  </div>
-                </div>
-              </div>
-            </Show>
-
-            {/* Step 3: Production Details */}
-            <Show when={currentStep() === 3}>
-              <div style={{ display: 'flex', 'flex-direction': 'column', gap: '1.5rem' }}>
-                <div style={{ display: 'grid', 'grid-template-columns': '1fr 1fr', gap: '1rem' }}>
-                  <div>
-                    <label style={{
-                      display: 'block',
-                      'margin-bottom': '0.5rem',
-                      'font-weight': '500',
-                      color: 'var(--text-primary)',
-                    }}>
-                      Batch Number
-                    </label>
-                    <input
-                      type="text"
-                      value={batchNumber()}
-                      onInput={(e) => setBatchNumber(e.currentTarget.value)}
-                      style={{
-                        width: '100%',
-                        padding: '0.75rem',
-                        border: '1px solid var(--border-color)',
-                        'border-radius': '0.375rem',
-                        'background-color': 'var(--bg-primary)',
-                        color: 'var(--text-primary)',
-                      }}
-                    />
-                  </div>
-
-                  <div>
-                    <label style={{
-                      display: 'block',
-                      'margin-bottom': '0.5rem',
-                      'font-weight': '500',
-                      color: 'var(--text-primary)',
-                    }}>
-                      Workstation
-                    </label>
-                    <input
-                      type="text"
-                      value={workstation()}
-                      onInput={(e) => setWorkstation(e.currentTarget.value)}
-                      placeholder="e.g., Oven 1, Station A"
-                      style={{
-                        width: '100%',
-                        padding: '0.75rem',
-                        border: '1px solid var(--border-color)',
-                        'border-radius': '0.375rem',
-                        'background-color': 'var(--bg-primary)',
-                        color: 'var(--text-primary)',
-                      }}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label style={{
-                    display: 'block',
-                    'margin-bottom': '0.5rem',
-                    'font-weight': '500',
-                    color: 'var(--text-primary)',
-                  }}>
-                    Target Quantity
-                  </label>
-                  <input
-                    type="number"
-                    value={targetQuantity()}
-                    onInput={(e) => setTargetQuantity(parseInt(e.currentTarget.value) || 0)}
-                    min="0"
-                    style={{
-                      width: '100%',
-                      padding: '0.75rem',
-                      border: '1px solid var(--border-color)',
-                      'border-radius': '0.375rem',
-                      'background-color': 'var(--bg-primary)',
-                      color: 'var(--text-primary)',
-                    }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{
-                    display: 'block',
-                    'margin-bottom': '0.5rem',
-                    'font-weight': '500',
-                    color: 'var(--text-primary)',
-                  }}>
-                    Notes
-                  </label>
-                  <textarea
-                    value={notes()}
-                    onInput={(e) => setNotes(e.currentTarget.value)}
-                    placeholder="Additional production notes..."
-                    rows="4"
-                    style={{
-                      width: '100%',
-                      padding: '0.75rem',
-                      border: '1px solid var(--border-color)',
-                      'border-radius': '0.375rem',
-                      'background-color': 'var(--bg-primary)',
-                      color: 'var(--text-primary)',
-                      resize: 'vertical',
-                    }}
-                  />
-                </div>
-
-                {/* Order Summary */}
-                <div style={{
-                  padding: '1rem',
-                  'background-color': 'var(--bg-secondary)',
-                  'border-radius': '0.375rem',
-                  border: '1px solid var(--border-color)',
-                }}>
-                  <h3 style={{
-                    'font-weight': '500',
-                    color: 'var(--text-primary)',
-                    'margin-bottom': '0.75rem',
-                  }}>
-                    Order Summary
-                  </h3>
-                  <div style={{ display: 'flex', 'flex-direction': 'column', gap: '0.5rem' }}>
-                    <div style={{ display: 'flex', 'justify-content': 'space-between' }}>
-                      <span style={{ color: 'var(--text-secondary)' }}>Total Items:</span>
-                      <span style={{ color: 'var(--text-primary)', 'font-weight': '500' }}>
-                        {items().reduce((sum, item) => sum + item.quantity, 0)}
-                      </span>
-                    </div>
-                    <div style={{ display: 'flex', 'justify-content': 'space-between' }}>
-                      <span style={{ color: 'var(--text-secondary)' }}>Estimated Cost:</span>
-                      <span style={{ color: 'var(--text-primary)', 'font-weight': '500' }}>
-                        ${calculateTotal().toFixed(2)}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </Show>
-          </div>
-
-          {/* Footer */}
-          <div style={{
-            padding: '1.5rem',
-            'border-top': '1px solid var(--border-color)',
-            display: 'flex',
-            'justify-content': 'space-between',
-            gap: '1rem',
-          }}>
-            <Button
-              onClick={prevStep}
-              disabled={currentStep() === 1}
-              variant="secondary"
-              size="sm"
-            >
-              Previous
-            </Button>
-
-            <div style={{ display: 'flex', gap: '1rem' }}>
-              <Button
-                onClick={handleClose}
-                variant="secondary"
-                size="sm"
-              >
-                Cancel
-              </Button>
-
+            <FormRow cols={2}>
               <Show
-                when={currentStep() === 3}
+                when={hasMultipleAreas()}
                 fallback={
-                  <Button
-                    onClick={nextStep}
-                    variant="primary"
-                    size="sm"
-                  >
-                    Next
-                  </Button>
+                  <TextField
+                    label="Source"
+                    type="text"
+                    value={formatSourceLabel(source())}
+                    disabled
+                  />
                 }
               >
-                <Button
-                  onClick={handleSubmit}
-                  disabled={loading()}
-                  variant="primary"
-                  size="sm"
+                <Select
+                  label="Source"
+                  value={source()}
+                  onInput={(e) => setSource(e.currentTarget.value as InternalOrderSource)}
                 >
-                  {loading() ? 'Submitting...' : props.editOrder ? 'Update Order' : 'Create Order'}
-                </Button>
+                  <For each={userAreas()}>
+                    {(area) => (
+                      <option value={area}>{formatSourceLabel(area)}</option>
+                    )}
+                  </For>
+                </Select>
               </Show>
+
+              <TextField
+                label="Requested By"
+                type="text"
+                value={requestedBy()}
+                disabled
+              />
+            </FormRow>
+
+            <FormRow cols={2}>
+              <Select
+                label="Priority"
+                value={priority()}
+                onInput={(e) => setPriority(e.currentTarget.value as InternalOrderPriority)}
+              >
+                <option value="low">Low</option>
+                <option value="normal">Normal</option>
+                <option value="high">High</option>
+                <option value="rush">Rush</option>
+              </Select>
+
+              <DatePicker
+                label="Needed By Date *"
+                value={neededByDate()}
+                onChange={(value) => setNeededByDate(value)}
+                placeholder="When is it needed"
+                minDate={new Date().toISOString().split('T')[0]}
+              />
+            </FormRow>
+          </FormStack>
+        </Show>
+
+        {/* Step 2: Products */}
+        <Show when={currentStep() === 2}>
+          <FormStack>
+            <TextField
+              label="Search Products"
+              type="text"
+              value={searchQuery()}
+              onInput={(e) => setSearchQuery(e.currentTarget.value)}
+              placeholder="Search by name or category..."
+            />
+
+            <ScrollableList>
+              <For each={filteredProducts()}>
+                {(product) => (
+                  <ListItem
+                    title={product.name}
+                    subtitle={`${product.category} - $${product.basePrice}`}
+                    onClick={() => addProduct(product)}
+                    action={<Button variant="primary" size="sm">Add</Button>}
+                  />
+                )}
+              </For>
+            </ScrollableList>
+
+            <div>
+              <SectionTitle>Selected Products ({items().length})</SectionTitle>
+              <ItemStack>
+                <For each={items()}>
+                  {(item) => (
+                    <SelectedItem
+                      title={item.productName}
+                      subtitle={`$${item.unitCost} each`}
+                    >
+                      <QuantityControl>
+                        <Button
+                          onClick={() => updateQuantity(item.productId, item.quantity - 1)}
+                          variant="secondary"
+                          size="sm"
+                        >
+                          -
+                        </Button>
+                        <QuantityValue value={item.quantity} />
+                        <Button
+                          onClick={() => updateQuantity(item.productId, item.quantity + 1)}
+                          variant="secondary"
+                          size="sm"
+                        >
+                          +
+                        </Button>
+                      </QuantityControl>
+                      <Button
+                        onClick={() => removeProduct(item.productId)}
+                        variant="danger"
+                        size="sm"
+                      >
+                        Remove
+                      </Button>
+                    </SelectedItem>
+                  )}
+                </For>
+              </ItemStack>
             </div>
-          </div>
-        </div>
-      </div>
-    </Show>
+          </FormStack>
+        </Show>
+
+        {/* Step 3: Order Details */}
+        <Show when={currentStep() === 3}>
+          <FormStack>
+            <FormRow cols={2}>
+              <TextField
+                label="Order Number"
+                type="text"
+                value={orderNumber()}
+                disabled
+              />
+              <TextField
+                label="Batch Number"
+                type="text"
+                value={batchNumber()}
+                disabled
+              />
+            </FormRow>
+
+            <TextArea
+              label="Notes"
+              value={notes()}
+              onInput={(e) => setNotes(e.currentTarget.value)}
+              placeholder="Additional production notes..."
+              rows={4}
+            />
+
+            <Card variant="secondary">
+              <CardTitle>Order Summary</CardTitle>
+              <SummaryStack>
+                <SummaryRow
+                  label="Total Items:"
+                  value={items().reduce((sum, item) => sum + item.quantity, 0)}
+                />
+                <SummaryRow
+                  label="Estimated Cost:"
+                  value={`$${calculateTotal().toFixed(2)}`}
+                />
+              </SummaryStack>
+            </Card>
+          </FormStack>
+        </Show>
+      </ModalBody>
+
+      <ModalFooter spaceBetween>
+        <Button
+          onClick={prevStep}
+          disabled={currentStep() === 1}
+          variant="secondary"
+          size="sm"
+        >
+          Previous
+        </Button>
+
+        <ButtonGroup>
+          <Button onClick={handleClose} variant="secondary" size="sm">
+            Cancel
+          </Button>
+
+          <Show
+            when={currentStep() === 3}
+            fallback={
+              <Button onClick={nextStep} variant="primary" size="sm">
+                Next
+              </Button>
+            }
+          >
+            <Button
+              onClick={handleSubmit}
+              disabled={loading()}
+              variant="primary"
+              size="sm"
+            >
+              {loading() ? 'Submitting...' : props.editOrder ? 'Update Order' : 'Create Order'}
+            </Button>
+          </Show>
+        </ButtonGroup>
+      </ModalFooter>
+    </Modal>
   );
 };
 

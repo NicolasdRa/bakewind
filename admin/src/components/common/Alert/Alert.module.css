@@ -1,0 +1,55 @@
+/* Base Alert */
+.alert {
+  padding: 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+/* Variants */
+.error {
+  background-color: var(--error-lighter);
+  border: 1px solid var(--error-color);
+  color: var(--error-text);
+}
+
+.success {
+  background-color: var(--success-lighter);
+  border: 1px solid var(--success-color);
+  color: var(--success-text);
+}
+
+.warning {
+  background-color: var(--warning-lighter);
+  border: 1px solid var(--warning-color);
+  color: var(--warning-text);
+}
+
+.info {
+  background-color: var(--info-lighter);
+  border: 1px solid var(--info-color);
+  color: var(--info-text);
+}
+
+/* Icon */
+.icon {
+  flex-shrink: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+/* Content */
+.content {
+  flex: 1;
+}
+
+.title {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.message {
+  line-height: 1.5;
+}

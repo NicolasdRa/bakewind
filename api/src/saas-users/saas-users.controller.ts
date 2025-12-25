@@ -55,7 +55,7 @@ export class SaasUsersController {
   async getCurrentUserProfile(
     @Request() req: any,
   ): Promise<UserProfileResponseDto> {
-    const userId = req.user.sub;
+    const userId = req.user.userId;
     return this.saasUsersService.getUserProfile(userId);
   }
 
@@ -82,7 +82,7 @@ export class SaasUsersController {
     @Request() req: any,
     @Body() updateProfileDto: UpdateUserProfileDto,
   ): Promise<UserProfileResponseDto> {
-    const userId = req.user.sub;
+    const userId = req.user.userId;
     return this.saasUsersService.updateProfile(userId, updateProfileDto);
   }
 
@@ -115,7 +115,7 @@ export class SaasUsersController {
     @Request() req: any,
     @Body() changePasswordDto: ChangePasswordDto,
   ) {
-    const userId = req.user.sub;
+    const userId = req.user.userId;
     await this.saasUsersService.changePassword(
       userId,
       changePasswordDto.currentPassword,
@@ -144,7 +144,7 @@ export class SaasUsersController {
   async getAccountSettings(
     @Request() req: any,
   ): Promise<UserAccountSettingsDto> {
-    const userId = req.user.sub;
+    const userId = req.user.userId;
     return this.saasUsersService.getAccountSettings(userId);
   }
 
@@ -171,7 +171,7 @@ export class SaasUsersController {
     @Request() req: any,
     @Body() settingsDto: UserAccountSettingsDto,
   ): Promise<UserAccountSettingsDto> {
-    const userId = req.user.sub;
+    const userId = req.user.userId;
     return this.saasUsersService.updateAccountSettings(userId, settingsDto);
   }
 
@@ -221,7 +221,7 @@ export class SaasUsersController {
     description: 'Unauthorized',
   })
   async getSubscriptionStatus(@Request() req: any) {
-    const userId = req.user.sub;
+    const userId = req.user.userId;
     return this.saasUsersService.getSubscriptionStatus(userId);
   }
 
@@ -269,7 +269,7 @@ export class SaasUsersController {
     description: 'Unauthorized',
   })
   async getBillingHistory(@Request() req: any, @Query('limit') limit?: string) {
-    const userId = req.user.sub;
+    const userId = req.user.userId;
     const limitNum = limit ? parseInt(limit, 10) : 10;
     return this.saasUsersService.getBillingHistory(userId, limitNum);
   }
@@ -326,7 +326,7 @@ export class SaasUsersController {
     description: 'Unauthorized',
   })
   async getUsageStats(@Request() req: any) {
-    const userId = req.user.sub;
+    const userId = req.user.userId;
     return this.saasUsersService.getUsageStatistics(userId);
   }
 

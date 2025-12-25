@@ -1,6 +1,17 @@
 import { Component, createSignal, createResource, Show, createEffect } from "solid-js";
 import { inventoryApi, UpdateInventoryItemRequest } from "~/api/inventory";
+
+// Common components
+import { Modal, ModalHeader, ModalBody, ModalFooter } from "~/components/common/Modal";
+import { FormRow, FormStack } from "~/components/common/FormRow";
+import { ButtonGroup } from "~/components/common/Card";
+import Alert from "~/components/common/Alert";
 import Button from "~/components/common/Button";
+import TextField from "~/components/common/TextField";
+import TextArea from "~/components/common/TextArea";
+import Select from "~/components/common/Select";
+
+import styles from "./EditInventoryItemModal.module.css";
 
 interface EditInventoryItemModalProps {
   isOpen: boolean;
@@ -71,302 +82,160 @@ const EditInventoryItemModal: Component<EditInventoryItemModalProps> = (props) =
   };
 
   return (
-    <Show when={props.isOpen && props.itemId}>
-      <div
-        class="fixed inset-0 z-50 flex items-center justify-center p-4"
-        style={{ "background-color": "rgba(0, 0, 0, 0.5)" }}
-        onClick={props.onClose}
-      >
-        <div
-          class="rounded-xl border shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
-          style={{
-            "background-color": "var(--bg-primary)",
-            "border-color": "var(--border-color)",
-          }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div class="p-6 border-b" style={{ "border-color": "var(--border-color)" }}>
-            <h2 class="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
-              Edit Inventory Item
-            </h2>
-          </div>
+    <Modal isOpen={props.isOpen && !!props.itemId} onClose={props.onClose} size="lg">
+      <ModalHeader title="Edit Inventory Item" onClose={props.onClose} />
 
-          <Show when={!itemData.loading && itemData()} fallback={
-            <div class="p-12 text-center">
-              <div class="animate-spin rounded-full h-10 w-10 border-b-2 mx-auto" style={{
-                "border-color": "var(--primary-color)"
-              }}></div>
-            </div>
-          }>
-            <form onSubmit={handleSubmit} class="p-6 space-y-4">
+      <Show
+        when={!itemData.loading && itemData()}
+        fallback={
+          <div class={styles.loadingContainer}>
+            <div class={styles.spinner}></div>
+          </div>
+        }
+      >
+        <form onSubmit={handleSubmit}>
+          <ModalBody>
+            <FormStack>
               <Show when={error()}>
-                <div
-                  class="p-4 rounded-lg"
-                  style={{
-                    "background-color": "var(--error-light)",
-                    color: "var(--error-color)",
-                  }}
-                >
-                  {error()}
-                </div>
+                <Alert variant="error">{error()}</Alert>
               </Show>
 
               {/* Name */}
-              <div>
-                <label class="block text-sm font-medium mb-2" style={{ color: "var(--text-secondary)" }}>
-                  Item Name
-                </label>
-                <input
-                  type="text"
-                  value={formData().name || ""}
-                  onInput={(e) => updateField("name", e.currentTarget.value)}
-                  class="w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2"
-                  style={{
-                    "background-color": "var(--bg-primary)",
-                    "border-color": "var(--border-color)",
-                    color: "var(--text-primary)",
-                    "--tw-ring-color": "var(--primary-color)",
-                  }}
-                />
-              </div>
+              <TextField
+                label="Item Name"
+                type="text"
+                value={formData().name || ""}
+                onInput={(e) => updateField("name", e.currentTarget.value)}
+              />
 
               {/* Category and Unit */}
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-sm font-medium mb-2" style={{ color: "var(--text-secondary)" }}>
-                    Category
-                  </label>
-                  <select
-                    value={formData().category || ""}
-                    onChange={(e) => updateField("category", e.currentTarget.value as any)}
-                    class="w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2"
-                    style={{
-                      "background-color": "var(--bg-primary)",
-                      "border-color": "var(--border-color)",
-                      color: "var(--text-primary)",
-                      "--tw-ring-color": "var(--primary-color)",
-                    }}
-                  >
-                    <option value="ingredient">Ingredient</option>
-                    <option value="packaging">Packaging</option>
-                    <option value="supplies">Supplies</option>
-                  </select>
-                </div>
+              <FormRow cols={2}>
+                <Select
+                  label="Category"
+                  value={formData().category || ""}
+                  onChange={(e) => updateField("category", e.currentTarget.value as any)}
+                >
+                  <option value="ingredient">Ingredient</option>
+                  <option value="packaging">Packaging</option>
+                  <option value="supplies">Supplies</option>
+                </Select>
 
-                <div>
-                  <label class="block text-sm font-medium mb-2" style={{ color: "var(--text-secondary)" }}>
-                    Unit
-                  </label>
-                  <select
-                    value={formData().unit || ""}
-                    onChange={(e) => updateField("unit", e.currentTarget.value as any)}
-                    class="w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2"
-                    style={{
-                      "background-color": "var(--bg-primary)",
-                      "border-color": "var(--border-color)",
-                      color: "var(--text-primary)",
-                      "--tw-ring-color": "var(--primary-color)",
-                    }}
-                  >
-                    <option value="kg">Kilogram (kg)</option>
-                    <option value="g">Gram (g)</option>
-                    <option value="l">Liter (l)</option>
-                    <option value="ml">Milliliter (ml)</option>
-                    <option value="unit">Unit</option>
-                    <option value="dozen">Dozen</option>
-                  </select>
-                </div>
-              </div>
+                <Select
+                  label="Unit"
+                  value={formData().unit || ""}
+                  onChange={(e) => updateField("unit", e.currentTarget.value as any)}
+                >
+                  <option value="kg">Kilogram (kg)</option>
+                  <option value="g">Gram (g)</option>
+                  <option value="l">Liter (l)</option>
+                  <option value="ml">Milliliter (ml)</option>
+                  <option value="unit">Unit</option>
+                  <option value="dozen">Dozen</option>
+                </Select>
+              </FormRow>
 
               {/* Stock Quantities */}
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-sm font-medium mb-2" style={{ color: "var(--text-secondary)" }}>
-                    Current Stock
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.001"
-                    value={formData().currentStock ?? ""}
-                    onInput={(e) => updateField("currentStock", parseFloat(e.currentTarget.value) || 0)}
-                    class="w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2"
-                    style={{
-                      "background-color": "var(--bg-primary)",
-                      "border-color": "var(--border-color)",
-                      color: "var(--text-primary)",
-                      "--tw-ring-color": "var(--primary-color)",
-                    }}
-                  />
-                </div>
-
-                <div>
-                  <label class="block text-sm font-medium mb-2" style={{ color: "var(--text-secondary)" }}>
-                    Minimum Stock
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.001"
-                    value={formData().minimumStock ?? ""}
-                    onInput={(e) => updateField("minimumStock", parseFloat(e.currentTarget.value) || 0)}
-                    class="w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2"
-                    style={{
-                      "background-color": "var(--bg-primary)",
-                      "border-color": "var(--border-color)",
-                      color: "var(--text-primary)",
-                      "--tw-ring-color": "var(--primary-color)",
-                    }}
-                  />
-                </div>
-              </div>
-
-              {/* Reorder Settings */}
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-sm font-medium mb-2" style={{ color: "var(--text-secondary)" }}>
-                    Reorder Point
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.001"
-                    value={formData().reorderPoint ?? ""}
-                    onInput={(e) => updateField("reorderPoint", parseFloat(e.currentTarget.value) || 0)}
-                    class="w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2"
-                    style={{
-                      "background-color": "var(--bg-primary)",
-                      "border-color": "var(--border-color)",
-                      color: "var(--text-primary)",
-                      "--tw-ring-color": "var(--primary-color)",
-                    }}
-                  />
-                </div>
-
-                <div>
-                  <label class="block text-sm font-medium mb-2" style={{ color: "var(--text-secondary)" }}>
-                    Reorder Quantity
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.001"
-                    value={formData().reorderQuantity ?? ""}
-                    onInput={(e) => updateField("reorderQuantity", parseFloat(e.currentTarget.value) || 0)}
-                    class="w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2"
-                    style={{
-                      "background-color": "var(--bg-primary)",
-                      "border-color": "var(--border-color)",
-                      color: "var(--text-primary)",
-                      "--tw-ring-color": "var(--primary-color)",
-                    }}
-                  />
-                </div>
-              </div>
-
-              {/* Cost Per Unit */}
-              <div>
-                <label class="block text-sm font-medium mb-2" style={{ color: "var(--text-secondary)" }}>
-                  Cost Per Unit
-                </label>
-                <input
+              <FormRow cols={2}>
+                <TextField
+                  label="Current Stock"
                   type="number"
                   min="0"
-                  step="0.01"
-                  value={formData().costPerUnit ?? ""}
-                  onInput={(e) => updateField("costPerUnit", parseFloat(e.currentTarget.value) || 0)}
-                  class="w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2"
-                  style={{
-                    "background-color": "var(--bg-primary)",
-                    "border-color": "var(--border-color)",
-                    color: "var(--text-primary)",
-                    "--tw-ring-color": "var(--primary-color)",
-                  }}
+                  step="0.001"
+                  value={(formData().currentStock ?? "").toString()}
+                  onInput={(e) => updateField("currentStock", parseFloat(e.currentTarget.value) || 0)}
                 />
-              </div>
+
+                <TextField
+                  label="Minimum Stock"
+                  type="number"
+                  min="0"
+                  step="0.001"
+                  value={(formData().minimumStock ?? "").toString()}
+                  onInput={(e) => updateField("minimumStock", parseFloat(e.currentTarget.value) || 0)}
+                />
+              </FormRow>
+
+              {/* Reorder Settings */}
+              <FormRow cols={2}>
+                <TextField
+                  label="Reorder Point"
+                  type="number"
+                  min="0"
+                  step="0.001"
+                  value={(formData().reorderPoint ?? "").toString()}
+                  onInput={(e) => updateField("reorderPoint", parseFloat(e.currentTarget.value) || 0)}
+                />
+
+                <TextField
+                  label="Reorder Quantity"
+                  type="number"
+                  min="0"
+                  step="0.001"
+                  value={(formData().reorderQuantity ?? "").toString()}
+                  onInput={(e) => updateField("reorderQuantity", parseFloat(e.currentTarget.value) || 0)}
+                />
+              </FormRow>
+
+              {/* Cost Per Unit */}
+              <TextField
+                label="Cost Per Unit"
+                type="number"
+                min="0"
+                step="0.01"
+                value={(formData().costPerUnit ?? "").toString()}
+                onInput={(e) => updateField("costPerUnit", parseFloat(e.currentTarget.value) || 0)}
+              />
 
               {/* Optional Fields */}
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-sm font-medium mb-2" style={{ color: "var(--text-secondary)" }}>
-                    Supplier
-                  </label>
-                  <input
-                    type="text"
-                    value={formData().supplier || ""}
-                    onInput={(e) => updateField("supplier", e.currentTarget.value)}
-                    class="w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2"
-                    style={{
-                      "background-color": "var(--bg-primary)",
-                      "border-color": "var(--border-color)",
-                      color: "var(--text-primary)",
-                      "--tw-ring-color": "var(--primary-color)",
-                    }}
-                  />
-                </div>
+              <FormRow cols={2}>
+                <TextField
+                  label="Supplier"
+                  type="text"
+                  value={formData().supplier || ""}
+                  onInput={(e) => updateField("supplier", e.currentTarget.value)}
+                />
 
-                <div>
-                  <label class="block text-sm font-medium mb-2" style={{ color: "var(--text-secondary)" }}>
-                    Location
-                  </label>
-                  <input
-                    type="text"
-                    value={formData().location || ""}
-                    onInput={(e) => updateField("location", e.currentTarget.value)}
-                    class="w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2"
-                    style={{
-                      "background-color": "var(--bg-primary)",
-                      "border-color": "var(--border-color)",
-                      color: "var(--text-primary)",
-                      "--tw-ring-color": "var(--primary-color)",
-                    }}
-                  />
-                </div>
-              </div>
+                <TextField
+                  label="Location"
+                  type="text"
+                  value={formData().location || ""}
+                  onInput={(e) => updateField("location", e.currentTarget.value)}
+                />
+              </FormRow>
 
               {/* Notes */}
-              <div>
-                <label class="block text-sm font-medium mb-2" style={{ color: "var(--text-secondary)" }}>
-                  Notes
-                </label>
-                <textarea
-                  value={formData().notes || ""}
-                  onInput={(e) => updateField("notes", e.currentTarget.value)}
-                  rows={3}
-                  class="w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2"
-                  style={{
-                    "background-color": "var(--bg-primary)",
-                    "border-color": "var(--border-color)",
-                    color: "var(--text-primary)",
-                    "--tw-ring-color": "var(--primary-color)",
-                  }}
-                />
-              </div>
+              <TextArea
+                label="Notes"
+                value={formData().notes || ""}
+                onInput={(e) => updateField("notes", e.currentTarget.value)}
+                rows={3}
+              />
+            </FormStack>
+          </ModalBody>
 
-              {/* Action Buttons */}
-              <div class="flex justify-end gap-3 pt-4">
-                <Button
-                  type="button"
-                  onClick={props.onClose}
-                  variant="secondary"
-                  size="sm"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={loading()}
-                  variant="primary"
-                  size="sm"
-                >
-                  {loading() ? "Saving..." : "Save Changes"}
-                </Button>
-              </div>
-            </form>
-          </Show>
-        </div>
-      </div>
-    </Show>
+          <ModalFooter>
+            <ButtonGroup>
+              <Button
+                type="button"
+                onClick={props.onClose}
+                variant="secondary"
+                size="sm"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={loading()}
+                variant="primary"
+                size="sm"
+              >
+                {loading() ? "Saving..." : "Save Changes"}
+              </Button>
+            </ButtonGroup>
+          </ModalFooter>
+        </form>
+      </Show>
+    </Modal>
   );
 };
 

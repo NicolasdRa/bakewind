@@ -54,7 +54,6 @@ export const internalOrders = pgTable('internal_orders', {
   priority: internalOrderPriorityEnum('priority').default('normal').notNull(),
   requestedBy: varchar('requested_by', { length: 255 }).notNull(),
   requestedByEmail: varchar('requested_by_email', { length: 255 }),
-  department: varchar('department', { length: 255 }).notNull(),
   totalCost: decimal('total_cost', { precision: 10, scale: 2 }),
   requestedDate: timestamp('requested_date').notNull(),
   neededByDate: timestamp('needed_by_date').notNull(),

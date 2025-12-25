@@ -1,0 +1,48 @@
+.row {
+  display: grid;
+  gap: 1rem;
+}
+
+.cols1 {
+  grid-template-columns: 1fr;
+}
+
+.cols2 {
+  grid-template-columns: 1fr 1fr;
+}
+
+.cols3 {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.cols4 {
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+}
+
+/* Responsive - stack on mobile */
+@media (max-width: 640px) {
+  .cols2,
+  .cols3,
+  .cols4 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Form Stack - vertical layout with gap */
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.stackSm {
+  gap: 1rem;
+}
+
+.stackMd {
+  gap: 1.5rem;
+}
+
+.stackLg {
+  gap: 2rem;
+}

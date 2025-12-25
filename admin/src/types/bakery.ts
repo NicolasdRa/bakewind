@@ -113,7 +113,6 @@ export interface InternalOrder {
   priority: InternalOrderPriority
   requestedBy: string
   requestedByEmail?: string
-  department: string
   items: InternalOrderItem[]
   totalCost?: number
   requestedDate: Date

@@ -117,19 +117,11 @@ const InternalOrdersPage: Component = () => {
 
     try {
       const updateData: UpdateInternalOrderRequest = {
-        // Production-specific fields
         priority: orderData.priority,
-        productionDate: orderData.productionDate,
-        productionShift: orderData.productionShift,
-        assignedStaff: orderData.assignedStaff,
-        workstation: orderData.workstation,
         batchNumber: orderData.batchNumber,
-        targetQuantity: orderData.targetQuantity,
         notes: orderData.notes,
-        // Status and other fields
         status: orderData.status,
         source: orderData.source,
-        department: orderData.department,
         requestedBy: orderData.requestedBy,
         requestedByEmail: orderData.requestedByEmail,
         neededByDate: orderData.neededByDate,
@@ -160,6 +152,14 @@ const InternalOrdersPage: Component = () => {
 
   // Handle status change
   const handleStatusChange = async (order: InternalOrder, newStatus: InternalOrderStatus) => {
+    // If advancing to scheduled, use the schedule production modal to ensure production schedule is created
+    if (newStatus === 'scheduled') {
+      setOrderToSchedule(order);
+      setShowScheduleModal(true);
+      setShowDetailsModal(false);
+      return;
+    }
+
     try {
       await internalOrdersApi.updateOrderStatus(order.id, newStatus);
       showSuccess('Success', `Order status updated to ${newStatus.replace('_', ' ')}`);
@@ -602,7 +602,7 @@ const InternalOrdersPage: Component = () => {
                     <h4 class={styles.orderDetailsTitle}>Order Details</h4>
                     <div class={styles.orderDetailsList}>
                       <div><strong>Order #:</strong> {order().orderNumber}</div>
-                      <div><strong>Department:</strong> {order().department || 'N/A'}</div>
+                      <div><strong>Source:</strong> {order().source.replace('_', ' ')}</div>
                       <div><strong>Items:</strong> {order().items.length} product(s)</div>
                       <Show when={order().items.length > 0}>
                         <div class={styles.orderItemsList}>

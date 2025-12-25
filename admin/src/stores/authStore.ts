@@ -11,6 +11,8 @@ import * as authApi from '../api/auth';
 import { logger } from '../utils/logger';
 
 // Types
+export type UserArea = 'cafe' | 'restaurant' | 'front_house' | 'catering' | 'retail' | 'events';
+
 export interface User {
   id: string;
   email: string;
@@ -18,6 +20,7 @@ export interface User {
   lastName: string;
   businessName: string;
   role: string;
+  areas: UserArea[];
   subscriptionStatus: 'trial' | 'active' | 'past_due' | 'canceled';
   trialEndsAt: string | null;
   isEmailVerified: boolean;
@@ -111,6 +114,7 @@ export function createAuthStore() {
         lastName: user.lastName || '',
         businessName: user.businessName || '',
         role: user.role || 'VIEWER',
+        areas: user.areas || [],
         subscriptionStatus: user.subscriptionStatus || 'trial',
         trialEndsAt: user.trialEndsAt || null,
         isEmailVerified: user.isEmailVerified || false,

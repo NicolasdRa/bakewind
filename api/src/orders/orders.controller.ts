@@ -118,7 +118,7 @@ export class OrdersController {
     @Param('id') id: string,
     @Body() updateOrderDto: UpdateOrderDto,
   ) {
-    const userId = req.user.sub;
+    const userId = req.user.userId;
     return this.ordersService.updateOrder(id, updateOrderDto, userId);
   }
 
@@ -137,7 +137,7 @@ export class OrdersController {
     @Param('id') id: string,
     @Body('status') status: OrderStatus,
   ) {
-    const userId = req.user.sub;
+    const userId = req.user.userId;
     return this.ordersService.updateOrderStatus(id, status, userId);
   }
 
@@ -153,7 +153,7 @@ export class OrdersController {
     description: 'Order not found',
   })
   async deleteOrder(@Request() req: any, @Param('id') id: string) {
-    const userId = req.user.sub;
+    const userId = req.user.userId;
     await this.ordersService.deleteOrder(id, userId);
   }
 }

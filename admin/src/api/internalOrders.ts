@@ -43,7 +43,6 @@ export interface InternalOrder {
   priority: InternalOrderPriority;
   requestedBy: string;
   requestedByEmail: string | null;
-  department: string;
   totalCost: string | null;
   requestedDate: string;
   neededByDate: string;
@@ -90,23 +89,14 @@ export interface CreateInternalOrderRequest {
   priority?: InternalOrderPriority;
   requestedBy: string;
   requestedByEmail?: string;
-  department: string;
   totalCost?: string;
-  requestedDate: string;
   neededByDate: string;
   approvedBy?: string;
   approvedAt?: string;
   specialInstructions?: string;
   notes?: string;
   // Production fields
-  productionDate?: string;
-  productionShift?: string;
   batchNumber?: string;
-  assignedStaff?: string;
-  workstation?: string;
-  targetQuantity?: number;
-  actualQuantity?: number;
-  wasteQuantity?: number;
   qualityNotes?: string;
   // Recurring fields
   isRecurring?: boolean;
@@ -122,7 +112,6 @@ export interface UpdateInternalOrderRequest {
   priority?: InternalOrderPriority;
   requestedBy?: string;
   requestedByEmail?: string;
-  department?: string;
   totalCost?: string;
   neededByDate?: string;
   approvedBy?: string;

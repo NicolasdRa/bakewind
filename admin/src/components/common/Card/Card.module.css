@@ -1,0 +1,148 @@
+/* Base Card */
+.card {
+  padding: 1rem;
+  background-color: var(--bg-primary);
+  border-radius: 0.375rem;
+  border: 1px solid var(--border-color);
+}
+
+.cardSecondary {
+  background-color: var(--bg-secondary);
+}
+
+.cardNoBorder {
+  border: none;
+}
+
+/* Card Title */
+.title {
+  font-weight: 500;
+  color: var(--text-primary);
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+}
+
+.titleLg {
+  font-size: 1.125rem;
+}
+
+/* Summary Row - for key-value displays */
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.summaryLabel {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.summaryValue {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+/* Summary Stack */
+.summaryStack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* List Card - for clickable list items */
+.listItem {
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background-color 0.15s ease;
+}
+
+.listItem:hover {
+  background-color: var(--bg-secondary);
+}
+
+.listItem:last-child {
+  border-bottom: none;
+}
+
+.listItemContent {
+  flex: 1;
+}
+
+.listItemTitle {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.listItemSubtitle {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-top: 0.125rem;
+}
+
+/* Selected Item Card */
+.selectedItem {
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.375rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--bg-primary);
+}
+
+.selectedItemContent {
+  flex: 1;
+}
+
+.selectedItemActions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Quantity Control */
+.quantityControl {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.quantityValue {
+  min-width: 2rem;
+  text-align: center;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+/* Scrollable List Container */
+.scrollableList {
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid var(--border-color);
+  border-radius: 0.375rem;
+}
+
+/* Section Title */
+.sectionTitle {
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+}
+
+/* Item Stack */
+.itemStack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Button Group */
+.buttonGroup {
+  display: flex;
+  gap: 1rem;
+}

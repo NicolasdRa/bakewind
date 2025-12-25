@@ -1,0 +1,83 @@
+/* Ingredient Item */
+.ingredientItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  background-color: var(--bg-secondary);
+}
+
+.ingredientItemContent {
+  flex: 1;
+  color: var(--text-primary);
+}
+
+.ingredientAmount {
+  font-weight: 500;
+}
+
+.ingredientNotes {
+  font-size: 0.875rem;
+  font-style: italic;
+  margin-left: 0.25rem;
+  color: var(--text-tertiary);
+}
+
+/* Instruction Item */
+.instructionItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  background-color: var(--bg-secondary);
+}
+
+.instructionNumber {
+  flex-shrink: 0;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  font-weight: 600;
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.instructionContent {
+  flex: 1;
+  color: var(--text-primary);
+}
+
+.instructionActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Add Row */
+.addRow {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.addRowInput {
+  flex: 1;
+}
+
+/* Ingredient Form Grid */
+.ingredientForm {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr auto;
+  gap: 0.75rem;
+  align-items: end;
+}
+
+@media (max-width: 768px) {
+  .ingredientForm {
+    grid-template-columns: 1fr 1fr;
+  }
+}

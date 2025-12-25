@@ -3,6 +3,7 @@ import { API_BASE_URL } from '../../config/constants';
 import { logger } from '../../utils/logger';
 import AuthLayout from '../../layouts/AuthLayout';
 import Button from '~/components/common/Button';
+import TextField from '~/components/common/TextField';
 
 const ForgotPassword: Component = () => {
   const [email, setEmail] = createSignal('');
@@ -47,14 +48,20 @@ const ForgotPassword: Component = () => {
         when={!success()}
         fallback={
           <div class="space-y-4">
-            <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
+            <div
+              class="p-4 rounded-lg"
+              style={{
+                "background-color": "var(--success-light)",
+                color: "var(--success-color)"
+              }}
+            >
               <p class="font-medium mb-1">Check your email!</p>
               <p class="text-sm">
                 We've sent password reset instructions to your email address.
               </p>
             </div>
             <div class="text-center">
-              <a href="/login" class="text-blue-600 hover:text-blue-700 text-sm font-medium">
+              <a href="/login" style={{ color: "var(--primary-color)" }} class="text-sm font-medium hover:underline">
                 ← Back to Login
               </a>
             </div>
@@ -62,25 +69,25 @@ const ForgotPassword: Component = () => {
         }
       >
         <form onSubmit={handleSubmit} class="space-y-6">
-          {/* Email input */}
-          <div>
-            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">
-              Email Address
-            </label>
-            <input
-              type="email"
-              id="email"
-              value={email()}
-              onInput={(e) => setEmail(e.currentTarget.value)}
-              required
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="your.email@example.com"
-            />
-          </div>
+          <TextField
+            label="Email Address"
+            type="email"
+            id="email"
+            value={email()}
+            onInput={(e) => setEmail(e.currentTarget.value)}
+            required
+            placeholder="your.email@example.com"
+          />
 
           {/* Error message */}
           <Show when={error()}>
-            <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+            <div
+              class="p-4 rounded-lg"
+              style={{
+                "background-color": "var(--error-light)",
+                color: "var(--error-color)"
+              }}
+            >
               {error()}
             </div>
           </Show>
@@ -100,12 +107,12 @@ const ForgotPassword: Component = () => {
         {/* Links */}
         <div class="mt-6 text-center space-y-2">
           <div>
-            <a href="/login" class="text-gray-600 hover:text-gray-700 text-sm">
+            <a href="/login" style={{ color: "var(--text-secondary)" }} class="text-sm hover:underline">
               ← Back to Login
             </a>
           </div>
           <div>
-            <a href="/trial-signup" class="text-blue-600 hover:text-blue-700 text-sm font-medium">
+            <a href="/trial-signup" style={{ color: "var(--primary-color)" }} class="text-sm font-medium hover:underline">
               Don't have an account? Start free trial
             </a>
           </div>

@@ -4,6 +4,7 @@ import * as authApi from '~/api/auth';
 import { logger } from '../../utils/logger';
 import AuthLayout from '../../layouts/AuthLayout';
 import Button from '~/components/common/Button';
+import TextField from '~/components/common/TextField';
 
 const Register: Component = () => {
   const [email, setEmail] = createSignal('');
@@ -53,94 +54,70 @@ const Register: Component = () => {
   return (
     <AuthLayout title="Create Account" subtitle="Join BakeWind to manage your bakery">
       <form onSubmit={handleSubmit} class="space-y-4">
-        {/* First Name */}
-        <div>
-          <label for="firstName" class="block text-sm font-medium text-gray-700 mb-1">
-            First Name
-          </label>
-          <input
-            type="text"
-            id="firstName"
-            value={firstName()}
-            onInput={(e) => setFirstName(e.currentTarget.value)}
-            required
-            autocomplete="given-name"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="John"
-          />
-        </div>
+        <TextField
+          label="First Name"
+          type="text"
+          id="firstName"
+          value={firstName()}
+          onInput={(e) => setFirstName(e.currentTarget.value)}
+          required
+          autocomplete="given-name"
+          placeholder="John"
+        />
 
-        {/* Last Name */}
-        <div>
-          <label for="lastName" class="block text-sm font-medium text-gray-700 mb-1">
-            Last Name
-          </label>
-          <input
-            type="text"
-            id="lastName"
-            value={lastName()}
-            onInput={(e) => setLastName(e.currentTarget.value)}
-            required
-            autocomplete="family-name"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Smith"
-          />
-        </div>
+        <TextField
+          label="Last Name"
+          type="text"
+          id="lastName"
+          value={lastName()}
+          onInput={(e) => setLastName(e.currentTarget.value)}
+          required
+          autocomplete="family-name"
+          placeholder="Smith"
+        />
 
-        {/* Email */}
-        <div>
-          <label for="email" class="block text-sm font-medium text-gray-700 mb-1">
-            Email Address
-          </label>
-          <input
-            type="email"
-            id="email"
-            value={email()}
-            onInput={(e) => setEmail(e.currentTarget.value)}
-            required
-            autocomplete="email"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="your.email@example.com"
-          />
-        </div>
+        <TextField
+          label="Email Address"
+          type="email"
+          id="email"
+          value={email()}
+          onInput={(e) => setEmail(e.currentTarget.value)}
+          required
+          autocomplete="email"
+          placeholder="your.email@example.com"
+        />
 
-        {/* Password */}
-        <div>
-          <label for="password" class="block text-sm font-medium text-gray-700 mb-1">
-            Password
-          </label>
-          <input
-            type="password"
-            id="password"
-            value={password()}
-            onInput={(e) => setPassword(e.currentTarget.value)}
-            required
-            autocomplete="new-password"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="••••••••"
-          />
-        </div>
+        <TextField
+          label="Password"
+          type="password"
+          id="password"
+          value={password()}
+          onInput={(e) => setPassword(e.currentTarget.value)}
+          required
+          autocomplete="new-password"
+          placeholder="••••••••"
+        />
 
-        {/* Confirm Password */}
-        <div>
-          <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-1">
-            Confirm Password
-          </label>
-          <input
-            type="password"
-            id="confirmPassword"
-            value={confirmPassword()}
-            onInput={(e) => setConfirmPassword(e.currentTarget.value)}
-            required
-            autocomplete="new-password"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="••••••••"
-          />
-        </div>
+        <TextField
+          label="Confirm Password"
+          type="password"
+          id="confirmPassword"
+          value={confirmPassword()}
+          onInput={(e) => setConfirmPassword(e.currentTarget.value)}
+          required
+          autocomplete="new-password"
+          placeholder="••••••••"
+        />
 
         {/* Error message */}
         <Show when={error()}>
-          <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+          <div
+            class="p-4 rounded-lg"
+            style={{
+              "background-color": "var(--error-light)",
+              color: "var(--error-color)"
+            }}
+          >
             {error()}
           </div>
         </Show>
@@ -159,9 +136,9 @@ const Register: Component = () => {
 
       {/* Links */}
       <div class="mt-6 text-center">
-        <p class="text-sm text-gray-600">
+        <p class="text-sm" style={{ color: "var(--text-secondary)" }}>
           Already have an account?{' '}
-          <a href="/login" class="text-blue-600 hover:text-blue-700 font-medium">
+          <a href="/login" style={{ color: "var(--primary-color)" }} class="font-medium hover:underline">
             Sign in
           </a>
         </p>
