@@ -12,6 +12,7 @@ import SearchInput from "~/components/common/SearchInput";
 import FilterSelect from "~/components/common/FilterSelect";
 import Badge from "~/components/common/Badge";
 import Button from "~/components/common/Button";
+import DatePicker from "~/components/common/DatePicker";
 import { useInfoModal } from "~/stores/infoModalStore";
 import { orderLocksStore } from "~/stores/order-locks";
 import InternalOrderFormModal from "~/components/orders/InternalOrderFormModal";
@@ -617,13 +618,12 @@ const InternalOrdersPage: Component = () => {
                   </div>
 
                   <div class={styles.formGroup}>
-                    <label class={styles.formLabel}>Production Date</label>
-                    <input
-                      type="date"
+                    <DatePicker
+                      label="Production Date"
                       value={scheduledProductionDate()}
-                      onInput={(e) => setScheduledProductionDate(e.currentTarget.value)}
+                      onChange={(value) => setScheduledProductionDate(value)}
+                      minDate={new Date().toISOString().split('T')[0]}
                       disabled={isScheduling()}
-                      class={styles.formInput}
                     />
                     <p class={styles.formHint}>
                       A production schedule will be created for all products in this order.

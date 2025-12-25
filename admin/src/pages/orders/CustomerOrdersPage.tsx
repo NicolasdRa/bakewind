@@ -7,6 +7,7 @@ import SearchInput from "~/components/common/SearchInput";
 import FilterSelect from "~/components/common/FilterSelect";
 import Badge from "~/components/common/Badge";
 import Button from "~/components/common/Button";
+import DatePicker from "~/components/common/DatePicker";
 import { useInfoModal } from "~/stores/infoModalStore";
 import styles from "./CustomerOrdersPage.module.css";
 
@@ -351,12 +352,11 @@ const CustomerOrdersPage: Component = () => {
               Schedule production for order "{orderToSchedule()?.orderNumber}"
             </p>
             <div class={styles.formGroup}>
-              <label class={styles.formLabel}>Scheduled Date</label>
-              <input
-                type="date"
+              <DatePicker
+                label="Scheduled Date"
                 value={scheduledDate()}
-                onInput={(e) => setScheduledDate(e.currentTarget.value)}
-                class={styles.formInput}
+                onChange={(value) => setScheduledDate(value)}
+                minDate={new Date().toISOString().split('T')[0]}
               />
             </div>
             <div class={styles.modalActions}>

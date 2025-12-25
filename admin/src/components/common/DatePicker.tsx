@@ -1,4 +1,6 @@
 import { Component, createSignal, Show, onMount, onCleanup } from "solid-js";
+import { Portal } from "solid-js/web";
+import styles from "./DatePicker.module.css";
 
 interface DatePickerProps {
   value: string;
@@ -18,13 +20,56 @@ const DatePicker: Component<DatePickerProps> = (props) => {
   const [currentMonth, setCurrentMonth] = createSignal(
     props.value ? new Date(props.value) : new Date()
   );
+  const [dropdownPosition, setDropdownPosition] = createSignal({ top: 0, left: 0 });
   let containerRef: HTMLDivElement | undefined;
+  let inputRef: HTMLInputElement | undefined;
+  let calendarRef: HTMLDivElement | undefined;
 
   // Handle clicks outside to close calendar
   const handleClickOutside = (e: MouseEvent) => {
-    if (containerRef && !containerRef.contains(e.target as Node)) {
+    const target = e.target as Node;
+    const isOutsideContainer = containerRef && !containerRef.contains(target);
+    const isOutsideCalendar = calendarRef && !calendarRef.contains(target);
+
+    if (isOutsideContainer && isOutsideCalendar) {
       setShowCalendar(false);
     }
+  };
+
+  // Calculate and set dropdown position, then open calendar
+  const openCalendar = () => {
+    if (props.disabled) return;
+
+    if (inputRef) {
+      const rect = inputRef.getBoundingClientRect();
+      const calendarWidth = 320; // 20rem
+      const calendarHeight = 380; // Approximate height of calendar
+      const gap = 8; // 0.5rem gap
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+
+      // Calculate horizontal position - ensure calendar stays within viewport
+      let left = rect.left;
+      if (left + calendarWidth > viewportWidth) {
+        left = Math.max(8, viewportWidth - calendarWidth - 8);
+      }
+
+      // Calculate vertical position - flip above if not enough space below
+      let top = rect.bottom + gap;
+      if (top + calendarHeight > viewportHeight) {
+        // Not enough space below, try above
+        const topAbove = rect.top - gap - calendarHeight;
+        if (topAbove > 0) {
+          top = topAbove;
+        } else {
+          // Neither works well, position at top of viewport with some padding
+          top = Math.max(8, viewportHeight - calendarHeight - 8);
+        }
+      }
+
+      setDropdownPosition({ top, left });
+    }
+    setShowCalendar(!showCalendar());
   };
 
   onMount(() => {
@@ -135,12 +180,10 @@ const DatePicker: Component<DatePickerProps> = (props) => {
     const firstDay = getFirstDayOfMonth(currentMonth());
     const days: (number | null)[] = [];
 
-    // Add empty cells for days before the first day of the month
     for (let i = 0; i < firstDay; i++) {
       days.push(null);
     }
 
-    // Add days of the month
     for (let i = 1; i <= daysInMonth; i++) {
       days.push(i);
     }
@@ -148,41 +191,23 @@ const DatePicker: Component<DatePickerProps> = (props) => {
     return days;
   };
 
+  const getDayButtonClass = (day: number) => {
+    const classes = [styles.dayButton];
+    if (isSelectedDate(day)) classes.push(styles.dayButtonSelected);
+    if (isToday(day)) classes.push(styles.dayButtonToday);
+    if (isDateDisabled(day)) classes.push(styles.dayButtonDisabled);
+    return classes.join(" ");
+  };
+
   return (
-    <div ref={containerRef} style={{ position: "relative", width: "100%" }}>
+    <div ref={containerRef} class={styles.container}>
       {props.label && (
-        <label
-          style={{
-            display: "block",
-            "font-size": "0.875rem",
-            "font-weight": "500",
-            "margin-bottom": "0.5rem",
-            color: "var(--text-secondary)",
-          }}
-        >
-          {props.label}
-        </label>
+        <label class={styles.label}>{props.label}</label>
       )}
 
-      <div style={{ position: "relative" }}>
-        <div
-          style={{
-            position: "absolute",
-            top: "50%",
-            left: "0.75rem",
-            transform: "translateY(-50%)",
-            display: "flex",
-            "align-items": "center",
-            "pointer-events": "none",
-            color: "var(--text-tertiary)",
-          }}
-        >
-          <svg
-            style={{ width: "1.25rem", height: "1.25rem" }}
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
+      <div class={styles.inputWrapper}>
+        <div class={styles.icon}>
+          <svg class={styles.iconSvg} fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path
               stroke-linecap="round"
               stroke-linejoin="round"
@@ -193,295 +218,94 @@ const DatePicker: Component<DatePickerProps> = (props) => {
         </div>
 
         <input
+          ref={inputRef}
           type="text"
+          class={styles.input}
           value={formatDisplayDate(selectedDate())}
           placeholder={props.placeholder || "Select date"}
-          onClick={() => !props.disabled && setShowCalendar(!showCalendar())}
+          onClick={openCalendar}
           readOnly
           disabled={props.disabled}
-          style={{
-            width: "100%",
-            "padding-left": "2.5rem",
-            "padding-right": "1rem",
-            "padding-top": "0.625rem",
-            "padding-bottom": "0.625rem",
-            border: "1px solid var(--border-color)",
-            "border-radius": "0.5rem",
-            "background-color": props.disabled
-              ? "var(--bg-secondary)"
-              : "var(--bg-primary)",
-            color: "var(--text-primary)",
-            cursor: props.disabled ? "not-allowed" : "pointer",
-            transition: "all 0.2s",
-            outline: "none",
-          }}
-          onFocus={(e) =>
-            (e.currentTarget.style.boxShadow =
-              "0 0 0 2px var(--primary-color-alpha)")
-          }
-          onBlur={(e) => (e.currentTarget.style.boxShadow = "none")}
         />
 
         <Show when={showCalendar()}>
-          <div
-            style={{
-              position: "absolute",
-              top: "calc(100% + 0.5rem)",
-              left: "0",
-              "z-index": "50",
-              width: "20rem",
-              padding: "1rem",
-              "background-color": "var(--bg-primary)",
-              border: "1px solid var(--border-color)",
-              "border-radius": "0.5rem",
-              "box-shadow":
-                "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Calendar Header */}
+          <Portal mount={document.body}>
             <div
+              ref={calendarRef}
+              class={styles.calendar}
               style={{
-                display: "flex",
-                "align-items": "center",
-                "justify-content": "space-between",
-                "margin-bottom": "1rem",
+                top: `${dropdownPosition().top}px`,
+                left: `${dropdownPosition().left}px`,
               }}
+              onClick={(e) => e.stopPropagation()}
             >
-              <button
-                type="button"
-                onClick={handlePreviousMonth}
-                style={{
-                  padding: "0.25rem",
-                  "background-color": "transparent",
-                  border: "none",
-                  "border-radius": "0.25rem",
-                  cursor: "pointer",
-                  color: "var(--text-primary)",
-                  transition: "background-color 0.2s",
-                }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.backgroundColor =
-                    "var(--bg-secondary)")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.backgroundColor = "transparent")
-                }
-              >
-                <svg
-                  style={{ width: "1.25rem", height: "1.25rem" }}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M15 19l-7-7 7-7"
-                  />
-                </svg>
-              </button>
+              {/* Calendar Header */}
+              <div class={styles.calendarHeader}>
+                <button type="button" onClick={handlePreviousMonth} class={styles.navButton}>
+                  <svg class={styles.navButtonIcon} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
 
-              <div
-                style={{
-                  "font-weight": "600",
-                  color: "var(--text-primary)",
-                }}
-              >
-                {currentMonth().toLocaleDateString("en-US", {
-                  month: "long",
-                  year: "numeric",
-                })}
+                <div class={styles.monthYear}>
+                  {currentMonth().toLocaleDateString("en-US", {
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </div>
+
+                <button type="button" onClick={handleNextMonth} class={styles.navButton}>
+                  <svg class={styles.navButtonIcon} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
               </div>
 
-              <button
-                type="button"
-                onClick={handleNextMonth}
-                style={{
-                  padding: "0.25rem",
-                  "background-color": "transparent",
-                  border: "none",
-                  "border-radius": "0.25rem",
-                  cursor: "pointer",
-                  color: "var(--text-primary)",
-                  transition: "background-color 0.2s",
-                }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.backgroundColor =
-                    "var(--bg-secondary)")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.backgroundColor = "transparent")
-                }
-              >
-                <svg
-                  style={{ width: "1.25rem", height: "1.25rem" }}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M9 5l7 7-7 7"
-                  />
-                </svg>
-              </button>
-            </div>
+              {/* Day Labels */}
+              <div class={styles.dayLabels}>
+                {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((day) => (
+                  <div class={styles.dayLabel}>{day}</div>
+                ))}
+              </div>
 
-            {/* Day Labels */}
-            <div
-              style={{
-                display: "grid",
-                "grid-template-columns": "repeat(7, 1fr)",
-                gap: "0.25rem",
-                "margin-bottom": "0.5rem",
-              }}
-            >
-              {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((day) => (
-                <div
-                  style={{
-                    "text-align": "center",
-                    "font-size": "0.75rem",
-                    "font-weight": "600",
-                    color: "var(--text-secondary)",
-                    padding: "0.5rem 0",
-                  }}
-                >
-                  {day}
-                </div>
-              ))}
-            </div>
-
-            {/* Calendar Days */}
-            <div
-              style={{
-                display: "grid",
-                "grid-template-columns": "repeat(7, 1fr)",
-                gap: "0.25rem",
-              }}
-            >
-              {renderCalendar().map((day) => (
-                <Show
-                  when={day !== null}
-                  fallback={
-                    <div
-                      style={{
-                        "aspect-ratio": "1",
-                      }}
-                    />
-                  }
-                >
-                  <button
-                    type="button"
-                    disabled={isDateDisabled(day!)}
-                    onClick={() => handleDateSelect(day!)}
-                    style={{
-                      "aspect-ratio": "1",
-                      display: "flex",
-                      "align-items": "center",
-                      "justify-content": "center",
-                      "border-radius": "0.375rem",
-                      "font-size": "0.875rem",
-                      border: "none",
-                      cursor: isDateDisabled(day!) ? "not-allowed" : "pointer",
-                      "background-color": isSelectedDate(day!)
-                        ? "var(--primary-color)"
-                        : "transparent",
-                      color: isSelectedDate(day!)
-                        ? "white"
-                        : isDateDisabled(day!)
-                          ? "var(--text-tertiary)"
-                          : "var(--text-primary)",
-                      "font-weight": isToday(day!) ? "600" : "normal",
-                      opacity: isDateDisabled(day!) ? "0.4" : "1",
-                      transition: "all 0.2s",
-                      outline: isToday(day!) ? "2px solid var(--primary-color)" : "none",
-                      "outline-offset": "-2px",
-                    }}
-                    onMouseEnter={(e) => {
-                      if (!isDateDisabled(day!) && !isSelectedDate(day!)) {
-                        e.currentTarget.style.backgroundColor =
-                          "var(--bg-secondary)";
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!isSelectedDate(day!)) {
-                        e.currentTarget.style.backgroundColor = "transparent";
-                      }
-                    }}
+              {/* Calendar Days */}
+              <div class={styles.daysGrid}>
+                {renderCalendar().map((day) => (
+                  <Show
+                    when={day !== null}
+                    fallback={<div class={styles.emptyDay} />}
                   >
-                    {day}
-                  </button>
-                </Show>
-              ))}
-            </div>
+                    <button
+                      type="button"
+                      disabled={isDateDisabled(day!)}
+                      onClick={() => handleDateSelect(day!)}
+                      class={getDayButtonClass(day!)}
+                    >
+                      {day}
+                    </button>
+                  </Show>
+                ))}
+              </div>
 
-            {/* Footer Buttons */}
-            <div
-              style={{
-                display: "flex",
-                gap: "0.5rem",
-                "margin-top": "1rem",
-                "padding-top": "1rem",
-                "border-top": "1px solid var(--border-color)",
-              }}
-            >
-              <button
-                type="button"
-                onClick={handleToday}
-                style={{
-                  flex: "1",
-                  padding: "0.5rem",
-                  "background-color": "var(--bg-secondary)",
-                  border: "none",
-                  "border-radius": "0.375rem",
-                  "font-size": "0.875rem",
-                  "font-weight": "500",
-                  color: "var(--text-primary)",
-                  cursor: "pointer",
-                  transition: "background-color 0.2s",
-                }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.backgroundColor =
-                    "var(--border-color)")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.backgroundColor =
-                    "var(--bg-secondary)")
-                }
-              >
-                Today
-              </button>
-              <button
-                type="button"
-                onClick={handleClear}
-                style={{
-                  flex: "1",
-                  padding: "0.5rem",
-                  "background-color": "transparent",
-                  border: "1px solid var(--border-color)",
-                  "border-radius": "0.375rem",
-                  "font-size": "0.875rem",
-                  "font-weight": "500",
-                  color: "var(--text-primary)",
-                  cursor: "pointer",
-                  transition: "all 0.2s",
-                }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.backgroundColor =
-                    "var(--bg-secondary)")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.backgroundColor = "transparent")
-                }
-              >
-                Clear
-              </button>
+              {/* Footer Buttons */}
+              <div class={styles.footer}>
+                <button
+                  type="button"
+                  onClick={handleToday}
+                  class={`${styles.footerButton} ${styles.todayButton}`}
+                >
+                  Today
+                </button>
+                <button
+                  type="button"
+                  onClick={handleClear}
+                  class={`${styles.footerButton} ${styles.clearButton}`}
+                >
+                  Clear
+                </button>
+              </div>
             </div>
-          </div>
+          </Portal>
         </Show>
       </div>
     </div>

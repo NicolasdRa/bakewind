@@ -3,6 +3,7 @@ import { useAuth } from "~/context/AuthContext"
 import * as usersApi from '~/api/users'
 import LoadingSpinner from "~/components/LoadingSpinner/LoadingSpinner"
 import Button from "~/components/common/Button"
+import DatePicker from "~/components/common/DatePicker"
 import styles from './ProfilePage.module.css'
 
 // Type Definitions
@@ -486,11 +487,9 @@ const ProfilePage: Component = () => {
                       </div>
                     }
                   >
-                    <input
-                      type="date"
+                    <DatePicker
                       value={formState().dateOfBirth || ''}
-                      onInput={(e) => updateFormField('dateOfBirth', e.currentTarget.value)}
-                      class={styles.input}
+                      onChange={(value) => updateFormField('dateOfBirth', value)}
                     />
                   </Show>
                 </div>

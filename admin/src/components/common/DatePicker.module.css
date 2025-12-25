@@ -1,0 +1,205 @@
+/* DatePicker Container */
+.container {
+  position: relative;
+  width: 100%;
+}
+
+/* Label */
+.label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: var(--text-secondary);
+}
+
+/* Input wrapper */
+.inputWrapper {
+  position: relative;
+}
+
+/* Icon container */
+.icon {
+  position: absolute;
+  top: 50%;
+  left: 0.75rem;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+  color: var(--text-tertiary);
+}
+
+.iconSvg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+/* Input field */
+.input {
+  width: 100%;
+  padding-left: 2.5rem;
+  padding-right: 1rem;
+  padding-top: 0.625rem;
+  padding-bottom: 0.625rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s;
+  outline: none;
+}
+
+.input:focus {
+  box-shadow: 0 0 0 2px var(--primary-color-alpha);
+}
+
+.input:disabled {
+  background-color: var(--bg-secondary);
+  cursor: not-allowed;
+}
+
+/* Calendar dropdown - rendered via Portal */
+.calendar {
+  position: fixed;
+  z-index: 10000;
+  width: 20rem;
+  padding: 1rem;
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Calendar header */
+.calendarHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.navButton {
+  padding: 0.25rem;
+  background-color: transparent;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  color: var(--text-primary);
+  transition: background-color 0.2s;
+}
+
+.navButton:hover {
+  background-color: var(--bg-secondary);
+}
+
+.navButtonIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.monthYear {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Day labels */
+.dayLabels {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.dayLabel {
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  padding: 0.5rem 0;
+}
+
+/* Calendar days grid */
+.daysGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.25rem;
+}
+
+.emptyDay {
+  aspect-ratio: 1;
+}
+
+.dayButton {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  border: none;
+  cursor: pointer;
+  background-color: transparent;
+  color: var(--text-primary);
+  transition: all 0.2s;
+}
+
+.dayButton:hover:not(:disabled):not(.dayButtonSelected) {
+  background-color: var(--bg-secondary);
+}
+
+.dayButtonSelected {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.dayButtonToday {
+  font-weight: 600;
+  outline: 2px solid var(--primary-color);
+  outline-offset: -2px;
+}
+
+.dayButtonDisabled {
+  color: var(--text-tertiary);
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Footer buttons */
+.footer {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.footerButton {
+  flex: 1;
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.todayButton {
+  background-color: var(--bg-secondary);
+  border: none;
+}
+
+.todayButton:hover {
+  background-color: var(--border-color);
+}
+
+.clearButton {
+  background-color: transparent;
+  border: 1px solid var(--border-color);
+}
+
+.clearButton:hover {
+  background-color: var(--bg-secondary);
+}
