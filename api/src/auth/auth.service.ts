@@ -8,7 +8,8 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
 import { UsersService } from '../users/users.service';
-// TODO: Replace TrialAccountsService with TenantsService after tenants module is implemented
+import { TenantsService } from '../tenants/tenants.service';
+import { StaffService } from '../staff/staff.service';
 import { StripeService } from '../stripe/stripe.service';
 import { RedisService } from '../redis/redis.service';
 import type {
@@ -28,10 +29,28 @@ export interface JwtPayload {
   exp: number;
 }
 
+export interface TenantContext {
+  id: string;
+  businessName: string;
+  subscriptionStatus: string;
+  trialEndsAt: Date | null;
+  onboardingCompleted: boolean;
+}
+
+export interface StaffContext {
+  id: string;
+  tenantId: string;
+  position: string | null;
+  department: string | null;
+  areas: string[];
+}
+
 export interface AuthResult {
   user: Omit<UsersData, 'password' | 'refreshToken'> & {
     locationId: string[];
   };
+  tenant: TenantContext | null;
+  staff: StaffContext | null;
   accessToken: string;
   refreshToken: string;
   expiresIn: string;
@@ -55,7 +74,8 @@ export class AuthService {
 
   constructor(
     private usersService: UsersService,
-    // TODO: Inject TenantsService when implemented
+    private tenantsService: TenantsService,
+    private staffService: StaffService,
     private stripeService: StripeService,
     private jwtService: JwtService,
     private configService: ConfigService,
@@ -122,8 +142,16 @@ export class AuthService {
     // Get user locations
     const locationIds = await this.usersService.getUserLocationIds(user.id);
 
+    // Get tenant and staff context based on role
+    const { tenant, staff } = await this.getTenantAndStaffContext(
+      user.id,
+      user.role,
+    );
+
     this.logger.log(`✅ User ${user.email} logged in successfully`, {
       userId: user.id,
+      role: user.role,
+      tenantId: tenant?.id,
       ipAddress: auditContext?.ipAddress,
       correlationId: auditContext?.correlationId,
     });
@@ -135,10 +163,67 @@ export class AuthService {
         ...user,
         locationId: locationIds,
       },
+      tenant,
+      staff,
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
       expiresIn: appConfig.jwt.expiresIn,
     };
+  }
+
+  /**
+   * Get tenant and staff context for a user
+   * - OWNER: gets tenant they own
+   * - STAFF: gets tenant they work for + staff profile
+   * - ADMIN/CUSTOMER: no tenant context
+   */
+  private async getTenantAndStaffContext(
+    userId: string,
+    role: string,
+  ): Promise<{ tenant: TenantContext | null; staff: StaffContext | null }> {
+    let tenant: TenantContext | null = null;
+    let staff: StaffContext | null = null;
+
+    if (role === 'OWNER') {
+      const tenantRecord = await this.tenantsService.findByOwnerUserId(userId);
+      if (tenantRecord) {
+        tenant = {
+          id: tenantRecord.id,
+          businessName: tenantRecord.businessName,
+          subscriptionStatus: tenantRecord.subscriptionStatus,
+          trialEndsAt: tenantRecord.trialEndsAt,
+          onboardingCompleted: tenantRecord.onboardingCompleted,
+        };
+      }
+    } else if (role === 'STAFF') {
+      const staffRecord = await this.staffService.findByUserId(userId);
+      if (staffRecord) {
+        staff = {
+          id: staffRecord.id,
+          tenantId: staffRecord.tenantId,
+          position: staffRecord.position,
+          department: staffRecord.department,
+          areas: staffRecord.areas || [],
+        };
+
+        // Also get tenant info for staff
+        const tenantRecord = await this.tenantsService.findById(
+          staffRecord.tenantId,
+        );
+        if (tenantRecord) {
+          tenant = {
+            id: tenantRecord.id,
+            businessName: tenantRecord.businessName,
+            subscriptionStatus: tenantRecord.subscriptionStatus,
+            trialEndsAt: tenantRecord.trialEndsAt,
+            onboardingCompleted: tenantRecord.onboardingCompleted,
+          };
+        }
+      }
+    }
+    // ADMIN and CUSTOMER roles don't have tenant context
+
+    return { tenant, staff };
   }
 
   async refreshTokens(
@@ -319,9 +404,16 @@ export class AuthService {
     // Get user locations
     const locationIds = await this.usersService.getUserLocationIds(user.id);
 
+    // Get tenant context (for OWNER, tenant was just created in hooks)
+    const { tenant, staff } = await this.getTenantAndStaffContext(
+      user.id,
+      user.role,
+    );
+
     this.logger.log(`✅ User registered: ${user.email}`, {
       userId: user.id,
       role: user.role,
+      tenantId: tenant?.id,
       ipAddress: auditContext?.ipAddress,
       correlationId: auditContext?.correlationId,
     });
@@ -333,6 +425,8 @@ export class AuthService {
         ...user,
         locationId: locationIds,
       },
+      tenant,
+      staff,
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
       expiresIn: appConfig.jwt.expiresIn,
@@ -391,7 +485,11 @@ export class AuthService {
   }
 
   async getUserProfile(userId: string): Promise<
-    | (Omit<UsersData, 'password' | 'refreshToken'> & { locationId: string[] })
+    | (Omit<UsersData, 'password' | 'refreshToken'> & {
+        locationId: string[];
+        tenant: TenantContext | null;
+        staff: StaffContext | null;
+      })
     | null
   > {
     const user = await this.usersService.findById(userId);
@@ -400,11 +498,17 @@ export class AuthService {
     }
 
     const locationIds = await this.usersService.getUserLocationIds(userId);
+    const { tenant, staff } = await this.getTenantAndStaffContext(
+      userId,
+      user.role,
+    );
 
     // user already has password and refreshToken omitted by findById
     return {
       ...user,
       locationId: locationIds,
+      tenant,
+      staff,
     };
   }
 
@@ -451,15 +555,30 @@ export class AuthService {
       );
     }
 
-    // TODO: Implement with TenantsService
-    // Create tenant record with trial tracking (replaces trial_accounts)
-    // This should:
-    // 1. Create a tenant with ownerUserId = user.id
-    // 2. Set businessName from metadata
-    // 3. Set businessSize, signupSource in tenant for analytics
-    // 4. Calculate and set trialEndsAt based on trialLengthDays
-    this.logger.log(
-      `Trial registration - TenantsService needed for user ${user.id}`,
-    );
+    // Create tenant record with trial tracking
+    const businessName = metadata?.businessName || `${user.firstName}'s Bakery`;
+
+    const createTenantDto: {
+      ownerUserId: string;
+      businessName: string;
+      signupSource?: string;
+      businessSize?: '1' | '2-3' | '4-10' | '10+';
+    } = {
+      ownerUserId: user.id,
+      businessName,
+      signupSource: 'web',
+    };
+
+    if (metadata?.businessSize) {
+      createTenantDto.businessSize = metadata.businessSize;
+    }
+
+    const tenant = await this.tenantsService.create(createTenantDto);
+
+    if (tenant) {
+      this.logger.log(
+        `Created tenant ${tenant.id} for owner ${user.id} with 14-day trial`,
+      );
+    }
   }
 }
