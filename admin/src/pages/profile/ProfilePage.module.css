@@ -1,5 +1,4 @@
-/* ProfilePage CSS Module - Matching Dashboard Pattern */
-@reference "tailwindcss";
+/* ProfilePage CSS Module */
 
 .editingSubtitle {
   font-size: var(--font-size-base);
@@ -10,11 +9,17 @@
 
 /* Loading State */
 .loadingContainer {
-  @apply flex flex-col items-center justify-center p-16 min-h-96;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-16);
+  min-height: 24rem;
 }
 
 .loadingText {
-  @apply mt-4 text-sm;
+  margin-top: var(--spacing-4);
+  font-size: var(--font-size-sm);
   color: var(--text-secondary);
 }
 
@@ -24,7 +29,9 @@
 }
 
 .editActions {
-  @apply flex gap-3 items-center;
+  display: flex;
+  gap: var(--spacing-3);
+  align-items: center;
 }
 
 /* Success Message */
@@ -35,33 +42,23 @@
   border-radius: var(--radius-lg);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
-  animation: var(--animate-slide-in);
   display: flex;
   align-items: center;
   gap: var(--spacing-2);
 }
 
-.successMessage::before {
-  content: '✓';
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.25rem;
-  height: 1.25rem;
-  background: var(--success-color);
-  color: white;
-  border-radius: 50%;
-  font-size: var(--font-size-xs);
-}
-
-/* Enhanced Sections */
+/* Sections as cards */
 .section {
-  padding: var(--spacing-4);
-  border-bottom: 1px solid var(--border-light);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-6);
+  margin-bottom: var(--spacing-6);
+  box-shadow: var(--shadow-card);
 }
 
 .section:last-child {
-  border-bottom: none;
+  margin-bottom: 0;
 }
 
 .sectionTitle {
@@ -111,20 +108,19 @@
 /* Field Value Display (View Mode) */
 .fieldValue {
   padding: var(--spacing-3) var(--spacing-4);
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-light);
+  background: var(--input-bg);
+  border: var(--input-border);
   border-radius: var(--radius-lg);
   color: var(--text-primary);
   font-size: var(--font-size-base);
   min-height: 2.75rem;
   display: flex;
   align-items: center;
-  transition: all var(--duration-fast) var(--easing-default);
 }
 
 .fieldValueLocked {
   padding: var(--spacing-3) var(--spacing-4);
-  background: var(--bg-tertiary);
+  background: var(--input-bg);
   border: 1px dashed var(--border-color);
   border-radius: var(--radius-lg);
   color: var(--text-muted);
@@ -133,7 +129,6 @@
   display: flex;
   align-items: center;
   cursor: not-allowed;
-  opacity: 0.8;
 }
 
 .lockedBadge {
@@ -162,17 +157,15 @@
   width: 100%;
   padding: var(--input-padding);
   background: var(--input-bg);
-  border: 2px solid var(--primary-light);
-  border-radius: var(--input-radius);
+  border: var(--input-border);
+  border-radius: var(--radius-lg);
   color: var(--text-primary);
   font-size: var(--font-size-base);
-  transition: all var(--duration-fast) var(--easing-default);
-  animation: var(--animate-fade-in);
-  box-shadow: 0 0 0 3px var(--primary-light);
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .input:hover {
-  border-color: var(--primary-color);
+  border-color: var(--border-hover);
 }
 
 .input:focus {
@@ -183,29 +176,30 @@
 
 .input::placeholder {
   color: var(--text-muted);
-  font-style: italic;
 }
 
 .inputError {
   border-color: var(--error-color);
-  box-shadow: 0 0 0 3px var(--error-light);
+}
+
+.inputError:focus {
+  box-shadow: 0 0 0 2px var(--error-light);
 }
 
 .select {
   width: 100%;
   padding: var(--input-padding);
   background: var(--input-bg);
-  border: 2px solid var(--primary-light);
-  border-radius: var(--input-radius);
+  border: var(--input-border);
+  border-radius: var(--radius-lg);
   color: var(--text-primary);
   font-size: var(--font-size-base);
-  transition: all var(--duration-fast) var(--easing-default);
+  transition: border-color 0.15s, box-shadow 0.15s;
   cursor: pointer;
-  box-shadow: 0 0 0 3px var(--primary-light);
 }
 
 .select:hover {
-  border-color: var(--primary-color);
+  border-color: var(--border-hover);
 }
 
 .select:focus {
@@ -218,19 +212,18 @@
   width: 100%;
   padding: var(--input-padding);
   background: var(--input-bg);
-  border: 2px solid var(--primary-light);
-  border-radius: var(--input-radius);
+  border: var(--input-border);
+  border-radius: var(--radius-lg);
   color: var(--text-primary);
   font-size: var(--font-size-base);
   resize: vertical;
   min-height: 100px;
-  transition: all var(--duration-fast) var(--easing-default);
-  box-shadow: 0 0 0 3px var(--primary-light);
+  transition: border-color 0.15s, box-shadow 0.15s;
   font-family: inherit;
 }
 
 .textarea:hover {
-  border-color: var(--primary-color);
+  border-color: var(--border-hover);
 }
 
 .textarea:focus {
@@ -241,7 +234,6 @@
 
 .textarea::placeholder {
   color: var(--text-muted);
-  font-style: italic;
 }
 
 /* Character Counter */
@@ -254,10 +246,10 @@
 
 /* Role and Status Cards */
 .infoCard {
-  background: var(--bg-secondary);
+  background: var(--input-bg);
   padding: var(--spacing-4);
   border-radius: var(--radius-lg);
-  border: 1px solid var(--border-light);
+  border: var(--input-border);
   margin-bottom: var(--spacing-4);
 }
 
@@ -420,10 +412,10 @@
 
 /* Security Card */
 .securityCard {
-  background: var(--bg-secondary);
+  background: var(--input-bg);
   padding: var(--spacing-4);
   border-radius: var(--radius-lg);
-  border: 1px solid var(--border-light);
+  border: var(--input-border);
 }
 
 .buttonIcon {
@@ -433,7 +425,7 @@
 
 /* Password Form */
 .passwordForm {
-  animation: var(--animate-slide-up);
+  /* form container */
 }
 
 .passwordFormTitle {
@@ -476,61 +468,9 @@
   gap: var(--spacing-1);
 }
 
-.validationError::before {
-  content: '!';
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 1rem;
-  height: 1rem;
-  background: var(--error-color);
-  color: white;
-  border-radius: 50%;
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-bold);
-}
-
-/* Shake Animation for Errors */
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
-  20%, 40%, 60%, 80% { transform: translateX(2px); }
-}
-
-/* Dark Theme Adjustments */
-[data-theme="dark"] .container {
-  background: var(--card-bg);
-  box-shadow: var(--shadow-lg);
-}
-
-[data-theme="dark"] .fieldValue {
-  background: var(--bg-tertiary);
-  border-color: var(--border-color);
-}
-
-[data-theme="dark"] .input,
-[data-theme="dark"] .select,
-[data-theme="dark"] .textarea {
-  background: var(--bg-primary);
-  border-color: var(--primary-light);
-}
-
-[data-theme="dark"] .infoCard,
-[data-theme="dark"] .securityCard {
-  background: var(--bg-tertiary);
-  border-color: var(--border-color);
-}
 
 /* Media Queries - Grouped by breakpoint */
 @media (max-width: 767px) {
-  .editActions {
-    width: 100%;
-  }
-
-  .editActions button {
-    flex: 1;
-  }
-
   .passwordFormActions {
     flex-direction: column;
   }
@@ -541,15 +481,7 @@
 }
 
 @media (min-width: 768px) {
-  .section {
-    padding: var(--spacing-8);
-  }
-
   .sectionGrid {
     grid-template-columns: repeat(2, 1fr);
-  }
-
-  .securityCard {
-    padding: var(--spacing-6);
   }
 }
