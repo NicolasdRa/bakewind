@@ -1,5 +1,4 @@
-
-import { Component, createSignal, onMount, For, Show } from "solid-js";
+import { Component, createSignal, createEffect, onMount, For, Show } from "solid-js";
 import { customerOrdersApi, CustomerOrder, CustomerOrderStatus } from "~/api/orders";
 import { productionApi } from "~/api/production";
 import DashboardPageLayout from "~/layouts/DashboardPageLayout";
@@ -9,9 +8,24 @@ import FilterSelect from "~/components/common/FilterSelect";
 import Badge from "~/components/common/Badge";
 import Button from "~/components/common/Button";
 import DatePicker from "~/components/common/DatePicker";
-import { Heading, Text } from "~/components/common/Typography";
+import { Text } from "~/components/common/Typography";
+import { Modal, ModalHeader, ModalBody, ModalFooter } from "~/components/common/Modal/Modal";
+import { ConfirmationModal } from "~/components/common/ConfirmationModal";
+import {
+  TableContainer,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableHeaderCell,
+  TableCell,
+  TableEmptyState,
+  TableLoadingState,
+} from "~/components/common/Table";
 import { useInfoModal } from "~/stores/infoModalStore";
-import { getCurrentDateString } from "~/utils/dateUtils";
+import { getCurrentDateString, formatShortDate } from "~/utils/dateUtils";
+import { getCustomerOrderStatusVariant, getPaymentStatusVariant } from "~/components/common/Badge.config";
+import { CUSTOMER_ORDER_STATUS_OPTIONS } from "~/constants/orderFilters";
 import styles from "./CustomerOrdersPage.module.css";
 
 const CustomerOrdersPage: Component = () => {
@@ -35,6 +49,10 @@ const CustomerOrdersPage: Component = () => {
   const [orderToSchedule, setOrderToSchedule] = createSignal<CustomerOrder | undefined>();
   const [showScheduleModal, setShowScheduleModal] = createSignal(false);
   const [scheduledDate, setScheduledDate] = createSignal("");
+  const [isScheduling, setIsScheduling] = createSignal(false);
+
+  // Debounce timer for search
+  let searchDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
   // Fetch orders
   const fetchOrders = async () => {
@@ -45,8 +63,9 @@ const CustomerOrdersPage: Component = () => {
         search: searchQuery() || undefined,
       });
       setOrders(data);
-    } catch (error: any) {
-      console.error('Error fetching orders:', error);
+    } catch (err: unknown) {
+      console.error('Error fetching orders:', err);
+      const error = err as { message?: string };
       showError('Error', error?.message || 'Failed to fetch orders');
     } finally {
       setLoading(false);
@@ -61,8 +80,8 @@ const CustomerOrdersPage: Component = () => {
       setPendingOrders(stats.pendingOrders);
       setCompletedOrders(stats.completedOrders);
       setTotalRevenue(stats.totalRevenue);
-    } catch (error: any) {
-      console.error('Error fetching stats:', error);
+    } catch (err: unknown) {
+      console.error('Error fetching stats:', err);
     }
   };
 
@@ -71,15 +90,36 @@ const CustomerOrdersPage: Component = () => {
     fetchStats();
   });
 
-  // Handle search
+  // Debounced search effect - tracks searchQuery and statusFilter for reactivity
+  createEffect(() => {
+    // Access reactive values to track them
+    void searchQuery();
+    void statusFilter();
+
+    // Clear existing timer
+    if (searchDebounceTimer) {
+      clearTimeout(searchDebounceTimer);
+    }
+
+    // Set new debounce timer
+    searchDebounceTimer = setTimeout(() => {
+      fetchOrders();
+    }, 300);
+  });
+
+  // Handle search input
   const handleSearch = (value: string) => {
     setSearchQuery(value);
-    fetchOrders();
+    // Fetch is handled by the debounced effect
   };
 
-  // Handle filter change
+  // Handle filter change (immediate, no debounce)
   const handleFilterChange = (value: string) => {
     setStatusFilter(value as CustomerOrderStatus | "all");
+    // Clear any pending search debounce and fetch immediately
+    if (searchDebounceTimer) {
+      clearTimeout(searchDebounceTimer);
+    }
     fetchOrders();
   };
 
@@ -100,8 +140,9 @@ const CustomerOrdersPage: Component = () => {
       setOrderToDelete(undefined);
       await fetchOrders();
       await fetchStats();
-    } catch (error: any) {
-      console.error('Error deleting order:', error);
+    } catch (err: unknown) {
+      console.error('Error deleting order:', err);
+      const error = err as { message?: string };
       const message = error.message || 'Failed to delete order';
       setShowDeleteConfirm(false);
       setOrderToDelete(undefined);
@@ -130,51 +171,31 @@ const CustomerOrdersPage: Component = () => {
     if (!order || !scheduledDate()) return;
 
     try {
-      setLoading(true);
+      setIsScheduling(true);
       await productionApi.createScheduleFromCustomerOrder(order.id, scheduledDate());
       setShowScheduleModal(false);
       setOrderToSchedule(undefined);
       setScheduledDate("");
       await fetchOrders();
       await fetchStats();
-    } catch (error: any) {
-      console.error('Error scheduling production:', error);
+    } catch (err: unknown) {
+      console.error('Error scheduling production:', err);
+      const error = err as { message?: string };
       const message = error.message || 'Failed to schedule production';
       setShowScheduleModal(false);
       setOrderToSchedule(undefined);
       showError('Cannot Schedule Production', message);
-      setLoading(false);
+    } finally {
+      setIsScheduling(false);
     }
   };
 
   const handleCancelSchedule = () => {
-    setShowScheduleModal(false);
-    setOrderToSchedule(undefined);
-    setScheduledDate("");
-  };
-
-  // Get status badge color
-  const getStatusColor = (status: CustomerOrderStatus): string => {
-    const colors: Record<CustomerOrderStatus, string> = {
-      draft: '#666',
-      pending: '#FFA500',
-      confirmed: '#4169E1',
-      ready: '#32CD32',
-      delivered: '#228B22',
-      cancelled: '#DC143C',
-    };
-    return colors[status] || '#666';
-  };
-
-  // Get payment status color
-  const getPaymentStatusColor = (status: string): string => {
-    const colors: Record<string, string> = {
-      pending: '#FFA500',
-      paid: '#228B22',
-      partial: '#4169E1',
-      refunded: '#DC143C',
-    };
-    return colors[status] || '#666';
+    if (!isScheduling()) {
+      setShowScheduleModal(false);
+      setOrderToSchedule(undefined);
+      setScheduledDate("");
+    }
   };
 
   // Format currency
@@ -182,14 +203,9 @@ const CustomerOrdersPage: Component = () => {
     return `$${parseFloat(value).toFixed(2)}`;
   };
 
-  // Format date
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
+  // Format status for display
+  const formatStatus = (status: string) => {
+    return status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
   };
 
   return (
@@ -233,92 +249,76 @@ const CustomerOrdersPage: Component = () => {
         <FilterSelect
           value={statusFilter()}
           onChange={handleFilterChange}
-          options={[
-            { value: "all", label: "All Status" },
-            { value: "pending", label: "Pending" },
-            { value: "confirmed", label: "Confirmed" },
-            { value: "in_production", label: "In Production" },
-            { value: "ready", label: "Ready" },
-            { value: "delivered", label: "Delivered" },
-            { value: "cancelled", label: "Cancelled" },
-          ]}
+          options={[...CUSTOMER_ORDER_STATUS_OPTIONS]}
         />
       </div>
 
       {/* Orders Table */}
-      <div class={styles.tableContainer}>
-        <Show
-          when={!loading()}
-          fallback={
-            <div class={styles.loadingState}>
-              <p>Loading orders...</p>
-            </div>
-          }
-        >
+      <Show
+        when={!loading()}
+        fallback={<TableLoadingState message="Loading orders..." />}
+      >
+        <TableContainer>
           <Show
             when={orders().length > 0}
             fallback={
-              <div class={styles.emptyState}>
-                <p>No orders found. Create your first order!</p>
-              </div>
+              <TableEmptyState message="No orders found. Create your first order!" />
             }
           >
-            <table class={styles.table}>
-              <thead class={styles.tableHead}>
+            <Table>
+              <TableHead>
                 <tr>
-                  <th class={styles.tableHeaderCell}>Order #</th>
-                  <th class={styles.tableHeaderCell}>Customer</th>
-                  <th class={styles.tableHeaderCell}>Source</th>
-                  <th class={styles.tableHeaderCell}>Items</th>
-                  <th class={styles.tableHeaderCellRight}>Total</th>
-                  <th class={styles.tableHeaderCellCenter}>Status</th>
-                  <th class={styles.tableHeaderCellCenter}>Payment</th>
-                  <th class={styles.tableHeaderCell}>Date</th>
-                  <th class={styles.tableHeaderCellCenter}>Actions</th>
+                  <TableHeaderCell>Order #</TableHeaderCell>
+                  <TableHeaderCell>Customer</TableHeaderCell>
+                  <TableHeaderCell>Source</TableHeaderCell>
+                  <TableHeaderCell>Items</TableHeaderCell>
+                  <TableHeaderCell align="right">Total</TableHeaderCell>
+                  <TableHeaderCell align="center">Status</TableHeaderCell>
+                  <TableHeaderCell align="center">Payment</TableHeaderCell>
+                  <TableHeaderCell>Date</TableHeaderCell>
+                  <TableHeaderCell align="center">Actions</TableHeaderCell>
                 </tr>
-              </thead>
-              <tbody>
+              </TableHead>
+              <TableBody>
                 <For each={orders()}>
                   {(order) => (
-                    <tr class={styles.tableRow}>
-                      <td class={styles.tableCell}>
+                    <TableRow>
+                      <TableCell>
                         <span class={styles.orderNumber}>{order.orderNumber}</span>
-                      </td>
-                      <td class={styles.tableCell}>
+                      </TableCell>
+                      <TableCell>
                         <div class={styles.customerName}>{order.customerName}</div>
                         <Show when={order.customerEmail}>
                           <div class={styles.customerEmail}>{order.customerEmail}</div>
                         </Show>
-                      </td>
-                      <td class={styles.tableCell}>
+                      </TableCell>
+                      <TableCell>
                         <span class={styles.sourceText}>
                           {order.source.replace('_', ' ').toUpperCase()}
                         </span>
-                      </td>
-                      <td class={styles.tableCell}>
+                      </TableCell>
+                      <TableCell>
                         <span class={styles.itemCount}>
                           {order.items.length} item{order.items.length !== 1 ? 's' : ''}
                         </span>
-                      </td>
-                      <td class={styles.tableCellRight}>
+                      </TableCell>
+                      <TableCell align="right">
                         <span class={styles.totalAmount}>{formatCurrency(order.total)}</span>
-                      </td>
-                      <td class={styles.tableCellCenter}>
-                        <Badge
-                          label={order.status.replace('_', ' ')}
-                          color={getStatusColor(order.status)}
-                        />
-                      </td>
-                      <td class={styles.tableCellCenter}>
-                        <Badge
-                          label={order.paymentStatus}
-                          color={getPaymentStatusColor(order.paymentStatus)}
-                        />
-                      </td>
-                      <td class={styles.tableCell}>
-                        <span class={styles.dateText}>{formatDate(order.createdAt)}</span>
-                      </td>
-                      <td class={styles.tableCellCenter}>
+                      </TableCell>
+                      <TableCell align="center">
+                        <Badge variant={getCustomerOrderStatusVariant(order.status)}>
+                          {formatStatus(order.status)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell align="center">
+                        <Badge variant={getPaymentStatusVariant(order.paymentStatus)}>
+                          {formatStatus(order.paymentStatus)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <span class={styles.dateText}>{formatShortDate(order.createdAt.split('T')[0])}</span>
+                      </TableCell>
+                      <TableCell align="center">
                         <div class={styles.actionsWrapper}>
                           <Button
                             variant="text"
@@ -331,68 +331,69 @@ const CustomerOrdersPage: Component = () => {
                             variant="text"
                             size="sm"
                             onClick={() => handleDeleteClick(order)}
-                            class={styles.deleteButtonSmall}
+                            class={styles.deleteButton}
                           >
                             Delete
                           </Button>
                         </div>
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   )}
                 </For>
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </Show>
-        </Show>
-      </div>
+        </TableContainer>
+      </Show>
 
       {/* Schedule Production Modal */}
-      <Show when={showScheduleModal()}>
-        <div class={styles.modalBackdrop} onClick={handleCancelSchedule}>
-          <div class={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-            <Heading variant="card" class={styles.modalTitle}>Schedule Production</Heading>
-            <Text class={styles.modalText}>
-              Schedule production for order "{orderToSchedule()?.orderNumber}"
-            </Text>
-            <div class={styles.formGroup}>
-              <DatePicker
-                label="Scheduled Date"
-                value={scheduledDate()}
-                onChange={(value) => setScheduledDate(value)}
-                minDate={getCurrentDateString()}
-              />
-            </div>
-            <div class={styles.modalActions}>
-              <Button variant="secondary" size="sm" onClick={handleCancelSchedule}>
-                Cancel
-              </Button>
-              <Button variant="primary" size="sm" onClick={handleConfirmSchedule}>
-                Schedule Production
-              </Button>
-            </div>
+      <Modal isOpen={showScheduleModal()} onClose={handleCancelSchedule} size="sm">
+        <ModalHeader title="Schedule Production" onClose={handleCancelSchedule} />
+        <ModalBody>
+          <Text color="secondary" class={styles.modalText}>
+            Schedule production for order "{orderToSchedule()?.orderNumber}"
+          </Text>
+          <div class={styles.formGroup}>
+            <DatePicker
+              label="Scheduled Date"
+              value={scheduledDate()}
+              onChange={(value) => setScheduledDate(value)}
+              minDate={getCurrentDateString()}
+              disabled={isScheduling()}
+            />
           </div>
-        </div>
-      </Show>
+        </ModalBody>
+        <ModalFooter>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={handleCancelSchedule}
+            disabled={isScheduling()}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={handleConfirmSchedule}
+            loading={isScheduling()}
+            disabled={isScheduling()}
+          >
+            Schedule Production
+          </Button>
+        </ModalFooter>
+      </Modal>
 
       {/* Delete Confirmation Modal */}
-      <Show when={showDeleteConfirm()}>
-        <div class={styles.modalBackdrop} onClick={handleCancelDelete}>
-          <div class={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-            <Heading variant="card" class={styles.modalTitle}>Delete Order</Heading>
-            <Text class={styles.modalTextLarge}>
-              Are you sure you want to delete order "{orderToDelete()?.orderNumber}"? This action cannot be undone.
-            </Text>
-            <div class={styles.modalActions}>
-              <Button variant="secondary" size="sm" onClick={handleCancelDelete}>
-                Cancel
-              </Button>
-              <Button variant="danger" size="sm" onClick={handleConfirmDelete}>
-                Delete
-              </Button>
-            </div>
-          </div>
-        </div>
-      </Show>
+      <ConfirmationModal
+        isOpen={showDeleteConfirm()}
+        onClose={handleCancelDelete}
+        onConfirm={handleConfirmDelete}
+        title="Delete Order"
+        message={`Are you sure you want to delete order "${orderToDelete()?.orderNumber}"? This action cannot be undone.`}
+        confirmLabel="Delete"
+        variant="danger"
+      />
     </DashboardPageLayout>
   );
 };

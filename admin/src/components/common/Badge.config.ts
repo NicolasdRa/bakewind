@@ -121,3 +121,80 @@ export const getRoleBadgeColor = (role: string): string => {
 export const getRecipeCategoryColor = (category: string): string => {
   return recipeCategoryColors[category] || recipeCategoryColors.other;
 };
+
+/**
+ * Customer order status badge variants
+ */
+export const customerOrderStatusVariants: Record<string, BadgeVariant> = {
+  draft: 'neutral',
+  pending: 'warning',
+  confirmed: 'info',
+  in_production: 'info',
+  ready: 'success',
+  delivered: 'success',
+  cancelled: 'error',
+};
+
+/**
+ * Payment status badge variants
+ */
+export const paymentStatusVariants: Record<string, BadgeVariant> = {
+  pending: 'warning',
+  paid: 'success',
+  partial: 'info',
+  refunded: 'error',
+};
+
+/**
+ * Internal order status badge variants
+ */
+export const internalOrderStatusVariants: Record<string, BadgeVariant> = {
+  draft: 'neutral',
+  requested: 'warning',
+  approved: 'info',
+  scheduled: 'info',
+  in_production: 'info',
+  quality_check: 'warning',
+  ready: 'success',
+  completed: 'success',
+  delivered: 'success',
+  cancelled: 'error',
+};
+
+/**
+ * Order priority badge variants
+ */
+export const orderPriorityVariants: Record<string, BadgeVariant> = {
+  low: 'success',
+  normal: 'info',
+  high: 'warning',
+  rush: 'error',
+};
+
+/**
+ * Helper to get customer order status variant
+ */
+export const getCustomerOrderStatusVariant = (status: string): BadgeVariant => {
+  return customerOrderStatusVariants[status] || 'neutral';
+};
+
+/**
+ * Helper to get payment status variant
+ */
+export const getPaymentStatusVariant = (status: string): BadgeVariant => {
+  return paymentStatusVariants[status] || 'neutral';
+};
+
+/**
+ * Helper to get internal order status variant
+ */
+export const getInternalOrderStatusVariant = (status: string): BadgeVariant => {
+  return internalOrderStatusVariants[status] || 'neutral';
+};
+
+/**
+ * Helper to get order priority variant
+ */
+export const getOrderPriorityVariant = (priority: string): BadgeVariant => {
+  return orderPriorityVariants[priority] || 'info';
+};

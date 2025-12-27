@@ -16,11 +16,26 @@ import Button from "~/components/common/Button";
 import { PlusIcon } from "~/components/icons";
 import DatePicker from "~/components/common/DatePicker";
 import { Heading, Text } from "~/components/common/Typography";
+import { Modal, ModalHeader, ModalBody, ModalFooter } from "~/components/common/Modal/Modal";
+import { ConfirmationModal } from "~/components/common/ConfirmationModal";
 import { useInfoModal } from "~/stores/infoModalStore";
 import { orderLocksStore } from "~/stores/order-locks";
 import { getCurrentDateString } from "~/utils/dateUtils";
 import InternalOrderFormModal from "~/components/orders/InternalOrderFormModal";
 import InternalOrderDetailsModal from "~/components/orders/InternalOrderDetailsModal";
+import {
+  TableContainer,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableHeaderCell,
+  TableCell,
+  TableEmptyState,
+  TableLoadingState,
+} from "~/components/common/Table";
+import { getInternalOrderStatusVariant, getOrderPriorityVariant } from "~/components/common/Badge.config";
+import { INTERNAL_ORDER_STATUS_OPTIONS } from "~/constants/orderFilters";
 import styles from "./InternalOrdersPage.module.css";
 
 const InternalOrdersPage: Component = () => {
@@ -60,9 +75,10 @@ const InternalOrdersPage: Component = () => {
         search: searchQuery() || undefined,
       });
       setOrders(data);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching orders:', error);
-      showError('Error', error?.message || 'Failed to fetch internal orders');
+      const err = error as { message?: string };
+      showError('Error', err?.message || 'Failed to fetch internal orders');
     } finally {
       setLoading(false);
     }
@@ -75,7 +91,7 @@ const InternalOrdersPage: Component = () => {
       setTotalOrders(stats.totalOrders);
       setPendingOrders(stats.pendingOrders);
       setCompletedOrders(stats.completedOrders);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching stats:', error);
     }
   };
@@ -109,7 +125,7 @@ const InternalOrdersPage: Component = () => {
       showSuccess('Success', 'Internal order created successfully');
       await fetchOrders();
       await fetchStats();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error creating order:', error);
       throw error;
     }
@@ -149,7 +165,7 @@ const InternalOrdersPage: Component = () => {
       await fetchStats();
 
       showSuccess('Success', 'Internal order updated successfully');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error updating order:', error);
       throw error;
     }
@@ -171,9 +187,10 @@ const InternalOrdersPage: Component = () => {
       await fetchOrders();
       await fetchStats();
       setShowDetailsModal(false);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error updating status:', error);
-      showError('Error', error?.message || 'Failed to update order status');
+      const err = error as { message?: string };
+      showError('Error', err?.message || 'Failed to update order status');
     }
   };
 
@@ -196,9 +213,10 @@ const InternalOrdersPage: Component = () => {
       showSuccess('Success', 'Internal order deleted successfully');
       await fetchOrders();
       await fetchStats();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error deleting order:', error);
-      const message = error.message || 'Failed to delete order';
+      const err = error as { message?: string };
+      const message = err.message || 'Failed to delete order';
       setShowDeleteConfirm(false);
       setOrderToDelete(undefined);
       showError('Cannot Delete Order', message);
@@ -237,11 +255,10 @@ const InternalOrdersPage: Component = () => {
       setOrderToSchedule(undefined);
       await fetchOrders();
       await fetchStats();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error scheduling production:', error);
-
-      // Provide helpful error messages
-      let errorMessage = error?.message || 'Failed to schedule production';
+      const err = error as { message?: string };
+      let errorMessage = err?.message || 'Failed to schedule production';
 
       // Check for missing recipe error
       if (errorMessage.includes('does not have a recipe associated')) {
@@ -298,34 +315,6 @@ const InternalOrdersPage: Component = () => {
     setShowFormModal(true);
   };
 
-  // Get status badge variant
-  const getStatusVariant = (status: InternalOrderStatus) => {
-    const variants: Record<InternalOrderStatus, { variant?: 'primary' | 'success' | 'warning' | 'error' | 'info' | 'neutral', color?: string }> = {
-      draft: { variant: 'neutral' },
-      requested: { variant: 'warning' },
-      approved: { variant: 'info' },
-      scheduled: { color: 'border-purple-600 text-purple-600 dark:border-purple-400 dark:text-purple-400' },
-      in_production: { color: 'border-purple-600 text-purple-600 dark:border-purple-400 dark:text-purple-400' },
-      quality_check: { color: 'border-orange-600 text-orange-600 dark:border-orange-400 dark:text-orange-400' },
-      ready: { variant: 'success' },
-      completed: { variant: 'success' },
-      delivered: { variant: 'success' },
-      cancelled: { variant: 'error' },
-    };
-    return variants[status] || { variant: 'neutral' as const };
-  };
-
-  // Get priority badge variant
-  const getPriorityVariant = (priority: string) => {
-    const variants: Record<string, { variant?: 'primary' | 'success' | 'warning' | 'error' | 'info' | 'neutral', color?: string }> = {
-      low: { variant: 'success' },
-      normal: { variant: 'info' },
-      high: { variant: 'warning' },
-      rush: { variant: 'error' },
-    };
-    return variants[priority] || { variant: 'info' as const };
-  };
-
   // Format date
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -336,6 +325,11 @@ const InternalOrdersPage: Component = () => {
       hour: '2-digit',
       minute: '2-digit',
     });
+  };
+
+  // Format status for display
+  const formatStatus = (status: string) => {
+    return status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
   };
 
   return (
@@ -381,19 +375,7 @@ const InternalOrdersPage: Component = () => {
             value={statusFilter()}
             onChange={handleFilterChange}
             label="Status"
-            options={[
-              { value: "all", label: "All Status" },
-              { value: "draft", label: "Draft" },
-              { value: "requested", label: "Requested" },
-              { value: "approved", label: "Approved" },
-              { value: "scheduled", label: "Scheduled" },
-              { value: "in_production", label: "In Production" },
-              { value: "quality_check", label: "Quality Check" },
-              { value: "ready", label: "Ready" },
-              { value: "completed", label: "Completed" },
-              { value: "delivered", label: "Delivered" },
-              { value: "cancelled", label: "Cancelled" },
-            ]}
+            options={[...INTERNAL_ORDER_STATUS_OPTIONS]}
           />
         </div>
       </div>
@@ -401,151 +383,127 @@ const InternalOrdersPage: Component = () => {
       {/* Orders Table */}
       <Show
         when={!loading()}
-        fallback={
-          <div class={styles.loadingContainer}>
-            <div class={styles.spinner}></div>
-          </div>
-        }
+        fallback={<TableLoadingState message="Loading orders..." />}
       >
-        <div class={styles.tableContainer}>
+        <TableContainer>
           <Show
             when={orders().length > 0}
             fallback={
-              <div class={styles.emptyState}>
-                No internal orders found. Create your first production order!
-              </div>
+              <TableEmptyState message="No internal orders found. Create your first production order!" />
             }
           >
-            <div class={styles.tableWrapper}>
-              <table class={styles.table}>
-                <thead class={styles.tableHead}>
-                  <tr>
-                    <th class={styles.tableHeaderCellNarrow}>
-                      {/* Lock icon */}
-                    </th>
-                    <th class={styles.tableHeaderCell}>
-                      <div class={styles.minWidth100}>Order #</div>
-                    </th>
-                    <th class={styles.tableHeaderCell}>
-                      <div class={styles.minWidth100}>Batch Number</div>
-                    </th>
-                    <th class={styles.tableHeaderCell}>
-                      <div class={styles.minWidth120}>Items</div>
-                    </th>
-                    <th class={styles.tableHeaderCellCenter}>
-                      <div class={styles.minWidth80}>Priority</div>
-                    </th>
-                    <th class={styles.tableHeaderCellCenter}>
-                      <div class={styles.minWidth100}>Status</div>
-                    </th>
-                    <th class={styles.tableHeaderCell}>
-                      <div class={styles.minWidth120}>Production Date</div>
-                    </th>
-                    <th class={styles.tableHeaderCell}>
-                      <div class={styles.minWidth100}>Actions</div>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <For each={orders()}>
-                    {(order) => (
-                      <tr
-                        class={styles.tableRow}
-                        onClick={() => handleViewDetails(order)}
-                      >
-                        <td class={styles.lockCell}>
-                          <Show when={orderLocksStore.isLocked(order.id)}>
-                            <span
-                              class={styles.lockIcon}
-                              title={
-                                orderLocksStore.isLockedByMe(order.id)
-                                  ? 'Locked by you'
-                                  : `Locked by ${orderLocksStore.getLock(order.id)?.locked_by_user_name}`
-                              }
-                            >
-                              {orderLocksStore.isLockedByMe(order.id) ? '🔓' : '🔒'}
-                            </span>
-                          </Show>
-                        </td>
-                        <td class={styles.tableCell}>
-                          <div class={styles.orderNumber}>{order.orderNumber}</div>
-                        </td>
-                        <td class={styles.tableCell}>
-                          <div class={styles.batchNumber}>
-                            {order.batchNumber || '-'}
-                          </div>
-                        </td>
-                        <td class={styles.tableCell}>
-                          <div class={styles.itemCount}>
-                            {order.items.length} item{order.items.length !== 1 ? 's' : ''}
-                          </div>
-                          <Show when={order.items.length > 0}>
-                            <div class={styles.itemNames}>
-                              {order.items.map(item => item.productName).join(', ')}
-                            </div>
-                          </Show>
-                        </td>
-                        <td class={styles.tableCellCenter}>
-                          <Badge
-                            {...getPriorityVariant(order.priority)}
-                            size="sm"
+            <Table>
+              <TableHead>
+                <tr>
+                  <TableHeaderCell class={styles.lockColumn}>{" "}</TableHeaderCell>
+                  <TableHeaderCell minWidth="100px">Order #</TableHeaderCell>
+                  <TableHeaderCell minWidth="100px">Batch Number</TableHeaderCell>
+                  <TableHeaderCell minWidth="120px">Items</TableHeaderCell>
+                  <TableHeaderCell align="center" minWidth="80px">Priority</TableHeaderCell>
+                  <TableHeaderCell align="center" minWidth="100px">Status</TableHeaderCell>
+                  <TableHeaderCell minWidth="120px">Production Date</TableHeaderCell>
+                  <TableHeaderCell minWidth="100px">Actions</TableHeaderCell>
+                </tr>
+              </TableHead>
+              <TableBody>
+                <For each={orders()}>
+                  {(order) => (
+                    <TableRow
+                      clickable
+                      onClick={() => handleViewDetails(order)}
+                    >
+                      <TableCell class={styles.lockCell}>
+                        <Show when={orderLocksStore.isLocked(order.id)}>
+                          <span
+                            class={styles.lockIcon}
+                            title={
+                              orderLocksStore.isLockedByMe(order.id)
+                                ? 'Locked by you'
+                                : `Locked by ${orderLocksStore.getLock(order.id)?.locked_by_user_name}`
+                            }
                           >
-                            {order.priority.charAt(0).toUpperCase() + order.priority.slice(1)}
-                          </Badge>
-                        </td>
-                        <td class={styles.tableCellCenter}>
-                          <Badge
-                            {...getStatusVariant(order.status)}
-                            size="sm"
-                          >
-                            {order.status.replace('_', ' ').charAt(0).toUpperCase() + order.status.replace('_', ' ').slice(1)}
-                          </Badge>
-                        </td>
-                        <td class={styles.tableCell}>
-                          <span class={styles.dateText}>
-                            {order.productionDate ? formatDate(order.productionDate) : '-'}
+                            {orderLocksStore.isLockedByMe(order.id) ? '🔓' : '🔒'}
                           </span>
-                        </td>
-                        <td class={styles.actionsCell}>
-                          <div class={styles.actionsRow} onClick={(e) => e.stopPropagation()}>
+                        </Show>
+                      </TableCell>
+                      <TableCell>
+                        <div class={styles.orderNumber}>{order.orderNumber}</div>
+                      </TableCell>
+                      <TableCell>
+                        <div class={styles.batchNumber}>
+                          {order.batchNumber || '-'}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div class={styles.itemCount}>
+                          {order.items.length} item{order.items.length !== 1 ? 's' : ''}
+                        </div>
+                        <Show when={order.items.length > 0}>
+                          <div class={styles.itemNames}>
+                            {order.items.map(item => item.productName).join(', ')}
+                          </div>
+                        </Show>
+                      </TableCell>
+                      <TableCell align="center">
+                        <Badge
+                          variant={getOrderPriorityVariant(order.priority)}
+                          size="sm"
+                        >
+                          {order.priority.charAt(0).toUpperCase() + order.priority.slice(1)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell align="center">
+                        <Badge
+                          variant={getInternalOrderStatusVariant(order.status)}
+                          size="sm"
+                        >
+                          {formatStatus(order.status)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <span class={styles.dateText}>
+                          {order.productionDate ? formatDate(order.productionDate) : '-'}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <div class={styles.actionsRow} onClick={(e) => e.stopPropagation()}>
+                          <Button
+                            variant="text"
+                            size="sm"
+                            onClick={() => handleViewDetails(order)}
+                          >Details</Button>
+                          <Show when={order.status === 'approved'}>
                             <Button
                               variant="text"
                               size="sm"
-                              onClick={() => handleViewDetails(order)}
-                            >Details</Button>
-                            <Show when={order.status === 'approved'}>
-                              <Button
-                                variant="text"
-                                size="sm"
-                                onClick={() => handleScheduleProductionClick(order)}
-                                class={styles.successLink}
-                              >Schedule</Button>
-                            </Show>
-                            <Show when={order.status !== 'delivered' && order.status !== 'cancelled'}>
-                              <Button
-                                variant="text"
-                                size="sm"
-                                onClick={() => handleEditOrder(order)}
-                              >Edit</Button>
-                            </Show>
-                            <Show when={order.status !== 'delivered' && order.status !== 'cancelled'}>
-                              <Button
-                                variant="text"
-                                size="sm"
-                                onClick={() => handleDeleteClick(order)}
-                                class={styles.deleteLink}
-                              >Delete</Button>
-                            </Show>
-                          </div>
-                        </td>
-                      </tr>
-                    )}
-                  </For>
-                </tbody>
-              </table>
-            </div>
+                              onClick={() => handleScheduleProductionClick(order)}
+                              class={styles.successLink}
+                            >Schedule</Button>
+                          </Show>
+                          <Show when={order.status !== 'delivered' && order.status !== 'cancelled'}>
+                            <Button
+                              variant="text"
+                              size="sm"
+                              onClick={() => handleEditOrder(order)}
+                            >Edit</Button>
+                          </Show>
+                          <Show when={order.status !== 'delivered' && order.status !== 'cancelled'}>
+                            <Button
+                              variant="text"
+                              size="sm"
+                              onClick={() => handleDeleteClick(order)}
+                              class={styles.deleteLink}
+                            >Delete</Button>
+                          </Show>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </For>
+              </TableBody>
+            </Table>
           </Show>
-        </div>
+        </TableContainer>
       </Show>
 
       {/* Form Modal */}
@@ -579,90 +537,78 @@ const InternalOrdersPage: Component = () => {
         onScheduleProduction={handleScheduleProductionClick}
       />
 
-      {/* Delete Confirmation Dialog */}
-      <Show when={showDeleteConfirm()}>
-        <div class={styles.modalBackdrop} onClick={handleCancelDelete}>
-          <div class={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-            <Heading variant="card" class={styles.modalTitle}>Delete Production Order</Heading>
-            <Text class={styles.modalText}>
-              Are you sure you want to delete order "{orderToDelete()?.orderNumber}"? This action cannot be undone.
-            </Text>
-            <div class={styles.modalActions}>
-              <Button variant="secondary" size="sm" onClick={handleCancelDelete}>
-                Cancel
-              </Button>
-              <Button variant="danger" size="sm" onClick={handleConfirmDelete}>
-                Delete
-              </Button>
-            </div>
-          </div>
-        </div>
-      </Show>
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={showDeleteConfirm()}
+        onClose={handleCancelDelete}
+        onConfirm={handleConfirmDelete}
+        title="Delete Production Order"
+        message={`Are you sure you want to delete order "${orderToDelete()?.orderNumber}"? This action cannot be undone.`}
+        confirmLabel="Delete"
+        variant="danger"
+      />
 
       {/* Schedule Production Modal */}
-      <Show when={showScheduleModal()}>
-        <div class={styles.modalBackdrop} onClick={handleCancelSchedule}>
-          <div class={styles.modalContentLarge} onClick={(e) => e.stopPropagation()}>
-            <Heading variant="card" class={styles.modalTitle}>Schedule Production</Heading>
-
-            <Show when={orderToSchedule()}>
-              {(order) => (
-                <div>
-                  <div class={styles.orderDetailsCard}>
-                    <Heading variant="label" class={styles.orderDetailsTitle}>Order Details</Heading>
-                    <div class={styles.orderDetailsList}>
-                      <Text><Text as="span" variant="label">Order #:</Text> {order().orderNumber}</Text>
-                      <Text><Text as="span" variant="label">Source:</Text> {order().source.replace('_', ' ')}</Text>
-                      <Text><Text as="span" variant="label">Items:</Text> {order().items.length} product(s)</Text>
-                      <Show when={order().items.length > 0}>
-                        <div class={styles.orderItemsList}>
-                          <For each={order().items}>
-                            {(item) => (
-                              <Text variant="body-sm">• {item.quantity}x {item.productName}</Text>
-                            )}
-                          </For>
-                        </div>
-                      </Show>
-                    </div>
-                  </div>
-
-                  <div class={styles.formGroup}>
-                    <DatePicker
-                      label="Production Date"
-                      value={scheduledProductionDate()}
-                      onChange={(value) => setScheduledProductionDate(value)}
-                      minDate={getCurrentDateString()}
-                      disabled={isScheduling()}
-                    />
-                    <Text variant="helper" color="muted" class={styles.formHint}>
-                      A production schedule will be created for all products in this order.
-                    </Text>
+      <Modal isOpen={showScheduleModal()} onClose={handleCancelSchedule} size="md">
+        <ModalHeader title="Schedule Production" onClose={handleCancelSchedule} />
+        <ModalBody>
+          <Show when={orderToSchedule()}>
+            {(order) => (
+              <div>
+                <div class={styles.orderDetailsCard}>
+                  <Heading variant="label" class={styles.orderDetailsTitle}>Order Details</Heading>
+                  <div class={styles.orderDetailsList}>
+                    <Text><Text as="span" variant="label">Order #:</Text> {order().orderNumber}</Text>
+                    <Text><Text as="span" variant="label">Source:</Text> {order().source.replace('_', ' ')}</Text>
+                    <Text><Text as="span" variant="label">Items:</Text> {order().items.length} product(s)</Text>
+                    <Show when={order().items.length > 0}>
+                      <div class={styles.orderItemsList}>
+                        <For each={order().items}>
+                          {(item) => (
+                            <Text variant="body-sm">• {item.quantity}x {item.productName}</Text>
+                          )}
+                        </For>
+                      </div>
+                    </Show>
                   </div>
                 </div>
-              )}
-            </Show>
 
-            <div class={styles.modalActions}>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={handleCancelSchedule}
-                disabled={isScheduling()}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={handleScheduleProduction}
-                disabled={isScheduling()}
-              >
-                {isScheduling() ? 'Scheduling...' : 'Schedule Production'}
-              </Button>
-            </div>
-          </div>
-        </div>
-      </Show>
+                <div class={styles.formGroup}>
+                  <DatePicker
+                    label="Production Date"
+                    value={scheduledProductionDate()}
+                    onChange={(value) => setScheduledProductionDate(value)}
+                    minDate={getCurrentDateString()}
+                    disabled={isScheduling()}
+                  />
+                  <Text variant="helper" color="muted" class={styles.formHint}>
+                    A production schedule will be created for all products in this order.
+                  </Text>
+                </div>
+              </div>
+            )}
+          </Show>
+        </ModalBody>
+        <ModalFooter>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={handleCancelSchedule}
+            disabled={isScheduling()}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={handleScheduleProduction}
+            loading={isScheduling()}
+            disabled={isScheduling()}
+          >
+            Schedule Production
+          </Button>
+        </ModalFooter>
+      </Modal>
     </DashboardPageLayout>
   );
 };

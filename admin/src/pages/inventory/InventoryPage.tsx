@@ -10,13 +10,24 @@ import FilterSelect from "~/components/common/FilterSelect";
 import Badge from "~/components/common/Badge";
 import Button from "~/components/common/Button";
 import { PlusIcon } from "~/components/icons";
-import { Heading, Text } from "~/components/common/Typography";
 import { getStockStatusVariant } from "~/components/common/Badge.config";
 import { useInfoModal } from "~/stores/infoModalStore";
+import {
+  TableContainer,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableHeaderCell,
+  TableCell,
+  TableEmptyState,
+  TableLoadingState,
+} from "~/components/common/Table";
+import { ConfirmationModal } from "~/components/common/ConfirmationModal";
+import type { SortDirection } from "~/components/common/Table";
 import styles from "./InventoryPage.module.css";
 
 type SortField = 'name' | 'current_stock' | 'avg_daily_consumption' | 'days_of_supply_remaining';
-type SortDirection = 'asc' | 'desc';
 
 const InventoryPage: Component = () => {
   const { showError } = useInfoModal();
@@ -75,9 +86,10 @@ const InventoryPage: Component = () => {
       setShowDeleteConfirm(false);
       setItemToDelete(undefined);
       await refetch();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to delete inventory item:', error);
-      const message = error?.message || 'Failed to delete inventory item. Please try again.';
+      const err = error as { message?: string };
+      const message = err?.message || 'Failed to delete inventory item. Please try again.';
       setShowDeleteConfirm(false);
       setItemToDelete(undefined);
       showError('Cannot Delete Item', message);
@@ -99,6 +111,11 @@ const InventoryPage: Component = () => {
       setSortField(field);
       setSortDirection('asc');
     }
+  };
+
+  // Get sort direction for a field
+  const getSortDirection = (field: SortField): SortDirection => {
+    return sortField() === field ? sortDirection() : null;
   };
 
   // Get filtered and sorted inventory
@@ -150,33 +167,6 @@ const InventoryPage: Component = () => {
           : (bValue as number) - (aValue as number);
       }
     });
-  };
-
-  // Render sort indicator - always show for sortable columns
-  const SortIndicator = (field: SortField) => {
-    const isActive = () => sortField() === field;
-    return (
-      <span class={styles.sortIndicator}>
-        <span
-          class={styles.sortArrow}
-          classList={{
-            [styles.sortArrowActive]: isActive() && sortDirection() === 'asc',
-            [styles.sortArrowInactive]: !isActive() || sortDirection() !== 'asc'
-          }}
-        >
-          ▲
-        </span>
-        <span
-          class={styles.sortArrow}
-          classList={{
-            [styles.sortArrowActive]: isActive() && sortDirection() === 'desc',
-            [styles.sortArrowInactive]: !isActive() || sortDirection() !== 'desc'
-          }}
-        >
-          ▼
-        </span>
-      </span>
-    );
   };
 
   return (
@@ -261,125 +251,125 @@ const InventoryPage: Component = () => {
       {/* Inventory Table */}
       <Show
         when={!inventory.loading}
-        fallback={
-          <div class={styles.loadingContainer}>
-            <div class={styles.spinner}></div>
-          </div>
-        }
+        fallback={<TableLoadingState message="Loading inventory..." />}
       >
-        <div class={styles.tableContainer}>
+        <TableContainer>
           <Show
-            when={(inventory() || []).length > 0}
+            when={sortedInventory().length > 0}
             fallback={
-              <div class={styles.emptyState}>
-                No inventory items found for the selected criteria.
-              </div>
+              <TableEmptyState message="No inventory items found for the selected criteria." />
             }
           >
-            <div class={styles.tableWrapper}>
-              <table class={styles.table}>
-                <thead class={styles.tableHead}>
-                  <tr>
-                    <th class={styles.tableHeaderCellSortable} onClick={() => handleSort('name')}>
-                      <div class={`${styles.headerContent} ${styles.minWidth140}`}>
-                        <span>Item Name</span>
-                        {SortIndicator('name')}
-                      </div>
-                    </th>
-                    <th class={styles.tableHeaderCell}>
-                      <div class={styles.minWidth90}>Category</div>
-                    </th>
-                    <th class={styles.tableHeaderCellSortable} onClick={() => handleSort('current_stock')}>
-                      <div class={`${styles.headerContent} ${styles.minWidth120}`}>
-                        <span>Current Stock</span>
-                        {SortIndicator('current_stock')}
-                      </div>
-                    </th>
-                    <th class={styles.tableHeaderCellSortable} onClick={() => handleSort('avg_daily_consumption')}>
-                      <div class={`${styles.headerContent} ${styles.minWidth110}`}>
-                        <span>Consumption</span>
-                        {SortIndicator('avg_daily_consumption')}
-                      </div>
-                    </th>
-                    <th class={styles.tableHeaderCellSortable} onClick={() => handleSort('days_of_supply_remaining')}>
-                      <div class={`${styles.headerContent} ${styles.minWidth130}`}>
-                        <span>Days Remaining</span>
-                        {SortIndicator('days_of_supply_remaining')}
-                      </div>
-                    </th>
-                    <th class={styles.tableHeaderCell}>
-                      <div class={styles.minWidth100}>Status</div>
-                    </th>
-                    <th class={styles.tableHeaderCell}>
-                      <div class={styles.minWidth100}>Actions</div>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <For each={sortedInventory()}>
-                    {(item) => {
-                      const stockStatus = getStockStatus(item);
-                      return (
-                        <tr class={styles.tableRow}>
-                          <td class={styles.tableCell}>
-                            <div>
-                              <div class={styles.itemName}>{item.name}</div>
-                              <Show when={item.consumption_tracking?.has_custom_threshold}>
-                                <div class={styles.customThreshold}>Custom Threshold</div>
-                              </Show>
-                            </div>
-                          </td>
-                          <td class={styles.tableCell}>
-                            <span class={styles.categoryText}>
-                              {item.category.charAt(0).toUpperCase() + item.category.slice(1)}
-                            </span>
-                          </td>
-                          <td class={styles.tableCell}>
-                            <span class={styles.stockText}>
-                              {item.current_stock.toFixed(2)} {item.unit}
-                            </span>
-                          </td>
-                          <td class={styles.tableCell}>
-                            <span class={styles.consumptionText}>
-                              <Show when={item.consumption_tracking} fallback="-">
-                                {item.consumption_tracking!.avg_daily_consumption.toFixed(2)} {item.unit}/day
-                              </Show>
-                            </span>
-                          </td>
-                          <td class={styles.tableCell}>
-                            <span class={styles.consumptionText}>
-                              <Show when={item.consumption_tracking} fallback="-">
-                                {item.consumption_tracking!.days_of_supply_remaining.toFixed(1)} days
-                              </Show>
-                            </span>
-                          </td>
-                          <td class={styles.tableCell}>
-                            <Badge variant={getStockStatusVariant(stockStatus)}>
-                              {getStockStatusLabel(stockStatus)}
-                            </Badge>
-                          </td>
-                          <td class={styles.tableCell}>
-                            <div class={styles.actionsRow}>
-                              <Button variant="text" size="sm" onClick={() => setSelectedItemId(item.id)}>
-                                Details
-                              </Button>
-                              <Button variant="text" size="sm" onClick={() => setEditItemId(item.id)}>
-                                Edit
-                              </Button>
-                              <Button variant="text" size="sm" onClick={() => handleDeleteClick(item)} class={styles.deleteLink}>
-                                Delete
-                              </Button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    }}
-                  </For>
-                </tbody>
-              </table>
-            </div>
+            <Table>
+              <TableHead>
+                <tr>
+                  <TableHeaderCell
+                    sortable
+                    sortDirection={getSortDirection('name')}
+                    onSort={() => handleSort('name')}
+                    minWidth="140px"
+                  >
+                    Item Name
+                  </TableHeaderCell>
+                  <TableHeaderCell minWidth="90px">
+                    Category
+                  </TableHeaderCell>
+                  <TableHeaderCell
+                    sortable
+                    sortDirection={getSortDirection('current_stock')}
+                    onSort={() => handleSort('current_stock')}
+                    minWidth="120px"
+                  >
+                    Current Stock
+                  </TableHeaderCell>
+                  <TableHeaderCell
+                    sortable
+                    sortDirection={getSortDirection('avg_daily_consumption')}
+                    onSort={() => handleSort('avg_daily_consumption')}
+                    minWidth="110px"
+                  >
+                    Consumption
+                  </TableHeaderCell>
+                  <TableHeaderCell
+                    sortable
+                    sortDirection={getSortDirection('days_of_supply_remaining')}
+                    onSort={() => handleSort('days_of_supply_remaining')}
+                    minWidth="130px"
+                  >
+                    Days Remaining
+                  </TableHeaderCell>
+                  <TableHeaderCell minWidth="100px">
+                    Status
+                  </TableHeaderCell>
+                  <TableHeaderCell minWidth="100px">
+                    Actions
+                  </TableHeaderCell>
+                </tr>
+              </TableHead>
+              <TableBody>
+                <For each={sortedInventory()}>
+                  {(item) => {
+                    const stockStatus = getStockStatus(item);
+                    return (
+                      <TableRow>
+                        <TableCell>
+                          <div>
+                            <div class={styles.itemName}>{item.name}</div>
+                            <Show when={item.consumption_tracking?.has_custom_threshold}>
+                              <div class={styles.customThreshold}>Custom Threshold</div>
+                            </Show>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <span class={styles.categoryText}>
+                            {item.category.charAt(0).toUpperCase() + item.category.slice(1)}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <span class={styles.stockText}>
+                            {item.current_stock.toFixed(2)} {item.unit}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <span class={styles.consumptionText}>
+                            <Show when={item.consumption_tracking} fallback="-">
+                              {item.consumption_tracking!.avg_daily_consumption.toFixed(2)} {item.unit}/day
+                            </Show>
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <span class={styles.consumptionText}>
+                            <Show when={item.consumption_tracking} fallback="-">
+                              {item.consumption_tracking!.days_of_supply_remaining.toFixed(1)} days
+                            </Show>
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={getStockStatusVariant(stockStatus)}>
+                            {getStockStatusLabel(stockStatus)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div class={styles.actionsRow}>
+                            <Button variant="text" size="sm" onClick={() => setSelectedItemId(item.id)}>
+                              Details
+                            </Button>
+                            <Button variant="text" size="sm" onClick={() => setEditItemId(item.id)}>
+                              Edit
+                            </Button>
+                            <Button variant="text" size="sm" onClick={() => handleDeleteClick(item)} class={styles.deleteLink}>
+                              Delete
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  }}
+                </For>
+              </TableBody>
+            </Table>
           </Show>
-        </div>
+        </TableContainer>
       </Show>
 
       {/* Add Item Modal */}
@@ -404,25 +394,16 @@ const InventoryPage: Component = () => {
         onSuccess={() => refetch()}
       />
 
-      {/* Delete Confirmation Dialog */}
-      <Show when={showDeleteConfirm()}>
-        <div class={styles.modalBackdrop} onClick={handleCancelDelete}>
-          <div class={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-            <Heading variant="card" class={styles.modalTitle}>Delete Inventory Item</Heading>
-            <Text class={styles.modalText}>
-              Are you sure you want to delete "{itemToDelete()?.name}"? This action cannot be undone.
-            </Text>
-            <div class={styles.modalActions}>
-              <Button variant="secondary" size="sm" onClick={handleCancelDelete}>
-                Cancel
-              </Button>
-              <Button variant="danger" size="sm" onClick={handleConfirmDelete}>
-                Delete
-              </Button>
-            </div>
-          </div>
-        </div>
-      </Show>
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={showDeleteConfirm()}
+        onClose={handleCancelDelete}
+        onConfirm={handleConfirmDelete}
+        title="Delete Inventory Item"
+        message={`Are you sure you want to delete "${itemToDelete()?.name}"? This action cannot be undone.`}
+        confirmLabel="Delete"
+        variant="danger"
+      />
     </DashboardPageLayout>
   );
 };

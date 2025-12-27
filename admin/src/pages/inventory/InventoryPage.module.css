@@ -103,121 +103,6 @@
   user-select: none;
 }
 
-/* Table container */
-.tableContainer {
-  border-radius: var(--radius-xl);
-  border: 1px solid var(--border-color);
-  overflow: hidden;
-  background-color: var(--bg-primary);
-  box-shadow: var(--shadow-card);
-}
-
-.tableWrapper {
-  overflow-x: auto;
-}
-
-.table {
-  min-width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-}
-
-/* Table header */
-.tableHead {
-  background-color: var(--bg-tertiary);
-}
-
-.tableHeaderCell {
-  padding: var(--spacing-4) var(--spacing-6);
-  text-align: left;
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--text-secondary);
-  border-bottom: 1px solid var(--border-color);
-}
-
-.tableHeaderCellSortable {
-  composes: tableHeaderCell;
-  cursor: pointer;
-  user-select: none;
-  transition: background-color 0.15s;
-}
-
-.tableHeaderCellSortable:hover {
-  background-color: var(--bg-hover);
-}
-
-.headerContent {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-}
-
-.minWidth90 {
-  min-width: 90px;
-}
-
-.minWidth100 {
-  min-width: 100px;
-}
-
-.minWidth110 {
-  min-width: 110px;
-}
-
-.minWidth120 {
-  min-width: 120px;
-}
-
-.minWidth130 {
-  min-width: 130px;
-}
-
-.minWidth140 {
-  min-width: 140px;
-}
-
-/* Sort indicator */
-.sortIndicator {
-  margin-left: var(--spacing-1);
-  display: inline-flex;
-  flex-direction: column;
-  line-height: 0.5;
-}
-
-.sortArrow {
-  font-size: 10px;
-  transition: color 0.15s;
-}
-
-.sortArrowActive {
-  color: var(--primary-color);
-  opacity: 1;
-}
-
-.sortArrowInactive {
-  color: var(--text-tertiary);
-  opacity: 0.4;
-}
-
-/* Table body */
-.tableRow {
-  transition: background-color 0.15s;
-  border-bottom: 1px solid var(--border-light);
-}
-
-.tableRow:hover {
-  background-color: var(--bg-hover);
-}
-
-.tableCell {
-  padding: var(--spacing-4) var(--spacing-6);
-  white-space: nowrap;
-}
-
 /* Cell content styles */
 .itemName {
   font-size: var(--font-size-sm);
@@ -263,79 +148,6 @@
   color: var(--error-hover);
 }
 
-/* Loading state */
-.loadingContainer {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: var(--spacing-16) 0;
-  border-radius: var(--radius-xl);
-  border: 1px solid var(--border-color);
-  background-color: var(--bg-primary);
-}
-
-.spinner {
-  width: 2.5rem;
-  height: 2.5rem;
-  border: 2px solid transparent;
-  border-bottom-color: var(--primary-color);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Empty state */
-.emptyState {
-  padding: var(--spacing-12);
-  text-align: center;
-  color: var(--text-secondary);
-}
-
-/* Modal backdrop */
-.modalBackdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 50;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--spacing-4);
-  background-color: var(--overlay-bg);
-}
-
-.modalContent {
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-xl);
-  max-width: 28rem;
-  width: 100%;
-  padding: var(--spacing-6);
-  background-color: var(--bg-primary);
-  border: 1px solid var(--border-color);
-}
-
-.modalTitle {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  margin-bottom: var(--spacing-4);
-  color: var(--text-primary);
-}
-
-.modalText {
-  margin-bottom: var(--spacing-6);
-  color: var(--text-secondary);
-}
-
-.modalActions {
-  display: flex;
-  justify-content: flex-end;
-  gap: var(--spacing-3);
-}
-
 /* Button icon */
 .buttonIcon {
   width: 18px;
@@ -343,7 +155,10 @@
   flex-shrink: 0;
 }
 
-/* Media Queries - Grouped by breakpoint */
+/* ==========================================================================
+   Media Queries
+   ========================================================================== */
+
 @media (max-width: 767px) {
   .filterCard {
     padding: var(--spacing-4);
@@ -363,24 +178,9 @@
     justify-content: flex-start;
   }
 
-  .tableWrapper {
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .tableHeaderCell,
-  .tableCell {
-    padding: var(--spacing-3) var(--spacing-4);
-    font-size: var(--font-size-sm);
-  }
-
   .actionsRow {
     flex-direction: column;
     gap: var(--spacing-2);
-  }
-
-  .modalContent {
-    max-width: calc(100vw - 2rem);
-    margin: var(--spacing-4);
   }
 }
 

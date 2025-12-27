@@ -131,6 +131,7 @@ async function bootstrap() {
       'X-User-Agent',
       'X-Session-ID',
       'X-Trial-ID',
+      'X-Tenant-Id',
       'X-Forwarded-Prefix',
       'X-Forwarded-Host',
       'X-Forwarded-Proto',

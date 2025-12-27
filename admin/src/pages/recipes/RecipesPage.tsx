@@ -9,13 +9,24 @@ import { recipesApi, Recipe, RecipeCategory, CreateRecipeRequest, UpdateRecipeRe
 import Badge from "~/components/common/Badge";
 import Button from "~/components/common/Button";
 import { PlusIcon } from "~/components/icons";
-import { Heading, Text } from "~/components/common/Typography";
+import { Text } from "~/components/common/Typography";
 import { getRecipeCategoryColor } from "~/components/common/Badge.config";
 import { useInfoModal } from "~/stores/infoModalStore";
+import {
+  TableContainer,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableHeaderCell,
+  TableCell,
+  TableEmptyState,
+} from "~/components/common/Table";
+import { ConfirmationModal } from "~/components/common/ConfirmationModal";
+import type { SortDirection } from "~/components/common/Table";
 import styles from "./RecipesPage.module.css";
 
 type SortField = 'name' | 'prepTime' | 'totalTime';
-type SortDirection = 'asc' | 'desc';
 
 // Adapter type for the UI (simplified ingredient format)
 interface UIRecipe extends Omit<Recipe, 'ingredients' | 'yield' | 'yieldUnit' | 'tags' | 'nutritionalInfo'> {
@@ -79,11 +90,11 @@ const RecipesPage: Component = () => {
       setError(null);
       const data = await recipesApi.getRecipes();
       setRecipes(data.map(convertToUIRecipe));
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error fetching recipes:', err);
-      // Extract error message from API response or use fallback
-      const errorMessage = err?.data?.message || err?.message || 'Failed to load recipes';
-      const statusCode = err?.status;
+      const error = err as { data?: { message?: string }; message?: string; status?: number };
+      const errorMessage = error?.data?.message || error?.message || 'Failed to load recipes';
+      const statusCode = error?.status;
       const displayMessage = statusCode === 403
         ? `Access denied: ${errorMessage}. You may not have permission to view recipes.`
         : errorMessage;
@@ -108,6 +119,11 @@ const RecipesPage: Component = () => {
     }
   };
 
+  // Get sort direction for a field
+  const getSortDirection = (field: SortField): SortDirection => {
+    return sortField() === field ? sortDirection() : null;
+  };
+
   // Handle opening the create modal
   const handleOpenCreateModal = () => {
     setFormMode('create');
@@ -124,20 +140,20 @@ const RecipesPage: Component = () => {
   };
 
   // Handle form submission
-  const handleFormSubmit = async (data: any) => {
+  const handleFormSubmit = async (data: Record<string, unknown>) => {
     try {
       setLoading(true);
       if (formMode() === 'create') {
         // Convert UI format to API format
         const createData: CreateRecipeRequest = {
-          name: data.name,
-          category: data.category,
-          description: data.description,
-          prepTime: data.prepTime,
-          cookTime: data.cookTime,
-          yield: data.yield ? parseInt(data.yield.split(' ')[0]) : 1,
-          yieldUnit: data.yield ? data.yield.split(' ').slice(1).join(' ') : 'servings',
-          ingredients: data.ingredients.map((ing: any) => ({
+          name: data.name as string,
+          category: data.category as RecipeCategory,
+          description: data.description as string,
+          prepTime: data.prepTime as number,
+          cookTime: data.cookTime as number,
+          yield: data.yield ? parseInt((data.yield as string).split(' ')[0]) : 1,
+          yieldUnit: data.yield ? (data.yield as string).split(' ').slice(1).join(' ') : 'servings',
+          ingredients: (data.ingredients as Array<{ name: string; amount: number; unit: string; notes?: string }>).map((ing) => ({
             ingredientId: '00000000-0000-0000-0000-000000000000', // Placeholder UUID
             ingredientName: ing.name,
             quantity: ing.amount,
@@ -145,23 +161,23 @@ const RecipesPage: Component = () => {
             cost: 0,
             notes: ing.notes || undefined,
           })),
-          instructions: data.instructions,
-          tags: data.tags,
+          instructions: data.instructions as string[],
+          tags: data.tags as string[],
           allergens: [],
-          nutritionalInfo: data.nutritionInfo,
+          nutritionalInfo: data.nutritionInfo as { calories?: number; fat?: number; carbs?: number; protein?: number } | undefined,
         };
         await recipesApi.createRecipe(createData);
       } else {
         // Update existing recipe
         const updateData: UpdateRecipeRequest = {
-          name: data.name,
-          category: data.category,
-          description: data.description,
-          prepTime: data.prepTime,
-          cookTime: data.cookTime,
-          yield: data.yield ? parseInt(data.yield.split(' ')[0]) : 1,
-          yieldUnit: data.yield ? data.yield.split(' ').slice(1).join(' ') : 'servings',
-          ingredients: data.ingredients.map((ing: any) => ({
+          name: data.name as string,
+          category: data.category as RecipeCategory,
+          description: data.description as string,
+          prepTime: data.prepTime as number,
+          cookTime: data.cookTime as number,
+          yield: data.yield ? parseInt((data.yield as string).split(' ')[0]) : 1,
+          yieldUnit: data.yield ? (data.yield as string).split(' ').slice(1).join(' ') : 'servings',
+          ingredients: (data.ingredients as Array<{ name: string; amount: number; unit: string; notes?: string }>).map((ing) => ({
             ingredientId: '00000000-0000-0000-0000-000000000000', // Placeholder UUID
             ingredientName: ing.name,
             quantity: ing.amount,
@@ -169,18 +185,19 @@ const RecipesPage: Component = () => {
             cost: 0,
             notes: ing.notes || undefined,
           })),
-          instructions: data.instructions,
-          tags: data.tags,
-          nutritionalInfo: data.nutritionInfo,
+          instructions: data.instructions as string[],
+          tags: data.tags as string[],
+          nutritionalInfo: data.nutritionInfo as { calories?: number; fat?: number; carbs?: number; protein?: number } | undefined,
         };
         await recipesApi.updateRecipe(recipeToEdit()!.id, updateData);
       }
       // Refresh the list
       await fetchRecipes();
       setIsFormModalOpen(false);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error saving recipe:', err);
-      const errorMessage = err?.data?.message || err?.message || 'Failed to save recipe';
+      const error = err as { data?: { message?: string }; message?: string };
+      const errorMessage = error?.data?.message || error?.message || 'Failed to save recipe';
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -203,9 +220,10 @@ const RecipesPage: Component = () => {
       setShowDeleteConfirm(false);
       setRecipeToDelete(undefined);
       await fetchRecipes();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error deleting recipe:', err);
-      const message = err.message || 'Failed to delete recipe';
+      const error = err as { message?: string };
+      const message = error.message || 'Failed to delete recipe';
       setShowDeleteConfirm(false);
       setRecipeToDelete(undefined);
       showError('Cannot Delete Recipe', message);
@@ -281,33 +299,6 @@ const RecipesPage: Component = () => {
     return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
   };
 
-  // Render sort indicator
-  const SortIndicator = (field: SortField) => {
-    const isActive = () => sortField() === field;
-    return (
-      <span class={styles.sortIndicator}>
-        <span
-          class={styles.sortArrow}
-          classList={{
-            [styles.sortArrowActive]: isActive() && sortDirection() === 'asc',
-            [styles.sortArrowInactive]: !isActive() || sortDirection() !== 'asc'
-          }}
-        >
-          ▲
-        </span>
-        <span
-          class={styles.sortArrow}
-          classList={{
-            [styles.sortArrowActive]: isActive() && sortDirection() === 'desc',
-            [styles.sortArrowInactive]: !isActive() || sortDirection() !== 'desc'
-          }}
-        >
-          ▼
-        </span>
-      </span>
-    );
-  };
-
   return (
     <DashboardPageLayout
       title="Recipe Management"
@@ -327,13 +318,15 @@ const RecipesPage: Component = () => {
       {/* Error Display */}
       <Show when={error()}>
         <div class={styles.errorBox}>
-          <p class={styles.errorText}>{error()}</p>
+          <Text color="error">{error()}</Text>
         </div>
       </Show>
 
       {/* Loading State */}
       <Show when={loading() && recipes().length === 0}>
-        <div class={styles.loadingText}>Loading recipes...</div>
+        <div class={styles.loadingText}>
+          <Text color="secondary">Loading recipes...</Text>
+        </div>
       </Show>
 
       {/* Stats Cards */}
@@ -350,7 +343,7 @@ const RecipesPage: Component = () => {
         />
         <StatsCard
           title="Avg Prep Time"
-          value={`${Math.round(recipes().reduce((sum, r) => sum + r.prepTime, 0) / recipes().length)}m`}
+          value={`${Math.round(recipes().reduce((sum, r) => sum + r.prepTime, 0) / recipes().length) || 0}m`}
           valueColor="var(--info-color)"
         />
       </div>
@@ -386,101 +379,103 @@ const RecipesPage: Component = () => {
       </div>
 
       {/* Recipes Table */}
-      <div class={styles.tableContainer}>
+      <TableContainer class={styles.tableMargin}>
         <Show
           when={sortedAndFilteredRecipes().length > 0}
           fallback={
-            <div class={styles.emptyState}>
-              No recipes found for the selected criteria.
-            </div>
+            <TableEmptyState message="No recipes found for the selected criteria." />
           }
         >
-          <div class={styles.tableWrapper}>
-            <table class={styles.table}>
-              <thead class={styles.tableHead}>
-                <tr>
-                  <th class={styles.tableHeaderCellSortable} onClick={() => handleSort('name')}>
-                    <div class={`${styles.headerContent} ${styles.minWidth180}`}>
-                      <span>Recipe Name</span>
-                      {SortIndicator('name')}
-                    </div>
-                  </th>
-                  <th class={styles.tableHeaderCell}>
-                    <div class={styles.minWidth100}>Category</div>
-                  </th>
-                  <th class={styles.tableHeaderCellSortable} onClick={() => handleSort('prepTime')}>
-                    <div class={`${styles.headerContent} ${styles.minWidth100}`}>
-                      <span>Prep Time</span>
-                      {SortIndicator('prepTime')}
-                    </div>
-                  </th>
-                  <th class={styles.tableHeaderCellSortable} onClick={() => handleSort('totalTime')}>
-                    <div class={`${styles.headerContent} ${styles.minWidth110}`}>
-                      <span>Total Time</span>
-                      {SortIndicator('totalTime')}
-                    </div>
-                  </th>
-                  <th class={styles.tableHeaderCell}>
-                    <div class={styles.minWidth90}>Yield</div>
-                  </th>
-                  <th class={styles.tableHeaderCell}>
-                    <div class={styles.minWidth100}>Actions</div>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <For each={sortedAndFilteredRecipes()}>
-                  {(recipe) => (
-                    <tr class={styles.tableRow}>
-                      <td class={styles.tableCellWrap}>
-                        <div>
-                          <div class={styles.recipeName}>{recipe.name}</div>
-                          <div class={styles.tagsRow}>
-                            <For each={recipe.tags.slice(0, 3)}>
-                              {(tag) => (
-                                <Badge size="sm" variant="neutral" rounded="md">
-                                  {tag}
-                                </Badge>
-                              )}
-                            </For>
-                          </div>
+          <Table>
+            <TableHead>
+              <tr>
+                <TableHeaderCell
+                  sortable
+                  sortDirection={getSortDirection('name')}
+                  onSort={() => handleSort('name')}
+                  minWidth="180px"
+                >
+                  Recipe Name
+                </TableHeaderCell>
+                <TableHeaderCell minWidth="100px">
+                  Category
+                </TableHeaderCell>
+                <TableHeaderCell
+                  sortable
+                  sortDirection={getSortDirection('prepTime')}
+                  onSort={() => handleSort('prepTime')}
+                  minWidth="100px"
+                >
+                  Prep Time
+                </TableHeaderCell>
+                <TableHeaderCell
+                  sortable
+                  sortDirection={getSortDirection('totalTime')}
+                  onSort={() => handleSort('totalTime')}
+                  minWidth="110px"
+                >
+                  Total Time
+                </TableHeaderCell>
+                <TableHeaderCell minWidth="90px">
+                  Yield
+                </TableHeaderCell>
+                <TableHeaderCell minWidth="100px">
+                  Actions
+                </TableHeaderCell>
+              </tr>
+            </TableHead>
+            <TableBody>
+              <For each={sortedAndFilteredRecipes()}>
+                {(recipe) => (
+                  <TableRow>
+                    <TableCell class={styles.cellWrap}>
+                      <div>
+                        <div class={styles.recipeName}>{recipe.name}</div>
+                        <div class={styles.tagsRow}>
+                          <For each={recipe.tags.slice(0, 3)}>
+                            {(tag) => (
+                              <Badge size="sm" variant="neutral" rounded="md">
+                                {tag}
+                              </Badge>
+                            )}
+                          </For>
                         </div>
-                      </td>
-                      <td class={styles.tableCell}>
-                        <Badge color={getRecipeCategoryColor(recipe.category)}>
-                          {formatCategoryName(recipe.category)}
-                        </Badge>
-                      </td>
-                      <td class={styles.tableCell}>
-                        <span class={styles.timeText}>{formatTime(recipe.prepTime)}</span>
-                      </td>
-                      <td class={styles.tableCell}>
-                        <span class={styles.totalTimeText}>{formatTime(recipe.totalTime)}</span>
-                      </td>
-                      <td class={styles.tableCell}>
-                        <span class={styles.yieldText}>{recipe.yield}</span>
-                      </td>
-                      <td class={styles.tableCell}>
-                        <div class={styles.actionsRow}>
-                          <Button variant="text" size="sm" onClick={() => setSelectedRecipe(recipe)}>
-                            View
-                          </Button>
-                          <Button variant="text" size="sm" onClick={() => handleOpenEditModal(recipe)}>
-                            Edit
-                          </Button>
-                          <Button variant="text" size="sm" onClick={() => handleDeleteClick(recipe)} class={styles.deleteLink}>
-                            Delete
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  )}
-                </For>
-              </tbody>
-            </table>
-          </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge color={getRecipeCategoryColor(recipe.category)}>
+                        {formatCategoryName(recipe.category)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <span class={styles.timeText}>{formatTime(recipe.prepTime)}</span>
+                    </TableCell>
+                    <TableCell>
+                      <span class={styles.totalTimeText}>{formatTime(recipe.totalTime)}</span>
+                    </TableCell>
+                    <TableCell>
+                      <span class={styles.yieldText}>{recipe.yield}</span>
+                    </TableCell>
+                    <TableCell>
+                      <div class={styles.actionsRow}>
+                        <Button variant="text" size="sm" onClick={() => setSelectedRecipe(recipe)}>
+                          View
+                        </Button>
+                        <Button variant="text" size="sm" onClick={() => handleOpenEditModal(recipe)}>
+                          Edit
+                        </Button>
+                        <Button variant="text" size="sm" onClick={() => handleDeleteClick(recipe)} class={styles.deleteLink}>
+                          Delete
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </For>
+            </TableBody>
+          </Table>
         </Show>
-      </div>
+      </TableContainer>
 
       {/* Recipe Details Modal */}
       <RecipeDetailsModal
@@ -502,25 +497,16 @@ const RecipesPage: Component = () => {
         onSubmit={handleFormSubmit}
       />
 
-      {/* Delete Confirmation Dialog */}
-      <Show when={showDeleteConfirm()}>
-        <div class={styles.modalBackdrop} onClick={handleCancelDelete}>
-          <div class={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-            <Heading variant="card" class={styles.modalTitle}>Delete Recipe</Heading>
-            <Text class={styles.modalText}>
-              Are you sure you want to delete "{recipeToDelete()?.name}"? This action cannot be undone.
-            </Text>
-            <div class={styles.modalActions}>
-              <Button variant="secondary" size="sm" onClick={handleCancelDelete}>
-                Cancel
-              </Button>
-              <Button variant="danger" size="sm" onClick={handleConfirmDelete}>
-                Delete
-              </Button>
-            </div>
-          </div>
-        </div>
-      </Show>
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={showDeleteConfirm()}
+        onClose={handleCancelDelete}
+        onConfirm={handleConfirmDelete}
+        title="Delete Recipe"
+        message={`Are you sure you want to delete "${recipeToDelete()?.name}"? This action cannot be undone.`}
+        confirmLabel="Delete"
+        variant="danger"
+      />
     </DashboardPageLayout>
   );
 };

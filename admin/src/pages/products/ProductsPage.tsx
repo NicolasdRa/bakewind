@@ -8,12 +8,23 @@ import FilterSelect from "~/components/common/FilterSelect";
 import Badge from "~/components/common/Badge";
 import Button from "~/components/common/Button";
 import { PlusIcon } from "~/components/icons";
-import { Heading, Text } from "~/components/common/Typography";
 import { getCategoryBadgeColor, getProductStatusVariant } from "~/components/common/Badge.config";
+import {
+  TableContainer,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableHeaderCell,
+  TableCell,
+  TableEmptyState,
+  TableLoadingState,
+} from "~/components/common/Table";
+import { ConfirmationModal } from "~/components/common/ConfirmationModal";
+import type { SortDirection } from "~/components/common/Table";
 import styles from "./ProductsPage.module.css";
 
 type SortField = 'name' | 'basePrice' | 'costOfGoods' | 'margin' | 'popularityScore';
-type SortDirection = 'asc' | 'desc';
 
 const ProductsPage: Component = () => {
   const [selectedCategory, setSelectedCategory] = createSignal<ProductCategory | 'all'>('all');
@@ -80,6 +91,11 @@ const ProductsPage: Component = () => {
     }
   };
 
+  const handleCancelDelete = () => {
+    setShowDeleteConfirm(false);
+    setProductToDelete(undefined);
+  };
+
   // Handle form submit
   const handleFormSubmit = async (data: CreateProductRequest | UpdateProductRequest) => {
     if (modalMode() === 'create') {
@@ -128,6 +144,11 @@ const ProductsPage: Component = () => {
     }
   };
 
+  // Get sort direction for a field
+  const getSortDirection = (field: SortField): SortDirection => {
+    return sortField() === field ? sortDirection() : null;
+  };
+
   // Get sorted products
   const sortedProducts = () => {
     const productsList = products() || [];
@@ -171,33 +192,6 @@ const ProductsPage: Component = () => {
           : (bValue as number) - (aValue as number);
       }
     });
-  };
-
-  // Render sort indicator - always show for sortable columns
-  const SortIndicator = (field: SortField) => {
-    const isActive = () => sortField() === field;
-    return (
-      <span class={styles.sortIndicator}>
-        <span
-          class={styles.sortArrow}
-          classList={{
-            [styles.sortArrowActive]: isActive() && sortDirection() === 'asc',
-            [styles.sortArrowInactive]: !isActive() || sortDirection() !== 'asc'
-          }}
-        >
-          ▲
-        </span>
-        <span
-          class={styles.sortArrow}
-          classList={{
-            [styles.sortArrowActive]: isActive() && sortDirection() === 'desc',
-            [styles.sortArrowInactive]: !isActive() || sortDirection() !== 'desc'
-          }}
-        >
-          ▼
-        </span>
-      </span>
-    );
   };
 
   return (
@@ -273,145 +267,147 @@ const ProductsPage: Component = () => {
       {/* Products Table */}
       <Show
         when={!products.loading}
-        fallback={
-          <div class={styles.loadingContainer}>
-            <div class={styles.spinner}></div>
-          </div>
-        }
+        fallback={<TableLoadingState message="Loading products..." />}
       >
-        <div class={styles.tableContainer}>
+        <TableContainer>
           <Show
             when={(products() || []).length > 0}
             fallback={
-              <div class={styles.emptyState}>
-                No products found for the selected criteria.
-              </div>
+              <TableEmptyState message="No products found for the selected criteria." />
             }
           >
-            <div class={styles.tableWrapper}>
-              <table class={styles.table}>
-                <thead class={styles.tableHead}>
-                  <tr>
-                    <th class={styles.tableHeaderCellSortable} onClick={() => handleSort('name')}>
-                      <div class={`${styles.headerContent} ${styles.minWidth140}`}>
-                        <span>Product Name</span>
-                        {SortIndicator('name')}
-                      </div>
-                    </th>
-                    <th class={styles.tableHeaderCell}>
-                      <div class={styles.minWidth80}>Category</div>
-                    </th>
-                    <th class={styles.tableHeaderCellSortable} onClick={() => handleSort('basePrice')}>
-                      <div class={`${styles.headerContent} ${styles.minWidth80}`}>
-                        <span>Price</span>
-                        {SortIndicator('basePrice')}
-                      </div>
-                    </th>
-                    <th class={styles.tableHeaderCellSortable} onClick={() => handleSort('costOfGoods')}>
-                      <div class={`${styles.headerContent} ${styles.minWidth70}`}>
-                        <span>Cost</span>
-                        {SortIndicator('costOfGoods')}
-                      </div>
-                    </th>
-                    <th class={styles.tableHeaderCellSortable} onClick={() => handleSort('margin')}>
-                      <div class={`${styles.headerContent} ${styles.minWidth80}`}>
-                        <span>Margin</span>
-                        {SortIndicator('margin')}
-                      </div>
-                    </th>
-                    <th class={styles.tableHeaderCell}>
-                      <div class={styles.minWidth80}>Status</div>
-                    </th>
-                    <th class={styles.tableHeaderCellSortable} onClick={() => handleSort('popularityScore')}>
-                      <div class={`${styles.headerContent} ${styles.minWidth100}`}>
-                        <span>Popularity</span>
-                        {SortIndicator('popularityScore')}
-                      </div>
-                    </th>
-                    <th class={styles.tableHeaderCell}>
-                      <div class={styles.minWidth100}>Actions</div>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <For each={sortedProducts()}>
-                    {(product) => (
-                      <tr class={styles.tableRow}>
-                        <td class={styles.tableCellWrap}>
-                          <div>
-                            <div class={styles.productName}>{product.name}</div>
-                            <Show when={product.description}>
-                              <div class={styles.productDescription}>
-                                {product.description}
-                              </div>
-                            </Show>
-                          </div>
-                        </td>
-                        <td class={styles.tableCell}>
-                          <Badge color={getCategoryBadgeColor(product.category)}>
-                            {formatCategoryName(product.category)}
-                          </Badge>
-                        </td>
-                        <td class={styles.tableCell}>
-                          <span class={styles.priceText}>{formatPrice(product.basePrice)}</span>
-                        </td>
-                        <td class={styles.tableCell}>
-                          <span class={styles.costText}>
-                            <Show when={product.costOfGoods} fallback="—">
-                              {formatPrice(product.costOfGoods!)}
-                            </Show>
-                          </span>
-                        </td>
-                        <td class={styles.tableCell}>
-                          <Show when={product.margin !== null} fallback={
-                            <span class={styles.marginText}>—</span>
-                          }>
-                            <div class={styles.marginContainer}>
-                              <span
-                                classList={{
-                                  [styles.marginWarning]: product.marginWarning,
-                                  [styles.marginText]: !product.marginWarning
-                                }}
-                              >
-                                {product.margin!.toFixed(1)}%
-                              </span>
-                              <Show when={product.marginWarning}>
-                                <span class={styles.warningIcon} title="Low margin warning (below 20%)">
-                                  ⚠️
-                                </span>
-                              </Show>
+            <Table>
+              <TableHead>
+                <tr>
+                  <TableHeaderCell
+                    sortable
+                    sortDirection={getSortDirection('name')}
+                    onSort={() => handleSort('name')}
+                    minWidth="140px"
+                  >
+                    Product Name
+                  </TableHeaderCell>
+                  <TableHeaderCell minWidth="80px">
+                    Category
+                  </TableHeaderCell>
+                  <TableHeaderCell
+                    sortable
+                    sortDirection={getSortDirection('basePrice')}
+                    onSort={() => handleSort('basePrice')}
+                    minWidth="80px"
+                  >
+                    Price
+                  </TableHeaderCell>
+                  <TableHeaderCell
+                    sortable
+                    sortDirection={getSortDirection('costOfGoods')}
+                    onSort={() => handleSort('costOfGoods')}
+                    minWidth="70px"
+                  >
+                    Cost
+                  </TableHeaderCell>
+                  <TableHeaderCell
+                    sortable
+                    sortDirection={getSortDirection('margin')}
+                    onSort={() => handleSort('margin')}
+                    minWidth="80px"
+                  >
+                    Margin
+                  </TableHeaderCell>
+                  <TableHeaderCell minWidth="80px">
+                    Status
+                  </TableHeaderCell>
+                  <TableHeaderCell
+                    sortable
+                    sortDirection={getSortDirection('popularityScore')}
+                    onSort={() => handleSort('popularityScore')}
+                    minWidth="100px"
+                  >
+                    Popularity
+                  </TableHeaderCell>
+                  <TableHeaderCell minWidth="100px">
+                    Actions
+                  </TableHeaderCell>
+                </tr>
+              </TableHead>
+              <TableBody>
+                <For each={sortedProducts()}>
+                  {(product) => (
+                    <TableRow>
+                      <TableCell class={styles.cellWrap}>
+                        <div>
+                          <div class={styles.productName}>{product.name}</div>
+                          <Show when={product.description}>
+                            <div class={styles.productDescription}>
+                              {product.description}
                             </div>
                           </Show>
-                        </td>
-                        <td class={styles.tableCell}>
-                          <Badge variant={getProductStatusVariant(product.status)}>
-                            {formatStatusName(product.status)}
-                          </Badge>
-                        </td>
-                        <td class={styles.tableCell}>
-                          <div class={styles.popularityContainer}>
-                            <span>⭐</span>
-                            <span>{product.popularityScore}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge color={getCategoryBadgeColor(product.category)}>
+                          {formatCategoryName(product.category)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <span class={styles.priceText}>{formatPrice(product.basePrice)}</span>
+                      </TableCell>
+                      <TableCell>
+                        <span class={styles.costText}>
+                          <Show when={product.costOfGoods} fallback="—">
+                            {formatPrice(product.costOfGoods!)}
+                          </Show>
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <Show when={product.margin !== null} fallback={
+                          <span class={styles.marginText}>—</span>
+                        }>
+                          <div class={styles.marginContainer}>
+                            <span
+                              classList={{
+                                [styles.marginWarning]: product.marginWarning,
+                                [styles.marginText]: !product.marginWarning
+                              }}
+                            >
+                              {product.margin!.toFixed(1)}%
+                            </span>
+                            <Show when={product.marginWarning}>
+                              <span class={styles.warningIcon} title="Low margin warning (below 20%)">
+                                ⚠️
+                              </span>
+                            </Show>
                           </div>
-                        </td>
-                        <td class={styles.tableCell}>
-                          <div class={styles.actionsRow}>
-                            <Button variant="text" size="sm" onClick={() => handleEdit(product)}>
-                              Edit
-                            </Button>
-                            <Button variant="text" size="sm" onClick={() => handleDeleteClick(product)} class={styles.deleteLink}>
-                              Delete
-                            </Button>
-                          </div>
-                        </td>
-                      </tr>
-                    )}
-                  </For>
-                </tbody>
-              </table>
-            </div>
+                        </Show>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={getProductStatusVariant(product.status)}>
+                          {formatStatusName(product.status)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div class={styles.popularityContainer}>
+                          <span>⭐</span>
+                          <span>{product.popularityScore}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div class={styles.actionsRow}>
+                          <Button variant="text" size="sm" onClick={() => handleEdit(product)}>
+                            Edit
+                          </Button>
+                          <Button variant="text" size="sm" onClick={() => handleDeleteClick(product)} class={styles.deleteLink}>
+                            Delete
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </For>
+              </TableBody>
+            </Table>
           </Show>
-        </div>
+        </TableContainer>
       </Show>
 
       {/* Product Form Modal */}
@@ -423,32 +419,16 @@ const ProductsPage: Component = () => {
         mode={modalMode()}
       />
 
-      {/* Delete Confirmation Dialog */}
-      <Show when={showDeleteConfirm()}>
-        <div class={styles.modalBackdrop}>
-          <div class={styles.modalContent}>
-            <Heading variant="card" class={styles.modalTitle}>Delete Product</Heading>
-            <Text class={styles.modalText}>
-              Are you sure you want to delete "{productToDelete()?.name}"? This action cannot be undone.
-            </Text>
-            <div class={styles.modalActions}>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => {
-                  setShowDeleteConfirm(false);
-                  setProductToDelete(undefined);
-                }}
-              >
-                Cancel
-              </Button>
-              <Button variant="danger" size="sm" onClick={handleDeleteConfirm}>
-                Delete
-              </Button>
-            </div>
-          </div>
-        </div>
-      </Show>
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={showDeleteConfirm()}
+        onClose={handleCancelDelete}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Product"
+        message={`Are you sure you want to delete "${productToDelete()?.name}"? This action cannot be undone.`}
+        confirmLabel="Delete"
+        variant="danger"
+      />
     </DashboardPageLayout>
   );
 };

@@ -1,0 +1,211 @@
+/* Table Components - Shared CSS Module */
+
+/* ==========================================================================
+   Container & Wrapper
+   ========================================================================== */
+
+.container {
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  background-color: var(--bg-primary);
+  box-shadow: var(--shadow-card);
+}
+
+.wrapper {
+  overflow-x: auto;
+}
+
+.table {
+  min-width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+/* ==========================================================================
+   Header
+   ========================================================================== */
+
+.head {
+  background-color: var(--bg-tertiary);
+}
+
+.headerCell {
+  padding: var(--spacing-4) var(--spacing-6);
+  text-align: left;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.headerCellCenter {
+  composes: headerCell;
+  text-align: center;
+}
+
+.headerCellRight {
+  composes: headerCell;
+  text-align: right;
+}
+
+.headerCellSortable {
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.15s;
+}
+
+.headerCellSortable:hover {
+  background-color: var(--bg-hover);
+}
+
+.headerContent {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.headerContentCenter {
+  composes: headerContent;
+  justify-content: center;
+}
+
+.headerContentRight {
+  composes: headerContent;
+  justify-content: flex-end;
+}
+
+/* ==========================================================================
+   Sort Indicator
+   ========================================================================== */
+
+.sortIndicator {
+  display: inline-flex;
+  flex-direction: column;
+  line-height: 0.5;
+  margin-left: var(--spacing-1);
+}
+
+.sortArrow {
+  font-size: 10px;
+  transition: color 0.15s;
+}
+
+.sortArrowActive {
+  color: var(--primary-color);
+  opacity: 1;
+}
+
+.sortArrowInactive {
+  color: var(--text-tertiary);
+  opacity: 0.4;
+}
+
+/* ==========================================================================
+   Body & Rows
+   ========================================================================== */
+
+.row {
+  transition: background-color 0.15s;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.row:hover {
+  background-color: var(--bg-hover);
+}
+
+.rowClickable {
+  composes: row;
+  cursor: pointer;
+}
+
+.cell {
+  padding: var(--spacing-4) var(--spacing-6);
+}
+
+.cellCenter {
+  composes: cell;
+  text-align: center;
+}
+
+.cellRight {
+  composes: cell;
+  text-align: right;
+}
+
+.cellNowrap {
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   States
+   ========================================================================== */
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: var(--spacing-4);
+  padding: var(--spacing-16) 0;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-primary);
+}
+
+.spinner {
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 2px solid transparent;
+  border-bottom-color: var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.emptyState {
+  padding: var(--spacing-12);
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+/* ==========================================================================
+   Actions
+   ========================================================================== */
+
+.actionsRow {
+  display: flex;
+  gap: var(--spacing-3);
+}
+
+.actionsRowCenter {
+  composes: actionsRow;
+  justify-content: center;
+}
+
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
+
+@media (max-width: 767px) {
+  .headerCell {
+    padding: var(--spacing-3) var(--spacing-4);
+    font-size: var(--font-size-xs);
+  }
+
+  .cell {
+    padding: var(--spacing-3) var(--spacing-4);
+  }
+
+  .actionsRow {
+    flex-direction: column;
+    gap: var(--spacing-2);
+  }
+}

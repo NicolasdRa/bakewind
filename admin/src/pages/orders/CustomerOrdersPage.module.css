@@ -21,79 +21,6 @@
   min-width: 250px;
 }
 
-/* Table container */
-.tableContainer {
-  background-color: var(--bg-secondary);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  border: 1px solid var(--border-color);
-}
-
-.table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-/* Loading and empty states */
-.loadingState {
-  padding: var(--spacing-12);
-  text-align: center;
-  color: var(--text-secondary);
-}
-
-.emptyState {
-  padding: var(--spacing-12);
-  text-align: center;
-  color: var(--text-secondary);
-}
-
-/* Table header */
-.tableHead {
-  background-color: var(--bg-primary);
-}
-
-.tableHeaderCell {
-  padding: var(--spacing-4);
-  text-align: left;
-  font-weight: var(--font-weight-semibold);
-  color: var(--text-primary);
-  border-bottom: 1px solid var(--border-color);
-}
-
-.tableHeaderCellRight {
-  composes: tableHeaderCell;
-  text-align: right;
-}
-
-.tableHeaderCellCenter {
-  composes: tableHeaderCell;
-  text-align: center;
-}
-
-/* Table body */
-.tableRow {
-  border-bottom: 1px solid var(--border-color);
-  transition: background-color 0.2s;
-}
-
-.tableRow:hover {
-  background-color: var(--bg-primary);
-}
-
-.tableCell {
-  padding: var(--spacing-4);
-}
-
-.tableCellRight {
-  composes: tableCell;
-  text-align: right;
-}
-
-.tableCellCenter {
-  composes: tableCell;
-  text-align: center;
-}
-
 /* Cell content styles */
 .orderNumber {
   color: var(--text-primary);
@@ -133,67 +60,19 @@
   justify-content: center;
 }
 
-.deleteButtonSmall {
+.deleteButton {
   color: var(--error-color);
 }
 
-.deleteButtonSmall:hover {
+.deleteButton:hover {
   background-color: var(--error-light);
 }
 
-/* Modal backdrop */
-.modalBackdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--spacing-4);
-  background-color: var(--overlay-bg);
-  overflow-y: auto;
-}
-
-.modalContent {
-  background-color: var(--bg-primary);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-xl);
-  width: 100%;
-  max-width: 28rem;
-  padding: var(--spacing-6);
-  margin: auto;
-}
-
-.modalTitle {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  margin-bottom: var(--spacing-4);
-  color: var(--text-primary);
-}
-
+/* Modal content */
 .modalText {
   margin-bottom: var(--spacing-4);
-  color: var(--text-secondary);
 }
 
-.modalTextLarge {
-  margin-bottom: var(--spacing-6);
-  color: var(--text-secondary);
-}
-
-.modalActions {
-  display: flex;
-  justify-content: flex-end;
-  gap: var(--spacing-3);
-}
-
-/* Form elements */
 .formGroup {
-  margin-bottom: var(--spacing-6);
+  margin-bottom: var(--spacing-2);
 }
-
-/* (Media queries inherited from DashboardPageLayout) */
