@@ -86,11 +86,13 @@ export const orderLocksStore = {
     } catch (err: unknown) {
       if (err && typeof err === 'object' && 'statusCode' in err && err.statusCode === 409) {
         // Lock conflict - update state with existing lock info
-        const conflictError = err as { locked_by: OrderLock };
+        const conflictError = err as unknown as { locked_by?: OrderLock };
         if (conflictError.locked_by) {
-          setLocks((prev) => new Map(prev).set(orderId, conflictError.locked_by));
+          setLocks((prev) => new Map(prev).set(orderId, conflictError.locked_by!));
+          setError(`Order is locked by ${conflictError.locked_by.locked_by_user_name}`);
+        } else {
+          setError('Order is locked by another user');
         }
-        setError(`Order is locked by ${conflictError.locked_by.locked_by_user_name}`);
       } else {
         setError('Failed to acquire lock');
       }
@@ -232,9 +234,9 @@ export const orderLocksStore = {
     renewalTimers.clear();
 
     // Reset state
-    setLocks(new Map());
-    setMyLocks(new Set());
-    setLoading(new Map());
+    setLocks(new Map<string, OrderLock>());
+    setMyLocks(new Set<string>());
+    setLoading(new Map<string, boolean>());
     setError(null);
   },
 };

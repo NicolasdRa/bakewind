@@ -12,6 +12,7 @@ import SearchInput from "~/components/common/SearchInput";
 import FilterSelect from "~/components/common/FilterSelect";
 import Badge from "~/components/common/Badge";
 import Button from "~/components/common/Button";
+import { PlusIcon } from "~/components/icons";
 import DatePicker from "~/components/common/DatePicker";
 import { useInfoModal } from "~/stores/infoModalStore";
 import { orderLocksStore } from "~/stores/order-locks";
@@ -344,7 +345,8 @@ const InternalOrdersPage: Component = () => {
           <p class={styles.pageSubtitle}>Track and manage internal production orders</p>
         </div>
         <Button variant="primary" size="md" onClick={handleCreateNew}>
-          + Create Order
+          <PlusIcon class={styles.buttonIcon} />
+          <span class="btn-text">Create Order</span>
         </Button>
       </div>
 

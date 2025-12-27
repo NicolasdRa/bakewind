@@ -1,0 +1,250 @@
+/* Tenant Selector Component */
+@reference "tailwindcss";
+
+.container {
+  position: relative;
+  width: 100%;
+  padding: 0 var(--spacing-3);
+  margin-bottom: var(--spacing-4);
+}
+
+.container.collapsed {
+  padding: 0 var(--spacing-2);
+}
+
+.trigger {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  width: 100%;
+  padding: var(--spacing-3);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--easing-default);
+}
+
+.trigger:hover {
+  background: var(--bg-hover);
+  border-color: var(--primary-color);
+}
+
+.collapsed .trigger {
+  justify-content: center;
+  padding: var(--spacing-2);
+}
+
+.triggerIcon {
+  flex-shrink: 0;
+  color: var(--primary-color);
+}
+
+.triggerContent {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+}
+
+.triggerLabel {
+  display: block;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.triggerValue {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.clearButton {
+  flex-shrink: 0;
+  padding: var(--spacing-1);
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: all var(--duration-fast) var(--easing-default);
+}
+
+.clearButton:hover {
+  background: var(--bg-hover);
+  color: var(--error-color);
+}
+
+.chevron {
+  flex-shrink: 0;
+  color: var(--text-muted);
+  transition: transform var(--duration-fast) var(--easing-default);
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+/* Dropdown */
+.dropdown {
+  position: absolute;
+  top: 100%;
+  left: var(--spacing-3);
+  right: var(--spacing-3);
+  margin-top: var(--spacing-2);
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--card-shadow-hover);
+  z-index: 100;
+  animation: slideDown var(--duration-fast) var(--easing-out);
+  overflow: hidden;
+}
+
+.collapsed .dropdown {
+  left: var(--spacing-2);
+  right: auto;
+  min-width: 280px;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Search */
+.searchContainer {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-3);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.searchIcon {
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+
+.searchInput {
+  flex: 1;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  outline: none;
+}
+
+.searchInput::placeholder {
+  color: var(--text-muted);
+}
+
+/* Tenant List */
+.tenantList {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.tenantItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-3);
+  width: 100%;
+  padding: var(--spacing-3);
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--easing-default);
+}
+
+.tenantItem:hover {
+  background: var(--bg-hover);
+}
+
+.tenantItemSelected {
+  background: var(--primary-light, rgba(59, 130, 246, 0.1));
+}
+
+.tenantItemSelected:hover {
+  background: var(--primary-light, rgba(59, 130, 246, 0.15));
+}
+
+.tenantInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.tenantName {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tenantPhone {
+  display: block;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+/* Status Badge */
+.statusBadge {
+  flex-shrink: 0;
+  padding: var(--spacing-1) var(--spacing-2);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  border-radius: var(--radius-full);
+  text-transform: capitalize;
+}
+
+.statusActive {
+  background: var(--success-bg, rgba(16, 185, 129, 0.1));
+  color: var(--success-color, #10b981);
+}
+
+.statusTrial {
+  background: var(--primary-light, rgba(59, 130, 246, 0.1));
+  color: var(--primary-color);
+}
+
+.statusPastDue {
+  background: var(--warning-bg, rgba(245, 158, 11, 0.1));
+  color: var(--warning-color, #f59e0b);
+}
+
+.statusCanceled {
+  background: var(--error-bg, rgba(239, 68, 68, 0.1));
+  color: var(--error-color, #ef4444);
+}
+
+/* States */
+.loading,
+.error,
+.empty {
+  padding: var(--spacing-4);
+  text-align: center;
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}
+
+.error {
+  color: var(--error-color);
+}

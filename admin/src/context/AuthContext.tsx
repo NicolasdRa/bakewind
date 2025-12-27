@@ -6,21 +6,18 @@
  */
 
 import { createContext, useContext, Component, JSX, onMount, createEffect } from 'solid-js';
-import { createAuthStore, type AuthStore, type User } from '../stores/authStore';
+import {
+  createAuthStore,
+  type AuthStore,
+  type User,
+  type TenantContext,
+  type StaffContext,
+  type StaffArea,
+} from '../stores/authStore';
 import { logger } from '../utils/logger';
 
-// Context type that components will use
-export interface AuthContextType {
-  user: User | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  error: string | null;
-  isInitialized: boolean;
-  login: (user: Partial<User>) => void;
-  logout: (navigate?: (path: string) => void) => Promise<void>;
-  refreshProfile: () => Promise<void>;
-  clearError: () => void;
-}
+// Re-export types for convenience
+export type { User, TenantContext, StaffContext, StaffArea };
 
 // Create context with undefined default (requires provider)
 // IMPORTANT: Export the context so it can be imported

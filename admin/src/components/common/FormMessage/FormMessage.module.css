@@ -1,0 +1,41 @@
+/* FormMessage Component */
+
+.base {
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid;
+}
+
+.title {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.message {
+  /* Inherits color from variant */
+}
+
+/* Variants */
+.error {
+  background-color: var(--error-light);
+  border-color: var(--error-color);
+  color: var(--error-color);
+}
+
+.success {
+  background-color: var(--success-light);
+  border-color: var(--success-color);
+  color: var(--success-color);
+}
+
+.warning {
+  background-color: var(--warning-light);
+  border-color: var(--warning-color);
+  color: var(--warning-color);
+}
+
+.info {
+  background-color: var(--info-light);
+  border-color: var(--info-color);
+  color: var(--info-color);
+}

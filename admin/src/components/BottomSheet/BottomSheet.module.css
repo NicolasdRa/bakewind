@@ -1,0 +1,326 @@
+/* BottomSheet Navigation - CSS Module */
+@reference "tailwindcss";
+
+/* Backdrop overlay */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 49;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Main bottom sheet container */
+.bottomSheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: var(--bg-primary);
+  border-top-left-radius: var(--radius-2xl);
+  border-top-right-radius: var(--radius-2xl);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+  transform: translateY(calc(100% - 80px));
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.expanded {
+  transform: translateY(0);
+}
+
+/* Drag handle area */
+.dragHandle {
+  display: flex;
+  justify-content: center;
+  padding: var(--spacing-2) 0;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.dragIndicator {
+  width: 40px;
+  height: 4px;
+  background: var(--border-color);
+  border-radius: var(--radius-full);
+  transition: background-color 0.2s;
+}
+
+.dragHandle:hover .dragIndicator {
+  background: var(--text-muted);
+}
+
+/* Mini bar - always visible */
+.miniBar {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: var(--spacing-2) var(--spacing-4) var(--spacing-6);
+  border-top: 1px solid var(--border-color);
+  flex-shrink: 0;
+}
+
+.miniBarItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-1);
+  padding: var(--spacing-2);
+  color: var(--text-secondary);
+  text-decoration: none;
+  border-radius: var(--radius-lg);
+  transition: color 0.15s, background-color 0.15s;
+  min-width: 56px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.miniBarItem:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.miniBarItem.miniBarItemActive,
+.miniBarItem.miniBarItemActive:hover {
+  color: var(--primary-color);
+}
+
+.miniBarItem.miniBarItemActive .navIcon {
+  color: var(--primary-color);
+}
+
+.miniBarLabel {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+}
+
+/* Navigation icon */
+.navIcon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+/* Full menu - visible when expanded */
+.fullMenu {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.menuHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: var(--spacing-2);
+}
+
+.menuTitle {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+}
+
+.closeButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-full);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.closeButton:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.closeIcon {
+  width: 20px;
+  height: 20px;
+}
+
+/* Navigation grid */
+.navGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-2);
+}
+
+@media (min-width: 480px) {
+  .navGrid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+.navItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-3);
+  color: var(--text-secondary);
+  text-decoration: none;
+  border-radius: var(--radius-lg);
+  transition: color 0.15s, background-color 0.15s;
+  text-align: center;
+}
+
+.navItem:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.navItem.navItemActive,
+.navItem.navItemActive:hover {
+  color: var(--primary-color);
+  background: var(--bg-hover);
+}
+
+.navItem.navItemActive .navIcon {
+  color: var(--primary-color);
+}
+
+.navLabel {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.2;
+}
+
+/* Divider */
+.divider {
+  height: 1px;
+  background: var(--border-color);
+  margin: var(--spacing-2) 0;
+}
+
+/* User section */
+.userSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.actionButton {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3) var(--spacing-4);
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: color 0.15s, background-color 0.15s, border-color 0.15s;
+}
+
+.actionButton:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+  border-color: var(--border-hover);
+}
+
+.actionIcon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+/* User info */
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3) var(--spacing-4);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+}
+
+.userAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  flex-shrink: 0;
+}
+
+.userDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.userName {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.userEmail {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Sign out button */
+.signOutButton {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3) var(--spacing-4);
+  color: var(--error-color);
+  background: transparent;
+  border: 1px solid var(--error-color);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: color 0.15s, background-color 0.15s;
+}
+
+.signOutButton:hover {
+  background: var(--error-light);
+}
+
+/* Hide on desktop (lg breakpoint) */
+@media (min-width: 1024px) {
+  .backdrop,
+  .bottomSheet {
+    display: none;
+  }
+}

@@ -5,13 +5,20 @@ import * as schema from '../schemas';
 export async function seedInventory(db: NodePgDatabase<typeof schema>) {
   console.log('🌱 Seeding inventory items...');
 
+  // Get the first available tenant for seeding
+  const existingTenant = await db.query.tenantsTable.findFirst();
+  if (!existingTenant) {
+    console.log('⚠️ No tenant found. Run users seed first.');
+    return;
+  }
+  const tenantId = existingTenant.id;
+  console.log('🏢 Using tenant:', existingTenant.businessName);
+
   const now = new Date();
   const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
-  // Create inventory items
-  const items = await db
-    .insert(inventoryItems)
-    .values([
+  // Define inventory items without tenantId first
+  const inventoryData = [
       // ========== INGREDIENTS ==========
 
       // Flours
@@ -724,7 +731,17 @@ export async function seedInventory(db: NodePgDatabase<typeof schema>) {
         lastRestocked: now,
         notes: '16-inch disposable piping bags',
       },
-    ])
+  ];
+
+  // Add tenantId to all items and insert with proper typing
+  const items = await db
+    .insert(inventoryItems)
+    .values(inventoryData.map(item => ({
+      ...item,
+      tenantId,
+      category: item.category as 'ingredient' | 'packaging' | 'supplies',
+      unit: item.unit as 'kg' | 'g' | 'l' | 'ml' | 'unit' | 'dozen',
+    })))
     .onConflictDoNothing()
     .returning();
 

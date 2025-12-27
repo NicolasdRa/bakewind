@@ -2,7 +2,13 @@
 
 /* Page layout */
 .pageContainer {
-  padding: var(--spacing-6);
+  padding: var(--spacing-4);
+}
+
+@media (min-width: 768px) {
+  .pageContainer {
+    padding: var(--spacing-8);
+  }
 }
 
 .pageHeader {

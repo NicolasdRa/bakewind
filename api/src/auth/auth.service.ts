@@ -131,7 +131,15 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const tokens = await this.generateTokens(user);
+    // Get tenant and staff context based on role BEFORE generating tokens
+    // so that tenantId can be included in the JWT
+    const { tenant, staff } = await this.getTenantAndStaffContext(
+      user.id,
+      user.role,
+    );
+
+    // Generate tokens with tenantId for multi-tenancy support
+    const tokens = await this.generateTokens(user, tenant?.id);
 
     // Update refresh token in database
     await this.usersService.updateRefreshToken(user.id, tokens.refreshToken);
@@ -141,12 +149,6 @@ export class AuthService {
 
     // Get user locations
     const locationIds = await this.usersService.getUserLocationIds(user.id);
-
-    // Get tenant and staff context based on role
-    const { tenant, staff } = await this.getTenantAndStaffContext(
-      user.id,
-      user.role,
-    );
 
     this.logger.log(`✅ User ${user.email} logged in successfully`, {
       userId: user.id,
@@ -270,9 +272,12 @@ export class AuthService {
       }
 
       // Generate NEW tokens (rotation)
+      // Get tenant context for the refreshed token
+      const { tenant } = await this.getTenantAndStaffContext(user.id, user.role);
+
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password: _pwd, refreshToken: _token, ...userForTokens } = user;
-      const newTokens = await this.generateTokens(userForTokens);
+      const newTokens = await this.generateTokens(userForTokens, tenant?.id);
 
       // CRITICAL: Immediately invalidate old refresh token and store new one
       // This implements refresh token rotation
@@ -397,18 +402,19 @@ export class AuthService {
     // Apply role-based post-registration hooks (Stripe, trial tracking, etc.)
     await this.applyPostRegistrationHooks(user, metadata);
 
-    // Generate tokens
-    const tokens = await this.generateTokens(user);
-    await this.usersService.updateRefreshToken(user.id, tokens.refreshToken);
-
-    // Get user locations
-    const locationIds = await this.usersService.getUserLocationIds(user.id);
-
-    // Get tenant context (for OWNER, tenant was just created in hooks)
+    // Get tenant context FIRST (for OWNER, tenant was just created in hooks)
+    // so that tenantId can be included in the JWT
     const { tenant, staff } = await this.getTenantAndStaffContext(
       user.id,
       user.role,
     );
+
+    // Generate tokens with tenantId for multi-tenancy support
+    const tokens = await this.generateTokens(user, tenant?.id);
+    await this.usersService.updateRefreshToken(user.id, tokens.refreshToken);
+
+    // Get user locations
+    const locationIds = await this.usersService.getUserLocationIds(user.id);
 
     this.logger.log(`✅ User registered: ${user.email}`, {
       userId: user.id,
@@ -435,6 +441,7 @@ export class AuthService {
 
   private async generateTokens(
     user: Omit<UsersData, 'password' | 'refreshToken'>,
+    tenantId?: string,
   ): Promise<{
     accessToken: string;
     refreshToken: string;
@@ -442,11 +449,18 @@ export class AuthService {
     const appConfig = this.configService.get<AppConfig>('app')!;
 
     // Note: 'exp' and 'iat' will be added automatically by jwtService.signAsync
-    const payload: Omit<JwtPayload, 'type' | 'iat' | 'exp'> = {
+    const payload: Omit<JwtPayload, 'type' | 'iat' | 'exp'> & {
+      tenantId?: string | undefined;
+    } = {
       sub: user.id,
       email: user.email,
       role: user.role,
     };
+
+    // Only include tenantId if it exists (for OWNER/STAFF users)
+    if (tenantId) {
+      payload.tenantId = tenantId;
+    }
 
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(
@@ -546,13 +560,21 @@ export class AuthService {
       businessName?: string;
     },
   ): Promise<void> {
-    // Create Stripe customer for future billing
+    // Create Stripe customer for future billing (non-blocking)
+    // Stripe is optional during trial - don't block registration if it fails
     if (metadata?.fullName && metadata?.businessName) {
-      await this.stripeService.createCustomer(
-        user.email,
-        metadata.fullName,
-        metadata.businessName,
-      );
+      try {
+        await this.stripeService.createCustomer(
+          user.email,
+          metadata.fullName,
+          metadata.businessName,
+        );
+      } catch (error) {
+        // Log but don't block registration - Stripe customer can be created later
+        this.logger.warn(
+          `Failed to create Stripe customer for ${user.email}, will retry later`,
+        );
+      }
     }
 
     // Create tenant record with trial tracking

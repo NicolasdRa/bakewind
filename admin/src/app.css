@@ -149,18 +149,18 @@
   --radius-3xl: 1.5rem;
   --radius-full: 9999px;
 
-  /* Modern Shadows with colored tints */
-  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
-  --shadow-base: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-  --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-  --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  --shadow-2xl: 0 35px 60px -15px rgba(0, 0, 0, 0.3);
-  --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
-  --shadow-primary: 0 10px 40px -10px rgba(245, 158, 11, 0.3);
-  --shadow-success: 0 10px 40px -10px rgba(16, 185, 129, 0.3);
-  --shadow-error: 0 10px 40px -10px rgba(239, 68, 68, 0.3);
-  --shadow-card: 0 2px 8px -2px rgba(0, 0, 0, 0.08), 0 4px 12px -4px rgba(0, 0, 0, 0.08);
+  /* Modern Shadows with improved visibility */
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.12), 0 1px 2px -1px rgba(0, 0, 0, 0.08);
+  --shadow-base: 0 4px 6px -1px rgba(0, 0, 0, 0.12), 0 2px 4px -2px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.12), 0 4px 6px -4px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.08);
+  --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.2);
+  --shadow-2xl: 0 35px 60px -15px rgba(0, 0, 0, 0.25);
+  --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.08);
+  --shadow-primary: 0 10px 40px -10px rgba(232, 146, 10, 0.35);
+  --shadow-success: 0 10px 40px -10px rgba(16, 185, 129, 0.35);
+  --shadow-error: 0 10px 40px -10px rgba(239, 68, 68, 0.35);
+  --shadow-card: 0 2px 8px -2px rgba(0, 0, 0, 0.1), 0 4px 12px -4px rgba(0, 0, 0, 0.06);
 
   /* Gradient Tokens */
   --gradient-primary: linear-gradient(135deg, var(--color-primary-500), var(--color-primary-600));
@@ -210,36 +210,36 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background-color: #fafaf9;
-  color: #292524;
+  background-color: #f8f7f6;
+  color: #1a1816;
 }
 
 /* Unified Theme Variables */
 :root {
-  /* Light Theme Semantic Colors - Enhanced */
+  /* Light Theme Semantic Colors - Enhanced for better contrast */
   --bg-primary: #ffffff;
-  --bg-secondary: #fafaf9;
-  --bg-tertiary: #f5f5f4;
-  --bg-surface: #fafaf9;
-  --bg-hover: #f0efee;
-  --bg-active: #e7e5e4;
-  --text-primary: #1c1917;
-  --text-secondary: #57534e;
-  --text-tertiary: #78716c;
-  --text-muted: #a8a29e;
-  --border-color: #e7e5e4;
-  --border-light: #f5f5f4;
-  --border-hover: #d6d3d1;
-  --primary-color: #f59e0b;
-  --primary-hover: #d97706;
+  --bg-secondary: #f8f7f6;
+  --bg-tertiary: #f0eeec;
+  --bg-surface: #f8f7f6;
+  --bg-hover: #ebe9e7;
+  --bg-active: #e0deda;
+  --text-primary: #1a1816;
+  --text-secondary: #4a4744;
+  --text-tertiary: #6b6762;
+  --text-muted: #8a8580;
+  --border-color: #d4d0cc;
+  --border-light: #e5e2de;
+  --border-hover: #b8b4af;
+  --primary-color: #e8920a;
+  --primary-hover: #c77d06;
   --primary-light: #fef3c7;
   --primary-dark: #92400e;
-  --accent-color: #f59e0b;
-  --accent-hover: #d97706;
+  --accent-color: #e8920a;
+  --accent-hover: #c77d06;
   --accent-light: #fde68a;
-  --shadow-color: rgba(0, 0, 0, 0.08);
-  --shadow-subtle: rgba(0, 0, 0, 0.04);
-  --shadow-colored: rgba(245, 158, 11, 0.1);
+  --shadow-color: rgba(0, 0, 0, 0.12);
+  --shadow-subtle: rgba(0, 0, 0, 0.06);
+  --shadow-colored: rgba(232, 146, 10, 0.15);
 
   /* Success Semantic Tokens */
   --success-color: var(--color-success-600);
@@ -250,11 +250,11 @@ body {
   --success-text: var(--color-success-700);
 
   /* Warning Semantic Tokens */
-  --warning-color: var(--color-warning-500);
-  --warning-hover: var(--color-warning-600);
+  --warning-color: var(--color-warning-600);
+  --warning-hover: var(--color-warning-700);
   --warning-light: var(--color-warning-100);
   --warning-lighter: var(--color-warning-50);
-  --warning-dark: var(--color-warning-700);
+  --warning-dark: var(--color-warning-800);
   --warning-text: var(--color-warning-700);
 
   /* Error Semantic Tokens */
@@ -266,16 +266,16 @@ body {
   --error-text: var(--color-error-700);
 
   /* Info Semantic Tokens */
-  --info-color: var(--color-info-500);
-  --info-hover: var(--color-info-600);
+  --info-color: var(--color-info-600);
+  --info-hover: var(--color-info-700);
   --info-light: var(--color-info-100);
   --info-lighter: var(--color-info-50);
-  --info-dark: var(--color-info-700);
+  --info-dark: var(--color-info-800);
   --info-text: var(--color-info-700);
 
-  /* Glass & Overlay Effects */
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.2);
+  /* Glass & Overlay Effects - improved contrast for light mode */
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(0, 0, 0, 0.08);
   --overlay-bg: rgba(0, 0, 0, 0.5);
 }
 
@@ -294,16 +294,17 @@ body {
   --border-color: #57534e;
   --border-light: #44403c;
   --border-hover: #78716c;
-  --primary-color: #fbbf24;
-  --primary-hover: #f59e0b;
-  --primary-light: #78350f;
-  --primary-dark: #fef3c7;
-  --accent-color: #fbbf24;
-  --accent-hover: #f59e0b;
+  /* Softer amber for dark mode - easier on the eyes */
+  --primary-color: #d97706;
+  --primary-hover: #b45309;
+  --primary-light: #451a03;
+  --primary-dark: #fde68a;
+  --accent-color: #d97706;
+  --accent-hover: #b45309;
   --accent-light: #451a03;
   --shadow-color: rgba(0, 0, 0, 0.4);
   --shadow-subtle: rgba(0, 0, 0, 0.2);
-  --shadow-colored: rgba(251, 191, 36, 0.1);
+  --shadow-colored: rgba(217, 119, 6, 0.15);
 
   /* Success Semantic Tokens (Dark) */
   --success-color: var(--color-success-500);
@@ -856,5 +857,68 @@ body {
 
   .print-break-after {
     page-break-after: always;
+  }
+}
+
+/* ============================= */
+/* MOBILE-FIRST UTILITIES */
+/* ============================= */
+
+/* Touch-friendly targets */
+@media (max-width: 768px) {
+  /* Ensure minimum touch target size */
+  button:not(.compact),
+  [role="button"]:not(.compact),
+  a.btn:not(.compact) {
+    min-height: 44px;
+  }
+
+  /* Mobile table scroll */
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-inline: calc(-1 * var(--spacing-4));
+    padding-inline: var(--spacing-4);
+  }
+
+  /* Stack form rows on mobile */
+  .form-row {
+    flex-direction: column;
+    gap: var(--spacing-4);
+  }
+
+  /* Full-width inputs on mobile */
+  .form-input,
+  .form-select,
+  .form-textarea {
+    width: 100%;
+  }
+}
+
+/* Button text - hidden on mobile for icon-only buttons */
+@media (max-width: 768px) {
+  .btn-text {
+    display: none;
+  }
+}
+
+/* Safe area insets for notched devices */
+:root {
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-left: env(safe-area-inset-left, 0px);
+  --safe-area-right: env(safe-area-inset-right, 0px);
+}
+
+/* Bottom sheet specific variables */
+:root {
+  --bottom-sheet-height: 80px;
+  --touch-target-min: 44px;
+}
+
+/* Hide sidebar toggle on mobile when bottom sheet is available */
+@media (max-width: 1023px) {
+  .hide-on-mobile-nav {
+    display: none !important;
   }
 }

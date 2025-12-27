@@ -30,6 +30,8 @@ export interface TrialSignupData {
 }
 
 export type UserRole = 'ADMIN' | 'OWNER' | 'STAFF' | 'CUSTOMER';
+export type SubscriptionStatus = 'trial' | 'active' | 'past_due' | 'canceled' | 'incomplete';
+export type StaffArea = 'cafe' | 'restaurant' | 'front_house' | 'catering' | 'retail' | 'events' | 'management' | 'bakery' | 'patisserie';
 
 export interface UserProfile {
   id: string;
@@ -42,40 +44,72 @@ export interface UserProfile {
   phoneNumber?: string | null;
   country?: string | null;
   city?: string | null;
+  bio?: string | null;
+  gender?: string | null;
+  dateOfBirth?: string | null;
+  profilePictureUrl?: string | null;
   createdAt: string;
   locationId?: string[];  // User's assigned location IDs
 }
 
-/**
- * Get current user profile
- */
-export async function getProfile(): Promise<UserProfile> {
-  logger.auth('Fetching user profile...');
-  return apiClient.get<UserProfile>('/auth/me');
+export interface TenantContext {
+  id: string;
+  businessName: string;
+  subscriptionStatus: SubscriptionStatus;
+  trialEndsAt: string | null;
+  onboardingCompleted: boolean;
+}
+
+export interface StaffContext {
+  id: string;
+  tenantId: string;
+  position: string | null;
+  department: string | null;
+  areas: StaffArea[];
+}
+
+export interface AuthResponse {
+  user: UserProfile;
+  tenant: TenantContext | null;
+  staff: StaffContext | null;
+  expiresIn: string;
+}
+
+export interface ProfileResponse extends UserProfile {
+  tenant: TenantContext | null;
+  staff: StaffContext | null;
 }
 
 /**
- * Login user
+ * Get current user profile (includes tenant and staff context)
  */
-export async function login(credentials: LoginCredentials): Promise<{ user: UserProfile }> {
+export async function getProfile(): Promise<ProfileResponse> {
+  logger.auth('Fetching user profile...');
+  return apiClient.get<ProfileResponse>('/auth/me');
+}
+
+/**
+ * Login user (returns user, tenant, and staff context)
+ */
+export async function login(credentials: LoginCredentials): Promise<AuthResponse> {
   logger.auth(`Logging in user: ${credentials.email}`);
-  return apiClient.post<{ user: UserProfile }>('/auth/login', credentials);
+  return apiClient.post<AuthResponse>('/auth/login', credentials);
 }
 
 /**
  * Register new user
  */
-export async function register(data: RegisterData): Promise<{ user: UserProfile }> {
+export async function register(data: RegisterData): Promise<AuthResponse> {
   logger.auth(`Registering new user: ${data.email}`);
-  return apiClient.post<{ user: UserProfile }>('/auth/register', data);
+  return apiClient.post<AuthResponse>('/auth/register', data);
 }
 
 /**
- * Trial signup
+ * Trial signup (creates OWNER user with tenant)
  */
-export async function trialSignup(data: TrialSignupData): Promise<{ user: UserProfile }> {
+export async function trialSignup(data: TrialSignupData): Promise<AuthResponse> {
   logger.auth(`Trial signup for: ${data.email}`);
-  return apiClient.post<{ user: UserProfile }>('/auth/trial-signup', data);
+  return apiClient.post<AuthResponse>('/auth/trial-signup', data);
 }
 
 /**

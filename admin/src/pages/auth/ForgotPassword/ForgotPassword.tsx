@@ -1,8 +1,11 @@
 import { Component, createSignal, Show } from 'solid-js';
-import { API_BASE_URL } from '../../config/constants';
-import { logger } from '../../utils/logger';
-import AuthLayout from '../../layouts/AuthLayout';
+import { API_BASE_URL } from '~/config/constants';
+import { logger } from '~/utils/logger';
+import AuthLayout from '~/layouts/AuthLayout';
 import Button from '~/components/common/Button';
+import Form from '~/components/common/Form';
+import FormFooter from '~/components/common/FormFooter';
+import FormMessage from '~/components/common/FormMessage';
 import TextField from '~/components/common/TextField';
 
 const ForgotPassword: Component = () => {
@@ -47,28 +50,17 @@ const ForgotPassword: Component = () => {
       <Show
         when={!success()}
         fallback={
-          <div class="space-y-4">
-            <div
-              class="p-4 rounded-lg"
-              style={{
-                "background-color": "var(--success-light)",
-                color: "var(--success-color)"
-              }}
-            >
-              <p class="font-medium mb-1">Check your email!</p>
-              <p class="text-sm">
-                We've sent password reset instructions to your email address.
-              </p>
-            </div>
-            <div class="text-center">
-              <a href="/login" style={{ color: "var(--primary-color)" }} class="text-sm font-medium hover:underline">
-                ← Back to Login
-              </a>
-            </div>
-          </div>
+          <>
+            <FormMessage variant="success" title="Check your email!">
+              We've sent password reset instructions to your email address.
+            </FormMessage>
+            <FormFooter links={[
+              { href: "/login", text: "← Back to Login" }
+            ]} />
+          </>
         }
       >
-        <form onSubmit={handleSubmit} class="space-y-6">
+        <Form onSubmit={handleSubmit} error={error()} gap="lg">
           <TextField
             label="Email Address"
             type="email"
@@ -79,20 +71,6 @@ const ForgotPassword: Component = () => {
             placeholder="your.email@example.com"
           />
 
-          {/* Error message */}
-          <Show when={error()}>
-            <div
-              class="p-4 rounded-lg"
-              style={{
-                "background-color": "var(--error-light)",
-                color: "var(--error-color)"
-              }}
-            >
-              {error()}
-            </div>
-          </Show>
-
-          {/* Submit button */}
           <Button
             type="submit"
             disabled={isLoading() || !email()}
@@ -102,21 +80,12 @@ const ForgotPassword: Component = () => {
           >
             {isLoading() ? 'Sending...' : 'Send Reset Instructions'}
           </Button>
-        </form>
+        </Form>
 
-        {/* Links */}
-        <div class="mt-6 text-center space-y-2">
-          <div>
-            <a href="/login" style={{ color: "var(--text-secondary)" }} class="text-sm hover:underline">
-              ← Back to Login
-            </a>
-          </div>
-          <div>
-            <a href="/trial-signup" style={{ color: "var(--primary-color)" }} class="text-sm font-medium hover:underline">
-              Don't have an account? Start free trial
-            </a>
-          </div>
-        </div>
+        <FormFooter links={[
+          { href: "/login", text: "← Back to Login", variant: "secondary" },
+          { href: "/trial-signup", text: "Don't have an account? Start free trial" }
+        ]} />
       </Show>
     </AuthLayout>
   );

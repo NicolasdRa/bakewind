@@ -1,4 +1,5 @@
 import { Show } from 'solid-js'
+import { WindIcon } from '~/components/icons'
 import styles from './Logo.module.css'
 
 interface LogoProps {
@@ -22,6 +23,7 @@ export default function Logo(props: LogoProps) {
         [styles.darkTheme]: props.theme === 'dark'
       }}
     >
+      <WindIcon class={styles.logoIcon} />
       <div class={styles.logoText}>
         <h1 class={styles.logoTitle}>BakeWind</h1>
         <Show when={variant() === 'full' && showSubtitle()}>

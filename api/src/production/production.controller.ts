@@ -30,11 +30,13 @@ import {
   ProductionItemDto,
 } from './dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { TenantGuard } from '../auth/guards/tenant.guard';
+import { CurrentTenant } from '../auth/decorators/current-tenant.decorator';
 
 @ApiTags('production')
 @Controller('production')
 @UsePipes(new ValidationPipe({ transform: true }))
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, TenantGuard)
 @ApiBearerAuth()
 export class ProductionController {
   constructor(private readonly productionService: ProductionService) {}
@@ -94,9 +96,10 @@ export class ProductionController {
   async createSchedule(
     @Request() req: any,
     @Body() createDto: CreateProductionScheduleDto,
+    @CurrentTenant() tenantId: string,
   ): Promise<ProductionScheduleDto> {
     const userId = req.user.userId;
-    return this.productionService.createSchedule(createDto, userId);
+    return this.productionService.createSchedule(createDto, userId, tenantId);
   }
 
   @Post('schedules/from-order/:orderId')
@@ -120,12 +123,14 @@ export class ProductionController {
     @Request() req: any,
     @Param('orderId') orderId: string,
     @Body('scheduledDate') scheduledDate: string,
+    @CurrentTenant() tenantId: string,
   ): Promise<ProductionScheduleDto> {
     const userId = req.user.userId;
     return this.productionService.createScheduleFromOrder(
       orderId,
       scheduledDate,
       userId,
+      tenantId,
     );
   }
 
@@ -150,12 +155,14 @@ export class ProductionController {
     @Request() req: any,
     @Param('orderId') orderId: string,
     @Body('scheduledDate') scheduledDate: string,
+    @CurrentTenant() tenantId: string,
   ): Promise<ProductionScheduleDto> {
     const userId = req.user.userId;
     return this.productionService.createScheduleFromInternalOrder(
       orderId,
       scheduledDate,
       userId,
+      tenantId,
     );
   }
 
@@ -180,12 +187,14 @@ export class ProductionController {
     @Request() req: any,
     @Param('orderId') orderId: string,
     @Body('scheduledDate') scheduledDate: string,
+    @CurrentTenant() tenantId: string,
   ): Promise<ProductionScheduleDto> {
     const userId = req.user.userId;
     return this.productionService.createScheduleFromCustomerOrder(
       orderId,
       scheduledDate,
       userId,
+      tenantId,
     );
   }
 

@@ -21,14 +21,15 @@ export class ProductsService {
   constructor(private readonly databaseService: DatabaseService) {}
 
   /**
-   * Get all products with optional filtering
+   * Get all products with optional filtering (tenant-scoped)
    */
   async getProducts(
+    tenantId: string,
     category?: ProductCategory,
     status?: ProductStatus,
     search?: string,
   ): Promise<ProductDto[]> {
-    const conditions: SQL[] = [];
+    const conditions: SQL[] = [eq(products.tenantId, tenantId)];
 
     // Filter by category
     if (category) {
@@ -51,33 +52,23 @@ export class ProductsService {
       }
     }
 
-    const items =
-      conditions.length > 0
-        ? await this.databaseService.database
-            .select()
-            .from(products)
-            .where(and(...conditions))
-            .orderBy(
-              sql`${products.popularityScore} DESC, ${products.name} ASC`,
-            )
-        : await this.databaseService.database
-            .select()
-            .from(products)
-            .orderBy(
-              sql`${products.popularityScore} DESC, ${products.name} ASC`,
-            );
+    const items = await this.databaseService.database
+      .select()
+      .from(products)
+      .where(and(...conditions))
+      .orderBy(sql`${products.popularityScore} DESC, ${products.name} ASC`);
 
     return items.map((item) => this.mapToProductDto(item));
   }
 
   /**
-   * Get a single product by ID
+   * Get a single product by ID (tenant-scoped)
    */
-  async getProductById(productId: string): Promise<ProductDto> {
+  async getProductById(productId: string, tenantId: string): Promise<ProductDto> {
     const [product] = await this.databaseService.database
       .select()
       .from(products)
-      .where(eq(products.id, productId));
+      .where(and(eq(products.id, productId), eq(products.tenantId, tenantId)));
 
     if (!product) {
       throw new NotFoundException(`Product with ID ${productId} not found`);
@@ -87,10 +78,10 @@ export class ProductsService {
   }
 
   /**
-   * Create a new product
+   * Create a new product (tenant-scoped)
    * If recipeId is provided, auto-populates costOfGoods from recipe's costPerUnit
    */
-  async createProduct(dto: CreateProductDto): Promise<ProductDto> {
+  async createProduct(dto: CreateProductDto, tenantId: string): Promise<ProductDto> {
     let costOfGoods: number | undefined = dto.costOfGoods;
 
     // Layer 2: If recipe is linked, auto-populate cost from recipe (unless explicitly overridden)
@@ -120,6 +111,7 @@ export class ProductsService {
       customizable: dto.customizable || false,
       customizationOptions: dto.customizationOptions || null,
       popularityScore: 0,
+      tenantId,
     } as typeof products.$inferInsert;
 
     const [created] = await this.databaseService.database
@@ -135,15 +127,16 @@ export class ProductsService {
   }
 
   /**
-   * Update an existing product
+   * Update an existing product (tenant-scoped)
    * If recipeId is updated, auto-syncs costOfGoods from the new recipe
    */
   async updateProduct(
     productId: string,
     dto: UpdateProductDto,
+    tenantId: string,
   ): Promise<ProductDto> {
-    // Check if product exists
-    await this.getProductById(productId);
+    // Check if product exists and belongs to tenant
+    await this.getProductById(productId, tenantId);
 
     const updateData: any = {
       updatedAt: new Date(),
@@ -203,38 +196,42 @@ export class ProductsService {
   }
 
   /**
-   * Delete a product
+   * Delete a product (tenant-scoped)
    */
-  async deleteProduct(productId: string): Promise<void> {
-    // Check if product exists
-    await this.getProductById(productId);
+  async deleteProduct(productId: string, tenantId: string): Promise<void> {
+    // Check if product exists and belongs to tenant
+    await this.getProductById(productId, tenantId);
 
     await this.databaseService.database
       .delete(products)
-      .where(eq(products.id, productId));
+      .where(and(eq(products.id, productId), eq(products.tenantId, tenantId)));
   }
 
   /**
-   * Get products by category
+   * Get products by category (tenant-scoped)
    */
   async getProductsByCategory(
+    tenantId: string,
     category: ProductCategory,
   ): Promise<ProductDto[]> {
-    return this.getProducts(category);
+    return this.getProducts(tenantId, category);
   }
 
   /**
-   * Get active products only
+   * Get active products only (tenant-scoped)
    */
-  async getActiveProducts(): Promise<ProductDto[]> {
-    return this.getProducts(undefined, 'active');
+  async getActiveProducts(tenantId: string): Promise<ProductDto[]> {
+    return this.getProducts(tenantId, undefined, 'active');
   }
 
   /**
-   * Calculate and update popularity score based on order counts
+   * Calculate and update popularity score based on order counts (tenant-scoped)
    * Popularity = count of customer orders + count of internal orders
    */
-  async calculatePopularity(productId: string): Promise<ProductDto> {
+  async calculatePopularity(productId: string, tenantId: string): Promise<ProductDto> {
+    // Verify product belongs to tenant
+    await this.getProductById(productId, tenantId);
+
     // Count customer orders containing this product
     const customerOrderCount = await this.databaseService.database
       .select({ count: sql<number>`count(*)::int` })
@@ -257,7 +254,7 @@ export class ProductsService {
         popularityScore: totalOrders,
         updatedAt: new Date(),
       })
-      .where(eq(products.id, productId))
+      .where(and(eq(products.id, productId), eq(products.tenantId, tenantId)))
       .returning();
 
     if (!updated) {
@@ -268,17 +265,18 @@ export class ProductsService {
   }
 
   /**
-   * Recalculate popularity for all products
+   * Recalculate popularity for all products (tenant-scoped)
    * Useful for batch updates or scheduled jobs
    */
-  async recalculateAllPopularity(): Promise<{ updated: number }> {
+  async recalculateAllPopularity(tenantId: string): Promise<{ updated: number }> {
     const allProducts = await this.databaseService.database
       .select({ id: products.id })
-      .from(products);
+      .from(products)
+      .where(eq(products.tenantId, tenantId));
 
     let updated = 0;
     for (const product of allProducts) {
-      await this.calculatePopularity(product.id);
+      await this.calculatePopularity(product.id, tenantId);
       updated++;
     }
 
@@ -286,11 +284,11 @@ export class ProductsService {
   }
 
   /**
-   * Sync product cost from linked recipe
+   * Sync product cost from linked recipe (tenant-scoped)
    * Layer 2: Updates costOfGoods from recipe's costPerUnit
    */
-  async syncCostFromRecipe(productId: string): Promise<ProductDto> {
-    const product = await this.getProductById(productId);
+  async syncCostFromRecipe(productId: string, tenantId: string): Promise<ProductDto> {
+    const product = await this.getProductById(productId, tenantId);
 
     if (!product.recipeId) {
       throw new NotFoundException(
@@ -306,7 +304,7 @@ export class ProductsService {
         costOfGoods: recipeCost?.toString() || null,
         updatedAt: new Date(),
       })
-      .where(eq(products.id, productId))
+      .where(and(eq(products.id, productId), eq(products.tenantId, tenantId)))
       .returning();
 
     if (!updated) {
@@ -317,18 +315,18 @@ export class ProductsService {
   }
 
   /**
-   * Sync costs for all products linked to recipes
+   * Sync costs for all products linked to recipes (tenant-scoped)
    * Useful after recipe costs change due to ingredient price updates
    */
-  async syncAllCostsFromRecipes(): Promise<{ updated: number }> {
+  async syncAllCostsFromRecipes(tenantId: string): Promise<{ updated: number }> {
     const linkedProducts = await this.databaseService.database
       .select({ id: products.id })
       .from(products)
-      .where(sql`${products.recipeId} IS NOT NULL`);
+      .where(and(eq(products.tenantId, tenantId), sql`${products.recipeId} IS NOT NULL`));
 
     let updated = 0;
     for (const product of linkedProducts) {
-      await this.syncCostFromRecipe(product.id);
+      await this.syncCostFromRecipe(product.id, tenantId);
       updated++;
     }
 

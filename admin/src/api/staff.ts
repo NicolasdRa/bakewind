@@ -20,6 +20,10 @@ export interface StaffProfile {
   hireDate: string | null;
   createdAt: string;
   updatedAt: string;
+  // User information (from joined users table)
+  firstName: string;
+  lastName: string;
+  email: string;
 }
 
 export interface UpdateStaffProfileData {

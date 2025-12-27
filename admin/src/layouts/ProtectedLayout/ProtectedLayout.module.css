@@ -27,3 +27,32 @@
 .loginRedirectBtn {
   @apply px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors;
 }
+
+/* Tenant Selection Gate for ADMIN users */
+.tenantSelectionGate {
+  @apply min-h-screen flex items-center justify-center bg-gray-50 px-4;
+  background: linear-gradient(135deg, var(--bg-primary, #f9fafb) 0%, var(--bg-secondary, #f3f4f6) 100%);
+}
+
+.tenantSelectionCard {
+  @apply bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center;
+  border: 1px solid var(--border-color, #e5e7eb);
+}
+
+.tenantSelectionIcon {
+  @apply mx-auto mb-6 w-16 h-16 rounded-full flex items-center justify-center;
+  background: linear-gradient(135deg, var(--primary-color, #3b82f6) 0%, var(--accent-color, #8b5cf6) 100%);
+  color: white;
+}
+
+.tenantSelectionCard h2 {
+  @apply text-2xl font-bold text-gray-900 mb-3;
+}
+
+.tenantSelectionCard p {
+  @apply text-gray-600 mb-6;
+}
+
+.tenantSelectorWrapper {
+  @apply w-full;
+}

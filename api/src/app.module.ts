@@ -30,6 +30,7 @@ import { RealtimeModule } from './realtime/realtime.module';
 import { ProductionModule } from './production/production.module';
 import { StaffModule } from './staff/staff.module';
 import { TenantsModule } from './tenants/tenants.module';
+import { EmailModule } from './email/email.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
 import { CorrelationIdMiddleware } from './common/middleware/correlation-id.middleware';
@@ -93,6 +94,7 @@ import configuration, { AppConfig } from './config/configuration';
     ProductionModule,
     StaffModule,
     TenantsModule,
+    EmailModule,
     HealthModule,
     CommonModule,
   ],

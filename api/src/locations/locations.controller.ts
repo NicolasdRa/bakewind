@@ -21,9 +21,11 @@ import {
 } from '@nestjs/swagger';
 import { LocationsService } from './locations.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { TenantGuard } from '../auth/guards/tenant.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { CurrentTenant } from '../auth/decorators/current-tenant.decorator';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 import {
   CreateLocationDto,
@@ -39,7 +41,7 @@ import {
 
 @ApiTags('Locations')
 @Controller('locations')
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, TenantGuard, RolesGuard)
 @ApiBearerAuth('JWT-auth')
 export class LocationsController {
   constructor(private readonly locationsService: LocationsService) {}
@@ -59,8 +61,9 @@ export class LocationsController {
   async create(
     @Body(new ZodValidationPipe(createLocationSchema))
     createLocationDto: CreateLocationDto,
+    @CurrentTenant() tenantId: string,
   ): Promise<LocationResponseData> {
-    return this.locationsService.create(createLocationDto);
+    return this.locationsService.create(createLocationDto, tenantId);
   }
 
   @Get()

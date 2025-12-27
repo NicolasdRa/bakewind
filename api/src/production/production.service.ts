@@ -99,6 +99,7 @@ export class ProductionService {
   async createSchedule(
     dto: CreateProductionScheduleDto,
     userId: string,
+    tenantId: string,
   ): Promise<ProductionScheduleDto> {
     // Validate all recipes exist (simplified validation for first recipe)
     const recipeIds = dto.items.map((item) => item.recipeId);
@@ -122,6 +123,7 @@ export class ProductionService {
     const [schedule] = await this.databaseService.database
       .insert(productionSchedules)
       .values({
+        tenantId,
         date: dto.date,
         totalItems: dto.items.length,
         completedItems: 0,
@@ -175,6 +177,7 @@ export class ProductionService {
     orderId: string,
     scheduledDate: string,
     userId: string,
+    tenantId: string,
   ): Promise<ProductionScheduleDto> {
     // Fetch the order with its items
     const [order] = await this.databaseService.database
@@ -237,7 +240,11 @@ export class ProductionService {
       items: productionScheduleItems,
     };
 
-    const productionSchedule = await this.createSchedule(scheduleDto, userId);
+    const productionSchedule = await this.createSchedule(
+      scheduleDto,
+      userId,
+      tenantId,
+    );
 
     // Note: Order status will be updated by the caller (frontend)
     // We don't automatically change status here to allow proper workflow control
@@ -257,6 +264,7 @@ export class ProductionService {
     orderId: string,
     scheduledDate: string,
     userId: string,
+    tenantId: string,
   ): Promise<ProductionScheduleDto> {
     // Fetch the order with its items
     const [order] = await this.databaseService.database
@@ -319,7 +327,11 @@ export class ProductionService {
       items: productionScheduleItems,
     };
 
-    const productionSchedule = await this.createSchedule(scheduleDto, userId);
+    const productionSchedule = await this.createSchedule(
+      scheduleDto,
+      userId,
+      tenantId,
+    );
 
     // Update order status to confirmed (ready for production)
     await this.databaseService.database
@@ -345,9 +357,15 @@ export class ProductionService {
     orderId: string,
     scheduledDate: string,
     userId: string,
+    tenantId: string,
   ): Promise<ProductionScheduleDto> {
     // Try internal orders first for backward compatibility
-    return this.createScheduleFromInternalOrder(orderId, scheduledDate, userId);
+    return this.createScheduleFromInternalOrder(
+      orderId,
+      scheduledDate,
+      userId,
+      tenantId,
+    );
   }
 
   /**

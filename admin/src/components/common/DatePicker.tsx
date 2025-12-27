@@ -12,8 +12,19 @@ interface DatePickerProps {
   disabled?: boolean;
 }
 
+const MONTHS = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"
+];
+
+const YEAR_START = 1900;
+const YEAR_END = 2100;
+
 const DatePicker: Component<DatePickerProps> = (props) => {
   const [showCalendar, setShowCalendar] = createSignal(false);
+  const [showMonthSelect, setShowMonthSelect] = createSignal(false);
+  const [showYearSelect, setShowYearSelect] = createSignal(false);
+  let isSelectingMonthYear = false;
 
   // Parse YYYY-MM-DD string as local date (not UTC)
   const parseLocalDate = (dateString: string): Date => {
@@ -31,6 +42,7 @@ const DatePicker: Component<DatePickerProps> = (props) => {
   let containerRef: HTMLDivElement | undefined;
   let inputRef: HTMLInputElement | undefined;
   let calendarRef: HTMLDivElement | undefined;
+  let yearSelectRef: HTMLDivElement | undefined;
 
   // Sync internal state when props.value changes
   createEffect(() => {
@@ -45,12 +57,20 @@ const DatePicker: Component<DatePickerProps> = (props) => {
 
   // Handle clicks outside to close calendar
   const handleClickOutside = (e: MouseEvent) => {
+    // Skip if we're in the middle of selecting month/year
+    if (isSelectingMonthYear) {
+      isSelectingMonthYear = false;
+      return;
+    }
+
     const target = e.target as Node;
     const isOutsideContainer = containerRef && !containerRef.contains(target);
     const isOutsideCalendar = calendarRef && !calendarRef.contains(target);
 
     if (isOutsideContainer && isOutsideCalendar) {
       setShowCalendar(false);
+      setShowMonthSelect(false);
+      setShowYearSelect(false);
     }
   };
 
@@ -164,6 +184,48 @@ const DatePicker: Component<DatePickerProps> = (props) => {
     setShowCalendar(false);
   };
 
+  const handleMonthClick = (e: Event) => {
+    e.stopPropagation();
+    setShowMonthSelect(!showMonthSelect());
+    setShowYearSelect(false);
+  };
+
+  const handleYearClick = (e: Event) => {
+    e.stopPropagation();
+    setShowYearSelect(!showYearSelect());
+    setShowMonthSelect(false);
+    // Scroll to current year when opening
+    setTimeout(() => {
+      if (yearSelectRef) {
+        const currentYear = currentMonth().getFullYear();
+        const yearElement = yearSelectRef.querySelector(`[data-year="${currentYear}"]`);
+        if (yearElement) {
+          yearElement.scrollIntoView({ block: "center" });
+        }
+      }
+    }, 0);
+  };
+
+  const handleMonthSelect = (e: Event, monthIndex: number) => {
+    e.stopPropagation();
+    e.preventDefault();
+    isSelectingMonthYear = true;
+    const newMonth = new Date(currentMonth());
+    newMonth.setMonth(monthIndex);
+    setCurrentMonth(newMonth);
+    setShowMonthSelect(false);
+  };
+
+  const handleYearSelect = (e: Event, year: number) => {
+    e.stopPropagation();
+    e.preventDefault();
+    isSelectingMonthYear = true;
+    const newMonth = new Date(currentMonth());
+    newMonth.setFullYear(year);
+    setCurrentMonth(newMonth);
+    setShowYearSelect(false);
+  };
+
   const isDateDisabled = (day: number): boolean => {
     const date = new Date(
       currentMonth().getFullYear(),
@@ -269,11 +331,72 @@ const DatePicker: Component<DatePickerProps> = (props) => {
                   </svg>
                 </button>
 
-                <div class={styles.monthYear}>
-                  {currentMonth().toLocaleDateString("en-US", {
-                    month: "long",
-                    year: "numeric",
-                  })}
+                <div class={styles.monthYearContainer}>
+                  {/* Month Selector */}
+                  <div class={styles.selectorWrapper}>
+                    <button
+                      type="button"
+                      onClick={handleMonthClick}
+                      class={styles.monthYearButton}
+                    >
+                      {MONTHS[currentMonth().getMonth()]}
+                      <svg class={styles.dropdownArrow} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                    <Show when={showMonthSelect()}>
+                      <div
+                        class={styles.selectDropdown}
+                        onClick={(e) => e.stopPropagation()}
+                        onMouseDown={(e) => e.stopPropagation()}
+                      >
+                        {MONTHS.map((month, index) => (
+                          <button
+                            type="button"
+                            class={`${styles.selectOption} ${index === currentMonth().getMonth() ? styles.selectOptionActive : ""}`}
+                            onClick={(e) => handleMonthSelect(e, index)}
+                            onMouseDown={(e) => e.stopPropagation()}
+                          >
+                            {month}
+                          </button>
+                        ))}
+                      </div>
+                    </Show>
+                  </div>
+
+                  {/* Year Selector */}
+                  <div class={styles.selectorWrapper}>
+                    <button
+                      type="button"
+                      onClick={handleYearClick}
+                      class={styles.monthYearButton}
+                    >
+                      {currentMonth().getFullYear()}
+                      <svg class={styles.dropdownArrow} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                    <Show when={showYearSelect()}>
+                      <div
+                        ref={yearSelectRef}
+                        class={`${styles.selectDropdown} ${styles.yearDropdown}`}
+                        onClick={(e) => e.stopPropagation()}
+                        onMouseDown={(e) => e.stopPropagation()}
+                      >
+                        {Array.from({ length: YEAR_END - YEAR_START + 1 }, (_, i) => YEAR_START + i).map((year) => (
+                          <button
+                            type="button"
+                            data-year={year}
+                            class={`${styles.selectOption} ${year === currentMonth().getFullYear() ? styles.selectOptionActive : ""}`}
+                            onClick={(e) => handleYearSelect(e, year)}
+                            onMouseDown={(e) => e.stopPropagation()}
+                          >
+                            {year}
+                          </button>
+                        ))}
+                      </div>
+                    </Show>
+                  </div>
                 </div>
 
                 <button type="button" onClick={handleNextMonth} class={styles.navButton}>

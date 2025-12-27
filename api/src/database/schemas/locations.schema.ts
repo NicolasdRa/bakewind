@@ -9,6 +9,7 @@ import {
   text,
 } from 'drizzle-orm/pg-core';
 import { usersTable } from './users.schema';
+import { tenantsTable } from './tenants.schema';
 
 export const locationsTable = pgTable(
   'locations',
@@ -16,6 +17,11 @@ export const locationsTable = pgTable(
     id: uuid('id')
       .primaryKey()
       .default(sql`gen_random_uuid()`),
+
+    // Tenant reference - which bakery owns this location
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .references(() => tenantsTable.id, { onDelete: 'cascade' }),
 
     // Basic information
     name: varchar({ length: 200 }).notNull(),
@@ -55,10 +61,16 @@ export const locationsTable = pgTable(
     }),
   },
   (table) => ({
+    // Tenant index for filtering
+    idxLocationTenant: index('idx_location_tenant').on(table.tenantId),
     // Performance indexes
     idxLocationName: index('idx_location_name').on(table.name),
     idxLocationCity: index('idx_location_city').on(table.city),
     idxLocationActive: index('idx_location_active').on(table.isActive),
+    idxLocationTenantActive: index('idx_location_tenant_active').on(
+      table.tenantId,
+      table.isActive,
+    ),
     idxLocationNotDeleted: index('idx_location_not_deleted')
       .on(table.deletedAt)
       .where(sql`${table.deletedAt} IS NULL`),

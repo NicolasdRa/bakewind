@@ -22,12 +22,15 @@ const AnalyticsPage = lazy(() => import("./pages/analytics/AnalyticsPage"));
 const ProductsPage = lazy(() => import("./pages/products/ProductsPage"));
 const ProfilePage = lazy(() => import("./pages/profile/ProfilePage"));
 const SettingsPage = lazy(() => import("./pages/settings/SettingsPage"));
+const BusinessSettings = lazy(() => import("./pages/settings/BusinessSettings"));
+const TeamPage = lazy(() => import("./pages/team/TeamPage"));
 
 // Auth pages (public routes)
-const Login = lazy(() => import("./pages/auth/Login/Login"));
+const Login = lazy(() => import("./pages/auth/Login"));
 const TrialSignup = lazy(() => import("./pages/auth/TrialSignup"));
 const Register = lazy(() => import("./pages/auth/Register"));
 const ForgotPassword = lazy(() => import("./pages/auth/ForgotPassword"));
+const ResetPassword = lazy(() => import("./pages/auth/ResetPassword"));
 
 const App: Component = () => {
   logger.ui('Rendering App component');
@@ -39,6 +42,7 @@ const App: Component = () => {
       <Route path="/trial-signup" component={TrialSignup} />
       <Route path="/register" component={Register} />
       <Route path="/forgot-password" component={ForgotPassword} />
+      <Route path="/reset-password" component={ResetPassword} />
 
       {/* Redirect root to dashboard */}
       <Route path="/" component={() => <Navigate href="/dashboard/overview" />} />
@@ -54,8 +58,10 @@ const App: Component = () => {
         <Route path="/products" component={ProductsPage} />
         <Route path="/customers" component={CustomersPage} />
         <Route path="/analytics" component={AnalyticsPage} />
+        <Route path="/team" component={TeamPage} />
         <Route path="/profile" component={ProfilePage} />
         <Route path="/settings" component={SettingsPage} />
+        <Route path="/settings/business" component={BusinessSettings} />
       </Route>
 
       {/* 404 fallback */}

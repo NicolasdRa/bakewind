@@ -1,9 +1,12 @@
-import { Component, createSignal, Show } from 'solid-js';
+import { Component, createSignal } from 'solid-js';
 import { useNavigate } from '@solidjs/router';
 import * as authApi from '~/api/auth';
-import { logger } from '../../utils/logger';
-import AuthLayout from '../../layouts/AuthLayout';
+import { logger } from '~/utils/logger';
+import AuthLayout from '~/layouts/AuthLayout';
 import Button from '~/components/common/Button';
+import Form from '~/components/common/Form';
+import FormFooter from '~/components/common/FormFooter';
+import { FormRow } from '~/components/common/FormRow';
 import TextField from '~/components/common/TextField';
 
 const Register: Component = () => {
@@ -53,28 +56,29 @@ const Register: Component = () => {
 
   return (
     <AuthLayout title="Create Account" subtitle="Join BakeWind to manage your bakery">
-      <form onSubmit={handleSubmit} class="space-y-4">
-        <TextField
-          label="First Name"
-          type="text"
-          id="firstName"
-          value={firstName()}
-          onInput={(e) => setFirstName(e.currentTarget.value)}
-          required
-          autocomplete="given-name"
-          placeholder="John"
-        />
-
-        <TextField
-          label="Last Name"
-          type="text"
-          id="lastName"
-          value={lastName()}
-          onInput={(e) => setLastName(e.currentTarget.value)}
-          required
-          autocomplete="family-name"
-          placeholder="Smith"
-        />
+      <Form onSubmit={handleSubmit} error={error()}>
+        <FormRow>
+          <TextField
+            label="First Name"
+            type="text"
+            id="firstName"
+            value={firstName()}
+            onInput={(e) => setFirstName(e.currentTarget.value)}
+            required
+            autocomplete="given-name"
+            placeholder="John"
+          />
+          <TextField
+            label="Last Name"
+            type="text"
+            id="lastName"
+            value={lastName()}
+            onInput={(e) => setLastName(e.currentTarget.value)}
+            required
+            autocomplete="family-name"
+            placeholder="Smith"
+          />
+        </FormRow>
 
         <TextField
           label="Email Address"
@@ -87,42 +91,29 @@ const Register: Component = () => {
           placeholder="your.email@example.com"
         />
 
-        <TextField
-          label="Password"
-          type="password"
-          id="password"
-          value={password()}
-          onInput={(e) => setPassword(e.currentTarget.value)}
-          required
-          autocomplete="new-password"
-          placeholder="••••••••"
-        />
+        <FormRow>
+          <TextField
+            label="Password"
+            type="password"
+            id="password"
+            value={password()}
+            onInput={(e) => setPassword(e.currentTarget.value)}
+            required
+            autocomplete="new-password"
+            placeholder="••••••••"
+          />
+          <TextField
+            label="Confirm Password"
+            type="password"
+            id="confirmPassword"
+            value={confirmPassword()}
+            onInput={(e) => setConfirmPassword(e.currentTarget.value)}
+            required
+            autocomplete="new-password"
+            placeholder="••••••••"
+          />
+        </FormRow>
 
-        <TextField
-          label="Confirm Password"
-          type="password"
-          id="confirmPassword"
-          value={confirmPassword()}
-          onInput={(e) => setConfirmPassword(e.currentTarget.value)}
-          required
-          autocomplete="new-password"
-          placeholder="••••••••"
-        />
-
-        {/* Error message */}
-        <Show when={error()}>
-          <div
-            class="p-4 rounded-lg"
-            style={{
-              "background-color": "var(--error-light)",
-              color: "var(--error-color)"
-            }}
-          >
-            {error()}
-          </div>
-        </Show>
-
-        {/* Submit button */}
         <Button
           type="submit"
           disabled={isLoading()}
@@ -132,17 +123,11 @@ const Register: Component = () => {
         >
           {isLoading() ? 'Creating Account...' : 'Create Account'}
         </Button>
-      </form>
+      </Form>
 
-      {/* Links */}
-      <div class="mt-6 text-center">
-        <p class="text-sm" style={{ color: "var(--text-secondary)" }}>
-          Already have an account?{' '}
-          <a href="/login" style={{ color: "var(--primary-color)" }} class="font-medium hover:underline">
-            Sign in
-          </a>
-        </p>
-      </div>
+      <FormFooter links={[
+        { href: "/login", text: "Already have an account? Sign in" }
+      ]} />
     </AuthLayout>
   );
 };

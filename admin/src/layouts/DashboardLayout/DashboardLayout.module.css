@@ -28,7 +28,7 @@
 }
 
 /* Desktop specific constraints */
-@media (min-width: 769px) {
+@media (min-width: 1025px) {
   .container {
     /* Ensure exactly 100vh on desktop */
     height: 100vh;
@@ -64,19 +64,19 @@
   overflow: hidden;
 }
 
-/* Mobile Adjustments */
-@media (max-width: 768px) {
+/* Mobile/Tablet Adjustments - use bottom sheet instead of sidebar */
+@media (max-width: 1024px) {
   .container,
   .containerCollapsed,
   .containerExpanded {
-    /* Stack layout on mobile */
+    /* Stack layout on mobile/tablet */
     display: block;
     grid-template-columns: none;
     grid-template-areas: none;
   }
-  
+
   .contentArea {
-    /* Content area takes full width on mobile */
+    /* Content area takes full width on mobile/tablet */
     @apply w-full;
     grid-area: none;
   }
@@ -112,9 +112,17 @@
   .headerSection {
     @apply p-3 pb-0;
   }
-  
+
   .innerContent {
     @apply px-3 pb-3;
+  }
+}
+
+/* Bottom sheet padding on mobile/tablet */
+@media (max-width: 1023px) {
+  .innerContent {
+    /* Add padding for the bottom sheet mini-bar */
+    padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
   }
 }
 

@@ -6,6 +6,7 @@ import SearchInput from "~/components/common/SearchInput";
 import FilterSelect from "~/components/common/FilterSelect";
 import Badge from "~/components/common/Badge";
 import Button from "~/components/common/Button";
+import { PlusIcon } from "~/components/icons";
 import { getCategoryBadgeColor, getProductStatusVariant } from "~/components/common/Badge.config";
 import styles from "./ProductsPage.module.css";
 
@@ -205,7 +206,8 @@ const ProductsPage: Component = () => {
           <p class={styles.pageSubtitle}>Manage your bakery products and menu items</p>
         </div>
         <Button variant="primary" size="md" onClick={handleCreate}>
-          + Create Product
+          <PlusIcon class={styles.buttonIcon} />
+          <span class="btn-text">Create Product</span>
         </Button>
       </div>
 

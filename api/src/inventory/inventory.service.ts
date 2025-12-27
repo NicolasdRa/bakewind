@@ -439,10 +439,12 @@ export class InventoryService {
 
   async createInventoryItem(
     dto: CreateInventoryItemDto,
+    tenantId: string,
   ): Promise<InventoryItemDto> {
     const [created] = await this.databaseService.database
       .insert(inventoryItems)
       .values({
+        tenantId,
         name: dto.name,
         category: dto.category,
         unit: dto.unit,

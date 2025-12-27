@@ -24,11 +24,13 @@ import {
 import { OrdersService } from './orders.service';
 import { CreateOrderDto, UpdateOrderDto, OrderStatus } from './dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { TenantGuard } from '../auth/guards/tenant.guard';
+import { CurrentTenant } from '../auth/decorators/current-tenant.decorator';
 
 @ApiTags('orders')
 @Controller('orders')
 @UsePipes(new ValidationPipe({ transform: true }))
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, TenantGuard)
 @ApiBearerAuth()
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
@@ -99,8 +101,11 @@ export class OrdersController {
     status: 409,
     description: 'Order number already exists',
   })
-  async createOrder(@Body() createOrderDto: CreateOrderDto) {
-    return this.ordersService.createOrder(createOrderDto);
+  async createOrder(
+    @Body() createOrderDto: CreateOrderDto,
+    @CurrentTenant() tenantId: string,
+  ) {
+    return this.ordersService.createOrder(createOrderDto, tenantId);
   }
 
   @Put(':id')

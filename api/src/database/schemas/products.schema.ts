@@ -1,3 +1,4 @@
+import { sql } from 'drizzle-orm';
 import {
   pgTable,
   uuid,
@@ -9,7 +10,9 @@ import {
   timestamp,
   pgEnum,
   json,
+  index,
 } from 'drizzle-orm/pg-core';
+import { tenantsTable } from './tenants.schema';
 
 export const productCategoryEnum = pgEnum('product_category', [
   'bread',
@@ -29,9 +32,17 @@ export const productStatusEnum = pgEnum('product_status', [
   'discontinued',
 ]);
 
-export const products = pgTable('products', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  name: varchar('name', { length: 255 }).notNull(),
+export const products = pgTable(
+  'products',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+
+    // Tenant reference - which bakery owns this product
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .references(() => tenantsTable.id, { onDelete: 'cascade' }),
+
+    name: varchar('name', { length: 255 }).notNull(),
   description: text('description'),
   category: productCategoryEnum('category').notNull(),
   status: productStatusEnum('status').default('active').notNull(),
@@ -67,6 +78,20 @@ export const products = pgTable('products', {
     }[]
   >(),
   popularityScore: integer('popularity_score').default(0),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-});
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => ({
+    // Tenant index for filtering
+    idxProductTenant: index('idx_product_tenant').on(table.tenantId),
+    // Composite index for common queries
+    idxProductTenantStatus: index('idx_product_tenant_status').on(
+      table.tenantId,
+      table.status,
+    ),
+    idxProductTenantCategory: index('idx_product_tenant_category').on(
+      table.tenantId,
+      table.category,
+    ),
+  }),
+);

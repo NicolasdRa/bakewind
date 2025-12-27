@@ -1,7 +1,7 @@
 import { Component, JSX, splitProps } from "solid-js";
 import styles from "./Button.module.css";
 
-export type ButtonVariant = "primary" | "secondary" | "ghost" | "text" | "success" | "danger";
+export type ButtonVariant = "primary" | "secondary" | "ghost" | "text" | "subtle" | "success" | "danger";
 export type ButtonSize = "xs" | "sm" | "md" | "lg" | "xl";
 
 interface ButtonProps extends JSX.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -9,6 +9,7 @@ interface ButtonProps extends JSX.ButtonHTMLAttributes<HTMLButtonElement> {
   size?: ButtonSize;
   fullWidth?: boolean;
   loading?: boolean;
+  mobileIconOnly?: boolean;
   children: JSX.Element;
 }
 
@@ -17,6 +18,7 @@ const variantClasses: Record<ButtonVariant, string> = {
   secondary: styles.secondary,
   ghost: styles.ghost,
   text: styles.text,
+  subtle: styles.subtle,
   success: styles.success,
   danger: styles.danger,
 };
@@ -35,6 +37,7 @@ const Button: Component<ButtonProps> = (props) => {
     "size",
     "fullWidth",
     "loading",
+    "mobileIconOnly",
     "children",
     "class",
   ]);
@@ -45,8 +48,8 @@ const Button: Component<ButtonProps> = (props) => {
   const classes = () => {
     const classList = [styles.base, variantClasses[variant()]];
 
-    // Text buttons don't need size classes (no padding)
-    if (variant() !== "text") {
+    // Text and subtle buttons don't need size classes (custom padding)
+    if (variant() !== "text" && variant() !== "subtle") {
       classList.push(sizeClasses[size()]);
     }
 
@@ -56,6 +59,10 @@ const Button: Component<ButtonProps> = (props) => {
 
     if (local.loading) {
       classList.push(styles.loading);
+    }
+
+    if (local.mobileIconOnly) {
+      classList.push(styles.mobileIconOnly);
     }
 
     if (local.class) {

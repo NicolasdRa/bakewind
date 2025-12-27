@@ -20,6 +20,7 @@ export interface JwtPayload {
   businessName?: string;
   role: string;
   subscriptionStatus: string;
+  tenantId?: string; // Tenant ID for OWNER/STAFF users
   iat?: number;
   exp?: number;
   iss?: string;
@@ -119,6 +120,7 @@ export class UserSessionsService {
       businessName: userData.businessName,
       role: userData.role,
       subscriptionStatus: userData.subscriptionStatus,
+      tenantId: userData.tenantId, // Include tenantId for OWNER/STAFF users
       iss: 'bakewind-api',
     };
 

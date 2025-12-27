@@ -2,9 +2,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ProductionController } from './production.controller';
 import { ProductionService } from './production.service';
 import { ProductionStatus } from './dto';
+import { TenantsService } from '../tenants/tenants.service';
 
 describe('ProductionController', () => {
   let controller: ProductionController;
+  const mockTenantId = 'test-tenant-id';
 
   const mockProductionService = {
     getAllSchedules: jest.fn(),
@@ -17,6 +19,11 @@ describe('ProductionController', () => {
     completeProduction: jest.fn(),
   };
 
+  const mockTenantsService = {
+    exists: jest.fn().mockResolvedValue(true),
+    findById: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [ProductionController],
@@ -24,6 +31,10 @@ describe('ProductionController', () => {
         {
           provide: ProductionService,
           useValue: mockProductionService,
+        },
+        {
+          provide: TenantsService,
+          useValue: mockTenantsService,
         },
       ],
     }).compile();
@@ -174,12 +185,13 @@ describe('ProductionController', () => {
 
       mockProductionService.createSchedule.mockResolvedValue(mockCreated);
 
-      const result = await controller.createSchedule(mockRequest, createDto);
+      const result = await controller.createSchedule(mockRequest, createDto, mockTenantId);
 
       expect(result).toEqual(mockCreated);
       expect(mockProductionService.createSchedule).toHaveBeenCalledWith(
         createDto,
         'user-1',
+        mockTenantId,
       );
     });
   });

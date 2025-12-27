@@ -29,7 +29,7 @@ export interface ChangePasswordData {
  */
 export async function updateProfile(data: Partial<UpdateProfileData>): Promise<void> {
   logger.api('Updating user profile...');
-  return apiClient.patch('/users/profile', data);
+  return apiClient.patch('/users/me', data);
 }
 
 /**

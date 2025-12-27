@@ -19,6 +19,8 @@ import {
   ApiQuery,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { TenantGuard } from '../auth/guards/tenant.guard';
+import { CurrentTenant } from '../auth/decorators/current-tenant.decorator';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 import { InventoryService } from './inventory.service';
 import {
@@ -34,7 +36,7 @@ import {
 
 @ApiTags('inventory')
 @Controller('api/v1/inventory')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, TenantGuard)
 @ApiBearerAuth()
 export class InventoryController {
   constructor(private readonly inventoryService: InventoryService) {}
@@ -61,8 +63,9 @@ export class InventoryController {
   async createInventoryItem(
     @Body(new ZodValidationPipe(createInventoryItemSchema))
     dto: CreateInventoryItemDto,
+    @CurrentTenant() tenantId: string,
   ) {
-    return this.inventoryService.createInventoryItem(dto);
+    return this.inventoryService.createInventoryItem(dto, tenantId);
   }
 
   // Consumption tracking endpoints (more specific routes first)

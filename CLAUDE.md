@@ -210,6 +210,52 @@ bakewind/
 └── CLAUDE.md      # This file
 ```
 
+## CSS Styling Preferences
+
+### Media Query Organization
+Group all media queries at the bottom of CSS module files, organized by breakpoint:
+
+```css
+/* Base styles first */
+.element { ... }
+
+/* Tablet and up (640px) */
+@media (min-width: 640px) {
+  .element { ... }
+}
+
+/* Desktop (768px) */
+@media (min-width: 768px) {
+  .element { ... }
+}
+```
+
+### Icons
+- All SVG icons should be abstracted into `admin/src/components/icons/index.tsx`
+- Use the centralized icon components instead of inline SVGs
+- App logo uses `WindIcon` component
+
+### Typography
+Use the Typography components instead of raw `<h1>`-`<h6>` and `<p>` elements:
+
+```tsx
+import { Heading, Text } from '~/components/common/Typography'
+
+// Headings - use variant to control visual style, level for semantic HTML
+<Heading variant="page">Page Title</Heading>        // 1.875rem
+<Heading variant="section">Section Title</Heading>  // 1.5rem (default)
+<Heading variant="card">Card Title</Heading>        // 1.125rem
+<Heading variant="label">Label Title</Heading>      // 0.875rem uppercase
+
+// Text - use variant for size, color for theme-aware colors
+<Text>Default body text</Text>
+<Text variant="body-sm" color="secondary">Smaller secondary text</Text>
+<Text variant="caption" color="muted">Small muted caption</Text>
+<Text as="span">Inline text</Text>
+```
+
+Available text colors: `primary`, `secondary`, `tertiary`, `muted`, `error`, `success`
+
 # important-instruction-reminders
 Do what has been asked; nothing more, nothing less.
 NEVER create files unless they're absolutely necessary for achieving your goal.

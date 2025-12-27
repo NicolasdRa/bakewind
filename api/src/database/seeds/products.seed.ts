@@ -7,6 +7,15 @@ import * as schema from '../schemas';
 export async function seedProducts(db: NodePgDatabase<typeof schema>) {
   console.log('🌱 Seeding products...');
 
+  // Get the first available tenant for seeding
+  const existingTenant = await db.query.tenantsTable.findFirst();
+  if (!existingTenant) {
+    console.log('⚠️ No tenant found. Run users seed first.');
+    return;
+  }
+  const tenantId = existingTenant.id;
+  console.log('🏢 Using tenant:', existingTenant.businessName);
+
   // Fetch all recipes to link products
   const allRecipes = await db.select().from(recipes);
   console.log(`📖 Found ${allRecipes.length} recipes to link with products`);
@@ -960,7 +969,9 @@ export async function seedProducts(db: NodePgDatabase<typeof schema>) {
     }
 
     if (productsToInsert.length > 0) {
-      await db.insert(products).values(productsToInsert);
+      // Add tenantId to all products
+      const productsWithTenant = productsToInsert.map(p => ({ ...p, tenantId }));
+      await db.insert(products).values(productsWithTenant);
       console.log(`✅ Successfully seeded ${productsToInsert.length} products`);
     } else {
       console.log('⚠️  No products to seed (all products require recipes)');

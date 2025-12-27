@@ -5,6 +5,7 @@ import { DatabaseService } from '../database/database.service';
 
 describe('ProductsService', () => {
   let service: ProductsService;
+  const mockTenantId = 'test-tenant-id';
 
   // Mock database service
   const mockDatabaseService = {
@@ -69,11 +70,13 @@ describe('ProductsService', () => {
 
       mockDatabaseService.database.select.mockReturnValue({
         from: jest.fn().mockReturnValue({
-          orderBy: jest.fn().mockResolvedValue(mockProducts),
+          where: jest.fn().mockReturnValue({
+            orderBy: jest.fn().mockResolvedValue(mockProducts),
+          }),
         }),
       });
 
-      const result = await service.getProducts();
+      const result = await service.getProducts(mockTenantId);
 
       expect(result).toHaveLength(1);
       expect(result[0]!.name).toBe('Sourdough Bread');
@@ -108,7 +111,7 @@ describe('ProductsService', () => {
         }),
       });
 
-      const result = await service.getProducts('pastry');
+      const result = await service.getProducts(mockTenantId, 'pastry');
 
       expect(result).toHaveLength(1);
       expect(result[0]!.category).toBe('pastry');
@@ -155,7 +158,7 @@ describe('ProductsService', () => {
         }),
       });
 
-      const result = await service.getProductById('product-1');
+      const result = await service.getProductById('product-1', mockTenantId);
 
       expect(result).toBeDefined();
       expect(result.name).toBe('Chocolate Cake');
@@ -170,7 +173,7 @@ describe('ProductsService', () => {
         }),
       });
 
-      await expect(service.getProductById('non-existent')).rejects.toThrow(
+      await expect(service.getProductById('non-existent', mockTenantId)).rejects.toThrow(
         NotFoundException,
       );
     });
@@ -217,7 +220,7 @@ describe('ProductsService', () => {
         }),
       });
 
-      const result = await service.createProduct(createDto);
+      const result = await service.createProduct(createDto, mockTenantId);
 
       expect(result).toBeDefined();
       expect(result.name).toBe('Baguette');
@@ -266,7 +269,7 @@ describe('ProductsService', () => {
         }),
       });
 
-      const result = await service.updateProduct('product-1', updateDto);
+      const result = await service.updateProduct('product-1', updateDto, mockTenantId);
 
       expect(result.name).toBe('New Name');
       expect(result.basePrice).toBe(12.5);
@@ -281,7 +284,7 @@ describe('ProductsService', () => {
       });
 
       await expect(
-        service.updateProduct('non-existent', { name: 'Test' }),
+        service.updateProduct('non-existent', { name: 'Test' }, mockTenantId),
       ).rejects.toThrow(NotFoundException);
     });
   });
@@ -308,7 +311,7 @@ describe('ProductsService', () => {
         where: jest.fn().mockResolvedValue(undefined),
       });
 
-      await service.deleteProduct('product-1');
+      await service.deleteProduct('product-1', mockTenantId);
 
       expect(mockDatabaseService.database.delete).toHaveBeenCalled();
     });
@@ -320,7 +323,7 @@ describe('ProductsService', () => {
         }),
       });
 
-      await expect(service.deleteProduct('non-existent')).rejects.toThrow(
+      await expect(service.deleteProduct('non-existent', mockTenantId)).rejects.toThrow(
         NotFoundException,
       );
     });
@@ -347,7 +350,7 @@ describe('ProductsService', () => {
         }),
       });
 
-      const result = await service.getActiveProducts();
+      const result = await service.getActiveProducts(mockTenantId);
 
       expect(result).toHaveLength(1);
       expect(result[0]!.status).toBe('active');
@@ -360,10 +363,10 @@ describe('ProductsService', () => {
       const customerOrderCount = 5;
       const internalOrderCount = 3;
 
-      const updatedProduct = {
+      const mockProduct = {
         id: productId,
         name: 'Popular Product',
-        popularityScore: customerOrderCount + internalOrderCount,
+        popularityScore: 0,
         basePrice: '5.00',
         category: 'bread',
         status: 'active',
@@ -386,8 +389,19 @@ describe('ProductsService', () => {
         updatedAt: new Date(),
       };
 
-      // Mock customer order count query
+      const updatedProduct = {
+        ...mockProduct,
+        popularityScore: customerOrderCount + internalOrderCount,
+      };
+
+      // Mock getProductById check
       mockDatabaseService.database.select
+        .mockReturnValueOnce({
+          from: jest.fn().mockReturnValue({
+            where: jest.fn().mockResolvedValue([mockProduct]),
+          }),
+        })
+        // Mock customer order count query
         .mockReturnValueOnce({
           from: jest.fn().mockReturnValue({
             where: jest.fn().mockResolvedValue([{ count: customerOrderCount }]),
@@ -409,16 +423,16 @@ describe('ProductsService', () => {
         }),
       });
 
-      const result = await service.calculatePopularity(productId);
+      const result = await service.calculatePopularity(productId, mockTenantId);
 
       expect(result.popularityScore).toBe(8); // 5 + 3
-      expect(mockDatabaseService.database.select).toHaveBeenCalledTimes(2);
+      expect(mockDatabaseService.database.select).toHaveBeenCalledTimes(3);
     });
 
     it('should handle products with no orders', async () => {
       const productId = 'product-1';
 
-      const updatedProduct = {
+      const mockProduct = {
         id: productId,
         name: 'Unpopular Product',
         popularityScore: 0,
@@ -444,8 +458,14 @@ describe('ProductsService', () => {
         updatedAt: new Date(),
       };
 
-      // Mock both counts as 0
+      // Mock getProductById check first
       mockDatabaseService.database.select
+        .mockReturnValueOnce({
+          from: jest.fn().mockReturnValue({
+            where: jest.fn().mockResolvedValue([mockProduct]),
+          }),
+        })
+        // Mock both counts as 0
         .mockReturnValueOnce({
           from: jest.fn().mockReturnValue({
             where: jest.fn().mockResolvedValue([{ count: 0 }]),
@@ -461,12 +481,12 @@ describe('ProductsService', () => {
       mockDatabaseService.database.update.mockReturnValue({
         set: jest.fn().mockReturnValue({
           where: jest.fn().mockReturnValue({
-            returning: jest.fn().mockResolvedValue([updatedProduct]),
+            returning: jest.fn().mockResolvedValue([mockProduct]),
           }),
         }),
       });
 
-      const result = await service.calculatePopularity(productId);
+      const result = await service.calculatePopularity(productId, mockTenantId);
 
       expect(result.popularityScore).toBe(0);
     });
@@ -506,7 +526,7 @@ describe('ProductsService', () => {
         }),
       });
 
-      const result = await service.getProductById('product-1');
+      const result = await service.getProductById('product-1', mockTenantId);
 
       // Margin = (10 - 6) / 10 * 100 = 40%
       expect(result.margin).toBeCloseTo(40, 2);
@@ -551,7 +571,7 @@ describe('ProductsService', () => {
         }),
       });
 
-      const result = await service.getProductById('product-1');
+      const result = await service.getProductById('product-1', mockTenantId);
 
       // Margin = (10 - 9) / 10 * 100 = 10%
       expect(result.margin).toBeCloseTo(10, 2);
@@ -592,7 +612,7 @@ describe('ProductsService', () => {
         }),
       });
 
-      const result = await service.getProductById('product-1');
+      const result = await service.getProductById('product-1', mockTenantId);
 
       // All calculated fields should be null
       expect(result.margin).toBeNull();
@@ -606,61 +626,75 @@ describe('ProductsService', () => {
     it('should recalculate popularity for all products', async () => {
       const mockProducts = [{ id: 'product-1' }, { id: 'product-2' }];
 
-      // Mock fetching all product IDs
-      mockDatabaseService.database.select.mockReturnValueOnce({
-        from: jest.fn().mockResolvedValue(mockProducts),
+      const createMockProduct = (id: string, index: number) => ({
+        id,
+        name: `Product ${index + 1}`,
+        popularityScore: 8,
+        basePrice: '5.00',
+        category: 'bread',
+        status: 'active',
+        description: 'Test',
+        costOfGoods: null,
+        recipeId: null,
+        recipeName: null,
+        estimatedPrepTime: null,
+        allergens: null,
+        tags: null,
+        imageUrl: null,
+        nutritionalInfo: null,
+        availableSeasons: null,
+        minimumOrderQuantity: 1,
+        storageInstructions: null,
+        shelfLife: null,
+        customizable: false,
+        customizationOptions: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       });
 
-      // Mock calculatePopularity calls (customer + internal order counts for each product)
+      // Mock fetching all product IDs (with where chain)
+      mockDatabaseService.database.select.mockReturnValueOnce({
+        from: jest.fn().mockReturnValue({
+          where: jest.fn().mockResolvedValue(mockProducts),
+        }),
+      });
+
+      // Mock calculatePopularity calls for each product
+      // Each call needs: getProductById, customer count, internal count
       for (let i = 0; i < mockProducts.length; i++) {
-        mockDatabaseService.database.select
-          .mockReturnValueOnce({
-            from: jest.fn().mockReturnValue({
-              where: jest.fn().mockResolvedValue([{ count: 5 }]),
-            }),
-          })
-          .mockReturnValueOnce({
-            from: jest.fn().mockReturnValue({
-              where: jest.fn().mockResolvedValue([{ count: 3 }]),
-            }),
-          });
+        const productMock = createMockProduct(mockProducts[i]!.id, i);
+
+        // Mock getProductById check
+        mockDatabaseService.database.select.mockReturnValueOnce({
+          from: jest.fn().mockReturnValue({
+            where: jest.fn().mockResolvedValue([productMock]),
+          }),
+        });
+
+        // Mock customer order count
+        mockDatabaseService.database.select.mockReturnValueOnce({
+          from: jest.fn().mockReturnValue({
+            where: jest.fn().mockResolvedValue([{ count: 5 }]),
+          }),
+        });
+
+        // Mock internal order count
+        mockDatabaseService.database.select.mockReturnValueOnce({
+          from: jest.fn().mockReturnValue({
+            where: jest.fn().mockResolvedValue([{ count: 3 }]),
+          }),
+        });
 
         mockDatabaseService.database.update.mockReturnValueOnce({
           set: jest.fn().mockReturnValue({
             where: jest.fn().mockReturnValue({
-              returning: jest.fn().mockResolvedValue([
-                {
-                  id: mockProducts[i]!.id,
-                  name: `Product ${i + 1}`,
-                  popularityScore: 8,
-                  basePrice: '5.00',
-                  category: 'bread',
-                  status: 'active',
-                  description: 'Test',
-                  costOfGoods: null,
-                  recipeId: null,
-                  recipeName: null,
-                  estimatedPrepTime: null,
-                  allergens: null,
-                  tags: null,
-                  imageUrl: null,
-                  nutritionalInfo: null,
-                  availableSeasons: null,
-                  minimumOrderQuantity: 1,
-                  storageInstructions: null,
-                  shelfLife: null,
-                  customizable: false,
-                  customizationOptions: null,
-                  createdAt: new Date(),
-                  updatedAt: new Date(),
-                },
-              ]),
+              returning: jest.fn().mockResolvedValue([productMock]),
             }),
           }),
         });
       }
 
-      const result = await service.recalculateAllPopularity();
+      const result = await service.recalculateAllPopularity(mockTenantId);
 
       expect(result.updated).toBe(2);
     });

@@ -6,6 +6,15 @@ import * as schema from '../schemas';
 export async function seedRecipes(db: NodePgDatabase<typeof schema>) {
   console.log('🌱 Seeding recipes...');
 
+  // Get the first available tenant for seeding
+  const existingTenant = await db.query.tenantsTable.findFirst();
+  if (!existingTenant) {
+    console.log('⚠️ No tenant found. Run users seed first.');
+    return;
+  }
+  const tenantId = existingTenant.id;
+  console.log('🏢 Using tenant:', existingTenant.businessName);
+
   // Check existing recipes to prevent duplicates
   const existingRecipes = await db.select().from(recipes);
   const existingRecipeNames = new Set(existingRecipes.map((r) => r.name));
@@ -1290,8 +1299,9 @@ export async function seedRecipes(db: NodePgDatabase<typeof schema>) {
     `📝 Inserting ${newRecipes.length} new recipes (${recipesToSeed.length - newRecipes.length} already exist)`,
   );
 
-  // Insert only new recipes
-  const recipeList = await db.insert(recipes).values(newRecipes).returning();
+  // Add tenantId to all recipes and insert
+  const recipesWithTenant = newRecipes.map(r => ({ ...r, tenantId }));
+  const recipeList = await db.insert(recipes).values(recipesWithTenant).returning();
 
   console.log(`✅ Created ${recipeList.length} recipes`);
 

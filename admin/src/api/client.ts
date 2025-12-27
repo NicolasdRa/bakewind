@@ -7,6 +7,15 @@
 
 import { API_BASE_URL } from '../config/constants';
 import { logger } from '../utils/logger';
+import { adminActions } from '../stores/adminStore';
+
+// Header name for ADMIN tenant context
+const ADMIN_TENANT_HEADER = 'x-tenant-id';
+
+// Endpoints that should NOT include the tenant header (admin-only endpoints)
+const SKIP_TENANT_HEADER_ENDPOINTS = [
+  '/tenants', // List all tenants for admin selector
+];
 
 export interface ApiConfig {
   baseUrl: string;
@@ -95,6 +104,19 @@ export async function request<T = any>(
   // Only set Content-Type if we have data to send
   if (data && method !== 'GET') {
     headers.set('Content-Type', 'application/json');
+  }
+
+  // Add tenant context header for ADMIN users when a tenant is selected
+  // Skip for certain admin-only endpoints that don't need tenant context
+  const shouldSkipTenantHeader = SKIP_TENANT_HEADER_ENDPOINTS.some(
+    (skipEndpoint) => endpoint === skipEndpoint || endpoint.startsWith(skipEndpoint + '?')
+  );
+
+  if (!shouldSkipTenantHeader) {
+    const selectedTenantId = adminActions.getSelectedTenantId();
+    if (selectedTenantId) {
+      headers.set(ADMIN_TENANT_HEADER, selectedTenantId);
+    }
   }
 
   const requestOptions: RequestInit = {

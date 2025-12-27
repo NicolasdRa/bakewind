@@ -19,6 +19,8 @@ import {
   ApiQuery,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { TenantGuard } from '../auth/guards/tenant.guard';
+import { CurrentTenant } from '../auth/decorators/current-tenant.decorator';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 import { ProductsService } from './products.service';
 import {
@@ -32,7 +34,7 @@ import {
 
 @ApiTags('products')
 @Controller('api/v1/products')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, TenantGuard)
 @ApiBearerAuth()
 export class ProductsController {
   // Products CRUD endpoints
@@ -62,33 +64,40 @@ export class ProductsController {
   @ApiQuery({ name: 'search', required: false, type: String })
   @ApiResponse({ status: 200, description: 'Products retrieved successfully' })
   async getProducts(
+    @CurrentTenant() tenantId: string,
     @Query('category') category?: ProductCategory,
     @Query('status') status?: ProductStatus,
     @Query('search') search?: string,
   ) {
-    return this.productsService.getProducts(category, status, search);
+    return this.productsService.getProducts(tenantId, category, status, search);
   }
 
   @Get('active')
   @ApiOperation({ summary: 'Get only active products' })
   @ApiResponse({ status: 200, description: 'Active products retrieved' })
-  async getActiveProducts() {
-    return this.productsService.getActiveProducts();
+  async getActiveProducts(@CurrentTenant() tenantId: string) {
+    return this.productsService.getActiveProducts(tenantId);
   }
 
   @Get('category/:category')
   @ApiOperation({ summary: 'Get products by category' })
   @ApiResponse({ status: 200, description: 'Products by category retrieved' })
-  async getProductsByCategory(@Param('category') category: ProductCategory) {
-    return this.productsService.getProductsByCategory(category);
+  async getProductsByCategory(
+    @CurrentTenant() tenantId: string,
+    @Param('category') category: ProductCategory,
+  ) {
+    return this.productsService.getProductsByCategory(tenantId, category);
   }
 
   @Get(':productId')
   @ApiOperation({ summary: 'Get product by ID' })
   @ApiResponse({ status: 200, description: 'Product retrieved successfully' })
   @ApiResponse({ status: 404, description: 'Product not found' })
-  async getProductById(@Param('productId') productId: string) {
-    return this.productsService.getProductById(productId);
+  async getProductById(
+    @CurrentTenant() tenantId: string,
+    @Param('productId') productId: string,
+  ) {
+    return this.productsService.getProductById(productId, tenantId);
   }
 
   @Post()
@@ -96,10 +105,11 @@ export class ProductsController {
   @ApiResponse({ status: 201, description: 'Product created successfully' })
   @ApiResponse({ status: 400, description: 'Validation error' })
   async createProduct(
+    @CurrentTenant() tenantId: string,
     @Body(new ZodValidationPipe(createProductSchema))
     dto: CreateProductDto,
   ) {
-    return this.productsService.createProduct(dto);
+    return this.productsService.createProduct(dto, tenantId);
   }
 
   @Put(':productId')
@@ -108,11 +118,12 @@ export class ProductsController {
   @ApiResponse({ status: 400, description: 'Validation error' })
   @ApiResponse({ status: 404, description: 'Product not found' })
   async updateProduct(
+    @CurrentTenant() tenantId: string,
     @Param('productId') productId: string,
     @Body(new ZodValidationPipe(updateProductSchema))
     dto: UpdateProductDto,
   ) {
-    return this.productsService.updateProduct(productId, dto);
+    return this.productsService.updateProduct(productId, dto, tenantId);
   }
 
   @Delete(':productId')
@@ -120,8 +131,11 @@ export class ProductsController {
   @ApiOperation({ summary: 'Delete a product' })
   @ApiResponse({ status: 204, description: 'Product deleted successfully' })
   @ApiResponse({ status: 404, description: 'Product not found' })
-  async deleteProduct(@Param('productId') productId: string) {
-    await this.productsService.deleteProduct(productId);
+  async deleteProduct(
+    @CurrentTenant() tenantId: string,
+    @Param('productId') productId: string,
+  ) {
+    await this.productsService.deleteProduct(productId, tenantId);
   }
 
   @Post(':productId/calculate-popularity')
@@ -135,8 +149,11 @@ export class ProductsController {
     description: 'Popularity score calculated and updated',
   })
   @ApiResponse({ status: 404, description: 'Product not found' })
-  async calculatePopularity(@Param('productId') productId: string) {
-    return this.productsService.calculatePopularity(productId);
+  async calculatePopularity(
+    @CurrentTenant() tenantId: string,
+    @Param('productId') productId: string,
+  ) {
+    return this.productsService.calculatePopularity(productId, tenantId);
   }
 
   @Post('recalculate-all-popularity')
@@ -149,8 +166,8 @@ export class ProductsController {
     status: 200,
     description: 'All product popularity scores recalculated',
   })
-  async recalculateAllPopularity() {
-    return this.productsService.recalculateAllPopularity();
+  async recalculateAllPopularity(@CurrentTenant() tenantId: string) {
+    return this.productsService.recalculateAllPopularity(tenantId);
   }
 
   @Post(':productId/sync-from-recipe')
@@ -167,8 +184,11 @@ export class ProductsController {
     status: 404,
     description: 'Product not found or not linked to a recipe',
   })
-  async syncCostFromRecipe(@Param('productId') productId: string) {
-    return this.productsService.syncCostFromRecipe(productId);
+  async syncCostFromRecipe(
+    @CurrentTenant() tenantId: string,
+    @Param('productId') productId: string,
+  ) {
+    return this.productsService.syncCostFromRecipe(productId, tenantId);
   }
 
   @Post('sync-all-from-recipes')
@@ -181,7 +201,7 @@ export class ProductsController {
     status: 200,
     description: 'All recipe-linked product costs synced',
   })
-  async syncAllCostsFromRecipes() {
-    return this.productsService.syncAllCostsFromRecipes();
+  async syncAllCostsFromRecipes(@CurrentTenant() tenantId: string) {
+    return this.productsService.syncAllCostsFromRecipes(tenantId);
   }
 }

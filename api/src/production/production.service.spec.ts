@@ -6,6 +6,7 @@ import { ProductionStatus } from './dto';
 
 describe('ProductionService', () => {
   let service: ProductionService;
+  const mockTenantId = 'test-tenant-id';
 
   // Mock database service
   const mockDatabaseService = {
@@ -337,7 +338,7 @@ describe('ProductionService', () => {
         }),
       });
 
-      const result = await service.createSchedule(createDto, 'user-1');
+      const result = await service.createSchedule(createDto, 'user-1', mockTenantId);
 
       expect(result).toBeDefined();
       expect(result.id).toBe('new-schedule-id');

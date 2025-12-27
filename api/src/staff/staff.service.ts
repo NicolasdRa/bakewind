@@ -2,7 +2,7 @@ import { Injectable, Inject, NotFoundException, ConflictException } from '@nestj
 import { eq, and } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DATABASE_CONNECTION } from '../database/database-connection';
-import { staffTable } from '../database/schemas';
+import { staffTable, usersTable } from '../database/schemas';
 import * as schema from '../database/schemas';
 import { CreateStaffDto, UpdateStaffDto } from './dto';
 
@@ -39,13 +39,31 @@ export class StaffService {
   }
 
   /**
-   * Get all staff for a tenant
+   * Get all staff for a tenant with user information
    */
   async findAllByTenant(tenantId: string) {
-    return this.db
-      .select()
+    const results = await this.db
+      .select({
+        id: staffTable.id,
+        userId: staffTable.userId,
+        tenantId: staffTable.tenantId,
+        position: staffTable.position,
+        department: staffTable.department,
+        areas: staffTable.areas,
+        permissions: staffTable.permissions,
+        hireDate: staffTable.hireDate,
+        createdAt: staffTable.createdAt,
+        updatedAt: staffTable.updatedAt,
+        // User information
+        firstName: usersTable.firstName,
+        lastName: usersTable.lastName,
+        email: usersTable.email,
+      })
       .from(staffTable)
+      .innerJoin(usersTable, eq(staffTable.userId, usersTable.id))
       .where(eq(staffTable.tenantId, tenantId));
+
+    return results;
   }
 
   /**

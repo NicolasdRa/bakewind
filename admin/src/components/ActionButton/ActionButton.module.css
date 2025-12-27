@@ -1,24 +1,12 @@
 /* ActionButton Component - Tailwind CSS Module */
 @reference "tailwindcss";
 
-/* Enhanced Base Button Styles */
+/* Base Button Styles */
 .actionButton {
   @apply rounded-lg font-medium border border-transparent cursor-pointer;
   @apply flex items-center gap-2 justify-center text-center whitespace-nowrap;
-  @apply select-none relative overflow-hidden;
-  transition: var(--transition-base);
-  isolation: isolate;
-}
-
-.actionButton::before {
-  content: '';
-  @apply absolute top-1/2 left-1/2 w-0 h-0 rounded-full;
-  @apply bg-white/20 transform -translate-x-1/2 -translate-y-1/2;
-  @apply transition-all duration-500;
-}
-
-.actionButton:hover::before {
-  @apply w-[300px] h-[300px];
+  @apply select-none;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
 }
 
 .actionButton:focus {
@@ -31,7 +19,7 @@
   @apply opacity-50 cursor-not-allowed pointer-events-none;
 }
 
-/* Size Variants - Standardized Heights */
+/* Size Variants */
 .sm {
   @apply h-8 px-3 text-xs leading-4;
 }
@@ -44,70 +32,44 @@
   @apply h-12 px-6 text-base leading-6;
 }
 
-/* Enhanced Primary Variant */
+/* Primary Variant */
 .primary {
-  @apply text-white border-amber-500 relative;
-  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
-  box-shadow: 0 2px 8px var(--shadow-colored);
-}
-
-.primary::after {
-  content: '';
-  @apply absolute inset-0 opacity-0 transition-opacity duration-300 rounded-lg;
-  background: linear-gradient(135deg, var(--accent-color), var(--primary-color));
-}
-
-.primary:hover:not(:disabled)::after {
-  @apply opacity-100;
+  @apply text-white;
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 }
 
 .primary:hover:not(:disabled) {
-  @apply -translate-y-0.5;
-  box-shadow: 0 4px 12px var(--shadow-colored);
+  @apply text-white;
+  background-color: var(--primary-hover);
+  border-color: var(--primary-hover);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .primary:active:not(:disabled) {
-  @apply translate-y-0;
+  transform: scale(0.98);
 }
 
-/* Enhanced Secondary Variant */
+/* Secondary Variant */
 .secondary {
-  @apply bg-transparent border-amber-500 relative;
-  color: var(--primary-color);
-}
-
-.secondary::after {
-  content: '';
-  @apply absolute -inset-px rounded-lg opacity-0 -z-10 transition-opacity duration-300;
-  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
-}
-
-.secondary:hover:not(:disabled)::after {
-  @apply opacity-100;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  border-color: var(--border-color);
 }
 
 .secondary:hover:not(:disabled) {
-  @apply text-white -translate-y-0.5;
-  box-shadow: 0 4px 12px var(--shadow-colored);
+  background-color: var(--bg-tertiary);
+  border-color: var(--text-muted);
 }
 
 .secondary:active:not(:disabled) {
-  @apply translate-y-0;
+  background-color: var(--bg-active);
 }
 
-/* Enhanced Icon Styles */
+/* Icon Styles */
 .icon {
-  @apply flex items-center justify-center flex-shrink-0 relative z-10;
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.actionButton:hover .icon {
-  @apply scale-110;
-}
-
-.primary:hover .icon,
-.secondary:hover .icon {
-  @apply animate-pulse;
+  @apply flex items-center justify-center flex-shrink-0;
 }
 
 .sm .icon {
@@ -140,7 +102,7 @@
   @apply ml-0;
 }
 
-/* Enhanced Loading State */
+/* Loading State */
 .loading {
   @apply relative pointer-events-none;
   color: transparent !important;
@@ -151,30 +113,4 @@
   @apply absolute w-[18px] h-[18px] top-1/2 left-1/2;
   @apply -ml-[9px] -mt-[9px] border-2 border-white/30;
   @apply border-t-white rounded-full animate-spin;
-}
-
-/* Hover lift effect for all buttons */
-.actionButton:not(:disabled):not(.loading):hover {
-  @apply -translate-y-0.5;
-}
-
-.actionButton:not(:disabled):not(.loading):active {
-  @apply translate-y-0 scale-[0.98];
-}
-
-/* Pulse animation on click */
-@keyframes clickPulse {
-  0% {
-    box-shadow: 0 0 0 0 var(--shadow-colored);
-  }
-  70% {
-    box-shadow: 0 0 0 10px transparent;
-  }
-  100% {
-    box-shadow: 0 0 0 0 transparent;
-  }
-}
-
-.actionButton:not(:disabled):active {
-  animation: clickPulse 0.5s;
 }

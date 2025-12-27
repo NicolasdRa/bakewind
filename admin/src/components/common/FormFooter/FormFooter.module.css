@@ -1,0 +1,30 @@
+/* FormFooter Component */
+
+.container {
+  margin-top: 1.5rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.primary {
+  text-decoration: none;
+  color: var(--primary-color);
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.primary:hover {
+  color: var(--primary-hover);
+}
+
+.secondary {
+  text-decoration: none;
+  color: var(--text-secondary);
+  transition: color 0.2s;
+}
+
+.secondary:hover {
+  color: var(--text-primary);
+}

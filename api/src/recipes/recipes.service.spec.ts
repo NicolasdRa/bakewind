@@ -5,6 +5,7 @@ import { DatabaseService } from '../database/database.service';
 
 describe('RecipesService', () => {
   let service: RecipesService;
+  const mockTenantId = 'test-tenant-id';
 
   // Mock database service
   const mockDatabaseService = {
@@ -88,7 +89,9 @@ describe('RecipesService', () => {
       mockDatabaseService.database.select
         .mockReturnValueOnce({
           from: jest.fn().mockReturnValue({
-            orderBy: jest.fn().mockResolvedValue([mockRecipe]),
+            where: jest.fn().mockReturnValue({
+              orderBy: jest.fn().mockResolvedValue([mockRecipe]),
+            }),
           }),
         })
         .mockReturnValueOnce({
@@ -97,7 +100,7 @@ describe('RecipesService', () => {
           }),
         });
 
-      const result = await service.getRecipes();
+      const result = await service.getRecipes(mockTenantId);
 
       expect(result).toHaveLength(1);
       expect(result[0]!.name).toBe('Sourdough Bread');
@@ -146,7 +149,7 @@ describe('RecipesService', () => {
           }),
         });
 
-      const result = await service.getRecipes('pastry');
+      const result = await service.getRecipes(mockTenantId, 'pastry');
 
       expect(result).toHaveLength(1);
       expect(result[0]!.category).toBe('pastry');
@@ -203,7 +206,7 @@ describe('RecipesService', () => {
           }),
         });
 
-      const result = await service.getRecipeById('recipe-1');
+      const result = await service.getRecipeById('recipe-1', mockTenantId);
 
       expect(result).toBeDefined();
       expect(result.name).toBe('Chocolate Cake');
@@ -218,7 +221,7 @@ describe('RecipesService', () => {
         }),
       });
 
-      await expect(service.getRecipeById('non-existent')).rejects.toThrow(
+      await expect(service.getRecipeById('non-existent', mockTenantId)).rejects.toThrow(
         NotFoundException,
       );
     });
@@ -316,7 +319,7 @@ describe('RecipesService', () => {
         }),
       });
 
-      const result = await service.createRecipe(createDto);
+      const result = await service.createRecipe(createDto, mockTenantId);
 
       expect(result).toBeDefined();
       expect(result.name).toBe('Baguette');
@@ -362,7 +365,7 @@ describe('RecipesService', () => {
           }),
         });
 
-      const result = await service.getRecipeById('recipe-1');
+      const result = await service.getRecipeById('recipe-1', mockTenantId);
 
       // Margin = (10 - 6) / 10 * 100 = 40%
       expect(result.margin).toBeCloseTo(40, 2);
@@ -410,7 +413,7 @@ describe('RecipesService', () => {
           }),
         });
 
-      const result = await service.getRecipeById('recipe-1');
+      const result = await service.getRecipeById('recipe-1', mockTenantId);
 
       // Margin = (10 - 9) / 10 * 100 = 10%
       expect(result.margin).toBeCloseTo(10, 2);
@@ -454,7 +457,7 @@ describe('RecipesService', () => {
           }),
         });
 
-      const result = await service.getRecipeById('recipe-1');
+      const result = await service.getRecipeById('recipe-1', mockTenantId);
 
       // All calculated fields should be null
       expect(result.margin).toBeNull();
@@ -507,7 +510,7 @@ describe('RecipesService', () => {
         where: jest.fn().mockResolvedValue(undefined),
       });
 
-      await service.deleteRecipe('recipe-1');
+      await service.deleteRecipe('recipe-1', mockTenantId);
 
       expect(mockDatabaseService.database.delete).toHaveBeenCalled();
     });
@@ -519,7 +522,7 @@ describe('RecipesService', () => {
         }),
       });
 
-      await expect(service.deleteRecipe('non-existent')).rejects.toThrow(
+      await expect(service.deleteRecipe('non-existent', mockTenantId)).rejects.toThrow(
         NotFoundException,
       );
     });

@@ -7,6 +7,7 @@ import RecipeFormModal from "~/components/recipes/RecipeFormModal";
 import { recipesApi, Recipe, RecipeCategory, CreateRecipeRequest, UpdateRecipeRequest } from "~/api/recipes";
 import Badge from "~/components/common/Badge";
 import Button from "~/components/common/Button";
+import { PlusIcon } from "~/components/icons";
 import { getRecipeCategoryColor } from "~/components/common/Badge.config";
 import { useInfoModal } from "~/stores/infoModalStore";
 import styles from "./RecipesPage.module.css";
@@ -78,7 +79,13 @@ const RecipesPage: Component = () => {
       setRecipes(data.map(convertToUIRecipe));
     } catch (err: any) {
       console.error('Error fetching recipes:', err);
-      setError(err.message || 'Failed to load recipes');
+      // Extract error message from API response or use fallback
+      const errorMessage = err?.data?.message || err?.message || 'Failed to load recipes';
+      const statusCode = err?.status;
+      const displayMessage = statusCode === 403
+        ? `Access denied: ${errorMessage}. You may not have permission to view recipes.`
+        : errorMessage;
+      setError(displayMessage);
     } finally {
       setLoading(false);
     }
@@ -171,7 +178,8 @@ const RecipesPage: Component = () => {
       setIsFormModalOpen(false);
     } catch (err: any) {
       console.error('Error saving recipe:', err);
-      setError(err.message || 'Failed to save recipe');
+      const errorMessage = err?.data?.message || err?.message || 'Failed to save recipe';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -311,7 +319,8 @@ const RecipesPage: Component = () => {
           onClick={handleOpenCreateModal}
           disabled={loading()}
         >
-          + Add Recipe
+          <PlusIcon class={styles.buttonIcon} />
+          <span class="btn-text">Add Recipe</span>
         </Button>
       </div>
 

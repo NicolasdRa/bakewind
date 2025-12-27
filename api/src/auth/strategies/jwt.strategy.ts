@@ -38,6 +38,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     userId: string;
     email: string;
     role: string;
+    tenantId?: string;
   }> {
     this.logger.log(`JWT validation started for user: ${payload.email}`);
 
@@ -70,6 +71,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       userId: validatedPayload.sub, // Keep userId for backward compatibility
       email: validatedPayload.email,
       role: validatedPayload.role as string,
+      tenantId: (payload as any).tenantId, // Include tenantId for multi-tenancy
     };
   }
 }

@@ -1,6 +1,7 @@
 import { Injectable, Inject, Logger, NotFoundException } from '@nestjs/common';
-import { eq } from 'drizzle-orm';
+import { eq, and, gt } from 'drizzle-orm';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 import { DATABASE_CONNECTION } from '../database/database-connection';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { usersTable, userLocationsTable } from '../database/schemas';
@@ -295,5 +296,89 @@ export class UsersService {
       // Return empty array if query fails
       return [];
     }
+  }
+
+  /**
+   * Generate and save a password reset token for a user
+   * Token expires in 1 hour
+   */
+  async setPasswordResetToken(email: string): Promise<{ token: string; user: { firstName: string; email: string } } | null> {
+    const user = await this.findByEmail(email);
+    if (!user) {
+      return null;
+    }
+
+    // Generate a secure random token
+    const token = crypto.randomBytes(32).toString('hex');
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+    // Token expires in 1 hour
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
+
+    await this.db
+      .update(usersTable)
+      .set({
+        passwordResetToken: hashedToken,
+        passwordResetExpires: expiresAt,
+        updatedAt: new Date(),
+      })
+      .where(eq(usersTable.id, user.id));
+
+    this.logger.log(`Password reset token generated for user: ${email}`);
+
+    return {
+      token, // Return the unhashed token (to be sent in email)
+      user: {
+        firstName: user.firstName,
+        email: user.email,
+      },
+    };
+  }
+
+  /**
+   * Find a user by their password reset token
+   * Only returns user if token is valid and not expired
+   */
+  async findByPasswordResetToken(token: string): Promise<UsersData | null> {
+    // Hash the token to compare with stored hash
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+    const [user] = await this.db
+      .select()
+      .from(usersTable)
+      .where(
+        and(
+          eq(usersTable.passwordResetToken, hashedToken),
+          gt(usersTable.passwordResetExpires, new Date()),
+        ),
+      )
+      .limit(1);
+
+    return user || null;
+  }
+
+  /**
+   * Reset a user's password using a valid reset token
+   */
+  async resetPasswordWithToken(token: string, newPassword: string): Promise<boolean> {
+    const user = await this.findByPasswordResetToken(token);
+    if (!user) {
+      return false;
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
+
+    await this.db
+      .update(usersTable)
+      .set({
+        password: hashedPassword,
+        passwordResetToken: null,
+        passwordResetExpires: null,
+        updatedAt: new Date(),
+      })
+      .where(eq(usersTable.id, user.id));
+
+    this.logger.log(`Password reset successful for user: ${user.email}`);
+    return true;
   }
 }

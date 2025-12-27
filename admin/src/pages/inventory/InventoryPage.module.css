@@ -2,7 +2,7 @@
 
 /* Page layout */
 .pageContainer {
-  padding: var(--spacing-6);
+  padding: var(--spacing-4);
 }
 
 @media (min-width: 768px) {
@@ -422,4 +422,68 @@
 
 .deleteButton:hover {
   background-color: var(--error-hover);
+}
+
+/* Button icon */
+.buttonIcon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  .pageHeader {
+    flex-direction: column;
+    gap: var(--spacing-4);
+    align-items: stretch;
+  }
+
+  .pageTitle {
+    font-size: var(--font-size-2xl);
+  }
+
+  .primaryButton {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .filterCard {
+    padding: var(--spacing-4);
+  }
+
+  .filterRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .checkboxWrapper {
+    width: 100%;
+  }
+
+  .checkboxLabel {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .tableWrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tableHeaderCell,
+  .tableCell {
+    padding: var(--spacing-3) var(--spacing-4);
+    font-size: var(--font-size-sm);
+  }
+
+  .actionsRow {
+    flex-direction: column;
+    gap: var(--spacing-2);
+  }
+
+  .modalContent {
+    max-width: calc(100vw - 2rem);
+    margin: var(--spacing-4);
+  }
 }

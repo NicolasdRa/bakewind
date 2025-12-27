@@ -1,0 +1,70 @@
+/* ==========================================================================
+   Text Component Styles
+   ========================================================================== */
+
+.text {
+  margin: 0;
+}
+
+/* Body text - default paragraph */
+.text-body {
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+/* Body small - secondary content */
+.text-body-sm {
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+/* Caption - small annotations */
+.text-caption {
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+/* Label - form labels */
+.text-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+/* Helper - form helper text */
+.text-helper {
+  font-size: 0.8125rem;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+/* ==========================================================================
+   Text Colors
+   ========================================================================== */
+
+.color-primary {
+  color: var(--text-primary);
+}
+
+.color-secondary {
+  color: var(--text-secondary);
+}
+
+.color-tertiary {
+  color: var(--text-tertiary);
+}
+
+.color-muted {
+  color: var(--text-muted);
+}
+
+.color-error {
+  color: var(--error-color);
+}
+
+.color-success {
+  color: var(--success-color);
+}

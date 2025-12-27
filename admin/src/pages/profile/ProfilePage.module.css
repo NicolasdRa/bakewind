@@ -1,36 +1,60 @@
 /* ProfilePage CSS Module - Matching Dashboard Pattern */
 @reference "tailwindcss";
 
-/* Container and Header - Matching Overview Page */
+/* Page layout - matching other pages */
 .container {
-  @apply p-8 max-w-7xl mx-auto;
+  padding: var(--spacing-4);
 }
 
+@media (min-width: 768px) {
+  .container {
+    padding: var(--spacing-8);
+  }
+}
+
+/* Header section */
 .header {
-  @apply flex justify-between items-start mb-8;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-4);
+}
+
+@media (min-width: 768px) {
+  .header {
+    margin-bottom: var(--spacing-8);
+  }
 }
 
 .headerContent {
-  @apply flex-1;
+  flex: 1;
 }
 
 .title {
-  @apply text-3xl font-bold m-0 mb-2;
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--spacing-2);
   color: var(--text-primary);
 }
 
 .subtitle {
-  @apply text-base m-0;
+  font-size: var(--font-size-base);
   color: var(--text-secondary);
+  margin: 0;
 }
 
 .editingSubtitle {
-  @apply text-base m-0 font-medium;
+  font-size: var(--font-size-base);
   color: var(--primary-color);
+  font-weight: var(--font-weight-medium);
+  margin: 0;
 }
 
 .headerActions {
-  @apply flex flex-wrap items-center gap-3;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-3);
 }
 
 /* Loading State */
@@ -103,8 +127,14 @@
 
 /* Enhanced Sections */
 .section {
-  padding: var(--spacing-8);
+  padding: var(--spacing-4);
   border-bottom: 1px solid var(--border-light);
+}
+
+@media (min-width: 768px) {
+  .section {
+    padding: var(--spacing-8);
+  }
 }
 
 .section:last-child {
@@ -474,9 +504,15 @@
 /* Security Card */
 .securityCard {
   background: var(--bg-secondary);
-  padding: var(--spacing-6);
+  padding: var(--spacing-4);
   border-radius: var(--radius-lg);
   border: 1px solid var(--border-light);
+}
+
+@media (min-width: 768px) {
+  .securityCard {
+    padding: var(--spacing-6);
+  }
 }
 
 /* Change Password Button */

@@ -1,5 +1,5 @@
 import { Injectable, Inject, NotFoundException, Logger } from '@nestjs/common';
-import { eq } from 'drizzle-orm';
+import { eq, isNull, ilike, or, desc } from 'drizzle-orm';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DATABASE_CONNECTION } from '../database/database.module';
 import * as schema from '../database/schemas';
@@ -76,6 +76,50 @@ export class TenantsService {
       .limit(1);
 
     return tenant || null;
+  }
+
+  /**
+   * Get all tenants (ADMIN only)
+   * Excludes soft-deleted tenants
+   */
+  async findAll(search?: string) {
+    let query = this.db
+      .select({
+        id: tenantsTable.id,
+        businessName: tenantsTable.businessName,
+        businessPhone: tenantsTable.businessPhone,
+        subscriptionStatus: tenantsTable.subscriptionStatus,
+        trialEndsAt: tenantsTable.trialEndsAt,
+        createdAt: tenantsTable.createdAt,
+      })
+      .from(tenantsTable)
+      .where(isNull(tenantsTable.deletedAt))
+      .$dynamic();
+
+    if (search) {
+      query = query.where(
+        or(
+          ilike(tenantsTable.businessName, `%${search}%`),
+          ilike(tenantsTable.businessPhone, `%${search}%`),
+        ),
+      );
+    }
+
+    const tenants = await query.orderBy(desc(tenantsTable.createdAt));
+    return tenants;
+  }
+
+  /**
+   * Check if a tenant exists (for header validation)
+   */
+  async exists(id: string): Promise<boolean> {
+    const [tenant] = await this.db
+      .select({ id: tenantsTable.id })
+      .from(tenantsTable)
+      .where(eq(tenantsTable.id, id))
+      .limit(1);
+
+    return !!tenant;
   }
 
   /**

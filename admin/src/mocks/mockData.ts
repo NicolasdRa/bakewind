@@ -1,4 +1,4 @@
-import type { Order, Product, InventoryItem, Recipe, Customer, InternalOrder, ProductionSchedule, DashboardMetrics } from '~/types/bakery'
+import type { Order, Product, InventoryItem, Recipe, Customer, InternalOrder, DashboardMetrics } from '~/types/bakery'
 
 export const mockOrders: Order[] = [
   {

@@ -25,6 +25,15 @@ export async function seedLocations(db: NodePgDatabase<typeof schema>) {
     }
     console.log('👤 Found test user:', testUser.email);
 
+    // Get the first available tenant for seeding
+    const existingTenant = await db.query.tenantsTable.findFirst();
+    if (!existingTenant) {
+      console.log('⚠️ No tenant found. Run users seed first.');
+      return;
+    }
+    const tenantId = existingTenant.id;
+    console.log('🏢 Using tenant:', existingTenant.businessName);
+
     // Check if locations already exist
     const existingLocations = await db
       .select()
@@ -61,6 +70,7 @@ export async function seedLocations(db: NodePgDatabase<typeof schema>) {
           phoneNumber: '+1-555-0101',
           email: 'downtown@bakewind.com',
           description: 'Our flagship location in the heart of downtown',
+          tenantId,
         },
         {
           name: 'Uptown Bakery',
@@ -73,6 +83,7 @@ export async function seedLocations(db: NodePgDatabase<typeof schema>) {
           phoneNumber: '+1-555-0102',
           email: 'uptown@bakewind.com',
           description: 'Our cozy uptown location with artisanal specialties',
+          tenantId,
         },
       ];
 

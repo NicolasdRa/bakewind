@@ -169,11 +169,19 @@ export class OrdersService {
     };
   }
 
-  async createOrder(createOrderDto: CreateOrderDto): Promise<OrderWithItems> {
+  async createOrder(
+    createOrderDto: CreateOrderDto,
+    tenantId: string,
+  ): Promise<OrderWithItems> {
     const [existingOrder] = await this.databaseService.database
       .select()
       .from(customerOrders)
-      .where(eq(customerOrders.orderNumber, createOrderDto.orderNumber))
+      .where(
+        and(
+          eq(customerOrders.tenantId, tenantId),
+          eq(customerOrders.orderNumber, createOrderDto.orderNumber),
+        ),
+      )
       .limit(1);
 
     if (existingOrder) {
@@ -185,6 +193,7 @@ export class OrdersService {
     const [newOrder] = await this.databaseService.database
       .insert(customerOrders)
       .values({
+        tenantId,
         orderNumber: createOrderDto.orderNumber,
         customerId: createOrderDto.customerId || null,
         customerName: createOrderDto.customerName,

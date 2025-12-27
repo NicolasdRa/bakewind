@@ -8,6 +8,7 @@ import SearchInput from "~/components/common/SearchInput";
 import FilterSelect from "~/components/common/FilterSelect";
 import Badge from "~/components/common/Badge";
 import Button from "~/components/common/Button";
+import { PlusIcon } from "~/components/icons";
 import { getStockStatusVariant } from "~/components/common/Badge.config";
 import { useInfoModal } from "~/stores/infoModalStore";
 import styles from "./InventoryPage.module.css";
@@ -184,7 +185,8 @@ const InventoryPage: Component = () => {
           <p class={styles.pageSubtitle}>Track ingredients, packaging, and supplies</p>
         </div>
         <Button variant="primary" size="md" onClick={() => setIsAddModalOpen(true)}>
-          + Add Item
+          <PlusIcon class={styles.buttonIcon} />
+          <span class="btn-text">Add Item</span>
         </Button>
       </div>
 

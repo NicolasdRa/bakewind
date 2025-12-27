@@ -1,6 +1,7 @@
 import { createSignal, onMount } from 'solid-js'
 import { RouteSectionProps } from '@solidjs/router'
 import Sidebar from '~/components/Sidebar/Sidebar'
+import BottomSheet from '~/components/BottomSheet/BottomSheet'
 import { useAppStore } from '~/stores/appStore'
 import InfoModal from '~/components/common/InfoModal'
 import { useInfoModal } from '~/stores/infoModalStore'
@@ -46,6 +47,9 @@ export default function DashboardLayout(props: RouteSectionProps) {
         type={infoModalState().type}
         onClose={closeInfoModal}
       />
+
+      {/* Bottom Sheet Navigation for Mobile */}
+      <BottomSheet />
     </div>
   )
 }

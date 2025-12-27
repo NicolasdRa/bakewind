@@ -4,6 +4,7 @@ import CustomerFormModal from "../../components/customers/CustomerFormModal";
 import CustomerDetailsModal from "../../components/customers/CustomerDetailsModal";
 import Badge from "../../components/common/Badge";
 import Button from "../../components/common/Button";
+import { PlusIcon } from "../../components/icons";
 import SearchInput from "../../components/common/SearchInput";
 import FilterSelect from "../../components/common/FilterSelect";
 import styles from "./CustomersPage.module.css";
@@ -261,7 +262,8 @@ const CustomersPage: Component = () => {
                 {isExporting() ? "Exporting..." : "Export"}
               </Button>
               <Button variant="primary" size="sm" onClick={handleAddCustomer}>
-                Add Customer
+                <PlusIcon class={styles.buttonIcon} />
+                <span class="btn-text">Add Customer</span>
               </Button>
             </div>
           </div>

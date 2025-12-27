@@ -22,7 +22,7 @@
 }
 
 /* Desktop specific - ensure sidebar fills parent container height */
-@media (min-width: 769px) {
+@media (min-width: 1025px) {
   .sidebar {
     height: 100%;
     min-height: 100%;
@@ -32,8 +32,8 @@
   }
 }
 
-/* Mobile behavior */
-@media (max-width: 768px) {
+/* Mobile/Tablet behavior - hide sidebar, use bottom sheet instead */
+@media (max-width: 1024px) {
   .sidebar {
     @apply fixed left-0 top-0;
     height: 100vh !important;
@@ -41,6 +41,8 @@
     max-height: 100vh !important;
     grid-area: none;
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Hidden by default on mobile/tablet */
+    transform: translateX(-100%);
   }
 }
 
@@ -65,7 +67,7 @@
 }
 
 /* Enhanced desktop stability */
-@media (min-width: 769px) {
+@media (min-width: 1025px) {
   .sidebar,
   .sidebarCollapsed,
   .sidebarExpanded {
@@ -82,14 +84,16 @@
   }
 }
 
-/* Mobile-specific styles */
-@media (max-width: 768px) {
+/* Mobile/Tablet-specific styles */
+@media (max-width: 1024px) {
   .sidebarCollapsed {
-    @apply w-16 -translate-x-full;
+    @apply w-16;
+    transform: translateX(-100%);
   }
 
   .sidebarExpanded {
-    @apply w-72 -translate-x-full;
+    @apply w-72;
+    transform: translateX(-100%);
   }
 }
 
@@ -183,26 +187,8 @@
   overflow: hidden;
 }
 
-.navButton::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 3px;
-  height: 0;
-  background: var(--primary-color);
-  transition: height 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  border-radius: 0 3px 3px 0;
-}
-
-.navButton:hover::before {
-  height: 70%;
-}
-
 .navButton:hover {
   background-color: var(--bg-hover);
-  transform: translateX(2px);
 }
 
 .navButtonMobile {
@@ -218,14 +204,21 @@
 }
 
 .navButtonActive {
-  background: linear-gradient(to right, var(--primary-light), transparent);
+  background-color: var(--bg-hover);
   color: var(--primary-color);
   font-weight: 600;
+  border-left: 3px solid var(--primary-color);
+  padding-left: calc(1rem - 3px); /* Compensate for border */
+}
+
+.navButtonActive.navButtonCollapsed {
+  border-left: none;
+  border-bottom: 3px solid var(--primary-color);
+  padding-left: 0;
 }
 
 .navButtonActive::before {
-  height: 100% !important;
-  width: 4px;
+  display: none; /* Remove the pseudo-element indicator, using border instead */
 }
 
 .navButtonInactive {
@@ -241,24 +234,30 @@
   transition: var(--transition-fast);
 }
 
-.navButton:hover .navIcon {
-  transform: scale(1.1);
+.navIconWrapper {
+  @apply flex-shrink-0 w-6 flex items-center justify-center;
+  transition: var(--transition-fast);
+}
+
+.navIconSvg {
+  @apply w-5 h-5;
+  transition: var(--transition-fast);
+  color: currentColor;
+}
+
+.navButton:hover .navIcon,
+.navButton:hover .navIconWrapper {
   color: var(--primary-color);
 }
 
-.navButtonActive .navIcon {
+.navButtonActive .navIcon,
+.navButtonActive .navIconWrapper {
   color: var(--primary-color);
-  animation: pulse 2s infinite;
 }
 
 .navLabel {
   @apply font-medium truncate min-w-0 flex-1;
-  transition: var(--transition-fast);
   letter-spacing: -0.01em;
-}
-
-.navButton:hover .navLabel {
-  transform: translateX(2px);
 }
 
 .tooltip {
@@ -285,27 +284,10 @@
   transition: var(--transition-base);
 }
 
-.themeButton::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, var(--primary-light), transparent);
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-.themeButton:hover::before {
-  opacity: 0.1;
-}
 
 .themeButton:hover {
   background-color: var(--bg-hover);
   color: var(--text-primary);
-  transform: translateX(2px);
-}
-
-.themeButton:hover .themeIcon {
-  transform: rotate(180deg);
 }
 
 .themeButtonMobile {
@@ -323,6 +305,16 @@
 .themeIcon {
   @apply text-xl flex-shrink-0 w-6 text-center;
   transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.themeIconSvg {
+  @apply w-5 h-5 flex-shrink-0;
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  color: currentColor;
+}
+
+.themeButton:hover .themeIconSvg {
+  transform: rotate(180deg);
 }
 
 .themeLabel {
@@ -344,26 +336,12 @@
   overflow: hidden;
 }
 
-.userProfile::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, var(--primary-light), transparent);
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-.userProfile:hover::before {
-  opacity: 0.1;
-}
 
 .userProfile:hover {
   background-color: var(--bg-hover);
-  transform: translateY(-2px);
 }
 
 .userProfile:hover .userAvatar {
-  transform: scale(1.05);
   box-shadow: 0 4px 12px var(--shadow-colored);
 }
 
@@ -399,26 +377,9 @@
 
 .userAvatar {
   @apply rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0;
-  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
-  box-shadow: 0 2px 8px var(--shadow-colored);
+  background-color: var(--primary-color);
+  box-shadow: 0 2px 6px var(--shadow-colored);
   transition: var(--transition-base);
-  position: relative;
-}
-
-.userAvatar::after {
-  content: '';
-  position: absolute;
-  inset: -2px;
-  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
-  border-radius: inherit;
-  opacity: 0;
-  filter: blur(8px);
-  transition: opacity 0.3s;
-  z-index: -1;
-}
-
-.userProfile:hover .userAvatar::after {
-  opacity: 0.5;
 }
 
 .userAvatarLarge {
@@ -518,9 +479,66 @@
   opacity: 0.8;
 }
 
+.dropdownUserRole {
+  @apply text-xs font-medium px-2 py-0.5 rounded-full mt-1 inline-block;
+  background-color: var(--primary-light);
+  color: var(--primary-color);
+}
+
 .dropdownDivider {
   @apply h-px my-2 mx-2;
   background-color: var(--border-color);
+}
+
+/* Tenant Info Section */
+.dropdownTenantInfo {
+  @apply px-4 py-2;
+}
+
+.dropdownTenantName {
+  @apply text-sm font-medium mb-2;
+  color: var(--text-primary);
+}
+
+/* Subscription/Trial Badges */
+.trialBadge {
+  @apply flex items-center gap-2 text-xs py-1 px-2 rounded-md;
+  background-color: var(--warning-light, #fff7ed);
+  color: var(--warning-color, #ea580c);
+}
+
+.trialBadgeIcon {
+  @apply text-sm;
+}
+
+.activeBadge {
+  @apply flex items-center gap-2 text-xs py-1 px-2 rounded-md;
+  background-color: var(--success-light, #ecfdf5);
+  color: var(--success-color, #10b981);
+}
+
+.activeBadgeIcon {
+  @apply text-sm;
+}
+
+.warningBadge {
+  @apply flex items-center gap-2 text-xs py-1 px-2 rounded-md;
+  background-color: var(--error-light, #fef2f2);
+  color: var(--error-color, #ef4444);
+}
+
+.warningBadgeIcon {
+  @apply text-sm;
+}
+
+/* Business Name in Header */
+.headerBranding {
+  @apply flex flex-col;
+}
+
+.businessName {
+  @apply text-xs font-medium mt-1 truncate max-w-32;
+  color: var(--text-secondary);
 }
 
 .dropdownLogoutButton {

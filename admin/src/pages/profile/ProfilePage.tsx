@@ -121,18 +121,18 @@ const ProfilePage: Component = () => {
 
   // Initialize form with user data when user changes
   createEffect(() => {
-    const currentUser = user()
+    const currentUser = user() as any
     if (currentUser) {
       const initialData = {
         firstName: currentUser.firstName || '',
         lastName: currentUser.lastName || '',
-        phoneNumber: '',
-        bio: '',
-        gender: '',
-        dateOfBirth: '',
-        country: '',
-        city: '',
-        profilePictureUrl: ''
+        phoneNumber: currentUser.phoneNumber || '',
+        bio: currentUser.bio || '',
+        gender: currentUser.gender || '',
+        dateOfBirth: currentUser.dateOfBirth || '',
+        country: currentUser.country || '',
+        city: currentUser.city || '',
+        profilePictureUrl: currentUser.profilePictureUrl || ''
       }
 
       setOriginalValues(initialData)
@@ -230,6 +230,9 @@ const ProfilePage: Component = () => {
       if (Object.keys(changedFields).length > 0) {
         await updateProfile(changedFields)
 
+        // Refresh auth context to get updated user data
+        await auth.refreshProfile()
+
         // Update original values with new values after successful save
         setOriginalValues(currentData)
         setFormState(prev => ({ ...prev, isDirty: false }))
@@ -314,72 +317,70 @@ const ProfilePage: Component = () => {
   }
 
   return (
-    <div class={styles.grid}>
-      <div class={styles.profileInfoContainer}>
-        <div class={styles.container}>
-          <Show when={isLoading()}>
-            <div class={styles.loadingContainer}>
-              <LoadingSpinner message="Loading profile..." />
-            </div>
-          </Show>
+    <div class={styles.container}>
+      <Show when={isLoading()}>
+        <div class={styles.loadingContainer}>
+          <LoadingSpinner message="Loading profile..." />
+        </div>
+      </Show>
 
-          <Show when={!isLoading() && user()}>
-            {/* Header with Edit/Save Actions */}
-            <div class={styles.header}>
-              <div class={styles.headerContent}>
-                <h1 class={styles.title}>Profile Settings</h1>
-                <Show when={!isEditMode()}>
-                  <p class={styles.subtitle}>View and manage your personal information</p>
-                </Show>
-                <Show when={isEditMode()}>
-                  <p class={styles.editingSubtitle}>Editing profile information</p>
-                </Show>
+      <Show when={!isLoading() && user()}>
+        {/* Header with Edit/Save Actions */}
+        <div class={styles.header}>
+          <div class={styles.headerContent}>
+            <h1 class={styles.title}>Profile Settings</h1>
+            <Show when={!isEditMode()}>
+              <p class={styles.subtitle}>View and manage your personal information</p>
+            </Show>
+            <Show when={isEditMode()}>
+              <p class={styles.editingSubtitle}>Editing profile information</p>
+            </Show>
+          </div>
+
+          <div class={styles.headerActions}>
+            <Show when={saveMessage()}>
+              <div class={styles.successMessage}>
+                {saveMessage()}
               </div>
+            </Show>
 
-              <div class={styles.headerActions}>
-                <Show when={saveMessage()}>
-                  <div class={styles.successMessage}>
-                    {saveMessage()}
-                  </div>
-                </Show>
+            <Show when={!isEditMode()}>
+              <Button
+                onClick={handleEnterEditMode}
+                variant="primary"
+                size="sm"
+              >
+                <svg class={styles.editIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                Edit Profile
+              </Button>
+            </Show>
 
-                <Show when={!isEditMode()}>
-                  <Button
-                    onClick={handleEnterEditMode}
-                    variant="primary"
-                    size="sm"
-                  >
-                    <svg class={styles.editIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
-                    Edit Profile
-                  </Button>
-                </Show>
-
-                <Show when={isEditMode()}>
-                  <div class={styles.editActions}>
-                    <Button
-                      onClick={handleCancelEdit}
-                      variant="secondary"
-                      size="sm"
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      onClick={handleSaveProfile}
-                      disabled={isUpdating()}
-                      variant="primary"
-                      size="sm"
-                    >
-                      {isUpdating() ? 'Saving...' : 'Save Changes'}
-                    </Button>
-                  </div>
-                </Show>
+            <Show when={isEditMode()}>
+              <div class={styles.editActions}>
+                <Button
+                  onClick={handleCancelEdit}
+                  variant="secondary"
+                  size="sm"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleSaveProfile}
+                  disabled={isUpdating()}
+                  variant="primary"
+                  size="sm"
+                >
+                  {isUpdating() ? 'Saving...' : 'Save Changes'}
+                </Button>
               </div>
-            </div>
+            </Show>
+          </div>
+        </div>
 
-            {/* Personal Information Section */}
-            <div class={styles.section}>
+        {/* Personal Information Section */}
+        <div class={styles.section}>
               <h2 class={styles.sectionTitle}>
                 <svg class={styles.sectionIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -731,15 +732,13 @@ const ProfilePage: Component = () => {
               </div>
             </div>
 
-            {/* Error Display */}
-            <Show when={updateError()}>
-              <div class={styles.errorMessage}>
-                {updateError()?.message}
-              </div>
-            </Show>
-          </Show>
-        </div>
-      </div>
+        {/* Error Display */}
+        <Show when={updateError()}>
+          <div class={styles.errorMessage}>
+            {updateError()?.message}
+          </div>
+        </Show>
+      </Show>
     </div>
   )
 };

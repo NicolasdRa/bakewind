@@ -19,14 +19,15 @@ export class RecipesService {
   constructor(private readonly databaseService: DatabaseService) {}
 
   /**
-   * Get all recipes with optional filtering
+   * Get all recipes with optional filtering (tenant-scoped)
    */
   async getRecipes(
+    tenantId: string,
     category?: RecipeCategory,
     search?: string,
     isActive?: boolean,
   ): Promise<RecipeDto[]> {
-    const conditions: any[] = [];
+    const conditions: any[] = [eq(recipes.tenantId, tenantId)];
 
     if (category) {
       conditions.push(eq(recipes.category, category));
@@ -46,17 +47,11 @@ export class RecipesService {
       conditions.push(eq(recipes.isActive, isActive));
     }
 
-    const recipeList =
-      conditions.length > 0
-        ? await this.databaseService.database
-            .select()
-            .from(recipes)
-            .where(and(...conditions))
-            .orderBy(recipes.name)
-        : await this.databaseService.database
-            .select()
-            .from(recipes)
-            .orderBy(recipes.name);
+    const recipeList = await this.databaseService.database
+      .select()
+      .from(recipes)
+      .where(and(...conditions))
+      .orderBy(recipes.name);
 
     // Fetch ingredients for each recipe
     const recipeDtos = await Promise.all(
@@ -67,13 +62,13 @@ export class RecipesService {
   }
 
   /**
-   * Get a single recipe by ID
+   * Get a single recipe by ID (tenant-scoped)
    */
-  async getRecipeById(recipeId: string): Promise<RecipeDto> {
+  async getRecipeById(recipeId: string, tenantId: string): Promise<RecipeDto> {
     const [recipe] = await this.databaseService.database
       .select()
       .from(recipes)
-      .where(eq(recipes.id, recipeId));
+      .where(and(eq(recipes.id, recipeId), eq(recipes.tenantId, tenantId)));
 
     if (!recipe) {
       throw new NotFoundException(`Recipe with ID ${recipeId} not found`);
@@ -83,9 +78,9 @@ export class RecipesService {
   }
 
   /**
-   * Create a new recipe with ingredients
+   * Create a new recipe with ingredients (tenant-scoped)
    */
-  async createRecipe(dto: CreateRecipeDto): Promise<RecipeDto> {
+  async createRecipe(dto: CreateRecipeDto, tenantId: string): Promise<RecipeDto> {
     // Calculate total ingredient cost
     const totalIngredientCost = dto.ingredients.reduce(
       (sum, ing) => sum + (ing.cost || 0),
@@ -112,6 +107,7 @@ export class RecipesService {
       tags: dto.tags || null,
       imageUrl: dto.imageUrl || null,
       isActive: dto.isActive ?? true,
+      tenantId,
     } as typeof recipes.$inferInsert;
 
     const [created] = await this.databaseService.database
@@ -144,14 +140,15 @@ export class RecipesService {
   }
 
   /**
-   * Update an existing recipe
+   * Update an existing recipe (tenant-scoped)
    */
   async updateRecipe(
     recipeId: string,
     dto: UpdateRecipeDto,
+    tenantId: string,
   ): Promise<RecipeDto> {
-    // Check if recipe exists
-    await this.getRecipeById(recipeId);
+    // Check if recipe exists and belongs to tenant
+    await this.getRecipeById(recipeId, tenantId);
 
     const updateData: any = {
       updatedAt: new Date(),
@@ -209,13 +206,13 @@ export class RecipesService {
       );
 
       const yieldValue =
-        dto.yield ?? (await this.getRecipeById(recipeId)).yield;
+        dto.yield ?? (await this.getRecipeById(recipeId, tenantId)).yield;
       const costPerUnit =
         yieldValue > 0 ? totalIngredientCost / yieldValue : null;
       updateData.costPerUnit = costPerUnit ? costPerUnit.toFixed(4) : null;
     } else if (dto.yield !== undefined) {
       // If only yield changed, recalculate cost per unit
-      const existingRecipe = await this.getRecipeById(recipeId);
+      const existingRecipe = await this.getRecipeById(recipeId, tenantId);
       const totalCost = existingRecipe.totalIngredientCost;
       const costPerUnit = dto.yield > 0 ? totalCost / dto.yield : null;
       updateData.costPerUnit = costPerUnit ? costPerUnit.toFixed(4) : null;
@@ -224,7 +221,7 @@ export class RecipesService {
     const [updated] = await this.databaseService.database
       .update(recipes)
       .set(updateData)
-      .where(eq(recipes.id, recipeId))
+      .where(and(eq(recipes.id, recipeId), eq(recipes.tenantId, tenantId)))
       .returning();
 
     if (!updated) {
@@ -235,38 +232,38 @@ export class RecipesService {
   }
 
   /**
-   * Delete a recipe
+   * Delete a recipe (tenant-scoped)
    */
-  async deleteRecipe(recipeId: string): Promise<void> {
-    // Check if recipe exists
-    await this.getRecipeById(recipeId);
+  async deleteRecipe(recipeId: string, tenantId: string): Promise<void> {
+    // Check if recipe exists and belongs to tenant
+    await this.getRecipeById(recipeId, tenantId);
 
     // Delete recipe (ingredients will cascade delete)
     await this.databaseService.database
       .delete(recipes)
-      .where(eq(recipes.id, recipeId));
+      .where(and(eq(recipes.id, recipeId), eq(recipes.tenantId, tenantId)));
   }
 
   /**
-   * Get recipes by category
+   * Get recipes by category (tenant-scoped)
    */
-  async getRecipesByCategory(category: RecipeCategory): Promise<RecipeDto[]> {
-    return this.getRecipes(category);
+  async getRecipesByCategory(tenantId: string, category: RecipeCategory): Promise<RecipeDto[]> {
+    return this.getRecipes(tenantId, category);
   }
 
   /**
-   * Get active recipes only
+   * Get active recipes only (tenant-scoped)
    */
-  async getActiveRecipes(): Promise<RecipeDto[]> {
-    return this.getRecipes(undefined, undefined, true);
+  async getActiveRecipes(tenantId: string): Promise<RecipeDto[]> {
+    return this.getRecipes(tenantId, undefined, undefined, true);
   }
 
   /**
-   * Recalculate cost for a recipe based on current ingredient prices
+   * Recalculate cost for a recipe based on current ingredient prices (tenant-scoped)
    * This is useful when ingredient prices in inventory change
    */
-  async recalculateRecipeCost(recipeId: string): Promise<RecipeDto> {
-    const recipe = await this.getRecipeById(recipeId);
+  async recalculateRecipeCost(recipeId: string, tenantId: string): Promise<RecipeDto> {
+    const recipe = await this.getRecipeById(recipeId, tenantId);
 
     // Fetch fresh ingredient costs from inventory
     const ingredientIds = recipe.ingredients.map((ing) => ing.ingredientId);
@@ -310,9 +307,9 @@ export class RecipesService {
         costPerUnit: costPerUnit ? costPerUnit.toFixed(4) : null,
         updatedAt: new Date(),
       })
-      .where(eq(recipes.id, recipeId));
+      .where(and(eq(recipes.id, recipeId), eq(recipes.tenantId, tenantId)));
 
-    return this.getRecipeById(recipeId);
+    return this.getRecipeById(recipeId, tenantId);
   }
 
   /**

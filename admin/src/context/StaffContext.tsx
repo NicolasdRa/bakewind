@@ -4,6 +4,9 @@
  * Provides the staff store to the component tree via SolidJS Context.
  * This context manages staff-specific data like areas, position, and department.
  * Only relevant for STAFF role users.
+ *
+ * Note: Staff data is now loaded with the auth profile, so this context primarily
+ * provides a consistent API for accessing staff data throughout the app.
  */
 
 import { createContext, useContext, Component, JSX, createEffect } from 'solid-js';
@@ -21,7 +24,8 @@ export const StaffContext = createContext<StaffStore>();
  * StaffProvider Component
  *
  * Wraps the application and provides staff state to all child components.
- * Automatically fetches staff profile when user is authenticated with STAFF role.
+ * Staff data is now included in the auth profile response, so this syncs
+ * the staff store with the auth store's staff data.
  */
 export const StaffProvider: Component<{ children: JSX.Element }> = (props) => {
   logger.ui('Rendering StaffProvider');
@@ -30,14 +34,14 @@ export const StaffProvider: Component<{ children: JSX.Element }> = (props) => {
   const staffStore = createStaffStore();
   const auth = useAuth();
 
-  // Initialize staff profile when user is authenticated and has STAFF role
+  // Sync staff profile from auth store
   createEffect(() => {
-    const user = auth.user;
     const isAuthenticated = auth.isAuthenticated;
     const isInitialized = auth.isInitialized;
+    const staffContext = auth.staff;
 
-    // Only fetch if auth is initialized and user is authenticated
-    if (!isInitialized || !isAuthenticated || !user) {
+    // Only sync if auth is initialized and user is authenticated
+    if (!isInitialized || !isAuthenticated) {
       // Clear staff profile if user logs out
       if (staffStore.hasProfile) {
         logger.auth('User logged out, clearing staff profile');
@@ -46,18 +50,27 @@ export const StaffProvider: Component<{ children: JSX.Element }> = (props) => {
       return;
     }
 
-    // Only fetch for STAFF role users
-    if (user.role === 'STAFF') {
-      if (!staffStore.isInitialized) {
-        logger.auth('User is STAFF role, fetching staff profile...');
-        staffStore.fetchProfile();
-      }
-    } else {
-      // Clear if user is not STAFF (role changed or different user)
-      if (staffStore.hasProfile) {
-        logger.auth('User is not STAFF role, clearing staff profile');
-        staffStore.clear();
-      }
+    // If auth has staff context, sync it to the staff store
+    if (staffContext) {
+      // Convert StaffContext to StaffProfile format
+      const profile: StaffProfile = {
+        id: staffContext.id,
+        userId: auth.user?.id || '',
+        tenantId: staffContext.tenantId,
+        position: staffContext.position,
+        department: staffContext.department,
+        areas: staffContext.areas as StaffArea[],
+        permissions: {},
+        hireDate: null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      staffStore.setProfile(profile);
+      logger.auth(`Staff profile synced from auth: areas=${staffContext.areas.join(', ')}`);
+    } else if (staffStore.hasProfile) {
+      // Clear if auth no longer has staff context
+      logger.auth('No staff context in auth, clearing staff profile');
+      staffStore.clear();
     }
   });
 

@@ -5,6 +5,7 @@ import { createEffect } from 'solid-js'
 interface AppState {
   sidebarCollapsed: boolean
   sidebarOpen: boolean
+  bottomSheetExpanded: boolean
   theme: 'light' | 'dark'
   showWidgetModal: boolean
   dashboardLayout: 'grid' | 'list' | 'masonry'
@@ -14,6 +15,7 @@ interface AppState {
 const [appState, setAppState] = createStore<AppState>({
   sidebarCollapsed: false,
   sidebarOpen: false,
+  bottomSheetExpanded: false,
   theme: 'dark',
   showWidgetModal: false,
   dashboardLayout: 'grid'
@@ -35,6 +37,11 @@ export const appActions = {
 
   setSidebarOpen: (open: boolean) => {
     setAppState('sidebarOpen', open)
+  },
+
+  // Bottom sheet actions
+  setBottomSheetExpanded: (expanded: boolean) => {
+    setAppState('bottomSheetExpanded', expanded)
   },
 
   // Theme actions

@@ -8,10 +8,14 @@ import {
   HttpStatus,
   Res,
   UnauthorizedException,
+  BadRequestException,
   Logger,
 } from '@nestjs/common';
 import { FastifyReply, FastifyRequest } from 'fastify';
+import { ConfigService } from '@nestjs/config';
 import type { AuditContext } from './auth.service';
+import { UsersService } from '../users/users.service';
+import { EmailService } from '../email/email.service';
 
 interface RequestWithUser extends FastifyRequest {
   user: {
@@ -49,7 +53,12 @@ import {
 export class AuthController {
   private readonly logger = new Logger(AuthController.name);
 
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private usersService: UsersService,
+    private emailService: EmailService,
+    private configService: ConfigService,
+  ) {}
 
   /**
    * Extract audit context from request
@@ -240,6 +249,19 @@ export class AuthController {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
+    // Send welcome email for trial signup (async, don't block response)
+    const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3001';
+    this.emailService.sendWelcomeEmail({
+      email,
+      firstName,
+      businessName,
+      dashboardUrl: `${frontendUrl}/dashboard/overview`,
+      isTrialSignup: true,
+      trialDays: 14,
+    }).catch((err) => {
+      this.logger.error('Failed to send welcome email for trial signup:', err);
+    });
+
     // Return user data with tokens and dashboard URL
     return {
       user: result.user,
@@ -283,7 +305,20 @@ export class AuthController {
     @Request() req: RequestWithUser,
   ) {
     const auditContext = this.getAuditContext(req);
-    return this.authService.register(registerDto, auditContext);
+    const result = await this.authService.register(registerDto, auditContext);
+
+    // Send welcome email for registration (async, don't block response)
+    const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3001';
+    this.emailService.sendWelcomeEmail({
+      email: registerDto.email,
+      firstName: registerDto.firstName,
+      dashboardUrl: `${frontendUrl}/dashboard/overview`,
+      isTrialSignup: false,
+    }).catch((err) => {
+      this.logger.error('Failed to send welcome email for registration:', err);
+    });
+
+    return result;
   }
 
   @Post('refresh')
@@ -417,5 +452,102 @@ export class AuthController {
     }
 
     return profile;
+  }
+
+  @Public()
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  @Throttle({ default: { limit: 3, ttl: 60000 } }) // 3 requests per minute
+  @ApiOperation({
+    summary: 'Request password reset',
+    description: 'Sends a password reset email to the user if the email exists.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'If the email exists, a reset link has been sent',
+  })
+  @ApiResponse({
+    status: 429,
+    description: 'Too many password reset attempts',
+  })
+  async forgotPassword(@Body() body: { email: string }) {
+    const { email } = body;
+
+    if (!email) {
+      throw new BadRequestException('Email is required');
+    }
+
+    // Generate reset token (returns null if user doesn't exist)
+    const result = await this.usersService.setPasswordResetToken(email);
+
+    if (result) {
+      // Build reset URL
+      const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3001';
+      const resetUrl = `${frontendUrl}/reset-password?token=${result.token}`;
+
+      // Send email
+      await this.emailService.sendPasswordReset(
+        result.user.email,
+        result.user.firstName,
+        resetUrl,
+      );
+
+      this.logger.log(`Password reset email sent to: ${email}`);
+    } else {
+      // Don't reveal whether user exists - just log it
+      this.logger.log(`Password reset requested for non-existent email: ${email}`);
+    }
+
+    // Always return success to prevent email enumeration
+    return {
+      message: 'If an account with that email exists, we have sent password reset instructions.',
+    };
+  }
+
+  @Public()
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 attempts per minute
+  @ApiOperation({
+    summary: 'Reset password with token',
+    description: 'Resets the user password using the token from the reset email.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Password has been reset successfully',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid or expired token',
+    type: ErrorResponseDto,
+  })
+  @ApiResponse({
+    status: 429,
+    description: 'Too many password reset attempts',
+  })
+  async resetPassword(@Body() body: { token: string; password: string }) {
+    const { token, password } = body;
+
+    if (!token || !password) {
+      throw new BadRequestException('Token and password are required');
+    }
+
+    // Validate password strength
+    if (password.length < 8) {
+      throw new BadRequestException('Password must be at least 8 characters');
+    }
+
+    // Attempt to reset password
+    const success = await this.usersService.resetPasswordWithToken(token, password);
+
+    if (!success) {
+      throw new BadRequestException('Invalid or expired reset token. Please request a new password reset.');
+    }
+
+    this.logger.log('Password reset completed successfully');
+
+    return {
+      message: 'Password has been reset successfully. You can now log in with your new password.',
+    };
   }
 }

@@ -1,10 +1,44 @@
 /**
  * Widgets Store
  * Manages dashboard widget configuration state
+ *
+ * TODO: This store is a placeholder. The widgets API needs to be implemented.
  */
 
 import { createSignal } from 'solid-js';
-import { widgetsApi, Widget, WidgetConfiguration, UpdateWidgetConfigDto } from '../api/client';
+
+// Placeholder types until widgets API is implemented
+export interface Widget {
+  id: string;
+  type: string;
+  title: string;
+  position: number;
+  config?: Record<string, unknown>;
+}
+
+export interface WidgetConfiguration {
+  id: string;
+  user_id: string;
+  layout_type: 'grid' | 'list' | 'masonry';
+  widgets: Widget[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface UpdateWidgetConfigDto {
+  layout_type?: 'grid' | 'list' | 'masonry';
+  widgets?: Widget[];
+}
+
+// Placeholder API until widgets endpoint is implemented
+const widgetsApi = {
+  async getConfig(): Promise<WidgetConfiguration> {
+    throw new Error('Widgets API not implemented');
+  },
+  async updateConfig(_dto: UpdateWidgetConfigDto): Promise<WidgetConfiguration> {
+    throw new Error('Widgets API not implemented');
+  },
+};
 
 // Store state
 const [widgetConfig, setWidgetConfig] = createSignal<WidgetConfiguration | null>(null);

@@ -1,20 +1,23 @@
-/* Enhanced Settings Route using Design Tokens */
+/* Settings Page - CSS Module */
 @reference "tailwindcss";
 
-/* Container and Header */
+/* Page layout - matching other pages */
 .container {
-  padding: var(--header-padding);
-  max-width: var(--section-max-width);
-  margin: 0 auto;
-  animation: fadeIn var(--duration-base) var(--easing-out);
+  padding: var(--spacing-4);
 }
 
+@media (min-width: 768px) {
+  .container {
+    padding: var(--spacing-8);
+  }
+}
+
+/* Header section */
 .header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: var(--grid-gap-lg);
-  animation: slideInLeft var(--duration-slower) var(--easing-spring);
+  margin-bottom: var(--spacing-8);
 }
 
 .headerContent {
@@ -22,23 +25,14 @@
 }
 
 .title {
-  font-size: var(--font-size-4xl);
-  font-weight: var(--font-weight-extrabold);
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--spacing-2);
   color: var(--text-primary);
-  margin: 0 0 var(--spacing-2) 0;
-  letter-spacing: -0.02em;
-  background: linear-gradient(
-    135deg,
-    var(--text-primary) 0%,
-    var(--primary-color) 100%
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
 }
 
 .subtitle {
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-base);
   color: var(--text-secondary);
   margin: 0;
 }

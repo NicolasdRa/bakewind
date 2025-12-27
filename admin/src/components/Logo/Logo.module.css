@@ -2,6 +2,7 @@
 @reference "tailwindcss";
 .logo {
   @apply flex items-center select-none transition-transform duration-300;
+  gap: 0.5rem;
 }
 
 .logo:hover {
@@ -12,6 +13,29 @@
   /* Compact styling if needed */
 }
 
+/* Logo Icon */
+.logoIcon {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: var(--text-primary);
+  flex-shrink: 0;
+}
+
+.small .logoIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.medium .logoIcon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.large .logoIcon {
+  width: 2rem;
+  height: 2rem;
+}
+
 /* Logo Text */
 .logoText {
   @apply flex flex-col leading-none;
@@ -20,7 +44,7 @@
 .logoTitle {
   font-size: 24px;
   font-weight: 700;
-  color: #000000;
+  color: var(--text-primary);
   letter-spacing: -0.5px;
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI',
@@ -32,7 +56,7 @@
 .logoSubtitle {
   font-size: 12px;
   font-weight: 500;
-  color: #6b7280;
+  color: var(--text-secondary);
   letter-spacing: 0.5px;
   margin: 2px 0 0 0;
   text-transform: uppercase;
@@ -91,24 +115,7 @@
                'Inter', Helvetica, Arial, sans-serif;
 }
 
-/* Manual dark theme class for footer */
-.darkTheme .logoTitle {
-  color: #ffffff;
-}
-
-.darkTheme .logoSubtitle {
-  color: #9ca3af;
-}
-
-/* Dark theme adjustments */
-[data-theme="dark"] .logoTitle {
-  color: #ffffff !important;
-}
-
-[data-theme="dark"] .logoSubtitle {
-  color: #9ca3af !important;
-}
-
+/* Dark theme adjustments for minimal logo */
 [data-theme="dark"] .logoMinimal {
   background: #ffffff;
 }

@@ -1,10 +1,22 @@
-import { Show, For, createSignal, onMount, onCleanup } from 'solid-js'
+import { Show, For, createSignal, createMemo, onMount, onCleanup, JSX } from 'solid-js'
 import { Portal } from 'solid-js/web'
 import { A, useNavigate } from '@solidjs/router'
 import { useAppStore } from '~/stores/appStore'
 import { useAuth } from '~/context/AuthContext'
 import Logo from '~/components/Logo/Logo'
 import Button from '~/components/common/Button'
+import TenantSelector from '~/components/TenantSelector/TenantSelector'
+import {
+  navIcons,
+  NavIconId,
+  CloseIcon,
+  ChevronRightIcon,
+  ChevronLeftIcon,
+  ChevronDownIcon,
+  SunIcon,
+  MoonIcon,
+  LogoutIcon,
+} from '~/components/icons'
 import styles from './Sidebar.module.css'
 
 interface SidebarProps {
@@ -65,19 +77,45 @@ export default function Sidebar(props: SidebarProps) {
     })
   })
 
-  const menuItems = [
-    { id: 'dashboard', label: 'Overview', icon: '🏪', path: '/dashboard/overview' },
-    { id: 'customer-orders', label: 'Customer Orders', icon: '📋', path: '/dashboard/orders/customer' },
-    { id: 'internal-orders', label: 'Internal Orders', icon: '🏢', path: '/dashboard/orders/internal' },
-    { id: 'inventory', label: 'Inventory', icon: '📦', path: '/dashboard/inventory' },
-    { id: 'recipes', label: 'Recipes', icon: '📖', path: '/dashboard/recipes' },
-    { id: 'products', label: 'Products', icon: '🥐', path: '/dashboard/products' },
-    { id: 'production', label: 'Production', icon: '🥖', path: '/dashboard/production' },
-    { id: 'customers', label: 'Customers', icon: '👥', path: '/dashboard/customers' },
-    { id: 'analytics', label: 'Analytics', icon: '📊', path: '/dashboard/analytics' },
-    { id: 'profile', label: 'Profile', icon: '👤', path: '/dashboard/profile' },
-    { id: 'settings', label: 'Settings', icon: '⚙️', path: '/dashboard/settings' },
-  ]
+  // Render icon by id
+  const renderIcon = (id: NavIconId, className: string): JSX.Element => {
+    const IconComponent = navIcons[id]
+    return <IconComponent class={className} />
+  }
+
+  // Build menu items based on user role - reactive using createMemo
+  const menuItems = createMemo(() => {
+    const items: { id: NavIconId; label: string; path: string }[] = [
+      { id: 'dashboard', label: 'Overview', path: '/dashboard/overview' },
+      { id: 'customer-orders', label: 'Customer Orders', path: '/dashboard/orders/customer' },
+      { id: 'internal-orders', label: 'Internal Orders', path: '/dashboard/orders/internal' },
+      { id: 'inventory', label: 'Inventory', path: '/dashboard/inventory' },
+      { id: 'recipes', label: 'Recipes', path: '/dashboard/recipes' },
+      { id: 'products', label: 'Products', path: '/dashboard/products' },
+      { id: 'production', label: 'Production', path: '/dashboard/production' },
+      { id: 'customers', label: 'Customers', path: '/dashboard/customers' },
+      { id: 'analytics', label: 'Analytics', path: '/dashboard/analytics' },
+    ]
+
+    // Add Team menu for OWNER role
+    if (auth.user?.role === 'OWNER') {
+      items.push({ id: 'team', label: 'Team', path: '/dashboard/team' })
+    }
+
+    // Common items for all roles
+    items.push(
+      { id: 'profile', label: 'Profile', path: '/dashboard/profile' },
+    )
+
+    // Add Business Settings for OWNER role
+    if (auth.user?.role === 'OWNER') {
+      items.push({ id: 'business-settings', label: 'Business', path: '/dashboard/settings/business' })
+    }
+
+    items.push({ id: 'settings', label: 'Settings', path: '/dashboard/settings' })
+
+    return items
+  })
 
   // Defensive class calculation to prevent style loss during navigation
   const getSidebarClasses = () => {
@@ -104,7 +142,12 @@ export default function Sidebar(props: SidebarProps) {
         {props.mobileOpen ? (
           // Mobile view - full header with close button
           <div class={styles.headerMobile}>
-            <Logo size="small" />
+            <div class={styles.headerBranding}>
+              <Logo size="small" />
+              <Show when={auth.tenant}>
+                <span class={styles.businessName}>{auth.tenant?.businessName}</span>
+              </Show>
+            </div>
 
             <Button
               variant="ghost"
@@ -112,9 +155,7 @@ export default function Sidebar(props: SidebarProps) {
               class={styles.toggleButton}
               title="Close sidebar"
             >
-              <svg class={styles.icon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <CloseIcon class={styles.icon} />
             </Button>
           </div>
         ) : props.collapsed ? (
@@ -126,15 +167,18 @@ export default function Sidebar(props: SidebarProps) {
               class={styles.toggleButtonCentered}
               title="Expand sidebar"
             >
-              <svg class={styles.iconSmall} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-              </svg>
+              <ChevronRightIcon class={styles.iconSmall} />
             </Button>
           </div>
         ) : (
           // Desktop expanded view - horizontal layout
           <div class={styles.headerExpanded}>
-            <Logo size="small" />
+            <div class={styles.headerBranding}>
+              <Logo size="small" />
+              <Show when={auth.tenant}>
+                <span class={styles.businessName}>{auth.tenant?.businessName}</span>
+              </Show>
+            </div>
 
             <Button
               variant="ghost"
@@ -142,18 +186,21 @@ export default function Sidebar(props: SidebarProps) {
               class={styles.toggleButton}
               title="Collapse sidebar"
             >
-              <svg class={styles.icon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-              </svg>
+              <ChevronLeftIcon class={styles.icon} />
             </Button>
           </div>
         )}
       </div>
 
+      {/* Tenant Selector for ADMIN users */}
+      <Show when={auth.user?.role === 'ADMIN'}>
+        <TenantSelector collapsed={props.collapsed && !props.mobileOpen} />
+      </Show>
+
       {/* Navigation Menu */}
       <nav class={styles.nav}>
         <ul class={styles.navList}>
-          <For each={menuItems}>
+          <For each={menuItems()}>
             {(item) => (
               <li>
                 <A
@@ -174,7 +221,7 @@ export default function Sidebar(props: SidebarProps) {
                   inactiveClass={styles.navButtonInactive}
                   end={item.path === '/dashboard/overview'}
                 >
-                  <span class={styles.navIcon}>{item.icon}</span>
+                  <span class={styles.navIconWrapper}>{renderIcon(item.id, styles.navIconSvg)}</span>
                   <Show when={props.mobileOpen || !props.collapsed}>
                     <span class={styles.navLabel}>{item.label}</span>
                   </Show>
@@ -206,8 +253,14 @@ export default function Sidebar(props: SidebarProps) {
             [styles.themeButtonCollapsed]: !props.mobileOpen && props.collapsed,
             [styles.themeButtonExpanded]: !props.mobileOpen && !props.collapsed
           }}
+          title={state.theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
         >
-          <span class={styles.themeIcon}>{state.theme === 'light' ? '🌙' : '☀️'}</span>
+          <Show
+            when={state.theme === 'dark'}
+            fallback={<MoonIcon class={styles.themeIconSvg} />}
+          >
+            <SunIcon class={styles.themeIconSvg} />
+          </Show>
           <Show when={props.mobileOpen || !props.collapsed}>
             <span class={styles.themeLabel}>{state.theme === 'light' ? 'Dark Mode' : 'Light Mode'}</span>
           </Show>
@@ -265,15 +318,9 @@ export default function Sidebar(props: SidebarProps) {
                   <p class={styles.userEmail}>{auth.user?.email || 'No email provided'}</p>
                 </div>
                 <div class={styles.userChevron}>
-                  <svg
-                    class={styles.chevronIcon}
-                    classList={{ [styles.chevronIconRotated]: showUserDropdown() }}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                  </svg>
+                  <ChevronDownIcon
+                    class={`${styles.chevronIcon} ${showUserDropdown() ? styles.chevronIconRotated : ''}`}
+                  />
                 </div>
               </Show>
             </Button>
@@ -297,8 +344,39 @@ export default function Sidebar(props: SidebarProps) {
                         return `${u.firstName || ''} ${u.lastName || ''}`.trim() || 'No name';
                       })()}</p>
                       <p class={styles.dropdownUserId}>{auth.user?.email || 'No email provided'}</p>
+                      <p class={styles.dropdownUserRole}>{auth.user?.role || 'Unknown'}</p>
                     </div>
                   </div>
+
+                  {/* Tenant/Subscription Info */}
+                  <Show when={auth.tenant}>
+                    <div class={styles.dropdownDivider}></div>
+                    <div class={styles.dropdownTenantInfo}>
+                      <p class={styles.dropdownTenantName}>{auth.tenant?.businessName}</p>
+                      {/* Only show subscription status to OWNER and ADMIN, not STAFF */}
+                      <Show when={auth.user?.role !== 'STAFF'}>
+                        <Show when={auth.isTrialActive}>
+                          <div class={styles.trialBadge}>
+                            <span class={styles.trialBadgeIcon}>⏱</span>
+                            <span>{auth.trialDaysRemaining} days left in trial</span>
+                          </div>
+                        </Show>
+                        <Show when={!auth.isTrialActive && auth.tenant?.subscriptionStatus === 'active'}>
+                          <div class={styles.activeBadge}>
+                            <span class={styles.activeBadgeIcon}>✓</span>
+                            <span>Active subscription</span>
+                          </div>
+                        </Show>
+                        <Show when={auth.tenant?.subscriptionStatus === 'past_due'}>
+                          <div class={styles.warningBadge}>
+                            <span class={styles.warningBadgeIcon}>⚠</span>
+                            <span>Payment past due</span>
+                          </div>
+                        </Show>
+                      </Show>
+                    </div>
+                  </Show>
+
                   <div class={styles.dropdownDivider}></div>
                   <Button
                     variant="ghost"
@@ -315,9 +393,7 @@ export default function Sidebar(props: SidebarProps) {
                         </>
                       }
                     >
-                      <svg class={styles.dropdownLogoutIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                      </svg>
+                      <LogoutIcon class={styles.dropdownLogoutIcon} />
                       <span class={styles.dropdownLogoutText}>Sign Out</span>
                     </Show>
                   </Button>

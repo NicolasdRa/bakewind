@@ -28,13 +28,17 @@ export class LocationsService {
     private readonly db: NodePgDatabase<typeof schema>,
   ) {}
 
-  async create(locationData: CreateLocationDto): Promise<LocationResponseData> {
-    // Check for duplicate location name in the same city
+  async create(
+    locationData: CreateLocationDto,
+    tenantId: string,
+  ): Promise<LocationResponseData> {
+    // Check for duplicate location name in the same city within the same tenant
     const existingLocation = await this.db
       .select()
       .from(locationsTable)
       .where(
         and(
+          eq(locationsTable.tenantId, tenantId),
           eq(locationsTable.name, locationData.name),
           eq(locationsTable.city, locationData.city),
           isNull(locationsTable.deletedAt),
@@ -50,7 +54,7 @@ export class LocationsService {
 
     const [location] = await this.db
       .insert(locationsTable)
-      .values(locationData)
+      .values({ ...locationData, tenantId })
       .returning();
 
     if (!location) {

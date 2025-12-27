@@ -116,7 +116,12 @@ export const recipesApi = {
     search?: string;
     isActive?: boolean;
   }): Promise<Recipe[]> {
-    return apiClient.get('/recipes', { params });
+    const searchParams = new URLSearchParams();
+    if (params?.category) searchParams.set('category', params.category);
+    if (params?.search) searchParams.set('search', params.search);
+    if (params?.isActive !== undefined) searchParams.set('isActive', String(params.isActive));
+    const query = searchParams.toString();
+    return apiClient.get(`/recipes${query ? `?${query}` : ''}`);
   },
 
   /**

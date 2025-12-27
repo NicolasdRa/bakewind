@@ -5,6 +5,7 @@ import { DatabaseService } from '../database/database.service';
 
 describe('InventoryService', () => {
   let service: InventoryService;
+  const mockTenantId = 'test-tenant-id';
 
   // Mock database service
   const mockDatabaseService = {
@@ -1067,7 +1068,7 @@ describe('InventoryService', () => {
         }),
       });
 
-      const result = await service.createInventoryItem(createDto);
+      const result = await service.createInventoryItem(createDto, mockTenantId);
 
       expect(result.id).toBe('item-new');
       expect(result.name).toBe('Sugar');
@@ -1093,7 +1094,7 @@ describe('InventoryService', () => {
         }),
       });
 
-      await expect(service.createInventoryItem(createDto)).rejects.toThrow(
+      await expect(service.createInventoryItem(createDto, mockTenantId)).rejects.toThrow(
         'Failed to create inventory item',
       );
     });

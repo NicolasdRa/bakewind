@@ -57,35 +57,21 @@
   @apply flex flex-wrap items-center gap-3;
 }
 
-/* Enhanced Layout Controls */
+/* Layout Controls */
 .layoutControls {
   @apply flex items-center gap-1 rounded-lg border p-1;
-  background: var(--bg-secondary);
+  background: var(--bg-primary);
   border-color: var(--border-color);
-  position: relative;
-  overflow: hidden;
-}
-
-.layoutControls::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, var(--primary-light), transparent);
-  opacity: 0.05;
 }
 
 .layoutButton {
   @apply px-3 py-2 rounded-md text-sm font-medium;
-  transition: var(--transition-base);
-  position: relative;
-  z-index: 1;
+  transition: all 0.15s ease;
 }
 
 .layoutButtonActive {
-  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+  background-color: var(--primary-color);
   color: white;
-  box-shadow: 0 2px 8px var(--shadow-colored);
-  transform: scale(1.05);
 }
 
 .layoutButtonInactive {
@@ -95,8 +81,7 @@
 
 .layoutButtonInactive:hover {
   color: var(--text-primary);
-  background-color: var(--bg-hover);
-  transform: translateY(-1px);
+  background-color: var(--bg-tertiary);
 }
 
 .layoutButtonText {
@@ -113,62 +98,30 @@
 }
 
 .addButton {
-  @apply px-4 py-2 rounded-lg font-medium focus:outline-none flex items-center gap-2;
-  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
-  color: white;
-  transition: var(--transition-base);
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 2px 8px var(--shadow-colored);
-}
-
-.addButton::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.3);
-  transform: translate(-50%, -50%);
-  transition: width 0.6s, height 0.6s;
-}
-
-.addButton:hover::before {
-  width: 200px;
-  height: 200px;
+  @apply px-4 py-2 rounded-lg font-medium focus:outline-none text-white;
 }
 
 .addButton:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px var(--shadow-colored);
-}
-
-.addButton:active {
-  transform: translateY(0);
-}
-
-.addButton:focus {
-  box-shadow: 0 0 0 3px var(--shadow-colored);
+  @apply text-white;
 }
 
 .addButtonIcon {
-  @apply text-lg;
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  @apply text-lg text-white;
 }
 
-.addButton:hover .addButtonIcon {
-  transform: rotate(90deg);
+.addButtonIcon:hover {
+  @apply text-white;
 }
 
 .addButtonText {
-  @apply hidden sm:inline;
-  position: relative;
-  z-index: 1;
+  @apply hidden sm:inline text-white;
 }
 
-/* Enhanced Dropdown Menu */
+.addButtonText:hover {
+  @apply text-white;
+}
+
+/* Dropdown Menu */
 .dropdownContainer {
   @apply relative;
 }
@@ -176,38 +129,16 @@
 .dropdownTrigger {
   @apply p-2 rounded-lg;
   color: var(--text-secondary);
-  transition: var(--transition-base);
-  position: relative;
-}
-
-.dropdownTrigger::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: var(--bg-hover);
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-
-.dropdownTrigger:hover::before {
-  opacity: 1;
+  transition: all 0.15s ease;
 }
 
 .dropdownTrigger:hover {
   color: var(--text-primary);
-  transform: scale(1.05);
+  background-color: var(--bg-tertiary);
 }
 
 .dropdownIcon {
   @apply text-xl;
-  position: relative;
-  z-index: 1;
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.dropdownTrigger:hover .dropdownIcon {
-  transform: rotate(180deg);
 }
 
 .dropdownMenu {
@@ -230,24 +161,7 @@
 
 .dropdownItem {
   @apply w-full text-left px-4 py-2 text-sm;
-  transition: var(--transition-fast);
-  position: relative;
-  overflow: hidden;
-}
-
-.dropdownItem::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 0;
-  background: var(--primary-color);
-  transition: width 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.dropdownItem:hover::before {
-  width: 3px;
+  transition: all 0.15s ease;
 }
 
 .dropdownItemDefault {
@@ -255,9 +169,8 @@
 }
 
 .dropdownItemDefault:hover {
-  background-color: var(--bg-hover);
+  background-color: var(--bg-tertiary);
   color: var(--text-primary);
-  padding-left: 1.25rem;
 }
 
 .dropdownItemDanger {
@@ -266,9 +179,4 @@
 
 .dropdownItemDanger:hover {
   background-color: var(--error-light);
-  padding-left: 1.25rem;
-}
-
-.dropdownItemDanger:hover::before {
-  background: var(--error-color);
 }

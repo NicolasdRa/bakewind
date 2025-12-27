@@ -3,22 +3,31 @@ import {
   Get,
   Put,
   Post,
+  Delete,
+  Patch,
   Body,
   Param,
+  Query,
   UseGuards,
   Request,
   ForbiddenException,
   NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { TenantGuard } from '../auth/guards/tenant.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { SkipTenantCheck } from '../auth/decorators/skip-tenant-check.decorator';
+import { CurrentTenant } from '../auth/decorators/current-tenant.decorator';
+import { ConfigService } from '@nestjs/config';
 import { TenantsService } from './tenants.service';
 import { StaffService } from '../staff/staff.service';
 import { UsersService } from '../users/users.service';
+import { EmailService } from '../email/email.service';
 import { UpdateTenantDto, InviteStaffDto } from './dto/tenant.dto';
-import * as bcrypt from 'bcryptjs';
+import { UpdateStaffDto } from '../staff/dto';
 
 interface AuthenticatedRequest {
   user: {
@@ -31,13 +40,29 @@ interface AuthenticatedRequest {
 @ApiTags('tenants')
 @ApiBearerAuth()
 @Controller('tenants')
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, TenantGuard, RolesGuard)
 export class TenantsController {
   constructor(
     private readonly tenantsService: TenantsService,
     private readonly staffService: StaffService,
     private readonly usersService: UsersService,
+    private readonly emailService: EmailService,
+    private readonly configService: ConfigService,
   ) {}
+
+  /**
+   * Get all tenants (ADMIN only)
+   * Used by system admins to select which tenant to view/monitor
+   */
+  @Get()
+  @Roles('ADMIN')
+  @SkipTenantCheck()
+  @ApiOperation({ summary: 'List all tenants (admin only)' })
+  @ApiQuery({ name: 'search', required: false, type: String })
+  async getAllTenants(@Query('search') search?: string) {
+    const tenants = await this.tenantsService.findAll(search);
+    return { tenants };
+  }
 
   /**
    * Get current user's tenant
@@ -45,6 +70,7 @@ export class TenantsController {
    * For STAFF: returns tenant they work for
    */
   @Get('me')
+  @SkipTenantCheck()
   @ApiOperation({ summary: 'Get current tenant context' })
   async getMyTenant(@Request() req: AuthenticatedRequest) {
     const userId = req.user.sub;
@@ -83,6 +109,7 @@ export class TenantsController {
    */
   @Get(':id')
   @Roles('ADMIN')
+  @SkipTenantCheck()
   @ApiOperation({ summary: 'Get tenant by ID (admin only)' })
   async getTenantById(@Param('id') id: string) {
     const tenant = await this.tenantsService.findById(id);
@@ -93,18 +120,17 @@ export class TenantsController {
   }
 
   /**
-   * Update tenant (OWNER of tenant or ADMIN)
+   * Update tenant (OWNER of tenant)
    */
   @Put('me')
   @Roles('OWNER')
   @ApiOperation({ summary: 'Update own tenant details' })
   async updateMyTenant(
-    @Request() req: AuthenticatedRequest,
+    @CurrentTenant() tenantId: string,
     @Body() dto: UpdateTenantDto,
   ) {
-    const tenant = await this.tenantsService.findByOwnerUserId(req.user.sub);
-    if (!tenant) {
-      throw new NotFoundException('Tenant not found');
+    if (!tenantId) {
+      throw new BadRequestException('Tenant context required.');
     }
 
     // OWNER can only update limited fields
@@ -114,7 +140,7 @@ export class TenantsController {
     if (dto.businessAddress !== undefined) limitedDto.businessAddress = dto.businessAddress;
     if (dto.onboardingCompleted !== undefined) limitedDto.onboardingCompleted = dto.onboardingCompleted;
 
-    return this.tenantsService.update(tenant.id, limitedDto);
+    return this.tenantsService.update(tenantId, limitedDto);
   }
 
   /**
@@ -123,12 +149,11 @@ export class TenantsController {
   @Post('me/complete-onboarding')
   @Roles('OWNER')
   @ApiOperation({ summary: 'Mark onboarding as completed' })
-  async completeOnboarding(@Request() req: AuthenticatedRequest) {
-    const tenant = await this.tenantsService.findByOwnerUserId(req.user.sub);
-    if (!tenant) {
-      throw new NotFoundException('Tenant not found');
+  async completeOnboarding(@CurrentTenant() tenantId: string) {
+    if (!tenantId) {
+      throw new BadRequestException('Tenant context required.');
     }
-    return this.tenantsService.completeOnboarding(tenant.id);
+    return this.tenantsService.completeOnboarding(tenantId);
   }
 
   /**
@@ -139,11 +164,15 @@ export class TenantsController {
   @Roles('OWNER')
   @ApiOperation({ summary: 'Invite a new staff member to the bakery' })
   async inviteStaff(
-    @Request() req: AuthenticatedRequest,
+    @CurrentTenant() tenantId: string,
     @Body() dto: InviteStaffDto,
   ) {
-    // Get owner's tenant
-    const tenant = await this.tenantsService.findByOwnerUserId(req.user.sub);
+    if (!tenantId) {
+      throw new BadRequestException('Tenant context required.');
+    }
+
+    // Get tenant info for the email
+    const tenant = await this.tenantsService.findById(tenantId);
     if (!tenant) {
       throw new NotFoundException('Tenant not found');
     }
@@ -167,7 +196,7 @@ export class TenantsController {
           hireDate?: string;
         } = {
           userId: existingUser.id,
-          tenantId: tenant.id,
+          tenantId,
         };
         if (dto.position) createStaffDto.position = dto.position;
         if (dto.department) createStaffDto.department = dto.department;
@@ -183,12 +212,12 @@ export class TenantsController {
     // Create new user with STAFF role
     // Generate a temporary password (user will reset via email)
     const tempPassword = Math.random().toString(36).slice(-12);
-    const hashedPassword = await bcrypt.hash(tempPassword, 12);
 
+    // Pass plain password - usersService.create() handles hashing
     const newUser = await this.usersService.create({
       email: dto.email,
-      password: hashedPassword,
-      confirmPassword: hashedPassword,
+      password: tempPassword,
+      confirmPassword: tempPassword,
       firstName: dto.firstName,
       lastName: dto.lastName,
       role: 'STAFF',
@@ -204,7 +233,7 @@ export class TenantsController {
       hireDate?: string;
     } = {
       userId: newUser.id,
-      tenantId: tenant.id,
+      tenantId,
     };
     if (dto.position) createStaffDto.position = dto.position;
     if (dto.department) createStaffDto.department = dto.department;
@@ -213,7 +242,16 @@ export class TenantsController {
 
     const staff = await this.staffService.create(createStaffDto);
 
-    // TODO: Send invitation email with password reset link
+    // Send invitation email with temporary password
+    const loginUrl = this.configService.get<string>('LOGIN_URL') || 'http://localhost:3001/login';
+    const emailSent = await this.emailService.sendStaffInvitation({
+      recipientEmail: newUser.email,
+      recipientName: `${newUser.firstName} ${newUser.lastName}`,
+      businessName: tenant.businessName,
+      position: dto.position,
+      temporaryPassword: tempPassword,
+      loginUrl,
+    });
 
     return {
       user: {
@@ -224,21 +262,74 @@ export class TenantsController {
         role: newUser.role,
       },
       staff,
-      message: 'Staff member invited successfully. They will receive an email to set their password.',
+      emailSent,
+      message: emailSent
+        ? 'Staff member invited successfully. An invitation email has been sent.'
+        : 'Staff member created successfully. Email could not be sent - please share login credentials manually.',
     };
   }
 
   /**
    * Get all staff members for tenant
+   * OWNER: Uses tenantId from JWT
+   * ADMIN: Uses tenantId from X-Tenant-Id header
    */
   @Get('me/staff')
   @Roles('OWNER', 'ADMIN')
   @ApiOperation({ summary: 'Get all staff members for tenant' })
-  async getTenantStaff(@Request() req: AuthenticatedRequest) {
-    const tenant = await this.tenantsService.findByOwnerUserId(req.user.sub);
-    if (!tenant) {
-      throw new NotFoundException('Tenant not found');
+  async getTenantStaff(@CurrentTenant() tenantId: string) {
+    if (!tenantId) {
+      throw new BadRequestException('Tenant context required. For ADMIN users, select a tenant first.');
     }
-    return this.staffService.findAllByTenant(tenant.id);
+    return this.staffService.findAllByTenant(tenantId);
+  }
+
+  /**
+   * Update a staff member
+   */
+  @Patch('me/staff/:staffId')
+  @Roles('OWNER')
+  @ApiOperation({ summary: 'Update a staff member' })
+  async updateStaffMember(
+    @CurrentTenant() tenantId: string,
+    @Param('staffId') staffId: string,
+    @Body() dto: UpdateStaffDto,
+  ) {
+    if (!tenantId) {
+      throw new BadRequestException('Tenant context required.');
+    }
+
+    // Verify staff belongs to this tenant
+    const staff = await this.staffService.findByIdAndTenant(staffId, tenantId);
+    if (!staff) {
+      throw new NotFoundException('Staff member not found in your organization');
+    }
+
+    return this.staffService.update(staffId, dto);
+  }
+
+  /**
+   * Remove a staff member from tenant
+   * Note: This deletes the staff record but keeps the user account
+   */
+  @Delete('me/staff/:staffId')
+  @Roles('OWNER')
+  @ApiOperation({ summary: 'Remove a staff member from the bakery' })
+  async removeStaffMember(
+    @CurrentTenant() tenantId: string,
+    @Param('staffId') staffId: string,
+  ) {
+    if (!tenantId) {
+      throw new BadRequestException('Tenant context required.');
+    }
+
+    // Verify staff belongs to this tenant
+    const staff = await this.staffService.findByIdAndTenant(staffId, tenantId);
+    if (!staff) {
+      throw new NotFoundException('Staff member not found in your organization');
+    }
+
+    await this.staffService.delete(staffId);
+    return { message: 'Staff member removed successfully' };
   }
 }
