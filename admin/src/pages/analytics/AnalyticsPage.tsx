@@ -1,6 +1,7 @@
 import { Component, createSignal, createResource, For, Show } from "solid-js";
 import { analyticsApi } from "../../api/analytics";
 import Button from "~/components/common/Button";
+import { Heading, Text } from "~/components/common/Typography";
 import styles from "./AnalyticsPage.module.css";
 
 interface DashboardStats {
@@ -66,34 +67,34 @@ const AnalyticsPage: Component = () => {
   return (
     <div class={styles.pageContainer}>
       <div class={styles.pageHeader}>
-        <h1 class={styles.pageTitle}>Analytics & Reports</h1>
-        <p class={styles.pageSubtitle}>Track performance and business insights</p>
+        <Heading level="h1" variant="page">Analytics & Reports</Heading>
+        <Text color="secondary">Track performance and business insights</Text>
       </div>
 
       {/* Period Selection */}
       <div class={styles.periodCard}>
         <div class={styles.periodButtons}>
-          <button
-            class={styles.periodButton}
-            classList={{ [styles.periodButtonActive]: selectedPeriod() === '7days' }}
+          <Button
+            variant={selectedPeriod() === '7days' ? 'primary' : 'secondary'}
+            size="sm"
             onClick={() => setSelectedPeriod('7days')}
           >
             Last 7 Days
-          </button>
-          <button
-            class={styles.periodButton}
-            classList={{ [styles.periodButtonActive]: selectedPeriod() === '30days' }}
+          </Button>
+          <Button
+            variant={selectedPeriod() === '30days' ? 'primary' : 'secondary'}
+            size="sm"
             onClick={() => setSelectedPeriod('30days')}
           >
             Last 30 Days
-          </button>
-          <button
-            class={styles.periodButton}
-            classList={{ [styles.periodButtonActive]: selectedPeriod() === '90days' }}
+          </Button>
+          <Button
+            variant={selectedPeriod() === '90days' ? 'primary' : 'secondary'}
+            size="sm"
             onClick={() => setSelectedPeriod('90days')}
           >
             Last 90 Days
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -110,18 +111,19 @@ const AnalyticsPage: Component = () => {
           <div class={styles.metricCard}>
             <div class={styles.metricContent}>
               <div class={styles.metricInfo}>
-                <p class={styles.metricLabel}>Total Revenue</p>
-                <p class={styles.metricValue}>
+                <Text variant="label" color="secondary" class={styles.metricLabel}>Total Revenue</Text>
+                <Text variant="body" class={styles.metricValue}>
                   {formatCurrency(dashboardStats()?.revenue.thisMonth || 0)}
-                </p>
-                <p
+                </Text>
+                <Text
+                  variant="body-sm"
                   classList={{
                     [styles.metricSubtextPositive]: (dashboardStats()?.revenue.growth || 0) >= 0,
                     [styles.metricSubtextNegative]: (dashboardStats()?.revenue.growth || 0) < 0
                   }}
                 >
                   {formatPercent(dashboardStats()?.revenue.growth || 0)} from last month
-                </p>
+                </Text>
               </div>
               <div class={`${styles.metricIcon} ${styles.metricIconGreen}`}>
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: var(--success-color)">
@@ -134,13 +136,13 @@ const AnalyticsPage: Component = () => {
           <div class={styles.metricCard}>
             <div class={styles.metricContent}>
               <div class={styles.metricInfo}>
-                <p class={styles.metricLabel}>Total Orders</p>
-                <p class={styles.metricValue}>
+                <Text variant="label" color="secondary" class={styles.metricLabel}>Total Orders</Text>
+                <Text variant="body" class={styles.metricValue}>
                   {dashboardStats()?.orders.thisWeek || 0}
-                </p>
-                <p class={styles.metricSubtext}>
+                </Text>
+                <Text variant="body-sm" color="muted" class={styles.metricSubtext}>
                   Avg: {formatCurrency(dashboardStats()?.orders.avgOrderValue || 0)}
-                </p>
+                </Text>
               </div>
               <div class={`${styles.metricIcon} ${styles.metricIconBlue}`}>
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: var(--info-color)">
@@ -153,13 +155,13 @@ const AnalyticsPage: Component = () => {
           <div class={styles.metricCard}>
             <div class={styles.metricContent}>
               <div class={styles.metricInfo}>
-                <p class={styles.metricLabel}>Total Customers</p>
-                <p class={styles.metricValue}>
+                <Text variant="label" color="secondary" class={styles.metricLabel}>Total Customers</Text>
+                <Text variant="body" class={styles.metricValue}>
                   {dashboardStats()?.customers.total || 0}
-                </p>
-                <p class={styles.metricSubtextPositive}>
+                </Text>
+                <Text variant="body-sm" class={styles.metricSubtextPositive}>
                   +{dashboardStats()?.customers.new || 0} new this month
-                </p>
+                </Text>
               </div>
               <div class={`${styles.metricIcon} ${styles.metricIconPurple}`}>
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: #7e22ce">
@@ -172,13 +174,13 @@ const AnalyticsPage: Component = () => {
           <div class={styles.metricCard}>
             <div class={styles.metricContent}>
               <div class={styles.metricInfo}>
-                <p class={styles.metricLabel}>Customer Retention</p>
-                <p class={styles.metricValue}>
+                <Text variant="label" color="secondary" class={styles.metricLabel}>Customer Retention</Text>
+                <Text variant="body" class={styles.metricValue}>
                   {(dashboardStats()?.customers.retention || 0).toFixed(1)}%
-                </p>
-                <p class={styles.metricSubtext}>
+                </Text>
+                <Text variant="body-sm" color="muted" class={styles.metricSubtext}>
                   {dashboardStats()?.customers.returning || 0} returning customers
-                </p>
+                </Text>
               </div>
               <div class={`${styles.metricIcon} ${styles.metricIconYellow}`}>
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: var(--warning-color)">
@@ -192,7 +194,7 @@ const AnalyticsPage: Component = () => {
         <div class={styles.chartsGrid}>
           {/* Sales Chart */}
           <div class={styles.chartCard}>
-            <h3 class={styles.chartTitle}>Sales Trend</h3>
+            <Heading variant="card" class={styles.chartTitle}>Sales Trend</Heading>
             <div class={styles.chartContainer}>
               <For each={salesData()}>
                 {(data) => {
@@ -217,35 +219,35 @@ const AnalyticsPage: Component = () => {
 
           {/* Order Status */}
           <div class={styles.chartCard}>
-            <h3 class={styles.chartTitle}>Order Status</h3>
+            <Heading variant="card" class={styles.chartTitle}>Order Status</Heading>
             <div class={styles.statusList}>
               <div class={styles.statusItem}>
                 <div class={styles.statusIndicator}>
                   <div class={`${styles.statusDot} ${styles.statusDotYellow}`}></div>
-                  <span class={styles.statusLabel}>Pending</span>
+                  <Text as="span" class={styles.statusLabel}>Pending</Text>
                 </div>
-                <span class={styles.statusValue}>{dashboardStats()?.orders.pending || 0}</span>
+                <Text as="span" class={styles.statusValue}>{dashboardStats()?.orders.pending || 0}</Text>
               </div>
               <div class={styles.statusItem}>
                 <div class={styles.statusIndicator}>
                   <div class={`${styles.statusDot} ${styles.statusDotBlue}`}></div>
-                  <span class={styles.statusLabel}>In Progress</span>
+                  <Text as="span" class={styles.statusLabel}>In Progress</Text>
                 </div>
-                <span class={styles.statusValue}>12</span>
+                <Text as="span" class={styles.statusValue}>12</Text>
               </div>
               <div class={styles.statusItem}>
                 <div class={styles.statusIndicator}>
                   <div class={`${styles.statusDot} ${styles.statusDotGreen}`}></div>
-                  <span class={styles.statusLabel}>Completed</span>
+                  <Text as="span" class={styles.statusLabel}>Completed</Text>
                 </div>
-                <span class={styles.statusValue}>{dashboardStats()?.orders.completed || 0}</span>
+                <Text as="span" class={styles.statusValue}>{dashboardStats()?.orders.completed || 0}</Text>
               </div>
               <div class={styles.statusItem}>
                 <div class={styles.statusIndicator}>
                   <div class={`${styles.statusDot} ${styles.statusDotRed}`}></div>
-                  <span class={styles.statusLabel}>Cancelled</span>
+                  <Text as="span" class={styles.statusLabel}>Cancelled</Text>
                 </div>
-                <span class={styles.statusValue}>2</span>
+                <Text as="span" class={styles.statusValue}>2</Text>
               </div>
             </div>
           </div>
@@ -254,63 +256,63 @@ const AnalyticsPage: Component = () => {
         <div class={styles.bottomGrid}>
           {/* Top Products */}
           <div class={styles.chartCard}>
-            <h3 class={styles.chartTitle}>Top Selling Products</h3>
+            <Heading variant="card" class={styles.chartTitle}>Top Selling Products</Heading>
             <div class={styles.productList}>
               <div class={styles.productItem}>
                 <div class={styles.productInfo}>
-                  <p class={styles.productName}>Chocolate Croissants</p>
-                  <p class={styles.productSales}>89 sold this week</p>
+                  <Text class={styles.productName}>Chocolate Croissants</Text>
+                  <Text variant="body-sm" color="muted" class={styles.productSales}>89 sold this week</Text>
                 </div>
-                <p class={styles.productRevenue}>$1,780</p>
+                <Text class={styles.productRevenue}>$1,780</Text>
               </div>
               <div class={styles.productItem}>
                 <div class={styles.productInfo}>
-                  <p class={styles.productName}>Sourdough Bread</p>
-                  <p class={styles.productSales}>67 sold this week</p>
+                  <Text class={styles.productName}>Sourdough Bread</Text>
+                  <Text variant="body-sm" color="muted" class={styles.productSales}>67 sold this week</Text>
                 </div>
-                <p class={styles.productRevenue}>$536</p>
+                <Text class={styles.productRevenue}>$536</Text>
               </div>
               <div class={styles.productItem}>
                 <div class={styles.productInfo}>
-                  <p class={styles.productName}>Vanilla Cupcakes</p>
-                  <p class={styles.productSales}>54 sold this week</p>
+                  <Text class={styles.productName}>Vanilla Cupcakes</Text>
+                  <Text variant="body-sm" color="muted" class={styles.productSales}>54 sold this week</Text>
                 </div>
-                <p class={styles.productRevenue}>$162</p>
+                <Text class={styles.productRevenue}>$162</Text>
               </div>
               <div class={styles.productItem}>
                 <div class={styles.productInfo}>
-                  <p class={styles.productName}>Blueberry Muffins</p>
-                  <p class={styles.productSales}>43 sold this week</p>
+                  <Text class={styles.productName}>Blueberry Muffins</Text>
+                  <Text variant="body-sm" color="muted" class={styles.productSales}>43 sold this week</Text>
                 </div>
-                <p class={styles.productRevenue}>$129</p>
+                <Text class={styles.productRevenue}>$129</Text>
               </div>
             </div>
           </div>
 
           {/* Inventory Alerts */}
           <div class={styles.chartCard}>
-            <h3 class={styles.chartTitle}>Inventory Alerts</h3>
+            <Heading variant="card" class={styles.chartTitle}>Inventory Alerts</Heading>
             <div class={styles.alertList}>
               <div class={`${styles.alertItem} ${styles.alertItemUrgent}`}>
                 <div class={styles.alertInfo}>
-                  <p class={`${styles.alertName} ${styles.alertNameUrgent}`}>All-Purpose Flour</p>
-                  <p class={`${styles.alertStatus} ${styles.alertStatusUrgent}`}>Out of stock</p>
+                  <Text class={`${styles.alertName} ${styles.alertNameUrgent}`}>All-Purpose Flour</Text>
+                  <Text variant="body-sm" class={`${styles.alertStatus} ${styles.alertStatusUrgent}`}>Out of stock</Text>
                 </div>
-                <span class={`${styles.alertBadge} ${styles.alertBadgeUrgent}`}>Urgent</span>
+                <Text as="span" class={`${styles.alertBadge} ${styles.alertBadgeUrgent}`}>Urgent</Text>
               </div>
               <div class={`${styles.alertItem} ${styles.alertItemWarning}`}>
                 <div class={styles.alertInfo}>
-                  <p class={`${styles.alertName} ${styles.alertNameWarning}`}>Chocolate Chips</p>
-                  <p class={`${styles.alertStatus} ${styles.alertStatusWarning}`}>2.5 lbs remaining</p>
+                  <Text class={`${styles.alertName} ${styles.alertNameWarning}`}>Chocolate Chips</Text>
+                  <Text variant="body-sm" class={`${styles.alertStatus} ${styles.alertStatusWarning}`}>2.5 lbs remaining</Text>
                 </div>
-                <span class={`${styles.alertBadge} ${styles.alertBadgeWarning}`}>Low</span>
+                <Text as="span" class={`${styles.alertBadge} ${styles.alertBadgeWarning}`}>Low</Text>
               </div>
               <div class={`${styles.alertItem} ${styles.alertItemWarning}`}>
                 <div class={styles.alertInfo}>
-                  <p class={`${styles.alertName} ${styles.alertNameWarning}`}>Vanilla Extract</p>
-                  <p class={`${styles.alertStatus} ${styles.alertStatusWarning}`}>150ml remaining</p>
+                  <Text class={`${styles.alertName} ${styles.alertNameWarning}`}>Vanilla Extract</Text>
+                  <Text variant="body-sm" class={`${styles.alertStatus} ${styles.alertStatusWarning}`}>150ml remaining</Text>
                 </div>
-                <span class={`${styles.alertBadge} ${styles.alertBadgeWarning}`}>Low</span>
+                <Text as="span" class={`${styles.alertBadge} ${styles.alertBadgeWarning}`}>Low</Text>
               </div>
             </div>
             <Button

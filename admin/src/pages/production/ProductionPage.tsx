@@ -7,6 +7,7 @@ import DatePicker from "~/components/common/DatePicker";
 import FilterSelect from "~/components/common/FilterSelect";
 import Badge from "~/components/common/Badge";
 import Button from "~/components/common/Button";
+import { Heading, Text } from "~/components/common/Typography";
 import styles from "./ProductionPage.module.css";
 
 const ProductionPage: Component = () => {
@@ -100,8 +101,8 @@ const ProductionPage: Component = () => {
     <div class={styles.pageContainer}>
       <div class={styles.pageHeader}>
         <div>
-          <h1 class={styles.pageTitle}>Production Batches</h1>
-          <p class={styles.pageSubtitle}>View and manage active production schedules</p>
+          <Heading level="h1" variant="page">Production Batches</Heading>
+          <Text color="secondary">View and manage active production schedules</Text>
         </div>
       </div>
 
@@ -159,9 +160,9 @@ const ProductionPage: Component = () => {
       {/* Production Schedule */}
       <div class={styles.scheduleContainer}>
         <div class={styles.scheduleHeader}>
-          <h2 class={styles.scheduleTitle}>
+          <Heading variant="section" class={styles.scheduleTitle}>
             Production Schedule - {formatLocalDate(selectedDate())}
-          </h2>
+          </Heading>
         </div>
 
         <Show
@@ -187,7 +188,7 @@ const ProductionPage: Component = () => {
                     <div class={styles.itemContent}>
                       <div class={styles.itemMain}>
                         <div class={styles.itemHeader}>
-                          <h3 class={styles.recipeName}>{item.recipe_name}</h3>
+                          <Heading variant="card" class={styles.recipeName}>{item.recipe_name}</Heading>
                           <Show when={item.internal_order_id}>
                             <Badge color="#4169E1">Internal Order</Badge>
                           </Show>
@@ -204,44 +205,44 @@ const ProductionPage: Component = () => {
 
                         <div class={styles.detailsGrid}>
                           <div>
-                            <span class={styles.detailLabel}>Quantity:</span> {item.quantity}
+                            <Text as="span" variant="label" class={styles.detailLabel}>Quantity:</Text> {item.quantity}
                           </div>
                           <div>
-                            <span class={styles.detailLabel}>Scheduled:</span> {formatTime(item.scheduled_time)}
+                            <Text as="span" variant="label" class={styles.detailLabel}>Scheduled:</Text> {formatTime(item.scheduled_time)}
                           </div>
                           <Show when={item.start_time}>
                             <div>
-                              <span class={styles.detailLabel}>Started:</span> {formatTime(item.start_time)}
+                              <Text as="span" variant="label" class={styles.detailLabel}>Started:</Text> {formatTime(item.start_time)}
                             </div>
                           </Show>
                           <Show when={item.completed_time}>
                             <div>
-                              <span class={styles.detailLabel}>Completed:</span> {formatTime(item.completed_time)}
+                              <Text as="span" variant="label" class={styles.detailLabel}>Completed:</Text> {formatTime(item.completed_time)}
                             </div>
                           </Show>
                         </div>
 
                         <Show when={item.assigned_to}>
                           <div class={styles.extraDetail}>
-                            <span class={styles.detailLabel}>Assigned to:</span> {item.assigned_to}
+                            <Text as="span" variant="label" class={styles.detailLabel}>Assigned to:</Text> {item.assigned_to}
                           </div>
                         </Show>
 
                         <Show when={item.batch_number}>
                           <div class={styles.extraDetail}>
-                            <span class={styles.detailLabel}>Batch #:</span> {item.batch_number}
+                            <Text as="span" variant="label" class={styles.detailLabel}>Batch #:</Text> {item.batch_number}
                           </div>
                         </Show>
 
                         <Show when={item.notes}>
                           <div class={styles.extraDetail}>
-                            <span class={styles.detailLabel}>Notes:</span> {item.notes}
+                            <Text as="span" variant="label" class={styles.detailLabel}>Notes:</Text> {item.notes}
                           </div>
                         </Show>
 
                         <Show when={item.quality_notes}>
                           <div class={styles.extraDetail}>
-                            <span class={styles.detailLabel}>Quality Notes:</span> {item.quality_notes}
+                            <Text as="span" variant="label" class={styles.detailLabel}>Quality Notes:</Text> {item.quality_notes}
                           </div>
                         </Show>
                       </div>

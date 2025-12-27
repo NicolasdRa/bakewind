@@ -6,12 +6,6 @@
   padding: var(--spacing-4);
 }
 
-@media (min-width: 768px) {
-  .container {
-    padding: var(--spacing-8);
-  }
-}
-
 /* Header section */
 .header {
   display: flex;
@@ -20,27 +14,8 @@
   margin-bottom: var(--spacing-4);
 }
 
-@media (min-width: 768px) {
-  .header {
-    margin-bottom: var(--spacing-8);
-  }
-}
-
 .headerContent {
   flex: 1;
-}
-
-.title {
-  font-size: var(--font-size-3xl);
-  font-weight: var(--font-weight-bold);
-  margin-bottom: var(--spacing-2);
-  color: var(--text-primary);
-}
-
-.subtitle {
-  font-size: var(--font-size-base);
-  color: var(--text-secondary);
-  margin: 0;
 }
 
 .editingSubtitle {
@@ -65,28 +40,6 @@
 .loadingText {
   @apply mt-4 text-sm;
   color: var(--text-secondary);
-}
-
-/* Edit Button - Primary Action */
-.editButton {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-2);
-  padding: var(--btn-padding-md);
-  background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
-  color: white;
-  border: 2px solid transparent;
-  border-radius: var(--btn-radius);
-  font-weight: var(--btn-font-weight);
-  font-size: var(--font-size-base);
-  box-shadow: var(--btn-shadow-primary);
-  transition: all var(--duration-base) var(--easing-default);
-  cursor: pointer;
-}
-
-.editButton:hover {
-  transform: var(--btn-transform-hover);
-  box-shadow: var(--btn-shadow-primary-hover);
 }
 
 .editIcon {
@@ -131,12 +84,6 @@
   border-bottom: 1px solid var(--border-light);
 }
 
-@media (min-width: 768px) {
-  .section {
-    padding: var(--spacing-8);
-  }
-}
-
 .section:last-child {
   border-bottom: none;
 }
@@ -162,12 +109,6 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--spacing-6);
-}
-
-@media (min-width: 768px) {
-  .sectionGrid {
-    grid-template-columns: repeat(2, 1fr);
-  }
 }
 
 /* Enhanced Form Fields */
@@ -509,37 +450,6 @@
   border: 1px solid var(--border-light);
 }
 
-@media (min-width: 768px) {
-  .securityCard {
-    padding: var(--spacing-6);
-  }
-}
-
-/* Change Password Button */
-.changePasswordButton {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-3);
-  width: 100%;
-  padding: var(--spacing-4);
-  background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-secondary));
-  border: 2px dashed var(--border-color);
-  border-radius: var(--radius-lg);
-  color: var(--text-secondary);
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-medium);
-  transition: all var(--duration-base) var(--easing-default);
-  cursor: pointer;
-}
-
-.changePasswordButton:hover {
-  background: linear-gradient(135deg, var(--warning-light), transparent);
-  border-color: var(--warning-color);
-  color: var(--warning-color);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-}
-
 .buttonIcon {
   width: 1.5rem;
   height: 1.5rem;
@@ -566,64 +476,6 @@
   gap: var(--spacing-3);
   align-items: center;
   margin-top: var(--spacing-6);
-}
-
-/* Button Styles */
-.cancelButton {
-  @apply px-6 py-3 bg-transparent font-semibold text-base rounded-lg cursor-pointer whitespace-nowrap;
-  color: var(--text-secondary);
-  border: 2px solid var(--border-color);
-  transition: all var(--duration-base) var(--easing-default);
-}
-
-.cancelButton:hover {
-  background: var(--bg-hover);
-  border-color: var(--border-hover);
-  color: var(--text-primary);
-}
-
-.saveButton {
-  @apply px-6 py-3 text-white font-semibold text-base rounded-lg cursor-pointer whitespace-nowrap;
-  background: linear-gradient(135deg, var(--success-color), #047857);
-  border: 2px solid transparent;
-  box-shadow: 0 2px 8px -2px rgba(5, 150, 105, 0.3);
-  transition: all var(--duration-base) var(--easing-default);
-}
-
-.saveButton:hover {
-  transform: var(--btn-transform-hover);
-  box-shadow: 0 4px 12px -2px rgba(5, 150, 105, 0.4);
-}
-
-.saveButton:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none !important;
-}
-
-.dangerButton {
-  padding: var(--btn-padding-md);
-  background: linear-gradient(135deg, var(--error-color), #b91c1c);
-  color: white;
-  border: 2px solid transparent;
-  border-radius: var(--btn-radius);
-  font-weight: var(--btn-font-weight);
-  font-size: var(--font-size-base);
-  box-shadow: 0 2px 8px -2px rgba(220, 38, 38, 0.3);
-  transition: all var(--duration-base) var(--easing-default);
-  cursor: pointer;
-  flex: 1;
-}
-
-.dangerButton:hover {
-  transform: var(--btn-transform-hover);
-  box-shadow: 0 4px 12px -2px rgba(220, 38, 38, 0.4);
-}
-
-.dangerButton:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none !important;
 }
 
 /* Error Messages */
@@ -693,8 +545,8 @@
   border-color: var(--border-color);
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
+/* Media Queries - Grouped by breakpoint */
+@media (max-width: 767px) {
   .header {
     flex-direction: column;
     gap: var(--spacing-4);
@@ -702,11 +554,6 @@
 
   .headerActions {
     width: 100%;
-  }
-
-  .editButton {
-    width: 100%;
-    justify-content: center;
   }
 
   .editActions {
@@ -726,17 +573,24 @@
   }
 }
 
-/* Animation Classes */
-.animate-shake {
-  animation: shake 0.5s;
-}
+@media (min-width: 768px) {
+  .container {
+    padding: var(--spacing-8);
+  }
 
-/* Focus Visible for Accessibility */
-.editButton:focus-visible,
-.cancelButton:focus-visible,
-.saveButton:focus-visible,
-.dangerButton:focus-visible,
-.changePasswordButton:focus-visible {
-  outline: 2px solid var(--primary-color);
-  outline-offset: 2px;
+  .header {
+    margin-bottom: var(--spacing-8);
+  }
+
+  .section {
+    padding: var(--spacing-8);
+  }
+
+  .sectionGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .securityCard {
+    padding: var(--spacing-6);
+  }
 }

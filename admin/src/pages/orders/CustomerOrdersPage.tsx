@@ -8,6 +8,7 @@ import FilterSelect from "~/components/common/FilterSelect";
 import Badge from "~/components/common/Badge";
 import Button from "~/components/common/Button";
 import DatePicker from "~/components/common/DatePicker";
+import { Heading, Text } from "~/components/common/Typography";
 import { useInfoModal } from "~/stores/infoModalStore";
 import { getCurrentDateString } from "~/utils/dateUtils";
 import styles from "./CustomerOrdersPage.module.css";
@@ -194,8 +195,8 @@ const CustomerOrdersPage: Component = () => {
     <div class={styles.pageContainer}>
       {/* Header */}
       <div class={styles.pageHeader}>
-        <h1 class={styles.pageTitle}>Customer Orders</h1>
-        <p class={styles.pageSubtitle}>Manage and track customer orders</p>
+        <Heading level="h1" variant="page">Customer Orders</Heading>
+        <Text color="secondary">Manage and track customer orders</Text>
       </div>
 
       {/* Stats Cards */}
@@ -321,18 +322,21 @@ const CustomerOrdersPage: Component = () => {
                       </td>
                       <td class={styles.tableCellCenter}>
                         <div class={styles.actionsWrapper}>
-                          <button
+                          <Button
+                            variant="text"
+                            size="sm"
                             onClick={() => handleScheduleClick(order)}
-                            class={styles.scheduleButton}
                           >
                             Schedule
-                          </button>
-                          <button
+                          </Button>
+                          <Button
+                            variant="text"
+                            size="sm"
                             onClick={() => handleDeleteClick(order)}
                             class={styles.deleteButtonSmall}
                           >
                             Delete
-                          </button>
+                          </Button>
                         </div>
                       </td>
                     </tr>
@@ -348,10 +352,10 @@ const CustomerOrdersPage: Component = () => {
       <Show when={showScheduleModal()}>
         <div class={styles.modalBackdrop} onClick={handleCancelSchedule}>
           <div class={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-            <h3 class={styles.modalTitle}>Schedule Production</h3>
-            <p class={styles.modalText}>
+            <Heading variant="card" class={styles.modalTitle}>Schedule Production</Heading>
+            <Text class={styles.modalText}>
               Schedule production for order "{orderToSchedule()?.orderNumber}"
-            </p>
+            </Text>
             <div class={styles.formGroup}>
               <DatePicker
                 label="Scheduled Date"
@@ -376,10 +380,10 @@ const CustomerOrdersPage: Component = () => {
       <Show when={showDeleteConfirm()}>
         <div class={styles.modalBackdrop} onClick={handleCancelDelete}>
           <div class={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-            <h3 class={styles.modalTitle}>Delete Order</h3>
-            <p class={styles.modalTextLarge}>
+            <Heading variant="card" class={styles.modalTitle}>Delete Order</Heading>
+            <Text class={styles.modalTextLarge}>
               Are you sure you want to delete order "{orderToDelete()?.orderNumber}"? This action cannot be undone.
-            </p>
+            </Text>
             <div class={styles.modalActions}>
               <Button variant="secondary" size="sm" onClick={handleCancelDelete}>
                 Cancel

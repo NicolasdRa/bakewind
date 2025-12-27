@@ -14,6 +14,7 @@ import Badge from "~/components/common/Badge";
 import Button from "~/components/common/Button";
 import { PlusIcon } from "~/components/icons";
 import DatePicker from "~/components/common/DatePicker";
+import { Heading, Text } from "~/components/common/Typography";
 import { useInfoModal } from "~/stores/infoModalStore";
 import { orderLocksStore } from "~/stores/order-locks";
 import { getCurrentDateString } from "~/utils/dateUtils";
@@ -341,8 +342,8 @@ const InternalOrdersPage: Component = () => {
       {/* Header */}
       <div class={styles.pageHeader}>
         <div>
-          <h1 class={styles.pageTitle}>Internal Production Orders</h1>
-          <p class={styles.pageSubtitle}>Track and manage internal production orders</p>
+          <Heading level="h1" variant="page">Internal Production Orders</Heading>
+          <Text color="secondary">Track and manage internal production orders</Text>
         </div>
         <Button variant="primary" size="md" onClick={handleCreateNew}>
           <PlusIcon class={styles.buttonIcon} />
@@ -509,27 +510,33 @@ const InternalOrdersPage: Component = () => {
                         </td>
                         <td class={styles.actionsCell}>
                           <div class={styles.actionsRow} onClick={(e) => e.stopPropagation()}>
-                            <button
+                            <Button
+                              variant="text"
+                              size="sm"
                               onClick={() => handleViewDetails(order)}
-                              class={styles.actionLink}
-                            >Details</button>
+                            >Details</Button>
                             <Show when={order.status === 'approved'}>
-                              <button
+                              <Button
+                                variant="text"
+                                size="sm"
                                 onClick={() => handleScheduleProductionClick(order)}
                                 class={styles.successLink}
-                              >Schedule</button>
+                              >Schedule</Button>
                             </Show>
                             <Show when={order.status !== 'delivered' && order.status !== 'cancelled'}>
-                              <button
+                              <Button
+                                variant="text"
+                                size="sm"
                                 onClick={() => handleEditOrder(order)}
-                                class={styles.actionLink}
-                              >Edit</button>
+                              >Edit</Button>
                             </Show>
                             <Show when={order.status !== 'delivered' && order.status !== 'cancelled'}>
-                              <button
+                              <Button
+                                variant="text"
+                                size="sm"
                                 onClick={() => handleDeleteClick(order)}
                                 class={styles.deleteLink}
-                              >Delete</button>
+                              >Delete</Button>
                             </Show>
                           </div>
                         </td>
@@ -578,17 +585,17 @@ const InternalOrdersPage: Component = () => {
       <Show when={showDeleteConfirm()}>
         <div class={styles.modalBackdrop} onClick={handleCancelDelete}>
           <div class={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-            <h3 class={styles.modalTitle}>Delete Production Order</h3>
-            <p class={styles.modalText}>
+            <Heading variant="card" class={styles.modalTitle}>Delete Production Order</Heading>
+            <Text class={styles.modalText}>
               Are you sure you want to delete order "{orderToDelete()?.orderNumber}"? This action cannot be undone.
-            </p>
+            </Text>
             <div class={styles.modalActions}>
-              <button onClick={handleCancelDelete} class={styles.cancelButton}>
+              <Button variant="secondary" size="sm" onClick={handleCancelDelete}>
                 Cancel
-              </button>
-              <button onClick={handleConfirmDelete} class={styles.deleteButton}>
+              </Button>
+              <Button variant="danger" size="sm" onClick={handleConfirmDelete}>
                 Delete
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -598,22 +605,22 @@ const InternalOrdersPage: Component = () => {
       <Show when={showScheduleModal()}>
         <div class={styles.modalBackdrop} onClick={handleCancelSchedule}>
           <div class={styles.modalContentLarge} onClick={(e) => e.stopPropagation()}>
-            <h3 class={styles.modalTitle}>Schedule Production</h3>
+            <Heading variant="card" class={styles.modalTitle}>Schedule Production</Heading>
 
             <Show when={orderToSchedule()}>
               {(order) => (
                 <div>
                   <div class={styles.orderDetailsCard}>
-                    <h4 class={styles.orderDetailsTitle}>Order Details</h4>
+                    <Heading variant="label" class={styles.orderDetailsTitle}>Order Details</Heading>
                     <div class={styles.orderDetailsList}>
-                      <div><strong>Order #:</strong> {order().orderNumber}</div>
-                      <div><strong>Source:</strong> {order().source.replace('_', ' ')}</div>
-                      <div><strong>Items:</strong> {order().items.length} product(s)</div>
+                      <Text><Text as="span" variant="label">Order #:</Text> {order().orderNumber}</Text>
+                      <Text><Text as="span" variant="label">Source:</Text> {order().source.replace('_', ' ')}</Text>
+                      <Text><Text as="span" variant="label">Items:</Text> {order().items.length} product(s)</Text>
                       <Show when={order().items.length > 0}>
                         <div class={styles.orderItemsList}>
                           <For each={order().items}>
                             {(item) => (
-                              <div>• {item.quantity}x {item.productName}</div>
+                              <Text variant="body-sm">• {item.quantity}x {item.productName}</Text>
                             )}
                           </For>
                         </div>
@@ -629,9 +636,9 @@ const InternalOrdersPage: Component = () => {
                       minDate={getCurrentDateString()}
                       disabled={isScheduling()}
                     />
-                    <p class={styles.formHint}>
+                    <Text variant="helper" color="muted" class={styles.formHint}>
                       A production schedule will be created for all products in this order.
-                    </p>
+                    </Text>
                   </div>
                 </div>
               )}

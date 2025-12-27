@@ -3,6 +3,8 @@ import DashboardErrorBoundary from '~/components/ErrorBoundary/DashboardErrorBou
 import DashboardContent from "~/components/DashboardContent/DashboardContent"
 import ViewToggle from '~/components/ViewToggle/ViewToggle'
 import ActionButton from '~/components/ActionButton/ActionButton'
+import Button from '~/components/common/Button'
+import { Heading, Text } from '~/components/common/Typography'
 import { useAppStore } from '~/stores/appStore'
 import { bakeryActions } from '~/stores/bakeryStore'
 import styles from './OverviewPage.module.css'
@@ -46,8 +48,8 @@ export default function OverviewPage() {
     <div class={styles.container}>
       <div class={styles.header}>
         <div class={styles.headerContent}>
-          <h1 class={styles.title}>BakeWind Bakery Dashboard</h1>
-          <p class={styles.subtitle}>Welcome to your comprehensive bakery management workspace</p>
+          <Heading level="h1" variant="page">BakeWind Bakery Dashboard</Heading>
+          <Text color="secondary">Welcome to your comprehensive bakery management workspace</Text>
         </div>
 
         <div class={styles.headerActions}>
@@ -69,12 +71,13 @@ export default function OverviewPage() {
             </ActionButton>
 
             <div class={styles.dropdownContainer}>
-              <button class={styles.dropdownTrigger}>
-                <span class={styles.dropdownIcon}>⋮</span>
-              </button>
+              <Button variant="ghost" class={styles.dropdownTrigger}>
+                <Text as="span" class={styles.dropdownIcon}>⋮</Text>
+              </Button>
 
               <div class={styles.dropdownMenu}>
-                <button
+                <Button
+                  variant="ghost"
                   onClick={() => {
                     if (confirm('Reset dashboard to default layout?')) {
                       actions.resetLayout()
@@ -83,8 +86,9 @@ export default function OverviewPage() {
                   class={`${styles.dropdownItem} ${styles.dropdownItemDefault}`}
                 >
                   Reset Layout
-                </button>
-                <button
+                </Button>
+                <Button
+                  variant="ghost"
                   onClick={() => {
                     if (confirm('Clear all widgets? This cannot be undone.')) {
                       actions.clearLayout()
@@ -93,7 +97,7 @@ export default function OverviewPage() {
                   class={`${styles.dropdownItem} ${styles.dropdownItemDanger}`}
                 >
                   Clear All Widgets
-                </button>
+                </Button>
               </div>
             </div>
           </div>

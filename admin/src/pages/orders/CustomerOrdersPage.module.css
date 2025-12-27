@@ -5,26 +5,9 @@
   padding: var(--spacing-4);
 }
 
-@media (min-width: 768px) {
-  .pageContainer {
-    padding: var(--spacing-8);
-  }
-}
-
 /* Header section */
 .pageHeader {
   margin-bottom: var(--spacing-8);
-}
-
-.pageTitle {
-  font-size: var(--font-size-3xl);
-  font-weight: var(--font-weight-semibold);
-  color: var(--text-primary);
-  margin-bottom: var(--spacing-2);
-}
-
-.pageSubtitle {
-  color: var(--text-secondary);
 }
 
 /* Stats grid */
@@ -160,34 +143,12 @@
   justify-content: center;
 }
 
-.scheduleButton {
-  padding: var(--spacing-2) var(--spacing-4);
-  background-color: var(--primary-color);
-  color: white;
-  border: none;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  font-size: var(--font-size-sm);
-  transition: opacity 0.2s;
-}
-
-.scheduleButton:hover {
-  opacity: 0.8;
-}
-
 .deleteButtonSmall {
-  padding: var(--spacing-2) var(--spacing-4);
-  background-color: var(--error-color);
-  color: white;
-  border: none;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  font-size: var(--font-size-sm);
-  transition: background-color 0.2s;
+  color: var(--error-color);
 }
 
 .deleteButtonSmall:hover {
-  background-color: var(--error-hover);
+  background-color: var(--error-light);
 }
 
 /* Modal backdrop */
@@ -245,64 +206,9 @@
   margin-bottom: var(--spacing-6);
 }
 
-.formLabel {
-  display: block;
-  margin-bottom: var(--spacing-2);
-  color: var(--text-primary);
-  font-weight: var(--font-weight-medium);
-}
-
-.formInput {
-  width: 100%;
-  padding: var(--spacing-2);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  background-color: var(--bg-secondary);
-  color: var(--text-primary);
-}
-
-/* Modal buttons */
-.cancelButton {
-  padding: var(--spacing-2) var(--spacing-4);
-  border-radius: var(--radius-md);
-  font-weight: var(--font-weight-medium);
-  background-color: transparent;
-  border: 1px solid var(--border-color);
-  color: var(--text-primary);
-  cursor: pointer;
-  transition: opacity 0.2s;
-}
-
-.cancelButton:hover {
-  opacity: 0.8;
-}
-
-.submitButton {
-  padding: var(--spacing-2) var(--spacing-4);
-  border-radius: var(--radius-md);
-  font-weight: var(--font-weight-medium);
-  background-color: var(--primary-color);
-  color: white;
-  border: none;
-  cursor: pointer;
-  transition: opacity 0.2s;
-}
-
-.submitButton:hover {
-  opacity: 0.8;
-}
-
-.deleteButton {
-  padding: var(--spacing-2) var(--spacing-4);
-  border-radius: var(--radius-md);
-  font-weight: var(--font-weight-medium);
-  background-color: var(--error-color);
-  color: white;
-  border: none;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.deleteButton:hover {
-  background-color: var(--error-hover);
+/* Media Queries - Grouped by breakpoint */
+@media (min-width: 768px) {
+  .pageContainer {
+    padding: var(--spacing-8);
+  }
 }

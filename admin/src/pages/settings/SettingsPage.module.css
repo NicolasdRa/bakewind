@@ -6,12 +6,6 @@
   padding: var(--spacing-4);
 }
 
-@media (min-width: 768px) {
-  .container {
-    padding: var(--spacing-8);
-  }
-}
-
 /* Header section */
 .header {
   display: flex;
@@ -24,30 +18,10 @@
   flex: 1;
 }
 
-.title {
-  font-size: var(--font-size-3xl);
-  font-weight: var(--font-weight-bold);
-  margin-bottom: var(--spacing-2);
-  color: var(--text-primary);
-}
-
-.subtitle {
-  font-size: var(--font-size-base);
-  color: var(--text-secondary);
-  margin: 0;
-}
-
 /* Enhanced Settings Grid */
 .settingsGrid {
   @apply grid grid-cols-1;
   gap: var(--grid-gap);
-}
-
-@media (min-width: 1024px) {
-  .settingsGrid {
-    @apply grid-cols-2;
-    gap: var(--grid-gap-lg);
-  }
 }
 
 .settingsGrid > * {
@@ -221,4 +195,18 @@
 .checkbox:checked {
   background: var(--primary-color);
   border-color: var(--primary-color);
+}
+
+/* Media Queries - Grouped by breakpoint */
+@media (min-width: 768px) {
+  .container {
+    padding: var(--spacing-8);
+  }
+}
+
+@media (min-width: 1024px) {
+  .settingsGrid {
+    @apply grid-cols-2;
+    gap: var(--grid-gap-lg);
+  }
 }

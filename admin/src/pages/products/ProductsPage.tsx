@@ -7,6 +7,7 @@ import FilterSelect from "~/components/common/FilterSelect";
 import Badge from "~/components/common/Badge";
 import Button from "~/components/common/Button";
 import { PlusIcon } from "~/components/icons";
+import { Heading, Text } from "~/components/common/Typography";
 import { getCategoryBadgeColor, getProductStatusVariant } from "~/components/common/Badge.config";
 import styles from "./ProductsPage.module.css";
 
@@ -202,8 +203,8 @@ const ProductsPage: Component = () => {
     <div class={styles.pageContainer}>
       <div class={styles.pageHeader}>
         <div>
-          <h1 class={styles.pageTitle}>Products Management</h1>
-          <p class={styles.pageSubtitle}>Manage your bakery products and menu items</p>
+          <Heading level="h1" variant="page">Products Management</Heading>
+          <Text color="secondary">Manage your bakery products and menu items</Text>
         </div>
         <Button variant="primary" size="md" onClick={handleCreate}>
           <PlusIcon class={styles.buttonIcon} />
@@ -427,10 +428,10 @@ const ProductsPage: Component = () => {
       <Show when={showDeleteConfirm()}>
         <div class={styles.modalBackdrop}>
           <div class={styles.modalContent}>
-            <h3 class={styles.modalTitle}>Delete Product</h3>
-            <p class={styles.modalText}>
+            <Heading variant="card" class={styles.modalTitle}>Delete Product</Heading>
+            <Text class={styles.modalText}>
               Are you sure you want to delete "{productToDelete()?.name}"? This action cannot be undone.
-            </p>
+            </Text>
             <div class={styles.modalActions}>
               <Button
                 variant="secondary"

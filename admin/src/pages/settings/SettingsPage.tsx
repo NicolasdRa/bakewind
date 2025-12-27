@@ -1,4 +1,5 @@
 import { Component} from "solid-js";
+import { Heading, Text } from "~/components/common/Typography";
 import styles from './SettingsPage.module.css'
 
 
@@ -9,14 +10,14 @@ const SettingsPage: Component = () => {
        <div class={styles.container}>
         <div class={styles.header}>
           <div class={styles.headerContent}>
-            <h1 class={styles.title}>Settings</h1>
-            <p class={styles.subtitle}>Configure your dashboard settings and manage system preferences</p>
+            <Heading level="h1" variant="page">Settings</Heading>
+            <Text color="secondary">Configure your dashboard settings and manage system preferences</Text>
           </div>
         </div>
 
         <div class={styles.settingsGrid}>
           <div class={styles.settingsCard}>
-            <h3 class={styles.cardTitle}>General Settings</h3>
+            <Heading variant="card" class={styles.cardTitle}>General Settings</Heading>
             <div class={styles.formGroup}>
               <div>
                 <label class={styles.label}>Application Name</label>
@@ -38,7 +39,7 @@ const SettingsPage: Component = () => {
           </div>
 
           <div class={styles.settingsCard}>
-            <h3 class={styles.cardTitle}>Advanced Settings</h3>
+            <Heading variant="card" class={styles.cardTitle}>Advanced Settings</Heading>
             <div class={styles.checkboxGroup}>
               <label class={styles.checkboxLabel}>
                 <span class={styles.checkboxText}>Enable developer mode</span>

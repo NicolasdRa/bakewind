@@ -5,12 +5,6 @@
   padding: var(--spacing-4);
 }
 
-@media (min-width: 768px) {
-  .pageContainer {
-    padding: var(--spacing-8);
-  }
-}
-
 /* Button icon */
 .buttonIcon {
   width: 18px;
@@ -26,43 +20,12 @@
   margin-bottom: var(--spacing-8);
 }
 
-.pageTitle {
-  font-size: var(--font-size-3xl);
-  font-weight: var(--font-weight-bold);
-  margin-bottom: var(--spacing-2);
-  color: var(--text-primary);
-}
-
-.pageSubtitle {
-  font-size: var(--font-size-base);
-  color: var(--text-secondary);
-}
-
-.primaryButton {
-  padding: var(--spacing-3) var(--spacing-6);
-  border-radius: var(--radius-lg);
-  font-weight: var(--font-weight-medium);
-  background-color: var(--primary-color);
-  color: white;
-  transition: opacity 0.2s;
-}
-
-.primaryButton:hover {
-  opacity: 0.9;
-}
-
 /* Stats grid */
 .statsGrid {
   display: grid;
   grid-template-columns: repeat(1, 1fr);
   gap: var(--spacing-6);
   margin-bottom: var(--spacing-8);
-}
-
-@media (min-width: 768px) {
-  .statsGrid {
-    grid-template-columns: repeat(3, 1fr);
-  }
 }
 
 /* Filter card */
@@ -212,16 +175,6 @@
   gap: var(--spacing-3);
 }
 
-.actionLink {
-  font-weight: var(--font-weight-medium);
-  color: var(--primary-color);
-  transition: color 0.15s;
-}
-
-.actionLink:hover {
-  color: var(--primary-hover);
-}
-
 .successLink {
   font-weight: var(--font-weight-medium);
   color: var(--success-color);
@@ -321,57 +274,6 @@
   margin-top: var(--spacing-6);
 }
 
-/* Modal buttons */
-.cancelButton {
-  padding: var(--spacing-2) var(--spacing-4);
-  border-radius: var(--radius-md);
-  font-weight: var(--font-weight-medium);
-  background-color: transparent;
-  border: 1px solid var(--border-color);
-  color: var(--text-primary);
-  transition: all 0.2s;
-}
-
-.cancelButton:hover {
-  background-color: var(--bg-hover);
-}
-
-.cancelButton:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-
-.deleteButton {
-  padding: var(--spacing-2) var(--spacing-4);
-  border-radius: var(--radius-md);
-  font-weight: var(--font-weight-medium);
-  background-color: var(--error-color);
-  color: white;
-  transition: background-color 0.2s;
-}
-
-.deleteButton:hover {
-  background-color: var(--error-hover);
-}
-
-.submitButton {
-  padding: var(--spacing-2) var(--spacing-4);
-  border-radius: var(--radius-md);
-  font-weight: var(--font-weight-medium);
-  background-color: var(--primary-color);
-  color: white;
-  transition: background-color 0.2s;
-}
-
-.submitButton:hover {
-  background-color: var(--primary-hover);
-}
-
-.submitButton:disabled {
-  cursor: not-allowed;
-  opacity: 0.7;
-}
-
 /* Schedule modal specific */
 .orderDetailsCard {
   border-radius: var(--radius-lg);
@@ -406,30 +308,19 @@
   margin-bottom: var(--spacing-4);
 }
 
-.formLabel {
-  display: block;
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  margin-bottom: var(--spacing-2);
-  color: var(--text-primary);
-}
-
-.formInput {
-  width: 100%;
-  padding: var(--spacing-2) var(--spacing-3);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-color);
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
-}
-
-.formInput:disabled {
-  background-color: var(--bg-secondary);
-  cursor: not-allowed;
-}
-
 .formHint {
   margin-top: var(--spacing-2);
   font-size: var(--font-size-sm);
   color: var(--text-secondary);
+}
+
+/* Media Queries - Grouped by breakpoint */
+@media (min-width: 768px) {
+  .pageContainer {
+    padding: var(--spacing-8);
+  }
+
+  .statsGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }

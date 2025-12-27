@@ -8,6 +8,7 @@ import { recipesApi, Recipe, RecipeCategory, CreateRecipeRequest, UpdateRecipeRe
 import Badge from "~/components/common/Badge";
 import Button from "~/components/common/Button";
 import { PlusIcon } from "~/components/icons";
+import { Heading, Text } from "~/components/common/Typography";
 import { getRecipeCategoryColor } from "~/components/common/Badge.config";
 import { useInfoModal } from "~/stores/infoModalStore";
 import styles from "./RecipesPage.module.css";
@@ -310,8 +311,8 @@ const RecipesPage: Component = () => {
     <div class={styles.pageContainer}>
       <div class={styles.pageHeader}>
         <div>
-          <h1 class={styles.pageTitle}>Recipe Management</h1>
-          <p class={styles.pageSubtitle}>Manage your bakery's recipe collection</p>
+          <Heading level="h1" variant="page">Recipe Management</Heading>
+          <Text color="secondary">Manage your bakery's recipe collection</Text>
         </div>
         <Button
           variant="primary"
@@ -462,15 +463,15 @@ const RecipesPage: Component = () => {
                       </td>
                       <td class={styles.tableCell}>
                         <div class={styles.actionsRow}>
-                          <button onClick={() => setSelectedRecipe(recipe)} class={styles.actionLink}>
+                          <Button variant="text" size="sm" onClick={() => setSelectedRecipe(recipe)}>
                             View
-                          </button>
-                          <button onClick={() => handleOpenEditModal(recipe)} class={styles.actionLink}>
+                          </Button>
+                          <Button variant="text" size="sm" onClick={() => handleOpenEditModal(recipe)}>
                             Edit
-                          </button>
-                          <button onClick={() => handleDeleteClick(recipe)} class={styles.deleteLink}>
+                          </Button>
+                          <Button variant="text" size="sm" onClick={() => handleDeleteClick(recipe)} class={styles.deleteLink}>
                             Delete
-                          </button>
+                          </Button>
                         </div>
                       </td>
                     </tr>
@@ -506,17 +507,17 @@ const RecipesPage: Component = () => {
       <Show when={showDeleteConfirm()}>
         <div class={styles.modalBackdrop} onClick={handleCancelDelete}>
           <div class={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-            <h3 class={styles.modalTitle}>Delete Recipe</h3>
-            <p class={styles.modalText}>
+            <Heading variant="card" class={styles.modalTitle}>Delete Recipe</Heading>
+            <Text class={styles.modalText}>
               Are you sure you want to delete "{recipeToDelete()?.name}"? This action cannot be undone.
-            </p>
+            </Text>
             <div class={styles.modalActions}>
-              <button onClick={handleCancelDelete} class={styles.cancelButton}>
+              <Button variant="secondary" size="sm" onClick={handleCancelDelete}>
                 Cancel
-              </button>
-              <button onClick={handleConfirmDelete} class={styles.deleteButton}>
+              </Button>
+              <Button variant="danger" size="sm" onClick={handleConfirmDelete}>
                 Delete
-              </button>
+              </Button>
             </div>
           </div>
         </div>

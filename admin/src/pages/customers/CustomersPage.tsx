@@ -5,6 +5,7 @@ import CustomerDetailsModal from "../../components/customers/CustomerDetailsModa
 import Badge from "../../components/common/Badge";
 import Button from "../../components/common/Button";
 import { PlusIcon } from "../../components/icons";
+import { Heading, Text } from "../../components/common/Typography";
 import SearchInput from "../../components/common/SearchInput";
 import FilterSelect from "../../components/common/FilterSelect";
 import styles from "./CustomersPage.module.css";
@@ -194,27 +195,27 @@ const CustomersPage: Component = () => {
   return (
     <div class={styles.pageContainer}>
       <div class={styles.pageHeader}>
-        <h1 class={styles.pageTitle}>Customer Management</h1>
-        <p class={styles.pageSubtitle}>Manage customer information and relationships</p>
+        <Heading level="h1" variant="page">Customer Management</Heading>
+        <Text color="secondary">Manage customer information and relationships</Text>
       </div>
 
       {/* Stats Cards */}
       <div class={styles.statsGrid}>
         <div class={styles.statCard}>
-          <h3 class={styles.statTitle}>Total Customers</h3>
-          <p class={styles.statValuePrimary}>{getTotalCustomers()}</p>
+          <Heading variant="label" class={styles.statTitle}>Total Customers</Heading>
+          <Text class={styles.statValuePrimary}>{getTotalCustomers()}</Text>
         </div>
         <div class={styles.statCard}>
-          <h3 class={styles.statTitle}>Active Customers</h3>
-          <p class={styles.statValueSuccess}>{getActiveCustomers()}</p>
+          <Heading variant="label" class={styles.statTitle}>Active Customers</Heading>
+          <Text class={styles.statValueSuccess}>{getActiveCustomers()}</Text>
         </div>
         <div class={styles.statCard}>
-          <h3 class={styles.statTitle}>Business Customers</h3>
-          <p class={styles.statValueInfo}>{getBusinessCustomers()}</p>
+          <Heading variant="label" class={styles.statTitle}>Business Customers</Heading>
+          <Text class={styles.statValueInfo}>{getBusinessCustomers()}</Text>
         </div>
         <div class={styles.statCard}>
-          <h3 class={styles.statTitle}>Total Revenue</h3>
-          <p class={styles.statValueWarning}>{formatCurrency(getTotalRevenue())}</p>
+          <Heading variant="label" class={styles.statTitle}>Total Revenue</Heading>
+          <Text class={styles.statValueWarning}>{formatCurrency(getTotalRevenue())}</Text>
         </div>
       </div>
 
@@ -275,7 +276,7 @@ const CustomersPage: Component = () => {
         <div>
           <div class={styles.listCard}>
             <div class={styles.listHeader}>
-              <h2 class={styles.listTitle}>Customers ({filteredCustomers().length})</h2>
+              <Heading variant="section" class={styles.listTitle}>Customers ({filteredCustomers().length})</Heading>
             </div>
 
             <Show
@@ -302,7 +303,7 @@ const CustomersPage: Component = () => {
                         <div class={styles.customerItemContent}>
                           <div class={styles.customerInfo}>
                             <div class={styles.customerNameRow}>
-                              <h3 class={styles.customerName}>{customer.name}</h3>
+                              <Heading variant="card" class={styles.customerName}>{customer.name}</Heading>
                               <Badge
                                 variant={customer.status === "active" ? "success" : "neutral"}
                                 size="sm"
@@ -383,11 +384,11 @@ const CustomersPage: Component = () => {
             {(customer) => (
               <div class={styles.detailCard}>
                 <div class={styles.detailHeader}>
-                  <h2 class={styles.detailName}>{customer().name}</h2>
+                  <Heading variant="section" class={styles.detailName}>{customer().name}</Heading>
                   <Show when={customer().companyName}>
-                    <p class={styles.detailCompany}>{customer().companyName}</p>
+                    <Text class={styles.detailCompany}>{customer().companyName}</Text>
                   </Show>
-                  <p class={styles.detailEmail}>{customer().email || "No email"}</p>
+                  <Text color="muted" class={styles.detailEmail}>{customer().email || "No email"}</Text>
                   <div class={styles.detailBadges}>
                     <Badge variant={customer().status === "active" ? "success" : "neutral"}>
                       {customer().status === "active" ? "Active" : "Inactive"}
@@ -401,7 +402,7 @@ const CustomersPage: Component = () => {
                 <div class={styles.detailContent}>
                   {/* Contact Information */}
                   <div class={styles.detailSection}>
-                    <h3 class={styles.sectionTitle}>Contact Information</h3>
+                    <Heading variant="label" class={styles.sectionTitle}>Contact Information</Heading>
                     <div class={styles.detailRow}>
                       <div>
                         <span class={styles.detailLabel}>Phone:</span>{" "}
@@ -432,7 +433,7 @@ const CustomersPage: Component = () => {
 
                   {/* Order History */}
                   <div class={styles.detailSection}>
-                    <h3 class={styles.sectionTitle}>Order History</h3>
+                    <Heading variant="label" class={styles.sectionTitle}>Order History</Heading>
                     <div class={styles.orderHistoryGrid}>
                       <div>
                         <span class={styles.orderStatLabel}>Total Orders:</span>
@@ -463,7 +464,7 @@ const CustomersPage: Component = () => {
 
                   {/* Loyalty Information */}
                   <div class={styles.detailSection}>
-                    <h3 class={styles.sectionTitle}>Loyalty Program</h3>
+                    <Heading variant="label" class={styles.sectionTitle}>Loyalty Program</Heading>
                     <div class={styles.loyaltyRow}>
                       <span class={styles.loyaltyLabel}>Points:</span>
                       <span class={styles.loyaltyPoints}>{customer().loyaltyPoints}</span>
@@ -473,8 +474,8 @@ const CustomersPage: Component = () => {
                   {/* Notes */}
                   <Show when={customer().notes}>
                     <div class={styles.detailSection}>
-                      <h3 class={styles.sectionTitle}>Notes</h3>
-                      <p class={styles.notesText}>{customer().notes}</p>
+                      <Heading variant="label" class={styles.sectionTitle}>Notes</Heading>
+                      <Text color="muted" class={styles.notesText}>{customer().notes}</Text>
                     </div>
                   </Show>
 
@@ -521,7 +522,7 @@ const CustomersPage: Component = () => {
         <div class={styles.importModal}>
           <div class={styles.importModalBackdrop} onClick={handleCloseImport} />
           <div class={styles.importModalContent}>
-            <h2 class={styles.importModalTitle}>Import Customers</h2>
+            <Heading variant="section" class={styles.importModalTitle}>Import Customers</Heading>
             <textarea
               class={styles.importTextarea}
               placeholder='Paste JSON array of customers, e.g.:

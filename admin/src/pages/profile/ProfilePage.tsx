@@ -4,6 +4,7 @@ import * as usersApi from '~/api/users'
 import LoadingSpinner from "~/components/LoadingSpinner/LoadingSpinner"
 import Button from "~/components/common/Button"
 import DatePicker from "~/components/common/DatePicker"
+import { Heading, Text } from "~/components/common/Typography"
 import styles from './ProfilePage.module.css'
 
 // Type Definitions
@@ -328,12 +329,12 @@ const ProfilePage: Component = () => {
         {/* Header with Edit/Save Actions */}
         <div class={styles.header}>
           <div class={styles.headerContent}>
-            <h1 class={styles.title}>Profile Settings</h1>
+            <Heading level="h1" variant="page">Profile Settings</Heading>
             <Show when={!isEditMode()}>
-              <p class={styles.subtitle}>View and manage your personal information</p>
+              <Text color="secondary">View and manage your personal information</Text>
             </Show>
             <Show when={isEditMode()}>
-              <p class={styles.editingSubtitle}>Editing profile information</p>
+              <Text color="secondary" class={styles.editingSubtitle}>Editing profile information</Text>
             </Show>
           </div>
 
@@ -381,12 +382,12 @@ const ProfilePage: Component = () => {
 
         {/* Personal Information Section */}
         <div class={styles.section}>
-              <h2 class={styles.sectionTitle}>
+              <Heading variant="section" class={styles.sectionTitle}>
                 <svg class={styles.sectionIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
                 Personal Information
-              </h2>
+              </Heading>
 
               <div class={styles.sectionGrid}>
                 {/* First Name */}
@@ -540,13 +541,13 @@ const ProfilePage: Component = () => {
 
             {/* Location Information */}
             <div class={styles.section}>
-              <h2 class={styles.sectionTitle}>
+              <Heading variant="section" class={styles.sectionTitle}>
                 <svg class={styles.sectionIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
                 Location Information
-              </h2>
+              </Heading>
 
               <div class={styles.sectionGrid}>
                 {/* Country */}
@@ -595,12 +596,12 @@ const ProfilePage: Component = () => {
 
             {/* Professional Information (Always Read-only) */}
             <div class={styles.section}>
-              <h2 class={styles.sectionTitle}>
+              <Heading variant="section" class={styles.sectionTitle}>
                 <svg class={styles.sectionIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
                 Professional Information
-              </h2>
+              </Heading>
 
               {/* Role Badge */}
               <div class={styles.infoCard}>
@@ -609,9 +610,9 @@ const ProfilePage: Component = () => {
                   <span class={getRoleBadgeClass()}>
                     {user()?.role || 'No Role'}
                   </span>
-                  <p class={styles.roleDescription}>
+                  <Text variant="body-sm" color="muted" class={styles.roleDescription}>
                     {getRoleDescription()}
-                  </p>
+                  </Text>
                 </div>
               </div>
 
@@ -644,12 +645,12 @@ const ProfilePage: Component = () => {
 
             {/* Account Security */}
             <div class={styles.section}>
-              <h2 class={styles.sectionTitle}>
+              <Heading variant="section" class={styles.sectionTitle}>
                 <svg class={styles.sectionIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
                 Account Security
-              </h2>
+              </Heading>
 
               <div class={styles.securityCard}>
                 <Show when={!passwordForm().showForm}>
@@ -667,7 +668,7 @@ const ProfilePage: Component = () => {
 
                 <Show when={passwordForm().showForm}>
                   <div class={styles.passwordForm}>
-                    <h3 class={styles.passwordFormTitle}>Change Your Password</h3>
+                    <Heading variant="card" class={styles.passwordFormTitle}>Change Your Password</Heading>
 
                     <div class={styles.passwordField}>
                       <label class={styles.label}>Current Password</label>

@@ -8,12 +8,6 @@
   animation: fadeIn var(--duration-base) var(--easing-out);
 }
 
-@media (min-width: 768px) {
-  .container {
-    padding: var(--spacing-8);
-  }
-}
-
 .header {
   display: flex;
   justify-content: space-between;
@@ -24,24 +18,6 @@
 
 .headerContent {
   flex: 1;
-}
-
-.title {
-  font-size: var(--font-size-4xl);
-  font-weight: var(--font-weight-extrabold);
-  color: var(--text-primary);
-  margin: 0 0 var(--spacing-2) 0;
-  letter-spacing: -0.02em;
-  background: linear-gradient(135deg, var(--text-primary) 0%, var(--primary-color) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.subtitle {
-  font-size: var(--font-size-lg);
-  color: var(--text-secondary);
-  margin: 0;
 }
 
 .buttonIcon {
@@ -403,5 +379,12 @@
   to {
     opacity: 1;
     transform: translateX(0);
+  }
+}
+
+/* Media Queries - Grouped by breakpoint */
+@media (min-width: 768px) {
+  .container {
+    padding: var(--spacing-8);
   }
 }

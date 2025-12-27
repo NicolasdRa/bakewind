@@ -9,6 +9,7 @@ import FilterSelect from "~/components/common/FilterSelect";
 import Badge from "~/components/common/Badge";
 import Button from "~/components/common/Button";
 import { PlusIcon } from "~/components/icons";
+import { Heading, Text } from "~/components/common/Typography";
 import { getStockStatusVariant } from "~/components/common/Badge.config";
 import { useInfoModal } from "~/stores/infoModalStore";
 import styles from "./InventoryPage.module.css";
@@ -181,8 +182,8 @@ const InventoryPage: Component = () => {
     <div class={styles.pageContainer}>
       <div class={styles.pageHeader}>
         <div>
-          <h1 class={styles.pageTitle}>Inventory Management</h1>
-          <p class={styles.pageSubtitle}>Track ingredients, packaging, and supplies</p>
+          <Heading level="h1" variant="page">Inventory Management</Heading>
+          <Text color="secondary">Track ingredients, packaging, and supplies</Text>
         </div>
         <Button variant="primary" size="md" onClick={() => setIsAddModalOpen(true)}>
           <PlusIcon class={styles.buttonIcon} />
@@ -360,15 +361,15 @@ const InventoryPage: Component = () => {
                           </td>
                           <td class={styles.tableCell}>
                             <div class={styles.actionsRow}>
-                              <button onClick={() => setSelectedItemId(item.id)} class={styles.actionLink}>
+                              <Button variant="text" size="sm" onClick={() => setSelectedItemId(item.id)}>
                                 Details
-                              </button>
-                              <button onClick={() => setEditItemId(item.id)} class={styles.actionLink}>
+                              </Button>
+                              <Button variant="text" size="sm" onClick={() => setEditItemId(item.id)}>
                                 Edit
-                              </button>
-                              <button onClick={() => handleDeleteClick(item)} class={styles.deleteLink}>
+                              </Button>
+                              <Button variant="text" size="sm" onClick={() => handleDeleteClick(item)} class={styles.deleteLink}>
                                 Delete
-                              </button>
+                              </Button>
                             </div>
                           </td>
                         </tr>
@@ -408,17 +409,17 @@ const InventoryPage: Component = () => {
       <Show when={showDeleteConfirm()}>
         <div class={styles.modalBackdrop} onClick={handleCancelDelete}>
           <div class={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-            <h3 class={styles.modalTitle}>Delete Inventory Item</h3>
-            <p class={styles.modalText}>
+            <Heading variant="card" class={styles.modalTitle}>Delete Inventory Item</Heading>
+            <Text class={styles.modalText}>
               Are you sure you want to delete "{itemToDelete()?.name}"? This action cannot be undone.
-            </p>
+            </Text>
             <div class={styles.modalActions}>
-              <button onClick={handleCancelDelete} class={styles.cancelButton}>
+              <Button variant="secondary" size="sm" onClick={handleCancelDelete}>
                 Cancel
-              </button>
-              <button onClick={handleConfirmDelete} class={styles.deleteButton}>
+              </Button>
+              <Button variant="danger" size="sm" onClick={handleConfirmDelete}>
                 Delete
-              </button>
+              </Button>
             </div>
           </div>
         </div>

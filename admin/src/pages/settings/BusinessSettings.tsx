@@ -4,6 +4,7 @@ import * as tenantsApi from '~/api/tenants'
 import type { Tenant, UpdateTenantData } from '~/api/tenants'
 import LoadingSpinner from "~/components/LoadingSpinner/LoadingSpinner"
 import Button from "~/components/common/Button"
+import { Heading, Text } from "~/components/common/Typography"
 import styles from './SettingsPage.module.css'
 
 const BusinessSettings: Component = () => {
@@ -95,10 +96,10 @@ const BusinessSettings: Component = () => {
     return (
       <div class={styles.container}>
         <div class={styles.settingsCard}>
-          <h3 class={styles.cardTitle}>Access Denied</h3>
-          <p style={{ color: 'var(--text-secondary)' }}>
+          <Heading variant="card" class={styles.cardTitle}>Access Denied</Heading>
+          <Text color="secondary">
             Only business owners can access business settings.
-          </p>
+          </Text>
         </div>
       </div>
     )
@@ -108,8 +109,8 @@ const BusinessSettings: Component = () => {
     <div class={styles.container}>
       <div class={styles.header}>
         <div class={styles.headerContent}>
-          <h1 class={styles.title}>Business Settings</h1>
-          <p class={styles.subtitle}>Manage your bakery business information and subscription</p>
+          <Heading level="h1" variant="page">Business Settings</Heading>
+          <Text color="secondary">Manage your bakery business information and subscription</Text>
         </div>
       </div>
 
@@ -147,7 +148,7 @@ const BusinessSettings: Component = () => {
         <div class={styles.settingsGrid}>
           {/* Subscription Status Card */}
           <div class={styles.settingsCard}>
-            <h3 class={styles.cardTitle}>Subscription Status</h3>
+            <Heading variant="card" class={styles.cardTitle}>Subscription Status</Heading>
             <div class={styles.formGroup}>
               <div style={{ display: 'flex', "align-items": 'center', gap: '0.5rem', "margin-bottom": '1rem' }}>
                 <span style={{
@@ -201,7 +202,7 @@ const BusinessSettings: Component = () => {
           {/* Business Information Card */}
           <div class={styles.settingsCard}>
             <div style={{ display: 'flex', "justify-content": 'space-between', "align-items": 'center', "margin-bottom": '1rem' }}>
-              <h3 class={styles.cardTitle} style={{ margin: 0 }}>Business Information</h3>
+              <Heading variant="card" class={styles.cardTitle} style={{ margin: 0 }}>Business Information</Heading>
               <Show when={!isEditMode()}>
                 <Button variant="secondary" size="sm" onClick={() => setIsEditMode(true)}>
                   Edit
@@ -292,7 +293,7 @@ const BusinessSettings: Component = () => {
 
           {/* Account Details Card */}
           <div class={styles.settingsCard}>
-            <h3 class={styles.cardTitle}>Account Details</h3>
+            <Heading variant="card" class={styles.cardTitle}>Account Details</Heading>
             <div class={styles.formGroup}>
               <div>
                 <label class={styles.label}>Tenant ID</label>

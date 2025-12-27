@@ -5,6 +5,7 @@ import type { InviteStaffData, UpdateStaffData } from '~/api/tenants'
 import type { StaffArea, StaffProfile } from '~/api/staff'
 import LoadingSpinner from "~/components/LoadingSpinner/LoadingSpinner"
 import Button from "~/components/common/Button"
+import { Heading, Text } from "~/components/common/Typography"
 import styles from './TeamPage.module.css'
 
 const STAFF_AREAS: { value: StaffArea; label: string }[] = [
@@ -165,8 +166,8 @@ const TeamPage: Component = () => {
     return (
       <div class={styles.container}>
         <div class={styles.accessDenied}>
-          <h3>Access Denied</h3>
-          <p>Only business owners can manage team members.</p>
+          <Heading variant="card">Access Denied</Heading>
+          <Text color="secondary">Only business owners can manage team members.</Text>
         </div>
       </div>
     )
@@ -176,8 +177,8 @@ const TeamPage: Component = () => {
     <div class={styles.container}>
       <div class={styles.header}>
         <div class={styles.headerContent}>
-          <h1 class={styles.title}>Team Management</h1>
-          <p class={styles.subtitle}>Manage your bakery staff and team members</p>
+          <Heading level="h1" variant="page">Team Management</Heading>
+          <Text color="secondary">Manage your bakery staff and team members</Text>
         </div>
         <Button variant="primary" onClick={() => setShowInviteModal(true)}>
           <svg class={styles.buttonIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -207,8 +208,8 @@ const TeamPage: Component = () => {
             <svg class={styles.emptyIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
-            <h3>No team members yet</h3>
-            <p>Invite your first staff member to get started.</p>
+            <Heading variant="card">No team members yet</Heading>
+            <Text color="secondary">Invite your first staff member to get started.</Text>
             <Button variant="primary" onClick={() => setShowInviteModal(true)}>
               Invite Staff Member
             </Button>
@@ -225,9 +226,9 @@ const TeamPage: Component = () => {
                       {staff.firstName?.[0]?.toUpperCase() || ''}{staff.lastName?.[0]?.toUpperCase() || ''}
                     </div>
                     <div class={styles.staffInfo}>
-                      <h3 class={styles.staffName}>{staff.firstName} {staff.lastName}</h3>
-                      <p class={styles.staffEmail}>{staff.email}</p>
-                      <p class={styles.staffPosition}>{staff.position || 'No position set'}</p>
+                      <Heading variant="card" class={styles.staffName}>{staff.firstName} {staff.lastName}</Heading>
+                      <Text variant="body-sm" color="muted" class={styles.staffEmail}>{staff.email}</Text>
+                      <Text variant="body-sm" class={styles.staffPosition}>{staff.position || 'No position set'}</Text>
                     </div>
                   </div>
 
@@ -280,7 +281,7 @@ const TeamPage: Component = () => {
         <div class={styles.modalOverlay} onClick={() => setShowInviteModal(false)}>
           <div class={styles.modal} onClick={(e) => e.stopPropagation()}>
             <div class={styles.modalHeader}>
-              <h2>Invite Staff Member</h2>
+              <Heading variant="section">Invite Staff Member</Heading>
               <button class={styles.closeButton} onClick={() => setShowInviteModal(false)}>
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="24" height="24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -386,7 +387,7 @@ const TeamPage: Component = () => {
         <div class={styles.modalOverlay} onClick={() => setShowEditModal(false)}>
           <div class={styles.modal} onClick={(e) => e.stopPropagation()}>
             <div class={styles.modalHeader}>
-              <h2>Edit Staff Member</h2>
+              <Heading variant="section">Edit Staff Member</Heading>
               <button class={styles.closeButton} onClick={() => setShowEditModal(false)}>
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="24" height="24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
