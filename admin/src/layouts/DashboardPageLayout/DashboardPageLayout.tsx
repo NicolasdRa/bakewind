@@ -22,6 +22,7 @@ const DashboardPageLayout: Component<DashboardPageLayoutProps> = (props) => {
             }
           </Show>
         </div>
+        {/* Desktop: inline actions */}
         <Show when={props.actions}>
           <div class={styles.headerActions}>
             {props.actions}
@@ -29,6 +30,13 @@ const DashboardPageLayout: Component<DashboardPageLayoutProps> = (props) => {
         </Show>
       </div>
       {props.children}
+
+      {/* Mobile: FAB */}
+      <Show when={props.actions}>
+        <div class={styles.fab}>
+          {props.actions}
+        </div>
+      </Show>
     </div>
   )
 }

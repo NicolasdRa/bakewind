@@ -6,12 +6,12 @@
   background-color: var(--bg-primary);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
-  padding: var(--spacing-4);
+  padding: var(--spacing-2) var(--spacing-4);
 }
 
 .periodButtons {
   display: flex;
-  gap: var(--spacing-4);
+  gap: var(--spacing-2);
 }
 
 /* Loading state */

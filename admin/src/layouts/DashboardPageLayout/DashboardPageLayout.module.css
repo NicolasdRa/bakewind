@@ -16,26 +16,34 @@
 }
 
 .headerActions {
+  display: none;
+}
+
+/* FAB - Mobile floating action button */
+.fab {
+  position: fixed;
+  bottom: calc(80px + var(--spacing-4) + env(safe-area-inset-bottom, 0px));
+  right: var(--spacing-4);
+  z-index: 40;
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--spacing-3);
+  flex-direction: column;
+  gap: var(--spacing-2);
 }
 
 /* Media Queries - Grouped by breakpoint */
-@media (max-width: 767px) {
-  .header {
-    flex-direction: column;
-    gap: var(--spacing-4);
-  }
-
-  .headerActions {
-    width: 100%;
-  }
-}
-
 @media (min-width: 768px) {
   .container {
     padding: var(--spacing-8);
+  }
+
+  .headerActions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--spacing-3);
+  }
+
+  .fab {
+    display: none;
   }
 }
