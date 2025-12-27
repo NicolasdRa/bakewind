@@ -9,6 +9,7 @@ interface TextProps {
   color?: TextColor
   as?: 'p' | 'span' | 'label'
   class?: string
+  classList?: Record<string, boolean | undefined>
   children: JSX.Element | string
 }
 
@@ -20,6 +21,11 @@ export default function Text(props: TextProps) {
   const className = () => {
     const classes = [styles.text, styles[`text-${variant()}`], styles[`color-${color()}`]]
     if (props.class) classes.push(props.class)
+    if (props.classList) {
+      Object.entries(props.classList).forEach(([cls, active]) => {
+        if (active) classes.push(cls)
+      })
+    }
     return classes.join(' ')
   }
 

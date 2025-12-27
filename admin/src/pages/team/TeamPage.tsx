@@ -3,6 +3,7 @@ import { useAuth } from "~/context/AuthContext"
 import * as tenantsApi from '~/api/tenants'
 import type { InviteStaffData, UpdateStaffData } from '~/api/tenants'
 import type { StaffArea, StaffProfile } from '~/api/staff'
+import DashboardPageLayout from "~/layouts/DashboardPageLayout"
 import LoadingSpinner from "~/components/LoadingSpinner/LoadingSpinner"
 import Button from "~/components/common/Button"
 import { Heading, Text } from "~/components/common/Typography"
@@ -164,30 +165,31 @@ const TeamPage: Component = () => {
   // Only show for OWNER role
   if (user()?.role !== 'OWNER') {
     return (
-      <div class={styles.container}>
+      <DashboardPageLayout
+        title="Team Management"
+        subtitle="Manage your bakery staff and team members"
+      >
         <div class={styles.accessDenied}>
           <Heading variant="card">Access Denied</Heading>
           <Text color="secondary">Only business owners can manage team members.</Text>
         </div>
-      </div>
+      </DashboardPageLayout>
     )
   }
 
   return (
-    <div class={styles.container}>
-      <div class={styles.header}>
-        <div class={styles.headerContent}>
-          <Heading level="h1" variant="page">Team Management</Heading>
-          <Text color="secondary">Manage your bakery staff and team members</Text>
-        </div>
+    <DashboardPageLayout
+      title="Team Management"
+      subtitle="Manage your bakery staff and team members"
+      actions={
         <Button variant="primary" onClick={() => setShowInviteModal(true)}>
           <svg class={styles.buttonIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
           </svg>
           <span class="btn-text">Invite Staff</span>
         </Button>
-      </div>
-
+      }
+    >
       <Show when={error()}>
         <div class={styles.errorBanner}>{error()}</div>
       </Show>
@@ -449,7 +451,7 @@ const TeamPage: Component = () => {
           </div>
         </div>
       </Show>
-    </div>
+    </DashboardPageLayout>
   )
 }
 

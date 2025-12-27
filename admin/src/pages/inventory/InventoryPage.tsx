@@ -1,5 +1,6 @@
 import { Component, createSignal, createResource, For, Show } from "solid-js";
 import { inventoryApi, InventoryItemWithTracking } from "~/api/inventory";
+import DashboardPageLayout from "~/layouts/DashboardPageLayout";
 import AddInventoryItemModal from "~/components/inventory/AddInventoryItemModal";
 import InventoryDetailsModal from "~/components/inventory/InventoryDetailsModal";
 import EditInventoryItemModal from "~/components/inventory/EditInventoryItemModal";
@@ -179,18 +180,16 @@ const InventoryPage: Component = () => {
   };
 
   return (
-    <div class={styles.pageContainer}>
-      <div class={styles.pageHeader}>
-        <div>
-          <Heading level="h1" variant="page">Inventory Management</Heading>
-          <Text color="secondary">Track ingredients, packaging, and supplies</Text>
-        </div>
+    <DashboardPageLayout
+      title="Inventory Management"
+      subtitle="Track ingredients, packaging, and supplies"
+      actions={
         <Button variant="primary" size="md" onClick={() => setIsAddModalOpen(true)}>
           <PlusIcon class={styles.buttonIcon} />
           <span class="btn-text">Add Item</span>
         </Button>
-      </div>
-
+      }
+    >
       {/* Stats Cards */}
       <div class={styles.statsGrid}>
         <StatsCard
@@ -424,7 +423,7 @@ const InventoryPage: Component = () => {
           </div>
         </div>
       </Show>
-    </div>
+    </DashboardPageLayout>
   );
 };
 

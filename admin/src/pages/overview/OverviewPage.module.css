@@ -1,29 +1,5 @@
-/* Index Route CSS Module */
+/* OverviewPage CSS Module */
 @reference "tailwindcss";
-
-/* Page layout */
-.container {
-  padding: var(--spacing-4);
-}
-
-/* Header section */
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: var(--spacing-8);
-}
-
-.headerContent {
-  flex: 1;
-}
-
-.headerActions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.75rem;
-}
 
 /* Action Buttons */
 .actionButtons {
@@ -105,21 +81,3 @@
   background-color: var(--error-lighter);
 }
 
-/* Media Queries - Mobile first, grouped by breakpoint */
-@media (max-width: 767px) {
-  .header {
-    flex-direction: column;
-    gap: var(--spacing-4);
-    align-items: stretch;
-  }
-
-  .headerActions {
-    justify-content: space-between;
-  }
-}
-
-@media (min-width: 768px) {
-  .container {
-    padding: var(--spacing-8);
-  }
-}

@@ -1,0 +1,41 @@
+/* DashboardPageLayout - Shared page container and header styles */
+
+.container {
+  padding: var(--spacing-4);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-8);
+}
+
+.headerContent {
+  flex: 1;
+}
+
+.headerActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-3);
+}
+
+/* Media Queries - Grouped by breakpoint */
+@media (max-width: 767px) {
+  .header {
+    flex-direction: column;
+    gap: var(--spacing-4);
+  }
+
+  .headerActions {
+    width: 100%;
+  }
+}
+
+@media (min-width: 768px) {
+  .container {
+    padding: var(--spacing-8);
+  }
+}

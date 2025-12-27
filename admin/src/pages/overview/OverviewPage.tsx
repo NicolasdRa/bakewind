@@ -1,10 +1,11 @@
 import { onMount } from 'solid-js'
+import DashboardPageLayout from '~/layouts/DashboardPageLayout'
 import DashboardErrorBoundary from '~/components/ErrorBoundary/DashboardErrorBoundary'
 import DashboardContent from "~/components/DashboardContent/DashboardContent"
 import ViewToggle from '~/components/ViewToggle/ViewToggle'
 import ActionButton from '~/components/ActionButton/ActionButton'
 import Button from '~/components/common/Button'
-import { Heading, Text } from '~/components/common/Typography'
+import { Text } from '~/components/common/Typography'
 import { useAppStore } from '~/stores/appStore'
 import { bakeryActions } from '~/stores/bakeryStore'
 import styles from './OverviewPage.module.css'
@@ -45,22 +46,17 @@ export default function OverviewPage() {
   })
 
   return (
-    <div class={styles.container}>
-      <div class={styles.header}>
-        <div class={styles.headerContent}>
-          <Heading level="h1" variant="page">BakeWind Bakery Dashboard</Heading>
-          <Text color="secondary">Welcome to your comprehensive bakery management workspace</Text>
-        </div>
-
-        <div class={styles.headerActions}>
-          {/* Layout Controls */}
+    <DashboardPageLayout
+      title="BakeWind Bakery Dashboard"
+      subtitle="Welcome to your comprehensive bakery management workspace"
+      actions={
+        <>
           <ViewToggle
             options={layoutOptions}
             currentValue={state.dashboardLayout}
             onChange={(layout) => actions.setDashboardLayout(layout as 'grid' | 'list' | 'masonry')}
           />
 
-          {/* Action Buttons */}
           <div class={styles.actionButtons}>
             <ActionButton
               onClick={() => actions.setShowWidgetModal(true)}
@@ -101,9 +97,9 @@ export default function OverviewPage() {
               </div>
             </div>
           </div>
-        </div>
-      </div>
-
+        </>
+      }
+    >
       <DashboardErrorBoundary
         fallbackIcon="🥐"
         fallbackTitle="Dashboard Error"
@@ -113,6 +109,6 @@ export default function OverviewPage() {
           layout={state.dashboardLayout}
         />
       </DashboardErrorBoundary>
-    </div>
+    </DashboardPageLayout>
   )
 }

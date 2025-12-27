@@ -1,23 +1,10 @@
 /* InternalOrdersPage - CSS Module */
 
-/* Page layout */
-.pageContainer {
-  padding: var(--spacing-4);
-}
-
 /* Button icon */
 .buttonIcon {
   width: 18px;
   height: 18px;
   flex-shrink: 0;
-}
-
-/* Header section */
-.pageHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: var(--spacing-8);
 }
 
 /* Stats grid */
@@ -316,10 +303,6 @@
 
 /* Media Queries - Grouped by breakpoint */
 @media (min-width: 768px) {
-  .pageContainer {
-    padding: var(--spacing-8);
-  }
-
   .statsGrid {
     grid-template-columns: repeat(3, 1fr);
   }

@@ -1,5 +1,6 @@
 import { Component} from "solid-js";
-import { Heading, Text } from "~/components/common/Typography";
+import DashboardPageLayout from "~/layouts/DashboardPageLayout";
+import { Heading } from "~/components/common/Typography";
 import styles from './SettingsPage.module.css'
 
 
@@ -7,14 +8,10 @@ const SettingsPage: Component = () => {
 
 
   return (
-       <div class={styles.container}>
-        <div class={styles.header}>
-          <div class={styles.headerContent}>
-            <Heading level="h1" variant="page">Settings</Heading>
-            <Text color="secondary">Configure your dashboard settings and manage system preferences</Text>
-          </div>
-        </div>
-
+    <DashboardPageLayout
+      title="Settings"
+      subtitle="Configure your dashboard settings and manage system preferences"
+    >
         <div class={styles.settingsGrid}>
           <div class={styles.settingsCard}>
             <Heading variant="card" class={styles.cardTitle}>General Settings</Heading>
@@ -56,7 +53,7 @@ const SettingsPage: Component = () => {
             </div>
           </div>
         </div>
-      </div>
+    </DashboardPageLayout>
   );
 };
 

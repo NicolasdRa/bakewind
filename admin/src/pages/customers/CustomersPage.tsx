@@ -1,5 +1,6 @@
 import { Component, createSignal, createResource, createEffect, For, Show } from "solid-js";
 import { Customer, customersApi, CustomerQueryParams, CustomersResponse, ImportResult, CreateCustomerDto } from "../../api/customers";
+import DashboardPageLayout from "~/layouts/DashboardPageLayout";
 import CustomerFormModal from "../../components/customers/CustomerFormModal";
 import CustomerDetailsModal from "../../components/customers/CustomerDetailsModal";
 import Badge from "../../components/common/Badge";
@@ -193,12 +194,10 @@ const CustomersPage: Component = () => {
   };
 
   return (
-    <div class={styles.pageContainer}>
-      <div class={styles.pageHeader}>
-        <Heading level="h1" variant="page">Customer Management</Heading>
-        <Text color="secondary">Manage customer information and relationships</Text>
-      </div>
-
+    <DashboardPageLayout
+      title="Customer Management"
+      subtitle="Manage customer information and relationships"
+    >
       {/* Stats Cards */}
       <div class={styles.statsGrid}>
         <div class={styles.statCard}>
@@ -581,7 +580,7 @@ const CustomersPage: Component = () => {
           </div>
         </div>
       </Show>
-    </div>
+    </DashboardPageLayout>
   );
 };
 

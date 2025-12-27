@@ -1,19 +1,10 @@
 /* CustomersPage - CSS Module */
 
-/* Page layout */
-.pageContainer {
-  padding: var(--spacing-4);
-}
-
 /* Button icon */
 .buttonIcon {
   width: 18px;
   height: 18px;
   flex-shrink: 0;
-}
-
-.pageHeader {
-  margin-bottom: var(--spacing-6);
 }
 
 /* Stats grid */
@@ -518,10 +509,6 @@
 }
 
 @media (min-width: 768px) {
-  .pageContainer {
-    padding: var(--spacing-8);
-  }
-
   .statsGrid {
     grid-template-columns: repeat(4, 1fr);
   }

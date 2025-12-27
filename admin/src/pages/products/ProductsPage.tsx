@@ -1,5 +1,6 @@
 import { Component, createSignal, createResource, For, Show } from "solid-js";
 import { productsApi, Product, ProductCategory, ProductStatus, CreateProductRequest, UpdateProductRequest } from "~/api/products";
+import DashboardPageLayout from "~/layouts/DashboardPageLayout";
 import ProductFormModal from "~/components/products/ProductFormModal";
 import StatsCard from "~/components/common/StatsCard";
 import SearchInput from "~/components/common/SearchInput";
@@ -200,18 +201,16 @@ const ProductsPage: Component = () => {
   };
 
   return (
-    <div class={styles.pageContainer}>
-      <div class={styles.pageHeader}>
-        <div>
-          <Heading level="h1" variant="page">Products Management</Heading>
-          <Text color="secondary">Manage your bakery products and menu items</Text>
-        </div>
+    <DashboardPageLayout
+      title="Products Management"
+      subtitle="Manage your bakery products and menu items"
+      actions={
         <Button variant="primary" size="md" onClick={handleCreate}>
           <PlusIcon class={styles.buttonIcon} />
           <span class="btn-text">Create Product</span>
         </Button>
-      </div>
-
+      }
+    >
       {/* Stats Cards */}
       <div class={styles.statsGrid}>
         <StatsCard
@@ -450,7 +449,7 @@ const ProductsPage: Component = () => {
           </div>
         </div>
       </Show>
-    </div>
+    </DashboardPageLayout>
   );
 };
 

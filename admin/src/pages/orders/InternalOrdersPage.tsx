@@ -7,6 +7,7 @@ import {
   UpdateInternalOrderRequest
 } from "~/api/internalOrders";
 import { productionApi } from "~/api/production";
+import DashboardPageLayout from "~/layouts/DashboardPageLayout";
 import StatsCard from "~/components/common/StatsCard";
 import SearchInput from "~/components/common/SearchInput";
 import FilterSelect from "~/components/common/FilterSelect";
@@ -338,19 +339,16 @@ const InternalOrdersPage: Component = () => {
   };
 
   return (
-    <div class={styles.pageContainer}>
-      {/* Header */}
-      <div class={styles.pageHeader}>
-        <div>
-          <Heading level="h1" variant="page">Internal Production Orders</Heading>
-          <Text color="secondary">Track and manage internal production orders</Text>
-        </div>
+    <DashboardPageLayout
+      title="Internal Production Orders"
+      subtitle="Track and manage internal production orders"
+      actions={
         <Button variant="primary" size="md" onClick={handleCreateNew}>
           <PlusIcon class={styles.buttonIcon} />
           <span class="btn-text">Create Order</span>
         </Button>
-      </div>
-
+      }
+    >
       {/* Stats Cards */}
       <div class={styles.statsGrid}>
         <StatsCard
@@ -665,7 +663,7 @@ const InternalOrdersPage: Component = () => {
           </div>
         </div>
       </Show>
-    </div>
+    </DashboardPageLayout>
   );
 };
 

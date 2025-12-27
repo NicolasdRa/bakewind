@@ -8,6 +8,7 @@ interface HeadingProps {
   level?: HeadingLevel
   variant?: HeadingVariant
   class?: string
+  classList?: Record<string, boolean | undefined>
   children: JSX.Element | string
 }
 
@@ -18,6 +19,11 @@ export default function Heading(props: HeadingProps) {
   const className = () => {
     const classes = [styles.heading, styles[`heading-${variant()}`]]
     if (props.class) classes.push(props.class)
+    if (props.classList) {
+      Object.entries(props.classList).forEach(([cls, active]) => {
+        if (active) classes.push(cls)
+      })
+    }
     return classes.join(' ')
   }
 

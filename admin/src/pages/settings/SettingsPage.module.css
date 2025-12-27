@@ -1,23 +1,6 @@
 /* Settings Page - CSS Module */
 @reference "tailwindcss";
 
-/* Page layout - matching other pages */
-.container {
-  padding: var(--spacing-4);
-}
-
-/* Header section */
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: var(--spacing-8);
-}
-
-.headerContent {
-  flex: 1;
-}
-
 /* Enhanced Settings Grid */
 .settingsGrid {
   @apply grid grid-cols-1;
@@ -198,12 +181,6 @@
 }
 
 /* Media Queries - Grouped by breakpoint */
-@media (min-width: 768px) {
-  .container {
-    padding: var(--spacing-8);
-  }
-}
-
 @media (min-width: 1024px) {
   .settingsGrid {
     @apply grid-cols-2;

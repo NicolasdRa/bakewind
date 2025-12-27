@@ -1,25 +1,6 @@
 /* Team Management Page Styles */
 @reference "tailwindcss";
 
-.container {
-  padding: var(--spacing-4);
-  max-width: var(--section-max-width);
-  margin: 0 auto;
-  animation: fadeIn var(--duration-base) var(--easing-out);
-}
-
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: var(--grid-gap-lg);
-  animation: slideInLeft var(--duration-slower) var(--easing-spring);
-}
-
-.headerContent {
-  flex: 1;
-}
-
 .buttonIcon {
   width: 1rem;
   height: 1rem;
@@ -382,9 +363,4 @@
   }
 }
 
-/* Media Queries - Grouped by breakpoint */
-@media (min-width: 768px) {
-  .container {
-    padding: var(--spacing-8);
-  }
-}
+/* Removed - handled by DashboardPageLayout */

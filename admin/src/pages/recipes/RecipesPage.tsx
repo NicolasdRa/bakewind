@@ -1,4 +1,5 @@
 import { Component, createSignal, For, Show, onMount } from "solid-js";
+import DashboardPageLayout from "~/layouts/DashboardPageLayout";
 import StatsCard from "~/components/common/StatsCard";
 import SearchInput from "~/components/common/SearchInput";
 import FilterSelect from "~/components/common/FilterSelect";
@@ -308,12 +309,10 @@ const RecipesPage: Component = () => {
   };
 
   return (
-    <div class={styles.pageContainer}>
-      <div class={styles.pageHeader}>
-        <div>
-          <Heading level="h1" variant="page">Recipe Management</Heading>
-          <Text color="secondary">Manage your bakery's recipe collection</Text>
-        </div>
+    <DashboardPageLayout
+      title="Recipe Management"
+      subtitle="Manage your bakery's recipe collection"
+      actions={
         <Button
           variant="primary"
           size="md"
@@ -323,8 +322,8 @@ const RecipesPage: Component = () => {
           <PlusIcon class={styles.buttonIcon} />
           <span class="btn-text">Add Recipe</span>
         </Button>
-      </div>
-
+      }
+    >
       {/* Error Display */}
       <Show when={error()}>
         <div class={styles.errorBox}>
@@ -522,7 +521,7 @@ const RecipesPage: Component = () => {
           </div>
         </div>
       </Show>
-    </div>
+    </DashboardPageLayout>
   );
 };
 

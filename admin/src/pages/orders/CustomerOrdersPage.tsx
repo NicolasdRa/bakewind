@@ -2,6 +2,7 @@
 import { Component, createSignal, onMount, For, Show } from "solid-js";
 import { customerOrdersApi, CustomerOrder, CustomerOrderStatus } from "~/api/orders";
 import { productionApi } from "~/api/production";
+import DashboardPageLayout from "~/layouts/DashboardPageLayout";
 import StatsCard from "~/components/common/StatsCard";
 import SearchInput from "~/components/common/SearchInput";
 import FilterSelect from "~/components/common/FilterSelect";
@@ -192,13 +193,10 @@ const CustomerOrdersPage: Component = () => {
   };
 
   return (
-    <div class={styles.pageContainer}>
-      {/* Header */}
-      <div class={styles.pageHeader}>
-        <Heading level="h1" variant="page">Customer Orders</Heading>
-        <Text color="secondary">Manage and track customer orders</Text>
-      </div>
-
+    <DashboardPageLayout
+      title="Customer Orders"
+      subtitle="Manage and track customer orders"
+    >
       {/* Stats Cards */}
       <div class={styles.statsGrid}>
         <StatsCard
@@ -395,7 +393,7 @@ const CustomerOrdersPage: Component = () => {
           </div>
         </div>
       </Show>
-    </div>
+    </DashboardPageLayout>
   );
 };
 

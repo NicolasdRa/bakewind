@@ -1,18 +1,5 @@
 /* ProductionPage - CSS Module */
 
-/* Page layout */
-.pageContainer {
-  padding: var(--spacing-4);
-}
-
-/* Header section */
-.pageHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: var(--spacing-8);
-}
-
 /* Stats grid */
 .statsGrid {
   display: grid;
@@ -143,10 +130,6 @@
 
 /* Media Queries - Grouped by breakpoint */
 @media (min-width: 768px) {
-  .pageContainer {
-    padding: var(--spacing-8);
-  }
-
   .statsGrid {
     grid-template-columns: repeat(4, 1fr);
   }

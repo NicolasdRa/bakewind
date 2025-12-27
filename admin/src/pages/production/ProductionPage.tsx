@@ -2,6 +2,7 @@ import { Component, createSignal, For, Show, onMount } from "solid-js";
 import { productionApi, ProductionSchedule, ProductionItem, ProductionStatus } from "~/api/production";
 import { useInfoModal } from "~/stores/infoModalStore";
 import { formatLocalDate, formatTime, getCurrentDateString } from "~/utils/dateUtils";
+import DashboardPageLayout from "~/layouts/DashboardPageLayout";
 import StatsCard from "~/components/common/StatsCard";
 import DatePicker from "~/components/common/DatePicker";
 import FilterSelect from "~/components/common/FilterSelect";
@@ -98,14 +99,10 @@ const ProductionPage: Component = () => {
   };
 
   return (
-    <div class={styles.pageContainer}>
-      <div class={styles.pageHeader}>
-        <div>
-          <Heading level="h1" variant="page">Production Batches</Heading>
-          <Text color="secondary">View and manage active production schedules</Text>
-        </div>
-      </div>
-
+    <DashboardPageLayout
+      title="Production Batches"
+      subtitle="View and manage active production schedules"
+    >
       {/* Stats Cards */}
       <div class={styles.statsGrid}>
         <StatsCard
@@ -267,7 +264,7 @@ const ProductionPage: Component = () => {
           </Show>
         </Show>
       </div>
-    </div>
+    </DashboardPageLayout>
   );
 };
 

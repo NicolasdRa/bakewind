@@ -1,5 +1,6 @@
 import { Component, createSignal, createResource, For, Show } from "solid-js";
 import { analyticsApi } from "../../api/analytics";
+import DashboardPageLayout from "~/layouts/DashboardPageLayout";
 import Button from "~/components/common/Button";
 import { Heading, Text } from "~/components/common/Typography";
 import styles from "./AnalyticsPage.module.css";
@@ -65,12 +66,10 @@ const AnalyticsPage: Component = () => {
   };
 
   return (
-    <div class={styles.pageContainer}>
-      <div class={styles.pageHeader}>
-        <Heading level="h1" variant="page">Analytics & Reports</Heading>
-        <Text color="secondary">Track performance and business insights</Text>
-      </div>
-
+    <DashboardPageLayout
+      title="Analytics & Reports"
+      subtitle="Track performance and business insights"
+    >
       {/* Period Selection */}
       <div class={styles.periodCard}>
         <div class={styles.periodButtons}>
@@ -325,7 +324,7 @@ const AnalyticsPage: Component = () => {
           </div>
         </div>
       </Show>
-    </div>
+    </DashboardPageLayout>
   );
 };
 

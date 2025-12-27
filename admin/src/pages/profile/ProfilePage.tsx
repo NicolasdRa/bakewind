@@ -1,6 +1,7 @@
 import { Component, createSignal, createEffect, createMemo, Show } from "solid-js"
 import { useAuth } from "~/context/AuthContext"
 import * as usersApi from '~/api/users'
+import DashboardPageLayout from "~/layouts/DashboardPageLayout"
 import LoadingSpinner from "~/components/LoadingSpinner/LoadingSpinner"
 import Button from "~/components/common/Button"
 import DatePicker from "~/components/common/DatePicker"
@@ -318,7 +319,61 @@ const ProfilePage: Component = () => {
   }
 
   return (
-    <div class={styles.container}>
+    <DashboardPageLayout
+      title="Profile Settings"
+      subtitle={
+        <>
+          <Show when={!isEditMode()}>
+            <Text color="secondary">View and manage your personal information</Text>
+          </Show>
+          <Show when={isEditMode()}>
+            <Text color="secondary" class={styles.editingSubtitle}>Editing profile information</Text>
+          </Show>
+        </>
+      }
+      actions={
+        <>
+          <Show when={saveMessage()}>
+            <div class={styles.successMessage}>
+              {saveMessage()}
+            </div>
+          </Show>
+
+          <Show when={!isEditMode()}>
+            <Button
+              onClick={handleEnterEditMode}
+              variant="primary"
+              size="sm"
+            >
+              <svg class={styles.editIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+              Edit Profile
+            </Button>
+          </Show>
+
+          <Show when={isEditMode()}>
+            <div class={styles.editActions}>
+              <Button
+                onClick={handleCancelEdit}
+                variant="secondary"
+                size="sm"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSaveProfile}
+                disabled={isUpdating()}
+                variant="primary"
+                size="sm"
+              >
+                {isUpdating() ? 'Saving...' : 'Save Changes'}
+              </Button>
+            </div>
+          </Show>
+        </>
+      }
+    >
       <Show when={isLoading()}>
         <div class={styles.loadingContainer}>
           <LoadingSpinner message="Loading profile..." />
@@ -326,60 +381,6 @@ const ProfilePage: Component = () => {
       </Show>
 
       <Show when={!isLoading() && user()}>
-        {/* Header with Edit/Save Actions */}
-        <div class={styles.header}>
-          <div class={styles.headerContent}>
-            <Heading level="h1" variant="page">Profile Settings</Heading>
-            <Show when={!isEditMode()}>
-              <Text color="secondary">View and manage your personal information</Text>
-            </Show>
-            <Show when={isEditMode()}>
-              <Text color="secondary" class={styles.editingSubtitle}>Editing profile information</Text>
-            </Show>
-          </div>
-
-          <div class={styles.headerActions}>
-            <Show when={saveMessage()}>
-              <div class={styles.successMessage}>
-                {saveMessage()}
-              </div>
-            </Show>
-
-            <Show when={!isEditMode()}>
-              <Button
-                onClick={handleEnterEditMode}
-                variant="primary"
-                size="sm"
-              >
-                <svg class={styles.editIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                </svg>
-                Edit Profile
-              </Button>
-            </Show>
-
-            <Show when={isEditMode()}>
-              <div class={styles.editActions}>
-                <Button
-                  onClick={handleCancelEdit}
-                  variant="secondary"
-                  size="sm"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={handleSaveProfile}
-                  disabled={isUpdating()}
-                  variant="primary"
-                  size="sm"
-                >
-                  {isUpdating() ? 'Saving...' : 'Save Changes'}
-                </Button>
-              </div>
-            </Show>
-          </div>
-        </div>
-
         {/* Personal Information Section */}
         <div class={styles.section}>
               <Heading variant="section" class={styles.sectionTitle}>
@@ -740,7 +741,7 @@ const ProfilePage: Component = () => {
           </div>
         </Show>
       </Show>
-    </div>
+    </DashboardPageLayout>
   )
 };
 
