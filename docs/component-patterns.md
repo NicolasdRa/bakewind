@@ -517,3 +517,48 @@ When refactoring a component:
 11. [ ] Create/update CSS module with proper organization
 12. [ ] Remove unused CSS classes (especially .form, .error, .success, .links)
 13. [ ] Ensure media queries are grouped at bottom
+
+---
+
+## SolidJS & Architecture Patterns
+
+Patterns are categorized by enforcement level. Not all patterns apply universally.
+
+### RULES (Always Follow)
+
+Non-negotiable standards:
+
+- **CSS Modules only** - no inline styles or Tailwind classes
+- **CSS Variables** - use design system tokens (`--text-primary`, `--spacing-2`, etc.)
+- **Typography components** - use `Heading`/`Text` for all text content
+- **Centralized Icons** - all SVGs in `~/components/Icons`
+- **No `any` types** - use proper TypeScript typing
+
+### RECOMMENDATIONS (Default Practice)
+
+Follow unless there's a good reason to deviate:
+
+- **`createStore` for collections** - use for objects/arrays with multiple items
+- **Module-level constants** - define static data outside component functions
+- **Thin page components** - delegate complex logic to specialized child components
+- **No side effects in hooks** - avoid `createEffect` inside reusable hooks
+
+### PATTERNS (Situational)
+
+Apply when the specific conditions are met:
+
+| Pattern | When to Apply |
+|---------|---------------|
+| `createMemo` | Expensive computations or derived values accessed 2+ times |
+| `classList` | **Only** for conditional classes; use `class` for static classes |
+| Factory functions | 3+ entities with identical CRUD operations |
+| Dedicated stores | State is shared across multiple unrelated components |
+| Component extraction | Logic exceeds ~50 lines OR is reused in 2+ places |
+| Constants file extraction | Constants are used by multiple files |
+
+### ANTI-PATTERNS (Avoid)
+
+- **Callback registration between stores** - creates hidden dependencies
+- **Static data inside components** - recreates on every render
+- **`createEffect` inside multi-use hooks** - runs for every component using the hook
+- **`classList={{ [styles.foo]: true }}`** - use `class={styles.foo}` for non-conditional classes

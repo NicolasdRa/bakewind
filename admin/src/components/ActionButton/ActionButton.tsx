@@ -1,4 +1,4 @@
-import { JSX } from 'solid-js'
+import { JSX, createMemo } from 'solid-js'
 import styles from './ActionButton.module.css'
 
 export type ActionButtonVariant = 'primary' | 'secondary'
@@ -19,9 +19,9 @@ interface ActionButtonProps {
 }
 
 export default function ActionButton(props: ActionButtonProps) {
-  const variant = () => props.variant || 'primary'
-  const size = () => props.size || 'md'
-  
+  const variant = createMemo(() => props.variant || 'primary')
+  const size = createMemo(() => props.size || 'md')
+
   return (
     <button
       type={props.type || 'button'}
@@ -29,29 +29,21 @@ export default function ActionButton(props: ActionButtonProps) {
       disabled={props.disabled}
       title={props.title}
       class={`${styles.actionButton} ${styles[variant()]} ${styles[size()]} ${props.class || ''}`}
-      classList={{
-        [styles.disabled]: props.disabled
-      }}
+      classList={{ [styles.disabled]: props.disabled }}
     >
       {props.icon && props.iconPosition !== 'right' && (
-        <span class={`${styles.icon} ${styles.iconLeft}`}>
-          {props.icon}
-        </span>
+        <span class={`${styles.icon} ${styles.iconLeft}`}>{props.icon}</span>
       )}
-      
-      <span 
+
+      <span
         class={styles.text}
-        classList={{
-          [styles.textHiddenMobile]: props.hideTextOnMobile
-        }}
+        classList={{ [styles.textHiddenMobile]: props.hideTextOnMobile }}
       >
         {props.children}
       </span>
-      
+
       {props.icon && props.iconPosition === 'right' && (
-        <span class={`${styles.icon} ${styles.iconRight}`}>
-          {props.icon}
-        </span>
+        <span class={`${styles.icon} ${styles.iconRight}`}>{props.icon}</span>
       )}
     </button>
   )

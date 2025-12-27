@@ -1,5 +1,4 @@
 import { createStore } from 'solid-js/store'
-import { createEffect } from 'solid-js'
 
 // Define the app state interface
 interface AppState {
@@ -20,12 +19,6 @@ const [appState, setAppState] = createStore<AppState>({
   showWidgetModal: false,
   dashboardLayout: 'grid'
 })
-
-// Dashboard action callbacks for widget management
-const dashboardCallbacks = {
-  clearLayout: null as (() => void) | null,
-  resetLayout: null as (() => void) | null
-}
 
 // Store actions
 export const appActions = {
@@ -62,28 +55,6 @@ export const appActions = {
     localStorage.setItem('dashboardLayout', layout)
   },
 
-  // Dashboard actions
-  clearLayout: () => {
-    if (dashboardCallbacks.clearLayout) {
-      dashboardCallbacks.clearLayout()
-    }
-  },
-
-  resetLayout: () => {
-    if (dashboardCallbacks.resetLayout) {
-      dashboardCallbacks.resetLayout()
-    }
-  },
-
-  // Callback registration for dashboard actions
-  onClearLayout: (callback: () => void) => {
-    dashboardCallbacks.clearLayout = callback
-  },
-
-  onResetLayout: (callback: () => void) => {
-    dashboardCallbacks.resetLayout = callback
-  },
-
   // Initialize client state
   initializeClientState: () => {
     // Load saved states from localStorage
@@ -105,14 +76,7 @@ export const appActions = {
 export { appState }
 
 // Export a composable for easy component integration
-export const useAppStore = () => {
-  // Set up theme reactive effect inside the hook (avoids createRoot warning)
-  createEffect(() => {
-    document.documentElement.setAttribute('data-theme', appState.theme)
-  })
-
-  return {
-    state: appState,
-    actions: appActions
-  }
-}
+export const useAppStore = () => ({
+  state: appState,
+  actions: appActions
+})

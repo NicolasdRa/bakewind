@@ -1,4 +1,4 @@
-import { createStore } from 'solid-js/store'
+import { createStore, SetStoreFunction } from 'solid-js/store'
 import type {
   Order,
   InternalOrder,
@@ -13,6 +13,28 @@ import type {
 } from '~/types/bakery'
 import { mockOrders, mockProducts, mockInventoryItems, mockCustomers, mockInternalOrders, mockRecipes, mockMetrics } from '~/mocks/mockData'
 import { logger } from '~/utils/logger'
+
+// Factory for creating standard CRUD actions
+function createEntityActions<T extends { id: string }>(
+  setState: SetStoreFunction<BakeryState>,
+  entityKey: keyof BakeryState,
+  listKey: 'list' | 'items' = 'list'
+) {
+  return {
+    setAll: (items: T[]) => {
+      setState(entityKey as any, listKey, items)
+    },
+    add: (item: T) => {
+      setState(entityKey as any, listKey, (prev: T[]) => [...prev, item])
+    },
+    update: (id: string, updates: Partial<T>) => {
+      setState(entityKey as any, listKey, (item: T) => item.id === id, updates as any)
+    },
+    setLoading: (loading: boolean) => {
+      setState(entityKey as any, 'loading', loading)
+    }
+  }
+}
 
 interface BakeryState {
   orders: {
@@ -100,110 +122,70 @@ const [bakeryState, setBakeryState] = createStore<BakeryState>({
   alerts: []
 })
 
+// Create entity-specific actions using factory
+const orderActions = createEntityActions<Order>(setBakeryState, 'orders')
+const productActions = createEntityActions<Product>(setBakeryState, 'products')
+const recipeActions = createEntityActions<Recipe>(setBakeryState, 'recipes')
+const customerActions = createEntityActions<Customer>(setBakeryState, 'customers')
+const inventoryActions = createEntityActions<InventoryItem>(setBakeryState, 'inventory', 'items')
+const internalOrderActions = createEntityActions<InternalOrder>(setBakeryState, 'internalOrders')
+
 export const bakeryActions = {
-  // Order Management
-  setOrders: (orders: Order[]) => {
-    setBakeryState('orders', 'list', orders)
-  },
-
-  addOrder: (order: Order) => {
-    setBakeryState('orders', 'list', (prev) => [...prev, order])
-  },
-
-  updateOrder: (orderId: string, updates: Partial<Order>) => {
-    setBakeryState('orders', 'list', (order) => order.id === orderId, updates)
-  },
-
+  // Order Management (factory + custom)
+  setOrders: orderActions.setAll,
+  addOrder: orderActions.add,
+  updateOrder: orderActions.update,
+  setOrdersLoading: orderActions.setLoading,
   setOrderFilter: (filter: { status?: string; date?: Date; source?: string }) => {
     setBakeryState('orders', 'filter', filter)
   },
 
-  setOrdersLoading: (loading: boolean) => {
-    setBakeryState('orders', 'loading', loading)
-  },
-
-  // Inventory Management
+  // Inventory Management (factory + custom)
   setInventory: (items: InventoryItem[]) => {
-    setBakeryState('inventory', {
-      items,
-      lastUpdated: new Date()
-    })
+    setBakeryState('inventory', { items, lastUpdated: new Date() })
+  },
+  addInventoryItem: inventoryActions.add,
+  updateInventoryItem: inventoryActions.update,
+  setInventoryLoading: inventoryActions.setLoading,
+
+  // Product Management (factory)
+  setProducts: productActions.setAll,
+  addProduct: productActions.add,
+  updateProduct: productActions.update,
+  setProductsLoading: productActions.setLoading,
+
+  // Recipe Management (factory)
+  setRecipes: recipeActions.setAll,
+  addRecipe: recipeActions.add,
+  updateRecipe: recipeActions.update,
+  setRecipesLoading: recipeActions.setLoading,
+
+  // Customer Management (factory)
+  setCustomers: customerActions.setAll,
+  addCustomer: customerActions.add,
+  updateCustomer: customerActions.update,
+
+  // Internal Order Management (factory + custom)
+  setInternalOrders: internalOrderActions.setAll,
+  addInternalOrder: internalOrderActions.add,
+  updateInternalOrder: internalOrderActions.update,
+  setInternalOrdersLoading: internalOrderActions.setLoading,
+  setInternalOrderFilter: (filter: { status?: string; source?: string; priority?: string; date?: Date }) => {
+    setBakeryState('internalOrders', 'filter', filter)
   },
 
-  updateInventoryItem: (itemId: string, updates: Partial<InventoryItem>) => {
-    setBakeryState('inventory', 'items', (item) => item.id === itemId, updates)
-  },
-
-  addInventoryItem: (item: InventoryItem) => {
-    setBakeryState('inventory', 'items', (prev) => [...prev, item])
-  },
-
-  setInventoryLoading: (loading: boolean) => {
-    setBakeryState('inventory', 'loading', loading)
-  },
-
-  // Product Management
-  setProducts: (products: Product[]) => {
-    setBakeryState('products', 'list', products)
-  },
-
-  addProduct: (product: Product) => {
-    setBakeryState('products', 'list', (prev) => [...prev, product])
-  },
-
-  updateProduct: (productId: string, updates: Partial<Product>) => {
-    setBakeryState('products', 'list', (product) => product.id === productId, updates)
-  },
-
-  setProductsLoading: (loading: boolean) => {
-    setBakeryState('products', 'loading', loading)
-  },
-
-  // Recipe Management
-  setRecipes: (recipes: Recipe[]) => {
-    setBakeryState('recipes', 'list', recipes)
-  },
-
-  addRecipe: (recipe: Recipe) => {
-    setBakeryState('recipes', 'list', (prev) => [...prev, recipe])
-  },
-
-  updateRecipe: (recipeId: string, updates: Partial<Recipe>) => {
-    setBakeryState('recipes', 'list', (recipe) => recipe.id === recipeId, updates)
-  },
-
-  setRecipesLoading: (loading: boolean) => {
-    setBakeryState('recipes', 'loading', loading)
-  },
-
-  // Production Management
+  // Production Management (unique - no factory pattern fits)
   setProductionSchedules: (schedules: ProductionSchedule[]) => {
     setBakeryState('production', 'schedules', schedules)
   },
-
   setCurrentSchedule: (schedule: ProductionSchedule) => {
     setBakeryState('production', 'currentSchedule', schedule)
   },
-
   setProductionDemand: (demand: ProductionDemand[]) => {
     setBakeryState('production', 'demand', demand)
   },
-
   setProductionLoading: (loading: boolean) => {
     setBakeryState('production', 'loading', loading)
-  },
-
-  // Customer Management
-  setCustomers: (customers: Customer[]) => {
-    setBakeryState('customers', 'list', customers)
-  },
-
-  addCustomer: (customer: Customer) => {
-    setBakeryState('customers', 'list', (prev) => [...prev, customer])
-  },
-
-  updateCustomer: (customerId: string, updates: Partial<Customer>) => {
-    setBakeryState('customers', 'list', (customer) => customer.id === customerId, updates)
   },
 
   // Dashboard Metrics
@@ -211,53 +193,31 @@ export const bakeryActions = {
     setBakeryState('metrics', metrics)
   },
 
-  // Alerts
+  // Alerts (unique pattern)
   setAlerts: (alerts: Alert[]) => {
     setBakeryState('alerts', alerts)
   },
-
   addAlert: (alert: Alert) => {
     setBakeryState('alerts', (prev) => [...prev, alert])
   },
-
   markAlertRead: (alertId: string) => {
     setBakeryState('alerts', (alert) => alert.id === alertId, 'read', true)
   },
-
   removeAlert: (alertId: string) => {
     setBakeryState('alerts', (prev) => prev.filter(a => a.id !== alertId))
   },
 
-  // Internal Order Management
-  setInternalOrders: (orders: InternalOrder[]) => {
-    setBakeryState('internalOrders', 'list', orders)
-  },
-
-  addInternalOrder: (order: InternalOrder) => {
-    setBakeryState('internalOrders', 'list', (prev) => [...prev, order])
-  },
-
-  updateInternalOrder: (orderId: string, updates: Partial<InternalOrder>) => {
-    setBakeryState('internalOrders', 'list', (order) => order.id === orderId, updates)
-  },
-
-  setInternalOrderFilter: (filter: any) => {
-    setBakeryState('internalOrders', 'filter', filter)
-  },
-
-  setInternalOrdersLoading: (loading: boolean) => {
-    setBakeryState('internalOrders', 'loading', loading)
-  },
-
   // Mock data loader for development
   loadMockData: () => {
-    setBakeryState('orders', 'list', mockOrders)
-    setBakeryState('products', 'list', mockProducts)
-    setBakeryState('inventory', 'items', mockInventoryItems)
-    setBakeryState('customers', 'list', mockCustomers)
-    setBakeryState('internalOrders', 'list', mockInternalOrders)
-    setBakeryState('recipes', 'list', mockRecipes)
-    setBakeryState('metrics', mockMetrics)
+    setBakeryState({
+      orders: { ...bakeryState.orders, list: mockOrders },
+      products: { ...bakeryState.products, list: mockProducts },
+      inventory: { ...bakeryState.inventory, items: mockInventoryItems },
+      customers: { ...bakeryState.customers, list: mockCustomers },
+      internalOrders: { ...bakeryState.internalOrders, list: mockInternalOrders },
+      recipes: { ...bakeryState.recipes, list: mockRecipes },
+      metrics: mockMetrics
+    })
     logger.info('Mock bakery data loaded successfully')
   },
 }
