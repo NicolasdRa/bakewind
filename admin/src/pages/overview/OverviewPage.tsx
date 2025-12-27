@@ -9,6 +9,7 @@ import { Text } from '~/components/common/Typography'
 import { useAppStore } from '~/stores/appStore'
 import { bakeryActions } from '~/stores/bakeryStore'
 import styles from './OverviewPage.module.css'
+import { logger } from '~/utils/logger'
 
 export default function OverviewPage() {
   const { state, actions } = useAppStore()
@@ -42,7 +43,7 @@ export default function OverviewPage() {
   onMount(() => {
     // Load mock bakery data on mount
     bakeryActions.loadMockData()
-    console.log('BakeWind Bakery Dashboard initialized')
+    logger.info('BakeWind Bakery Dashboard initialized')
   })
 
   return (

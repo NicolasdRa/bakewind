@@ -16,6 +16,7 @@ import OrdersWidget from '../widgets/OrdersWidget/OrdersWidget'
 import InventoryWidget from '../widgets/InventoryWidget/InventoryWidget'
 import ProductionWidget from '../widgets/ProductionWidget/ProductionWidget'
 import { WidgetConfig, WidgetType } from '~/types/widget'
+import { logger } from '~/utils/logger'
 
 interface DashboardContentProps {
   layout: string
@@ -59,14 +60,14 @@ export default function DashboardContent(props: DashboardContentProps) {
   ]
 
   onMount(() => {
-    console.log('Dashboard Content: Initializing widget system...')
+    logger.info('Dashboard Content: Initializing widget system...')
     loadSavedWidgets()
     
     // Register layout action callbacks with store
     actions.onClearLayout(() => clearLayout())
     actions.onResetLayout(() => resetLayout())
     
-    console.log('Dashboard Content: Initialization complete')
+    logger.info('Dashboard Content: Initialization complete')
   })
 
   const generateWidgetId = () => {
@@ -76,7 +77,7 @@ export default function DashboardContent(props: DashboardContentProps) {
   }
 
   const addWidget = (type: string, config: Partial<WidgetConfig> = {}) => {
-    console.log('Dashboard Content: Adding widget of type:', type)
+    logger.info('Dashboard Content: Adding widget of type:', type)
     const widgetId = config.id || generateWidgetId()
     const widgetConfig: WidgetConfig = {
       id: widgetId,
@@ -87,7 +88,7 @@ export default function DashboardContent(props: DashboardContentProps) {
       ...config
     }
     
-    console.log('Dashboard Content: Widget config:', widgetConfig)
+    logger.info('Dashboard Content: Widget config:', widgetConfig)
     setWidgets(prev => {
       const newMap = new Map(prev)
       newMap.set(widgetId, widgetConfig)
@@ -98,11 +99,11 @@ export default function DashboardContent(props: DashboardContentProps) {
   }
 
   const removeWidget = (widgetId: string) => {
-    console.log('Dashboard Content: Removing widget', widgetId)
+    logger.info(`Dashboard Content: Removing widget ${widgetId}`)
     setWidgets(prev => {
       const newMap = new Map(prev)
       const deleted = newMap.delete(widgetId)
-      console.log('Dashboard Content: Widget deleted:', deleted, 'Widgets count:', newMap.size)
+      logger.info(`Dashboard Content: Widget deleted: ${deleted}, Widgets count: ${newMap.size}`)
       return newMap
     })
     saveWidgets()

@@ -6,6 +6,7 @@ import {
   type OrderUnlockedEvent,
   type ConnectionStatus,
 } from '../api/realtime';
+import { logger } from '~/utils/logger';
 
 // Store state
 const [connectionStatus, setConnectionStatus] =
@@ -22,7 +23,7 @@ let heartbeatInterval: number | null = null;
  */
 export function initializeRealtime(): void {
   if (isInitialized()) {
-    console.log('[RealtimeStore] Already initialized');
+    logger.info('[RealtimeStore] Already initialized');
     return;
   }
 
@@ -32,7 +33,7 @@ export function initializeRealtime(): void {
     return;
   }
 
-  console.log('[RealtimeStore] Initializing realtime connection');
+  logger.info('[RealtimeStore] Initializing realtime connection');
 
   // Connect to WebSocket
   realtimeClient.connect(token);
@@ -40,7 +41,7 @@ export function initializeRealtime(): void {
 
   // Listen for connection status
   const unsubStatus = realtimeClient.onConnectionStatus((event) => {
-    console.log('[RealtimeStore] Connection status:', event.status);
+    logger.info(`[RealtimeStore] Connection status: ${event.status}`);
     setConnectionStatus(event.status);
 
     if (event.status === 'connected') {
@@ -56,13 +57,13 @@ export function initializeRealtime(): void {
 
   // Listen for metrics updates
   const unsubMetrics = realtimeClient.onMetricsUpdate((event) => {
-    console.log('[RealtimeStore] Metrics update:', event.metrics);
+    logger.info(`[RealtimeStore] Metrics update: ${JSON.stringify(event.metrics)}`);
     mergeMetrics(event.metrics);
   });
 
   // Listen for errors
   const unsubError = realtimeClient.onError((event) => {
-    console.error('[RealtimeStore] Error:', event.code, event.message);
+    logger.error(`[RealtimeStore] Error: ${event.code} - ${event.message}`);
 
     if (event.code === 'AUTH_FAILED') {
       // Token expired, need to refresh or re-login
@@ -92,7 +93,7 @@ export function initializeRealtime(): void {
  * Disconnect from realtime server
  */
 export function disconnect(): void {
-  console.log('[RealtimeStore] Disconnecting');
+  logger.info('[RealtimeStore] Disconnecting');
   stopHeartbeat();
   realtimeClient.disconnect();
   setIsInitialized(false);
@@ -121,7 +122,7 @@ function startHeartbeat(): void {
     realtimeClient.sendHeartbeat([]);
   }, 30000); // 30 seconds
 
-  console.log('[RealtimeStore] Heartbeat started');
+  logger.info('[RealtimeStore] Heartbeat started');
 }
 
 /**
@@ -131,7 +132,7 @@ function stopHeartbeat(): void {
   if (heartbeatInterval) {
     clearInterval(heartbeatInterval);
     heartbeatInterval = null;
-    console.log('[RealtimeStore] Heartbeat stopped');
+    logger.info('[RealtimeStore] Heartbeat stopped');
   }
 }
 

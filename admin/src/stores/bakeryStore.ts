@@ -12,6 +12,7 @@ import type {
   Customer
 } from '~/types/bakery'
 import { mockOrders, mockProducts, mockInventoryItems, mockCustomers, mockInternalOrders, mockRecipes, mockMetrics } from '~/mocks/mockData'
+import { logger } from '~/utils/logger'
 
 interface BakeryState {
   orders: {
@@ -257,7 +258,7 @@ export const bakeryActions = {
     setBakeryState('internalOrders', 'list', mockInternalOrders)
     setBakeryState('recipes', 'list', mockRecipes)
     setBakeryState('metrics', mockMetrics)
-    console.log('Mock bakery data loaded successfully')
+    logger.info('Mock bakery data loaded successfully')
   },
 }
 
