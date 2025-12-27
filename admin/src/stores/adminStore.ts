@@ -24,15 +24,22 @@ const [adminState, setAdminState] = createStore<AdminState>({
 // Store actions
 export const adminActions = {
   /**
-   * Set the list of tenants
+   * Set the list of tenants (dedupes by ID to prevent duplicates)
    */
   setTenants: (tenants: TenantListItem[]) => {
-    setAdminState('tenants', tenants)
+    // Dedupe by ID to prevent duplicates from HMR or multiple loads
+    const seen = new Set<string>()
+    const uniqueTenants = tenants.filter((t) => {
+      if (seen.has(t.id)) return false
+      seen.add(t.id)
+      return true
+    })
+    setAdminState('tenants', uniqueTenants)
 
     // If we have a selected tenant ID, find and update the selected tenant object
     const selectedId = adminState.selectedTenantId
     if (selectedId) {
-      const tenant = tenants.find((t) => t.id === selectedId)
+      const tenant = uniqueTenants.find((t) => t.id === selectedId)
       if (tenant) {
         setAdminState('selectedTenant', tenant)
       } else {

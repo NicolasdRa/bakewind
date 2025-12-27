@@ -1,4 +1,5 @@
 import { Component, createSignal, For, Show, onMount } from "solid-js";
+import { useTenantRefetch } from "~/hooks/useTenantRefetch";
 import DashboardPageLayout from "~/layouts/DashboardPageLayout";
 import StatsCard from "~/components/common/StatsCard";
 import SearchInput from "~/components/common/SearchInput";
@@ -107,6 +108,11 @@ const RecipesPage: Component = () => {
   // Load recipes on mount
   onMount(() => {
     fetchRecipes();
+  });
+
+  // Refetch when ADMIN user switches tenant, clear data when tenant is deselected
+  useTenantRefetch(fetchRecipes, () => {
+    setRecipes([]);
   });
 
   // Handle column header click for sorting

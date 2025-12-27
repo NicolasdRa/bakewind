@@ -16,6 +16,18 @@ export async function seedProducts(db: NodePgDatabase<typeof schema>) {
   const tenantId = existingTenant.id;
   console.log('🏢 Using tenant:', existingTenant.businessName);
 
+  // Check for existing products to prevent duplicates
+  const existingProducts = await db
+    .select()
+    .from(products)
+    .where(eq(products.tenantId, tenantId));
+  const existingProductNames = new Set(existingProducts.map((p) => p.name));
+
+  if (existingProducts.length > 0) {
+    console.log(`📦 Found ${existingProducts.length} existing products, skipping seed`);
+    return;
+  }
+
   // Fetch all recipes to link products
   const allRecipes = await db.select().from(recipes);
   console.log(`📖 Found ${allRecipes.length} recipes to link with products`);

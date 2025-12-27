@@ -1,4 +1,5 @@
 import { Component, createSignal, createResource, createEffect, For, Show } from "solid-js";
+import { useTenantRefetch } from "~/hooks/useTenantRefetch";
 import { Customer, customersApi, CustomerQueryParams, CustomersResponse, ImportResult, CreateCustomerDto } from "../../api/customers";
 import DashboardPageLayout from "~/layouts/DashboardPageLayout";
 import CustomerFormModal from "../../components/customers/CustomerFormModal";
@@ -19,10 +20,15 @@ const CustomersPage: Component = () => {
   });
 
   // Fetch customers with query params
-  const [customersData, { refetch }] = createResource<CustomersResponse, CustomerQueryParams>(
+  const [customersData, { refetch, mutate }] = createResource<CustomersResponse, CustomerQueryParams>(
     queryParams,
     (params) => customersApi.getCustomers(params)
   );
+
+  // Refetch when ADMIN user switches tenant, clear data when tenant is deselected
+  useTenantRefetch(refetch, () => {
+    mutate({ customers: [], pagination: { total: 0, page: 1, limit: 20, totalPages: 0 } });
+  });
 
   // UI state
   const [selectedCustomer, setSelectedCustomer] = createSignal<Customer | null>(null);

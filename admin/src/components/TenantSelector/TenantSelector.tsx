@@ -12,15 +12,13 @@ const TenantSelector: Component<TenantSelectorProps> = (props) => {
   const [isOpen, setIsOpen] = createSignal(false)
   const [searchQuery, setSearchQuery] = createSignal('')
 
-  // Load tenants on mount (only if not already loaded)
+  // Load tenants on mount
   onMount(async () => {
     // Initialize from localStorage first
     actions.initializeFromStorage()
 
-    // Only load tenants from API if not already loaded
-    if (state.tenants.length === 0) {
-      await loadTenants()
-    }
+    // Always load fresh tenants from API
+    await loadTenants()
   })
 
   const loadTenants = async () => {
@@ -91,7 +89,7 @@ const TenantSelector: Component<TenantSelectorProps> = (props) => {
       <button
         class={styles.trigger}
         onClick={() => setIsOpen(!isOpen())}
-        title={props.collapsed ? state.selectedTenant?.businessName || 'Select Tenant' : undefined}
+        title={props.collapsed ? state.selectedTenant?.businessName || 'Choose tenant' : undefined}
       >
         <div class={styles.triggerIcon}>
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
@@ -107,7 +105,7 @@ const TenantSelector: Component<TenantSelectorProps> = (props) => {
           <div class={styles.triggerContent}>
             <span class={styles.triggerLabel}>Viewing as:</span>
             <span class={styles.triggerValue}>
-              {state.selectedTenant?.businessName || 'Select a tenant'}
+              {state.selectedTenant?.businessName || 'Choose tenant'}
             </span>
           </div>
           <Show when={state.selectedTenant}>

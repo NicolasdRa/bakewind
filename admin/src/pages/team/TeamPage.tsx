@@ -1,4 +1,5 @@
 import { Component, createSignal, createEffect, For, Show } from "solid-js"
+import { useTenantRefetch } from "~/hooks/useTenantRefetch"
 import { useAuth } from "~/context/AuthContext"
 import * as tenantsApi from '~/api/tenants'
 import type { InviteStaffData, UpdateStaffData } from '~/api/tenants'
@@ -72,6 +73,11 @@ const TeamPage: Component = () => {
     if (user()?.role === 'OWNER') {
       loadStaff()
     }
+  })
+
+  // Refetch when ADMIN user switches tenant, clear data when tenant is deselected
+  useTenantRefetch(loadStaff, () => {
+    setStaffList([]);
   })
 
   const handleInvite = async () => {

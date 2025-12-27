@@ -1,4 +1,5 @@
 import { Component, createSignal, createResource, For, Show } from "solid-js";
+import { useTenantRefetch } from "~/hooks/useTenantRefetch";
 import { productsApi, Product, ProductCategory, ProductStatus, CreateProductRequest, UpdateProductRequest } from "~/api/products";
 import DashboardPageLayout from "~/layouts/DashboardPageLayout";
 import ProductFormModal from "~/components/products/ProductFormModal";
@@ -45,7 +46,7 @@ const ProductsPage: Component = () => {
   const [productToDelete, setProductToDelete] = createSignal<Product | undefined>();
 
   // Fetch products with real-time filtering
-  const [products, { refetch }] = createResource(
+  const [products, { refetch, mutate }] = createResource(
     () => ({
       category: selectedCategory() !== 'all' ? selectedCategory() as ProductCategory : undefined,
       status: selectedStatus() !== 'all' ? selectedStatus() as ProductStatus : undefined,
@@ -55,6 +56,11 @@ const ProductsPage: Component = () => {
       return productsApi.getProducts(filters.category, filters.status, filters.search);
     }
   );
+
+  // Refetch when ADMIN user switches tenant, clear data when tenant is deselected
+  useTenantRefetch(refetch, () => {
+    mutate([]);
+  });
 
   // Handle create product
   const handleCreate = () => {

@@ -1,4 +1,5 @@
 import { Component, createSignal, onMount, onCleanup, For, Show } from "solid-js";
+import { useTenantRefetch } from "~/hooks/useTenantRefetch";
 import {
   internalOrdersApi,
   InternalOrder,
@@ -100,6 +101,20 @@ const InternalOrdersPage: Component = () => {
     fetchOrders();
     fetchStats();
   });
+
+  // Refetch when ADMIN user switches tenant, clear data when tenant is deselected
+  useTenantRefetch(
+    () => {
+      fetchOrders();
+      fetchStats();
+    },
+    () => {
+      setOrders([]);
+      setTotalOrders(0);
+      setPendingOrders(0);
+      setCompletedOrders(0);
+    }
+  );
 
   // Cleanup locks on unmount
   onCleanup(() => {

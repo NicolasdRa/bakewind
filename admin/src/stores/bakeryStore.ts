@@ -220,6 +220,20 @@ export const bakeryActions = {
     })
     logger.info('Mock bakery data loaded successfully')
   },
+
+  // Clear all data (used when tenant is deselected)
+  clearData: () => {
+    setBakeryState({
+      orders: { ...bakeryState.orders, list: [] },
+      products: { ...bakeryState.products, list: [] },
+      inventory: { ...bakeryState.inventory, items: [] },
+      customers: { ...bakeryState.customers, list: [] },
+      internalOrders: { ...bakeryState.internalOrders, list: [] },
+      recipes: { ...bakeryState.recipes, list: [] },
+      metrics: { todayOrders: 0, revenue: 0, newCustomers: 0, productionTasks: 0 }
+    })
+    logger.info('Bakery data cleared')
+  },
 }
 
 export { bakeryState }

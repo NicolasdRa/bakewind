@@ -1,4 +1,5 @@
 import { Component, createSignal, For, Show, onMount } from "solid-js";
+import { useTenantRefetch } from "~/hooks/useTenantRefetch";
 import { productionApi, ProductionSchedule, ProductionItem, ProductionStatus } from "~/api/production";
 import { useInfoModal } from "~/stores/infoModalStore";
 import { formatLocalDate, formatTime, getCurrentDateString } from "~/utils/dateUtils";
@@ -19,11 +20,6 @@ const ProductionPage: Component = () => {
   const [selectedDate, setSelectedDate] = createSignal(getCurrentDateString());
   const [selectedStatus, setSelectedStatus] = createSignal<ProductionStatus | 'all'>('all');
 
-  // Fetch schedules on mount
-  onMount(async () => {
-    await fetchSchedules();
-  });
-
   const fetchSchedules = async () => {
     try {
       setLoading(true);
@@ -39,6 +35,16 @@ const ProductionPage: Component = () => {
       setLoading(false);
     }
   };
+
+  // Fetch schedules on mount
+  onMount(async () => {
+    await fetchSchedules();
+  });
+
+  // Refetch when ADMIN user switches tenant, clear data when tenant is deselected
+  useTenantRefetch(fetchSchedules, () => {
+    setSchedules([]);
+  });
 
   // Get all production items from schedules for the selected date
   const getAllItems = (): ProductionItem[] => {

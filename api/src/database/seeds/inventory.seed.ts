@@ -1,4 +1,5 @@
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { eq } from 'drizzle-orm';
 import { inventoryItems, inventoryConsumptionTracking } from '../schemas';
 import * as schema from '../schemas';
 
@@ -13,6 +14,17 @@ export async function seedInventory(db: NodePgDatabase<typeof schema>) {
   }
   const tenantId = existingTenant.id;
   console.log('🏢 Using tenant:', existingTenant.businessName);
+
+  // Check for existing inventory to prevent duplicates
+  const existingInventory = await db
+    .select()
+    .from(inventoryItems)
+    .where(eq(inventoryItems.tenantId, tenantId));
+
+  if (existingInventory.length > 0) {
+    console.log(`📦 Found ${existingInventory.length} existing inventory items, skipping seed`);
+    return;
+  }
 
   const now = new Date();
   const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);

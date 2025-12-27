@@ -1,4 +1,5 @@
 import { Component, createSignal, createResource, For, Show } from "solid-js";
+import { useTenantRefetch } from "~/hooks/useTenantRefetch";
 import { analyticsApi } from "../../api/analytics";
 import DashboardPageLayout from "~/layouts/DashboardPageLayout";
 import Button from "~/components/common/Button";
@@ -40,8 +41,13 @@ interface SalesData {
 }
 
 const AnalyticsPage: Component = () => {
-  const [dashboardStats] = createResource<DashboardStats>(() => analyticsApi.getDashboardStats());
+  const [dashboardStats, { refetch, mutate }] = createResource<DashboardStats>(() => analyticsApi.getDashboardStats());
   const [selectedPeriod, setSelectedPeriod] = createSignal('7days');
+
+  // Refetch when ADMIN user switches tenant, clear data when tenant is deselected
+  useTenantRefetch(refetch, () => {
+    mutate(undefined);
+  });
 
   // Mock sales data for demonstration
   const [salesData] = createSignal<SalesData[]>([

@@ -171,7 +171,7 @@
 
 /* Navigation Section */
 .nav {
-  @apply flex-1 overflow-y-auto overflow-x-hidden p-4;
+  @apply flex-1 overflow-y-auto overflow-x-hidden px-4 pb-4 pt-1;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 

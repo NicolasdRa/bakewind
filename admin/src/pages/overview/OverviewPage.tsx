@@ -1,4 +1,5 @@
 import { onMount } from 'solid-js'
+import { useTenantRefetch } from '~/hooks/useTenantRefetch'
 import DashboardPageLayout from '~/layouts/DashboardPageLayout'
 import DashboardErrorBoundary from '~/components/ErrorBoundary/DashboardErrorBoundary'
 import DashboardContent from '~/components/DashboardContent/DashboardContent'
@@ -14,6 +15,16 @@ export default function OverviewPage() {
     bakeryActions.loadMockData()
     logger.info('BakeWind Bakery Dashboard initialized')
   })
+
+  // Refetch when ADMIN user switches tenant, clear data when tenant is deselected
+  useTenantRefetch(
+    () => {
+      bakeryActions.loadMockData()
+    },
+    () => {
+      bakeryActions.clearData()
+    }
+  )
 
   return (
     <DashboardPageLayout

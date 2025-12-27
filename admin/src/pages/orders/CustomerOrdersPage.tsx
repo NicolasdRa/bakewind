@@ -1,4 +1,5 @@
 import { Component, createSignal, createEffect, onMount, For, Show } from "solid-js";
+import { useTenantRefetch } from "~/hooks/useTenantRefetch";
 import { customerOrdersApi, CustomerOrder, CustomerOrderStatus } from "~/api/orders";
 import { productionApi } from "~/api/production";
 import DashboardPageLayout from "~/layouts/DashboardPageLayout";
@@ -89,6 +90,21 @@ const CustomerOrdersPage: Component = () => {
     fetchOrders();
     fetchStats();
   });
+
+  // Refetch when ADMIN user switches tenant, clear data when tenant is deselected
+  useTenantRefetch(
+    () => {
+      fetchOrders();
+      fetchStats();
+    },
+    () => {
+      setOrders([]);
+      setTotalOrders(0);
+      setPendingOrders(0);
+      setCompletedOrders(0);
+      setTotalRevenue("0");
+    }
+  );
 
   // Debounced search effect - tracks searchQuery and statusFilter for reactivity
   createEffect(() => {

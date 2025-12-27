@@ -1,4 +1,5 @@
 import { Component, createSignal, createResource, For, Show } from "solid-js";
+import { useTenantRefetch } from "~/hooks/useTenantRefetch";
 import { inventoryApi, InventoryItemWithTracking } from "~/api/inventory";
 import DashboardPageLayout from "~/layouts/DashboardPageLayout";
 import AddInventoryItemModal from "~/components/inventory/AddInventoryItemModal";
@@ -45,7 +46,7 @@ const InventoryPage: Component = () => {
   const [sortDirection, setSortDirection] = createSignal<SortDirection>('asc');
 
   // Fetch inventory with real-time filtering
-  const [inventory, { refetch }] = createResource(
+  const [inventory, { refetch, mutate }] = createResource(
     () => ({
       lowStockOnly: showLowStock(),
       category: selectedCategory() !== 'all' ? selectedCategory() : undefined,
@@ -54,6 +55,11 @@ const InventoryPage: Component = () => {
       return inventoryApi.getInventory(filters.lowStockOnly, filters.category);
     }
   );
+
+  // Refetch when ADMIN user switches tenant, clear data when tenant is deselected
+  useTenantRefetch(refetch, () => {
+    mutate([]);
+  });
 
   const getStockStatus = (item: InventoryItemWithTracking) => {
     if (item.current_stock === 0) return 'out';
